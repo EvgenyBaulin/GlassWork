@@ -25,7 +25,7 @@ log() { printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" | tee -a "$LOG"; }
 
 team() {
     if [[ -n "${GW_TEAM:-}" ]]; then echo "$GW_TEAM"; return; fi
-    sed -n 's/^DEVELOPMENT_TEAM *= *//p' "$HERE/Config/Local.xcconfig" 2>/dev/null | head -1
+    sed -n 's/^DEVELOPMENT_TEAM *= *//p' "$HERE/Config/Local.xcconfig" 2>/dev/null | head -1 || true
 }
 
 due() {
@@ -40,7 +40,7 @@ run() {
         return 0
     fi
     local team_id
-    team_id="$(team)"
+    team_id="$(team || true)"
     [[ -n "$team_id" ]] || { log "no signing team (set GW_TEAM or Config/Local.xcconfig)"; exit 1; }
 
     log "update started"
