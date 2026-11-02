@@ -21,7 +21,13 @@ DAYS="${GW_UPDATE_DAYS:-5}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-log() { printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" | tee -a "$LOG"; }
+log() {
+    local line
+    line="$(date '+%Y-%m-%d %H:%M:%S') $*"
+    echo "$line" >> "$LOG"
+    [[ -t 1 ]] && echo "$line"
+    return 0
+}
 
 team() {
     if [[ -n "${GW_TEAM:-}" ]]; then echo "$GW_TEAM"; return; fi
