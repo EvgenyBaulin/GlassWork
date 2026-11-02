@@ -1,0 +1,8 @@
+// Shared build settings for every target.
+// Put DEVELOPMENT_TEAM into Config/Local.xcconfig (not committed) to sign locally.
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+BUNDLE_ID_PREFIX = io.github.evgenybaulin
+APP_GROUP_ID = $(TeamIdentifierPrefix)$(BUNDLE_ID_PREFIX).glasswork
+
+#include? "Local.xcconfig"

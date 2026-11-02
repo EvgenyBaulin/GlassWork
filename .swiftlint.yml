@@ -1,0 +1,29 @@
+included:
+  - App
+  - Widgets
+  - Packages/GlassWorkKit/Sources
+  - Packages/GlassWorkKit/Tests
+excluded:
+  - build
+  - Packages/GlassWorkKit/.build
+disabled_rules:
+  - trailing_comma
+  - opening_brace
+  - todo
+opt_in_rules:
+  - empty_count
+  - first_where
+  - sorted_first_last
+  - toggle_bool
+  - unused_optional_binding
+  - redundant_nil_coalescing
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: true
+identifier_name:
+  excluded: [id, x, y, i, ok]
+type_body_length:
+  warning: 400
+file_length:
+  warning: 600
