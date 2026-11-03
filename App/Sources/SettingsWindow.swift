@@ -3,6 +3,7 @@ import GlassWorkCore
 import GlassWorkUI
 import ServiceManagement
 import SwiftUI
+import UserNotifications
 
 /// The Settings window and the first-launch welcome.
 @MainActor
@@ -98,8 +99,18 @@ struct SettingsRoot: View {
             .searchable(text: $query, placement: .sidebar)
             .navigationSplitViewColumnWidth(220)
         } detail: {
-            detail.frame(maxWidth: .infinity, maxHeight: .infinity)
+            detail
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background { undoButton }
         }
+    }
+
+    /// Changes apply instantly; ⌘Z takes back the last one.
+    private var undoButton: some View {
+        Button("") { store.undo() }
+            .keyboardShortcut("z")
+            .disabled(store.undoStack.isEmpty)
+            .opacity(0)
     }
 
     private func row(_ page: SettingsPage, _ title: String, _ symbol: String, _ color: Color) -> some View {
@@ -121,6 +132,7 @@ struct SettingsRoot: View {
         case .general: GeneralPane(store: store)
         case .menuBar: ModulesPane(store: store)
         case let .module(id): ModulePane(module: id, store: store, monitor: monitor)
+        case .shortcuts: ShortcutsPane()
         case .about: AboutPane()
         default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
         }
@@ -273,15 +285,77 @@ struct GeneralPane: View {
                     Text(loc("Precise")).tag(NumberStyle.precise)
                 }
             }
+            Section(loc("Notifications")) {
+                Toggle(loc("Notify about low battery and high temperature"), isOn: alertsEnabled)
+            }
             Section(loc("Settings file")) {
                 LabeledContent("settings.json") {
                     Button(loc("Reveal in Finder")) {
                         NSWorkspace.shared.activateFileViewerSelecting([SettingsFile.defaultURL])
                     }
                 }
+                HStack {
+                    Button(loc("Export…"), action: exportSettings)
+                    Button(loc("Import…"), action: importSettings)
+                    Spacer()
+                    Button(loc("Reset all…"), role: .destructive) { store.replace(with: AppSettings()) }
+                }
+                ForEach(store.backups.list()) { backup in
+                    LabeledContent(backup.date.formatted(date: .abbreviated, time: .shortened)) {
+                        Button(loc("Restore")) {
+                            if let settings = store.backups.load(backup) {
+                                store.replace(with: settings)
+                            }
+                        }
+                    }
+                }
                 if let error = store.lastError {
                     Text(error).foregroundStyle(.red).font(.caption)
                 }
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+extension GeneralPane {
+    func exportSettings() {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = "GlassWork Settings.json"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        try? SettingsFile(url: url).save(store.settings)
+    }
+
+    func importSettings() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        guard panel.runModal() == .OK, let url = panel.url,
+              let settings = try? SettingsFile(url: url).load()
+        else { return }
+        store.replace(with: settings)
+    }
+
+    /// macOS asks for permission the first time this is turned on.
+    var alertsEnabled: Binding<Bool> {
+        Binding(
+            get: { store.settings.alerts.isEnabled },
+            set: { value in
+                store.update { $0.alerts.isEnabled = value }
+                if value {
+                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+                }
+            }
+        )
+    }
+}
+
+struct ShortcutsPane: View {
+    var body: some View {
+        Form {
+            Section(loc("Shortcuts")) {
+                LabeledContent(loc("Open the Hub"), value: "⌃⌥Space")
+                LabeledContent(loc("Open Settings"), value: "⌘,")
+                LabeledContent(loc("Undo a change in Settings"), value: "⌘Z")
             }
         }
         .formStyle(.grouped)

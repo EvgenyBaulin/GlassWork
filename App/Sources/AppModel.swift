@@ -3,6 +3,7 @@ import GlassWorkCore
 import GlassWorkUI
 import Observation
 import SwiftUI
+import UserNotifications
 import WidgetKit
 
 /// Owns the app's long-lived objects and keeps them in step with settings.
@@ -16,13 +17,17 @@ final class AppModel {
     private let hotKey = HotKey()
     private var hasOpenPanel = false
     private var timer: Timer?
+    private var thresholds = ThresholdTracker()
 
     init() {
         observeSleep()
         hotKey.onPress = { [weak self] in self?.toggleHub() }
         hotKey.register()
         applySettings()
-        monitor.onUpdate = { [weak self] in self?.statusBar.refreshItems() }
+        monitor.onUpdate = { [weak self] in
+            self?.statusBar.refreshItems()
+            self?.checkAlerts()
+        }
         monitor.start()
         writeHeartbeat()
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
@@ -70,6 +75,33 @@ final class AppModel {
         }
     }
 
+    private func checkAlerts() {
+        let settings = store.settings.alerts
+        guard settings.isEnabled else { return }
+        let fired = thresholds.update(
+            battery: monitor.battery,
+            averageCPU: monitor.sensors?.averageCPU,
+            settings: settings
+        )
+        for alert in fired {
+            post(alert)
+        }
+    }
+
+    private func post(_ alert: ThresholdAlert) {
+        let content = UNMutableNotificationContent()
+        switch alert {
+        case .lowBattery:
+            content.title = loc("Battery is low")
+            content.body = monitor.battery.map { Format.percent($0.charge) } ?? ""
+        case .highTemperature:
+            content.title = loc("Mac is running hot")
+            content.body = monitor.sensors?.averageCPU.map(Format.temperature) ?? ""
+        }
+        let request = UNNotificationRequest(identifier: alert.rawValue, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+    }
+
     /// Runs now and again whenever settings change.
     private func applySettings() {
         withObservationTracking {
@@ -91,7 +123,7 @@ final class AppModel {
         demand.disk = everything || modes.contains(.disk)
         demand.battery = true
         demand.gpu = everything || modes.contains(.gpu)
-        demand.sensors = everything || modes.contains(.sensors)
+        demand.sensors = everything || modes.contains(.sensors) || store.settings.alerts.isEnabled
         demand.processes = everything
         monitor.demand = demand
     }

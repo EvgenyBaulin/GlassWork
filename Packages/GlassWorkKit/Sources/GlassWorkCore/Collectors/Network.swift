@@ -70,6 +70,36 @@ public struct NetworkSample: Codable, Sendable, Equatable {
 }
 
 public enum NetworkReader {
+    /// IPv4 address of the first active physical interface.
+    public static func localAddress() -> String? {
+        var head: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&head) == 0, let first = head else { return nil }
+        defer { freeifaddrs(head) }
+        for entry in sequence(first: first, next: { $0.pointee.ifa_next }) {
+            let interface = entry.pointee
+            guard let address = interface.ifa_addr, address.pointee.sa_family == UInt8(AF_INET),
+                  NetworkSample.isPhysical(String(cString: interface.ifa_name)),
+                  interface.ifa_flags & UInt32(IFF_UP) != 0
+            else { continue }
+            var host = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+            let status = getnameinfo(
+                address, socklen_t(address.pointee.sa_len), &host, socklen_t(host.count), nil, 0, NI_NUMERICHOST
+            )
+            if status == 0 {
+                return String(cString: host)
+            }
+        }
+        return nil
+    }
+
+    /// Asks an echo service for the public address. Only runs after the user turns it on.
+    public static func publicAddress() async -> String? {
+        guard let url = URL(string: "https://api.ipify.org"),
+              let (data, _) = try? await URLSession.shared.data(from: url)
+        else { return nil }
+        return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     /// 64-bit counters from the routing table: `getifaddrs` wraps at 4 GB.
     public static func counters() -> [InterfaceCounters] {
         var mib: [Int32] = [CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0]

@@ -43,6 +43,22 @@ public final class MenuBarItemRenderer {
         return image
     }
 
+    /// Current value, the graph window's range and one line of context.
+    public func tooltip() -> String {
+        let content = ItemContent.content(module, monitor: monitor, style: .precise)
+        var text = "\(module.title) \(content.figure)"
+        if let metric = content.metric {
+            let values = monitor.points(metric, in: .minute).map(\.value)
+            if let low = values.min(), let high = values.max() {
+                text += " · \(loc("min")) \(content.format(low)) · \(loc("max")) \(content.format(high))"
+            }
+        }
+        if let second = content.secondLine {
+            text += "\n\(second)"
+        }
+        return text
+    }
+
     private func signature(_ content: ItemContent, size: CGSize) -> String {
         var parts = [content.figure, content.secondLine ?? "", "\(style)", "\(size.width)", "\(content.alert != nil)"]
         if style == .graph || style == .graphAndFigure, let metric = content.metric {
