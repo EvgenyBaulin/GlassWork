@@ -68,6 +68,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var numberStyle: NumberStyle = .compact
     public var hiding = HidingSettings()
     public var welcomeCompleted = false
+    public var fans = FanSettings()
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
         self.modules = modules
@@ -103,7 +104,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
-        case version, modules, numberStyle, hiding, welcomeCompleted
+        case version, modules, numberStyle, hiding, welcomeCompleted, fans
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -115,6 +116,8 @@ extension AppSettings {
         numberStyle = try container.decodeIfPresent(NumberStyle.self, forKey: .numberStyle) ?? .compact
         hiding = try container.decodeIfPresent(HidingSettings.self, forKey: .hiding) ?? HidingSettings()
         welcomeCompleted = try container.decodeIfPresent(Bool.self, forKey: .welcomeCompleted) ?? false
+        // A broken hand edit of the fan section must not cost the rest of the file.
+        fans = (try? container.decodeIfPresent(FanSettings.self, forKey: .fans)) ?? FanSettings()
         normalize()
     }
 
