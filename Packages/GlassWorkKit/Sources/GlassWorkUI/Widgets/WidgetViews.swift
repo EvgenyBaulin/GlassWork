@@ -49,18 +49,24 @@ public struct WidgetFace: View {
             case .battery: BatteryWidget(size: size, snapshot: snapshot)
             case .macHealth, .uptime: MacHealthWidget(size: size, snapshot: snapshot, now: now)
             case .digitalClock: DigitalClockWidget(size: size, now: now)
-            default: PlaceholderWidget(kind: kind)
+            case .modularClock: ModularClockWidget(size: size, now: now)
+            case .calendarMonth: CalendarMonthWidget(now: now)
+            case .upNext: UpNextWidget(size: size, snapshot: snapshot, now: now)
+            case .endsIn: EndsInWidget(size: size, snapshot: snapshot, now: now)
+            case .todo: TodoWidget(size: size, snapshot: snapshot, now: now)
+            case .note: NoteWidget(snapshot: snapshot)
+            case .timer: TimerWidget(snapshot: snapshot, now: now)
+            case .countdown: CountdownWidget(snapshot: snapshot, now: now)
+            case .yearInDots: YearInDotsWidget(now: now)
+            case .moon: MoonWidget(now: now)
+            case .daylight: DaylightWidget(now: now)
+            case .storage: StorageWidget(size: size, snapshot: snapshot)
+            case .temperature: TemperatureWidget(size: size, snapshot: snapshot)
+            case .topApps: TopAppsWidget(size: size, snapshot: snapshot)
+            case .network: NetworkWidget(snapshot: snapshot)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-}
-
-struct PlaceholderWidget: View {
-    let kind: WidgetKind
-
-    var body: some View {
-        Text(kind.title).font(.headline).foregroundStyle(.secondary)
     }
 }
 

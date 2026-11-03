@@ -11,6 +11,34 @@ struct GlassWorkWidgets: WidgetBundle {
         MacHealthKindWidget()
         UptimeKindWidget()
         DigitalClockKindWidget()
+        MoreWidgets().body
+    }
+}
+
+/// A widget bundle body takes at most ten widgets, so the rest are grouped here.
+struct MoreWidgets: WidgetBundle {
+    var body: some Widget {
+        StorageKindWidget()
+        TemperatureKindWidget()
+        TopAppsKindWidget()
+        NetworkKindWidget()
+        ModularClockKindWidget()
+        CalendarMonthKindWidget()
+        UpNextKindWidget()
+        EndsInKindWidget()
+        EvenMoreWidgets().body
+    }
+}
+
+struct EvenMoreWidgets: WidgetBundle {
+    var body: some Widget {
+        TodoKindWidget()
+        NoteKindWidget()
+        TimerKindWidget()
+        CountdownKindWidget()
+        YearInDotsKindWidget()
+        MoonKindWidget()
+        DaylightKindWidget()
     }
 }
 
@@ -104,5 +132,95 @@ struct UptimeKindWidget: Widget {
 struct DigitalClockKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.digitalClock)
+    }
+}
+
+struct StorageKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.storage)
+    }
+}
+
+struct TemperatureKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.temperature)
+    }
+}
+
+struct TopAppsKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.topApps)
+    }
+}
+
+struct NetworkKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.network)
+    }
+}
+
+struct ModularClockKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.modularClock)
+    }
+}
+
+struct CalendarMonthKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.calendarMonth)
+    }
+}
+
+struct UpNextKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.upNext)
+    }
+}
+
+struct EndsInKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.endsIn)
+    }
+}
+
+struct TodoKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.todo)
+    }
+}
+
+struct NoteKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.note)
+    }
+}
+
+struct TimerKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.timer)
+    }
+}
+
+struct CountdownKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.countdown)
+    }
+}
+
+struct YearInDotsKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.yearInDots)
+    }
+}
+
+struct MoonKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.moon)
+    }
+}
+
+struct DaylightKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.daylight)
     }
 }

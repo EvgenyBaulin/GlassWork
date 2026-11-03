@@ -1291,6 +1291,16 @@
         }
       }
     },
+    "No note yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заметки пока нет"
+          }
+        }
+      }
+    },
     "No sensors available on this Mac": {
       "localizations": {
         "ru": {
@@ -2031,6 +2041,26 @@
         }
       }
     },
+    "This week": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эта неделя"
+          }
+        }
+      }
+    },
+    "This year": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот год"
+          }
+        }
+      }
+    },
     "Tiler": {
       "localizations": {
         "ru": {
@@ -2317,6 +2347,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "средняя SoC"
+          }
+        }
+      }
+    },
+    "days to go": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "дн. осталось"
           }
         }
       }
