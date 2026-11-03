@@ -91,12 +91,62 @@
         }
       }
     },
+    "%lld d": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld д"
+          }
+        }
+      }
+    },
+    "%lld dates": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дат: %lld"
+          }
+        }
+      }
+    },
+    "%lld days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld дн."
+          }
+        }
+      }
+    },
     "%lld in menu bar · %lld Hub only": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "В строке меню: %lld · только в Хабе: %lld"
+          }
+        }
+      }
+    },
+    "%lld min": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld мин"
+          }
+        }
+      }
+    },
+    "%lld running": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Идёт: %lld"
           }
         }
       }
@@ -171,6 +221,26 @@
         }
       }
     },
+    "Add": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить"
+          }
+        }
+      }
+    },
+    "Add a city": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить город"
+          }
+        }
+      }
+    },
     "All set": {
       "localizations": {
         "ru": {
@@ -217,6 +287,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Приложения"
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оформление"
           }
         }
       }
@@ -341,6 +421,16 @@
         }
       }
     },
+    "Colours": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цвета"
+          }
+        }
+      }
+    },
     "Coming soon": {
       "localizations": {
         "ru": {
@@ -421,12 +511,52 @@
         }
       }
     },
+    "Countdown": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обратный отсчёт"
+          }
+        }
+      }
+    },
+    "Custom: %lld min": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свой: %lld мин"
+          }
+        }
+      }
+    },
     "Cycle count": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Циклов зарядки"
+          }
+        }
+      }
+    },
+    "Date": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дата"
+          }
+        }
+      }
+    },
+    "Daylight": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Световой день"
           }
         }
       }
@@ -497,6 +627,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Изменить"
+          }
+        }
+      }
+    },
+    "Eject": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Извлечь"
           }
         }
       }
@@ -731,6 +871,16 @@
         }
       }
     },
+    "Keep Awake": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не спать"
+          }
+        }
+      }
+    },
     "Keep open in a floating window": {
       "localizations": {
         "ru": {
@@ -881,12 +1031,32 @@
         }
       }
     },
+    "Moon %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Луна %@"
+          }
+        }
+      }
+    },
     "Network": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Сеть"
+          }
+        }
+      }
+    },
+    "New date": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новая дата"
           }
         }
       }
@@ -901,12 +1071,42 @@
         }
       }
     },
+    "No timers running": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Таймеры не запущены"
+          }
+        }
+      }
+    },
+    "Notes": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заметки"
+          }
+        }
+      }
+    },
     "Nothing is needed now. Each module asks for access only when you turn it on.": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Сейчас ничего не нужно. Каждый модуль попросит доступ только при включении."
+          }
+        }
+      }
+    },
+    "Nothing to eject": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нечего извлекать"
           }
         }
       }
@@ -947,6 +1147,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выключен"
+          }
+        }
+      }
+    },
+    "On": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вкл"
           }
         }
       }
@@ -1047,6 +1257,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Разрешения"
+          }
+        }
+      }
+    },
+    "Pick a colour": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать цвет"
           }
         }
       }
@@ -1301,6 +1521,26 @@
         }
       }
     },
+    "Start": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустить"
+          }
+        }
+      }
+    },
+    "Start a timer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустить таймер"
+          }
+        }
+      }
+    },
     "Started": {
       "localizations": {
         "ru": {
@@ -1311,12 +1551,52 @@
         }
       }
     },
+    "Stopwatch": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Секундомер"
+          }
+        }
+      }
+    },
     "Style": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Стиль"
+          }
+        }
+      }
+    },
+    "Sun and Moon": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Солнце и Луна"
+          }
+        }
+      }
+    },
+    "Sunrise": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Восход"
+          }
+        }
+      }
+    },
+    "Sunset": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закат"
           }
         }
       }
@@ -1391,6 +1671,16 @@
         }
       }
     },
+    "Timers": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Таймеры"
+          }
+        }
+      }
+    },
     "Top processes": {
       "localizations": {
         "ru": {
@@ -1461,6 +1751,16 @@
         }
       }
     },
+    "Week %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неделя %lld"
+          }
+        }
+      }
+    },
     "Welcome to GlassWork": {
       "localizations": {
         "ru": {
@@ -1497,6 +1797,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Зарезервированная"
+          }
+        }
+      }
+    },
+    "World Clocks": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мировые часы"
           }
         }
       }

@@ -219,6 +219,11 @@ final class ModuleItem: NSObject {
 
     @objc private func clicked() {
         guard let button = item.button else { return }
-        model.togglePanel(module, from: button)
+        if module.isClickAction {
+            model.performClickAction(module)
+            refresh()
+        } else {
+            model.togglePanel(module, from: button)
+        }
     }
 }

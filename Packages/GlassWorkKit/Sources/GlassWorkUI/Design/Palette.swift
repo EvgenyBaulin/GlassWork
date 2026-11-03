@@ -32,6 +32,17 @@ public extension ModuleID {
         case .gpu: loc("GPU")
         case .sensors: loc("Sensors")
         case .uptime: loc("Uptime")
+        case .worldClocks: loc("World Clocks")
+        case .timers: loc("Timers")
+        case .keepAwake: loc("Keep Awake")
+        case .notes: loc("Notes")
+        case .countdown: loc("Countdown")
+        case .stopwatch: loc("Stopwatch")
+        case .colours: loc("Colours")
+        case .appearance: loc("Appearance")
+        case .eject: loc("Eject")
+        case .sunMoon: loc("Sun and Moon")
+        case .date: loc("Date")
         default: rawValue
         }
     }
@@ -47,6 +58,17 @@ public extension ModuleID {
         case .gpu: "cube"
         case .sensors: "thermometer.medium"
         case .uptime: "clock.arrow.circlepath"
+        case .worldClocks: "globe"
+        case .timers: "timer"
+        case .keepAwake: "cup.and.heat.waves"
+        case .notes: "note.text"
+        case .countdown: "hourglass"
+        case .stopwatch: "stopwatch"
+        case .colours: "eyedropper"
+        case .appearance: "circle.lefthalf.filled"
+        case .eject: "eject"
+        case .sunMoon: "sunrise"
+        case .date: "calendar"
         default: "square.dashed"
         }
     }
@@ -59,7 +81,13 @@ public extension ModuleID {
         case .disk: Palette.cyan
         case .network: Palette.teal
         case .gpu: Palette.purple
-        case .sensors: Palette.red
+        case .sensors, .date: Palette.red
+        case .worldClocks: Palette.blue
+        case .timers, .stopwatch, .sunMoon: Palette.orange
+        case .notes: Palette.yellow
+        case .countdown: Palette.purple
+        case .colours: Palette.pink
+        case .appearance: Palette.blue
         default: Palette.gray
         }
     }
@@ -80,10 +108,17 @@ public extension ModuleID {
         }
     }
 
+    /// Modules where a click does the job, so they have no panel.
+    var isClickAction: Bool {
+        self == .keepAwake || self == .stopwatch || self == .appearance
+    }
+
     /// Modules that already have a collector and a panel.
     var isAvailable: Bool {
         switch self {
         case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
+        case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
+        case .colours, .appearance, .eject, .sunMoon, .date: true
         default: false
         }
     }
