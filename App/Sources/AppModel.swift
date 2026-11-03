@@ -14,6 +14,7 @@ final class AppModel {
     private lazy var panels = PanelController(model: self)
     private lazy var statusBar = StatusBarController(model: self)
     private lazy var settingsWindow = SettingsWindowController(model: self)
+    private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private let hotKey = HotKey()
     private var hasOpenPanel = false
     private var timer: Timer?
@@ -30,7 +31,8 @@ final class AppModel {
         }
         monitor.start()
         writeHeartbeat()
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        let refresh = TimeInterval(store.settings.widgets.refreshSeconds)
+        timer = Timer.scheduledTimer(withTimeInterval: refresh, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.writeHeartbeat() }
         }
         if !store.settings.welcomeCompleted {
@@ -121,6 +123,7 @@ final class AppModel {
             Task { @MainActor in self?.applySettings() }
         }
         statusBar.apply(store.settings)
+        desktopWidgets.apply(store.settings.widgets)
         updateDemand()
     }
 
@@ -165,9 +168,10 @@ final class AppModel {
     }
 
     private func writeHeartbeat() {
-        let now = Date()
-        let beat = Heartbeat(updatedAt: now, bootTime: SystemClock.bootTime() ?? now)
-        guard (try? SnapshotStore().write(beat, for: Heartbeat.key)) != nil else { return }
-        WidgetCenter.shared.reloadAllTimelines()
+        Task {
+            let snapshot = await monitor.widgetSnapshot()
+            guard (try? SnapshotStore().write(snapshot, for: WidgetSnapshot.key)) != nil else { return }
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 }

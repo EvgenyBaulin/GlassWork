@@ -75,6 +75,36 @@ public final class SystemMonitor {
         loop = nil
     }
 
+    /// Everything widgets show, read fresh regardless of the current demand.
+    public func widgetSnapshot() async -> WidgetSnapshot {
+        var full = MonitorDemand()
+        full.cpu = true
+        full.memory = true
+        full.network = true
+        full.disk = true
+        full.battery = true
+        full.gpu = true
+        full.sensors = true
+        full.processes = true
+        let date = Date()
+        await apply(sampler.read(full, includeSlow: true), at: date)
+        var snapshot = WidgetSnapshot(date: date)
+        snapshot.cpu = cpu
+        snapshot.cpuInfo = cpuInfo
+        snapshot.memory = memory
+        snapshot.gpu = gpus.first
+        snapshot.battery = battery
+        snapshot.volumes = volumes
+        snapshot.network = network
+        snapshot.sensors = sensors
+        snapshot.processes = Array(processes.sorted { $0.cpu > $1.cpu }.prefix(12))
+        snapshot.everyday = everyday.data
+        snapshot.events = agenda.events
+        snapshot.todos = agenda.todos
+        snapshot.bootTime = SystemClock.bootTime()
+        return snapshot
+    }
+
     /// Reads right away, for example when a panel opens.
     public func refresh() {
         Task { await tick() }
