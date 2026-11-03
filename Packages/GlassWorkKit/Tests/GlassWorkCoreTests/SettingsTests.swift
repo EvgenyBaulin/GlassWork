@@ -102,3 +102,72 @@ struct HistoryTests {
         #expect(history.points(in: .hour, now: now).map(\.value) == [5])
     }
 }
+
+struct ThresholdTests {
+    private func battery(_ charge: Double, charging: Bool = false) -> BatterySample {
+        BatterySample(
+            charge: charge, isCharging: charging, isOnAC: charging, minutesRemaining: nil,
+            health: nil, cycleCount: nil, temperature: nil, adapterWatts: nil
+        )
+    }
+
+    @Test func firesOncePerCrossing() {
+        var tracker = ThresholdTracker()
+        let settings = AlertSettings()
+
+        #expect(tracker.update(battery: battery(0.2), averageCPU: nil, settings: settings).isEmpty)
+        #expect(tracker.update(battery: battery(0.1), averageCPU: nil, settings: settings) == [.lowBattery])
+        #expect(tracker.update(battery: battery(0.09), averageCPU: nil, settings: settings).isEmpty)
+    }
+
+    @Test func rearmsOnlyAfterRecovering() {
+        var tracker = ThresholdTracker()
+        let settings = AlertSettings()
+
+        #expect(tracker.update(battery: nil, averageCPU: 96, settings: settings) == [.highTemperature])
+        #expect(tracker.update(battery: nil, averageCPU: 92, settings: settings).isEmpty)
+        #expect(tracker.update(battery: nil, averageCPU: 96, settings: settings).isEmpty)
+        #expect(tracker.update(battery: nil, averageCPU: 80, settings: settings).isEmpty)
+        #expect(tracker.update(battery: nil, averageCPU: 96, settings: settings) == [.highTemperature])
+    }
+
+    @Test func chargingBatteryNeverAlerts() {
+        var tracker = ThresholdTracker()
+        let fired = tracker.update(battery: battery(0.05, charging: true), averageCPU: nil, settings: AlertSettings())
+        #expect(fired.isEmpty)
+    }
+}
+
+@MainActor
+struct UndoAndBackupTests {
+    private func store() -> SettingsStore {
+        SettingsStore(file: SettingsFile(url: FileManager.default.temporaryDirectory
+                .appending(path: "GlassWorkUndo-\(UUID().uuidString)/settings.json")))
+    }
+
+    @Test func undoRestoresThePreviousSettings() {
+        let store = store()
+        store.update { $0.numberStyle = .precise }
+        store.undo()
+        #expect(store.settings.numberStyle == .compact)
+        #expect(store.undoStack.isEmpty)
+    }
+
+    @Test func replacingKeepsABackup() throws {
+        let store = store()
+        store.update { $0.numberStyle = .precise }
+        store.replace(with: AppSettings())
+
+        let backup = try #require(store.backups.list().first)
+        #expect(store.backups.load(backup)?.numberStyle == .precise)
+    }
+
+    @Test func keepsOnlyTheLastTenBackups() {
+        let backups = SettingsBackups(directory: FileManager.default.temporaryDirectory
+            .appending(path: "GlassWorkBackups-\(UUID().uuidString)"))
+        for index in 0 ..< 13 {
+            backups.create(from: AppSettings(), at: Date(timeIntervalSince1970: Double(index) * 60))
+        }
+        #expect(backups.list().count == SettingsBackups.limit)
+    }
+}

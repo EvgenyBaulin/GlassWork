@@ -251,6 +251,16 @@
         }
       }
     },
+    "Battery is low": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Низкий заряд"
+          }
+        }
+      }
+    },
     "Breakdown": {
       "localizations": {
         "ru": {
@@ -357,6 +367,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сжатая"
+          }
+        }
+      }
+    },
+    "Contacts an external service": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обращается к внешнему сервису"
           }
         }
       }
@@ -487,6 +507,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Каждый день"
+          }
+        }
+      }
+    },
+    "Export…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Экспорт…"
           }
         }
       }
@@ -661,6 +691,16 @@
         }
       }
     },
+    "Import…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Импорт…"
+          }
+        }
+      }
+    },
     "In menu bar": {
       "localizations": {
         "ru": {
@@ -741,6 +781,16 @@
         }
       }
     },
+    "Local IP": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Локальный IP"
+          }
+        }
+      }
+    },
     "Low": {
       "localizations": {
         "ru": {
@@ -757,6 +807,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Лицензия MIT"
+          }
+        }
+      }
+    },
+    "Mac is running hot": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac перегревается"
           }
         }
       }
@@ -851,6 +911,26 @@
         }
       }
     },
+    "Notifications": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомления"
+          }
+        }
+      }
+    },
+    "Notify about low battery and high temperature": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщать о низком заряде и перегреве"
+          }
+        }
+      }
+    },
     "Numbers": {
       "localizations": {
         "ru": {
@@ -897,6 +977,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыть Дисковую утилиту"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть настройки"
+          }
+        }
+      }
+    },
+    "Open the Hub": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть Хаб"
           }
         }
       }
@@ -1001,6 +1101,16 @@
         }
       }
     },
+    "Public IP": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Публичный IP"
+          }
+        }
+      }
+    },
     "Quit": {
       "localizations": {
         "ru": {
@@ -1057,6 +1167,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Рендеринг"
+          }
+        }
+      }
+    },
+    "Reset all…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить всё…"
+          }
+        }
+      }
+    },
+    "Restore": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Восстановить"
           }
         }
       }
@@ -1271,6 +1401,16 @@
         }
       }
     },
+    "Undo a change in Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отменить изменение настроек"
+          }
+        }
+      }
+    },
     "Upload": {
       "localizations": {
         "ru": {
@@ -1407,6 +1547,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "средняя SoC"
+          }
+        }
+      }
+    },
+    "max": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "макс"
+          }
+        }
+      }
+    },
+    "min": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "мин"
           }
         }
       }

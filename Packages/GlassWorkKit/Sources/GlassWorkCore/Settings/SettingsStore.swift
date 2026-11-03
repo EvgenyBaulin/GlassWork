@@ -7,12 +7,17 @@ import Observation
 public final class SettingsStore {
     public private(set) var settings: AppSettings
     public private(set) var lastError: String?
+    public private(set) var undoStack: [AppSettings] = []
 
+    @ObservationIgnored public let backups: SettingsBackups
     @ObservationIgnored private let file: SettingsFile
     @ObservationIgnored private var watcher: DispatchSourceFileSystemObject?
 
+    private static let undoLimit = 50
+
     public init(file: SettingsFile = SettingsFile()) {
         self.file = file
+        backups = SettingsBackups(directory: file.url.deletingLastPathComponent().appending(path: "Backups"))
         do {
             settings = try file.load() ?? AppSettings()
         } catch {
@@ -26,9 +31,30 @@ public final class SettingsStore {
         var copy = settings
         change(&copy)
         guard copy != settings else { return }
-        settings = copy
+        undoStack.append(settings)
+        if undoStack.count > Self.undoLimit {
+            undoStack.removeFirst()
+        }
+        apply(copy)
+    }
+
+    /// Changes apply instantly, so ⌘Z is how a mistake gets reverted.
+    public func undo() {
+        guard let previous = undoStack.popLast() else { return }
+        apply(previous)
+    }
+
+    /// Replaces everything, keeping a backup of what was there.
+    public func replace(with new: AppSettings) {
+        backups.create(from: settings)
+        undoStack.append(settings)
+        apply(new)
+    }
+
+    private func apply(_ new: AppSettings) {
+        settings = new
         do {
-            try file.save(copy)
+            try file.save(new)
             lastError = nil
         } catch {
             lastError = error.localizedDescription

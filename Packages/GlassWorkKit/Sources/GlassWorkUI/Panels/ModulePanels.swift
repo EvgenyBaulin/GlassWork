@@ -316,6 +316,8 @@ struct DiskPanel: View {
 struct NetworkPanel: View {
     let monitor: SystemMonitor
     @State private var range = TieredHistory.Range.minute
+    @State private var showsPublicIP = false
+    @State private var publicIP: String?
 
     var body: some View {
         let network = monitor.network
@@ -351,6 +353,21 @@ struct NetworkPanel: View {
                     title: loc("This session"),
                     value: "↓ \(Format.bytes(Double(network.sessionReceived), style: .precise))  ↑ \(Format.bytes(Double(network.sessionSent), style: .precise))"
                 )
+            }
+            InfoRow(title: loc("Local IP"), value: NetworkReader.localAddress() ?? "—")
+            Toggle(isOn: $showsPublicIP) {
+                HStack {
+                    Text(loc("Public IP")).foregroundStyle(.secondary)
+                    Spacer()
+                    Text(showsPublicIP ? publicIP ?? "…" : "•••.•••.•••.•••").monospacedDigit()
+                }
+                .font(.system(size: 12))
+            }
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+            .help(loc("Contacts an external service"))
+            .task(id: showsPublicIP) {
+                publicIP = showsPublicIP ? await NetworkReader.publicAddress() : nil
             }
         }
     }

@@ -62,11 +62,21 @@ public struct HidingSettings: Codable, Sendable, Equatable {
     public init() {}
 }
 
+/// Threshold notifications. macOS asks for permission when these are first turned on.
+public struct AlertSettings: Codable, Sendable, Equatable {
+    public var isEnabled = false
+    public var lowBatteryPercent = 10
+    public var highTemperature = 95
+
+    public init() {}
+}
+
 public struct AppSettings: Codable, Sendable, Equatable {
     public var version = 1
     public var modules: [ModuleSettings]
     public var numberStyle: NumberStyle = .compact
     public var hiding = HidingSettings()
+    public var alerts = AlertSettings()
     public var welcomeCompleted = false
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
@@ -103,7 +113,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
-        case version, modules, numberStyle, hiding, welcomeCompleted
+        case version, modules, numberStyle, hiding, alerts, welcomeCompleted
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -114,6 +124,7 @@ extension AppSettings {
         version = try container.decodeIfPresent(Int.self, forKey: .version) ?? 1
         numberStyle = try container.decodeIfPresent(NumberStyle.self, forKey: .numberStyle) ?? .compact
         hiding = try container.decodeIfPresent(HidingSettings.self, forKey: .hiding) ?? HidingSettings()
+        alerts = try container.decodeIfPresent(AlertSettings.self, forKey: .alerts) ?? AlertSettings()
         welcomeCompleted = try container.decodeIfPresent(Bool.self, forKey: .welcomeCompleted) ?? false
         normalize()
     }

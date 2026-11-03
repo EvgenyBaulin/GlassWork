@@ -13,6 +13,16 @@ public struct ItemContent {
     /// Longest expected text, so the item keeps one width as figures change.
     public var template: String
 
+    /// Text for a raw metric value, used by tooltips.
+    func format(_ value: Double) -> String {
+        switch metric {
+        case .cpu, .memory, .gpu: Format.percent(value)
+        case .download, .upload, .diskRead, .diskWrite: Format.rate(value)
+        case .temperature: Format.temperature(value)
+        default: "\(Int(value))"
+        }
+    }
+
     static func content(_ module: ModuleID, monitor: SystemMonitor, style: NumberStyle) -> ItemContent {
         switch module {
         case .overview: overview(monitor)
@@ -96,7 +106,7 @@ public struct ItemContent {
             metric: .temperature,
             domain: 20 ... 110,
             alert: (celsius ?? 0) >= 95 ? Palette.orange : nil,
-            template: "100°"
+            template: "100°C"
         )
     }
 

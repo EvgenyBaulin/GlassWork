@@ -42,8 +42,9 @@ final class StatusBarController: NSObject {
         for id in items.keys where !wanted.contains(where: { $0.id == id }) {
             items.removeValue(forKey: id)?.remove()
         }
-        // The system adds new items on the left, so creating in reverse keeps the settings order.
-        for setting in wanted.reversed() {
+        // Position is measured from the right edge, so the last module in settings goes closest to it.
+        for (index, setting) in wanted.reversed().enumerated() {
+            Self.suggestPosition(for: setting.id, slot: index)
             if let item = items[setting.id] {
                 item.update(style: setting.style, numbers: settings.numberStyle)
             } else {
@@ -55,6 +56,16 @@ final class StatusBarController: NSObject {
     func refreshItems() {
         items.values.forEach { $0.refresh() }
     }
+
+    /// Seeds macOS's saved position for a new item. ⌘-dragged items keep the place the user gave them.
+    private static func suggestPosition(for module: ModuleID, slot: Int) {
+        let key = "NSStatusItem Preferred Position GlassWork-\(module.rawValue)"
+        guard UserDefaults.standard.object(forKey: key) == nil else { return }
+        UserDefaults.standard.set(firstSlot + CGFloat(slot) * slotWidth, forKey: key)
+    }
+
+    private static let firstSlot: CGFloat = 400
+    private static let slotWidth: CGFloat = 2
 
     /// Shows hidden items and hides them again after the configured delay.
     func revealHidden() {
