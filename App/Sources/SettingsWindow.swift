@@ -134,6 +134,7 @@ struct SettingsRoot: View {
         case let .module(id): ModulePane(module: id, store: store, monitor: monitor)
         case .shortcuts: ShortcutsPane()
         case .widgets: WidgetsPane(store: store)
+        case .dock: DockPane(store: store)
         case .about: AboutPane()
         default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
         }
@@ -395,6 +396,74 @@ struct WidgetsPane: View {
         let x = visible.minX + 24 + count * WidgetPlacement.gridStep
         let y = visible.maxY - 24 - size.height
         store.update { $0.widgets.placements.append(WidgetPlacement(kind: kind, size: size, x: x, y: y)) }
+    }
+}
+
+struct DockPane: View {
+    let store: SettingsStore
+    @State private var confirming = false
+
+    private var dock: AppSettingsBinding {
+        AppSettingsBinding(store: store)
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle(loc("Use GlassWork Dock"), isOn: Binding(
+                    get: { store.settings.dock.isEnabled },
+                    set: { value in
+                        if value {
+                            confirming = true
+                        } else {
+                            store.update { $0.dock.isEnabled = false }
+                        }
+                    }
+                ))
+                Text(
+                    loc("The system Dock is hidden while GlassWork Dock runs, and comes back as it was when you quit.")
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+            Section(loc("Size")) {
+                Slider(value: dock.iconSize, in: 32 ... 96) { Text(loc("Icon size")) }
+                Toggle(loc("Magnification"), isOn: dock.magnifies)
+                Slider(value: dock.magnifiedSize, in: 48 ... 128) { Text(loc("Magnified size")) }
+            }
+        }
+        .formStyle(.grouped)
+        .confirmationDialog(loc("Use GlassWork Dock?"), isPresented: $confirming) {
+            Button(loc("Use GlassWork Dock")) {
+                store.update { settings in
+                    if settings.dock.items.isEmpty {
+                        settings.dock.items = SystemDockApps.read().map(DockItem.app)
+                    }
+                    settings.dock.isEnabled = true
+                }
+            }
+        }
+    }
+}
+
+/// Bindings into Dock settings.
+@MainActor
+struct AppSettingsBinding {
+    let store: SettingsStore
+
+    var iconSize: Binding<Double> {
+        Binding(get: { store.settings.dock.iconSize }, set: { value in store.update { $0.dock.iconSize = value } })
+    }
+
+    var magnifies: Binding<Bool> {
+        Binding(get: { store.settings.dock.magnifies }, set: { value in store.update { $0.dock.magnifies = value } })
+    }
+
+    var magnifiedSize: Binding<Double> {
+        Binding(
+            get: { store.settings.dock.magnifiedSize },
+            set: { value in store.update { $0.dock.magnifiedSize = value } }
+        )
     }
 }
 

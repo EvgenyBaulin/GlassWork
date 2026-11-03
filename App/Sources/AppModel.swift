@@ -15,6 +15,7 @@ final class AppModel {
     private lazy var statusBar = StatusBarController(model: self)
     private lazy var settingsWindow = SettingsWindowController(model: self)
     private lazy var desktopWidgets = DesktopWidgetController(model: self)
+    private lazy var dock = DockController(model: self)
     private let hotKey = HotKey()
     private var hasOpenPanel = false
     private var timer: Timer?
@@ -53,6 +54,11 @@ final class AppModel {
                 kill(process.pid, force ? SIGKILL : SIGTERM)
             }
         )
+    }
+
+    /// Gives the system Dock back when the app quits.
+    func prepareToQuit() {
+        dock.restoreSystemDock()
     }
 
     func showSettings(module: ModuleID? = nil) {
@@ -124,6 +130,7 @@ final class AppModel {
         }
         statusBar.apply(store.settings)
         desktopWidgets.apply(store.settings.widgets)
+        dock.apply(store.settings.dock)
         updateDemand()
     }
 

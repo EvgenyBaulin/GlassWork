@@ -831,6 +831,16 @@
         }
       }
     },
+    "Folder name": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Название папки"
+          }
+        }
+      }
+    },
     "Force Quit": {
       "localizations": {
         "ru": {
@@ -987,6 +997,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Только в Хабе"
+          }
+        }
+      }
+    },
+    "Icon size": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размер значков"
           }
         }
       }
@@ -1157,6 +1177,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac перегревается"
+          }
+        }
+      }
+    },
+    "Magnification": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увеличение"
+          }
+        }
+      }
+    },
+    "Magnified size": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размер при увеличении"
           }
         }
       }
@@ -1681,6 +1721,16 @@
         }
       }
     },
+    "Remove from Folder": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Убрать из папки"
+          }
+        }
+      }
+    },
     "Renderer": {
       "localizations": {
         "ru": {
@@ -2021,6 +2071,16 @@
         }
       }
     },
+    "The system Dock is hidden while GlassWork Dock runs, and comes back as it was when you quit.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системный Dock скрыт, пока работает Dock GlassWork, и вернётся как был при выходе."
+          }
+        }
+      }
+    },
     "This Mac has no battery": {
       "localizations": {
         "ru": {
@@ -2161,6 +2221,16 @@
         }
       }
     },
+    "Ungroup": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разобрать папку"
+          }
+        }
+      }
+    },
     "Up Next": {
       "localizations": {
         "ru": {
@@ -2187,6 +2257,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Время работы"
+          }
+        }
+      }
+    },
+    "Use GlassWork Dock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать Dock GlassWork"
+          }
+        }
+      }
+    },
+    "Use GlassWork Dock?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать Dock GlassWork?"
           }
         }
       }

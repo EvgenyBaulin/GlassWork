@@ -18,6 +18,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model = AppModel()
     }
 
+    func applicationWillTerminate(_: Notification) {
+        model?.prepareToQuit()
+    }
+
     /// Opening the app again from Finder or Spotlight shows Settings.
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
         model?.showSettings()
