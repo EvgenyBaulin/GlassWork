@@ -75,13 +75,38 @@ public struct DockView: View {
         switch item {
         case let .app(app):
             AppTile(app: app, size: size, isRunning: running.contains(app.path)) { actions.open(app) }
+                .draggable(app.path)
+                .dropDestination(for: String.self) { paths, _ in
+                    drop(paths) { dragged, items in DockLayout.drop(dragged, onto: app, in: items) }
+                }
         case let .folder(folder):
             FolderTile(folder: folder, size: size, isRunning: folder.apps.contains { running.contains($0.path) }) {
                 openFolder = openFolder?.id == folder.id ? nil : folder
             }
+            .dropDestination(for: String.self) { paths, _ in
+                drop(paths) { dragged, items in DockLayout.drop(dragged, into: folder, in: items) }
+            }
         case let .widget(module):
             WidgetTile(module: module, size: size, monitor: monitor) { actions.showPanel(module) }
         }
+    }
+}
+
+private extension DockView {
+    /// Applies a drop of an app already in the Dock.
+    func drop(_ paths: [String], change: @escaping (DockApp, [DockItem]) -> [DockItem]) -> Bool {
+        guard let path = paths.first, let dragged = app(at: path) else { return false }
+        actions.update { change(dragged, $0) }
+        return true
+    }
+
+    func app(at path: String) -> DockApp? {
+        settings.items.compactMap { item -> DockApp? in
+            if case let .app(app) = item, app.path == path {
+                return app
+            }
+            return nil
+        }.first
     }
 }
 
