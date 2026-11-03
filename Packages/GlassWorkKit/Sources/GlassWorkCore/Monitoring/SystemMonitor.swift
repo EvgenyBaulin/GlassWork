@@ -40,6 +40,9 @@ public final class SystemMonitor {
     public var interval: TimeInterval = 2
     public var slowInterval: TimeInterval = 30
 
+    /// Called after each read. Menu bar items redraw from here, without SwiftUI's update machinery.
+    @ObservationIgnored public var onUpdate: (() -> Void)?
+
     @ObservationIgnored private let sampler = Sampler()
     @ObservationIgnored private var loop: Task<Void, Never>?
     @ObservationIgnored private var lastSlow = Date.distantPast
@@ -92,6 +95,7 @@ public final class SystemMonitor {
         }
         let reading = await sampler.read(demand, includeSlow: includeSlow)
         apply(reading, at: now)
+        onUpdate?()
     }
 
     private func apply(_ reading: Sampler.Reading, at date: Date) {
@@ -178,6 +182,7 @@ actor Sampler {
     private var disk: DiskCounters?
     private var diskDate = Date()
     private lazy var sensorReader = SensorReader()
+    private var sensorTick = 0
 
     func read(_ demand: MonitorDemand, includeSlow: Bool) async -> Reading {
         var reading = Reading()
@@ -211,6 +216,12 @@ actor Sampler {
             }
         }
         return reading
+    }
+
+    /// Temperatures move slowly: every third read is enough unless a panel shows them live.
+    private func shouldReadSensors(detailed: Bool) -> Bool {
+        sensorTick += 1
+        return detailed || sensorTick % 3 == 1
     }
 
     private func readCPU(into reading: inout Reading) {

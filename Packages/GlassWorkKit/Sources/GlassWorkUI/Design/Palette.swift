@@ -1,0 +1,121 @@
+import GlassWorkCore
+import SwiftUI
+
+/// Accent colors shared by panels, tiles, charts and widgets.
+public enum Palette {
+    public static let blue = Color(red: 0.231, green: 0.510, blue: 0.965)
+    public static let green = Color(red: 0.357, green: 0.831, blue: 0.373)
+    public static let purple = Color(red: 0.659, green: 0.333, blue: 0.969)
+    public static let orange = Color(red: 0.961, green: 0.620, blue: 0.043)
+    public static let red = Color(red: 0.937, green: 0.267, blue: 0.267)
+    public static let cyan = Color(red: 0.431, green: 0.776, blue: 0.878)
+    public static let yellow = Color(red: 0.961, green: 0.784, blue: 0.259)
+    public static let pink = Color(red: 0.925, green: 0.282, blue: 0.600)
+    public static let teal = Color(red: 0.078, green: 0.722, blue: 0.651)
+    public static let gray = Color(red: 0.557, green: 0.557, blue: 0.576)
+}
+
+/// Localized text from this package's string catalog.
+public func loc(_ key: String.LocalizationValue) -> String {
+    String(localized: key, bundle: .module)
+}
+
+public extension ModuleID {
+    var title: String {
+        switch self {
+        case .overview: loc("Overview")
+        case .cpu: loc("CPU")
+        case .memory: loc("Memory")
+        case .disk: loc("Disk")
+        case .network: loc("Network")
+        case .battery: loc("Battery")
+        case .gpu: loc("GPU")
+        case .sensors: loc("Sensors")
+        case .uptime: loc("Uptime")
+        default: rawValue
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .overview: "gauge.with.dots.needle.33percent"
+        case .cpu: "cpu"
+        case .memory: "memorychip"
+        case .disk: "internaldrive"
+        case .network: "arrow.up.arrow.down"
+        case .battery: "battery.75percent"
+        case .gpu: "cube"
+        case .sensors: "thermometer.medium"
+        case .uptime: "clock.arrow.circlepath"
+        default: "square.dashed"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .overview, .uptime: Palette.gray
+        case .cpu: Palette.blue
+        case .memory, .battery: Palette.green
+        case .disk: Palette.cyan
+        case .network: Palette.teal
+        case .gpu: Palette.purple
+        case .sensors: Palette.red
+        default: Palette.gray
+        }
+    }
+
+    /// Short label for the Labelled style, shown in tiny vertical capitals.
+    var shortLabel: String {
+        switch self {
+        case .overview: "ALL"
+        case .cpu: "CPU"
+        case .memory: "MEM"
+        case .disk: "SSD"
+        case .network: "NET"
+        case .battery: "BAT"
+        case .gpu: "GPU"
+        case .sensors: "TMP"
+        case .uptime: "UP"
+        default: ""
+        }
+    }
+
+    /// Modules that already have a collector and a panel.
+    var isAvailable: Bool {
+        switch self {
+        case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
+        default: false
+        }
+    }
+}
+
+public extension ModuleGroup {
+    var title: String {
+        switch self {
+        case .system: loc("System")
+        case .developer: loc("Developer")
+        case .yourDay: loc("Your Day")
+        case .everyday: loc("Everyday")
+        case .extra: loc("Extra")
+        }
+    }
+}
+
+/// Rounded colored square with a white glyph.
+public struct ModuleIcon: View {
+    private let module: ModuleID
+    private let size: CGFloat
+
+    public init(_ module: ModuleID, size: CGFloat = 28) {
+        self.module = module
+        self.size = size
+    }
+
+    public var body: some View {
+        Image(systemName: module.symbol)
+            .font(.system(size: size * 0.52, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: size, height: size)
+            .background(module.tint.gradient, in: .rect(cornerRadius: size / 4))
+    }
+}

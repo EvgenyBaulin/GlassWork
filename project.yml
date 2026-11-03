@@ -4,6 +4,7 @@ options:
   deploymentTarget:
     macOS: "26.0"
   createIntermediateGroups: true
+  developmentLanguage: en
   groupSortPosition: top
 configFiles:
   Debug: Config/Base.xcconfig
@@ -49,6 +50,7 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
         LSUIElement: true
+        CFBundleLocalizations: [en, ru]
         GWAppGroupID: $(APP_GROUP_ID)
         NSHumanReadableCopyright: Copyright © 2026 Evgeny Baulin. MIT License.
     settings:

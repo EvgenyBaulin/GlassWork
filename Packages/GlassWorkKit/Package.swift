@@ -14,7 +14,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "GlassWorkCore"),
-        .target(name: "GlassWorkUI", dependencies: ["GlassWorkCore"]),
+        .target(name: "GlassWorkUI", dependencies: ["GlassWorkCore"], resources: [.process("Resources")]),
         .testTarget(name: "GlassWorkCoreTests", dependencies: ["GlassWorkCore"]),
         .testTarget(
             name: "GlassWorkUITests",

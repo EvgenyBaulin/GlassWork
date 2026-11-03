@@ -6,6 +6,7 @@ public final class SMCClient: @unchecked Sendable {
     // @unchecked: the connection is an immutable port and calls are serialised by `lock`.
     private let connection: io_connect_t
     private let lock = NSLock()
+    private var infoCache: [UInt32: Message.KeyInfo] = [:]
 
     public init?() {
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSMC"))
@@ -45,18 +46,27 @@ public final class SMCClient: @unchecked Sendable {
     }
 
     private func read(_ key: UInt32) -> Value? {
-        var infoRequest = Message()
-        infoRequest.key = key
-        infoRequest.command = Command.keyInfo
-        guard let info = call(infoRequest) else { return nil }
-
+        guard let info = keyInfo(key) else { return nil }
         var request = Message()
         request.key = key
-        request.keyInfo.size = info.keyInfo.size
+        request.keyInfo.size = info.size
         request.command = Command.read
         guard let reply = call(request) else { return nil }
-        let bytes = withUnsafeBytes(of: reply.bytes) { Array($0.prefix(Int(info.keyInfo.size))) }
-        return Value(type: FourCC.decode(info.keyInfo.type), bytes: bytes)
+        let bytes = withUnsafeBytes(of: reply.bytes) { Array($0.prefix(Int(info.size))) }
+        return Value(type: FourCC.decode(info.type), bytes: bytes)
+    }
+
+    /// A key's type and size never change, so each is asked for once.
+    private func keyInfo(_ key: UInt32) -> Message.KeyInfo? {
+        if let cached = lock.withLock({ infoCache[key] }) {
+            return cached
+        }
+        var request = Message()
+        request.key = key
+        request.command = Command.keyInfo
+        guard let info = call(request)?.keyInfo else { return nil }
+        lock.withLock { infoCache[key] = info }
+        return info
     }
 
     private func call(_ message: Message) -> Message? {
@@ -78,8 +88,8 @@ public final class SMCClient: @unchecked Sendable {
         static let keyInfo: UInt8 = 9
     }
 
-    /// Mirrors the driver's `SMCKeyData_t`, so field order and sizes must not change.
     // swiftlint:disable nesting large_tuple
+    /// Mirrors the driver's `SMCKeyData_t`, so field order and sizes must not change.
     private struct Message {
         struct Version {
             var major: UInt8 = 0
