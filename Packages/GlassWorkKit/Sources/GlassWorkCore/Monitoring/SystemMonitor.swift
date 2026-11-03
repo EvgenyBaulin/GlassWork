@@ -38,6 +38,8 @@ public final class SystemMonitor {
 
     /// Timers, notes and other small modules, ticking along with the monitor.
     public let everyday = EverydayStore()
+    /// Calendar events and reminders.
+    public let agenda = AgendaStore()
 
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2

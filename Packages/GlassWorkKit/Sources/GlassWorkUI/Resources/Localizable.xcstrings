@@ -141,6 +141,26 @@
         }
       }
     },
+    "%lld now": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас: %lld"
+          }
+        }
+      }
+    },
+    "%lld open": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыто: %lld"
+          }
+        }
+      }
+    },
     "%lld running": {
       "localizations": {
         "ru": {
@@ -241,6 +261,36 @@
         }
       }
     },
+    "Add a reminder": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить напоминание"
+          }
+        }
+      }
+    },
+    "All": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все"
+          }
+        }
+      }
+    },
+    "All day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Весь день"
+          }
+        }
+      }
+    },
     "All set": {
       "localizations": {
         "ru": {
@@ -267,6 +317,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Всё в строку меню"
+          }
+        }
+      }
+    },
+    "Allow Access": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить доступ"
+          }
+        }
+      }
+    },
+    "Allow GlassWork in System Settings → Privacy & Security": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите GlassWork в Системных настройках → Конфиденциальность и безопасность"
           }
         }
       }
@@ -397,6 +467,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вычисляется…"
+          }
+        }
+      }
+    },
+    "Calendar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Календарь"
           }
         }
       }
@@ -641,6 +721,16 @@
         }
       }
     },
+    "Ends In": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До конца"
+          }
+        }
+      }
+    },
     "Everyday": {
       "localizations": {
         "ru": {
@@ -691,6 +781,16 @@
         }
       }
     },
+    "Flagged": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С флагом"
+          }
+        }
+      }
+    },
     "Force Quit": {
       "localizations": {
         "ru": {
@@ -707,6 +807,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Завершить «%@» принудительно?"
+          }
+        }
+      }
+    },
+    "Free all day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свободно весь день"
+          }
+        }
+      }
+    },
+    "Free until %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свободно до %@"
           }
         }
       }
@@ -867,6 +987,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Интерфейсы"
+          }
+        }
+      }
+    },
+    "Join": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключиться"
           }
         }
       }
@@ -1061,6 +1191,26 @@
         }
       }
     },
+    "Next": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дальше"
+          }
+        }
+      }
+    },
+    "No events today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня событий нет"
+          }
+        }
+      }
+    },
     "No sensors available on this Mac": {
       "localizations": {
         "ru": {
@@ -1181,12 +1331,32 @@
         }
       }
     },
+    "Open Calendar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть Календарь"
+          }
+        }
+      }
+    },
     "Open Disk Utility": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Открыть Дисковую утилиту"
+          }
+        }
+      }
+    },
+    "Open Reminders": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть Напоминания"
           }
         }
       }
@@ -1217,6 +1387,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Прочие"
+          }
+        }
+      }
+    },
+    "Overdue": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Просрочено"
           }
         }
       }
@@ -1461,6 +1641,26 @@
         }
       }
     },
+    "See your events here": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь будут ваши события"
+          }
+        }
+      }
+    },
+    "See your reminders here": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь будут ваши напоминания"
+          }
+        }
+      }
+    },
     "Sensors": {
       "localizations": {
         "ru": {
@@ -1677,6 +1877,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Таймеры"
+          }
+        }
+      }
+    },
+    "To-Dos": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задачи"
+          }
+        }
+      }
+    },
+    "Today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня"
+          }
+        }
+      }
+    },
+    "Tomorrow": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завтра"
           }
         }
       }
