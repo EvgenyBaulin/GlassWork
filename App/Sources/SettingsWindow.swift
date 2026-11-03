@@ -1,0 +1,371 @@
+import AppKit
+import GlassWorkCore
+import GlassWorkUI
+import ServiceManagement
+import SwiftUI
+
+/// The Settings window and the first-launch welcome.
+@MainActor
+final class SettingsWindowController {
+    private unowned let model: AppModel
+    private var window: NSWindow?
+    private var welcome: NSWindow?
+    private let navigation = SettingsNavigation()
+
+    init(model: AppModel) {
+        self.model = model
+    }
+
+    func show(module: ModuleID?) {
+        navigation.selection = module.map(SettingsPage.module) ?? navigation.selection
+        if window == nil {
+            let view = SettingsRoot(store: model.store, monitor: model.monitor, navigation: navigation)
+            let created = NSWindow(contentViewController: NSHostingController(rootView: view))
+            created.title = loc("GlassWork Settings")
+            created.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+            created.toolbarStyle = .unified
+            created.contentMinSize = CGSize(width: 760, height: 540)
+            created.setContentSize(CGSize(width: 900, height: 640))
+            created.setFrameAutosaveName("GlassWorkSettings")
+            created.isReleasedWhenClosed = false
+            window = created
+        }
+        NSApp.activate()
+        window?.makeKeyAndOrderFront(nil)
+    }
+
+    func showWelcome() {
+        let view = WelcomeView(store: model.store) { [weak self] in
+            self?.welcome?.close()
+            self?.welcome = nil
+        }
+        let created = NSWindow(contentViewController: NSHostingController(rootView: view))
+        created.title = loc("Welcome to GlassWork")
+        created.styleMask = [.titled, .closable, .fullSizeContentView]
+        created.titlebarAppearsTransparent = true
+        created.center()
+        created.isReleasedWhenClosed = false
+        welcome = created
+        NSApp.activate()
+        created.makeKeyAndOrderFront(nil)
+    }
+}
+
+enum SettingsPage: Hashable {
+    case general, menuBar, widgets, dock, fans, shortcuts, permissions, about
+    case module(ModuleID)
+}
+
+@MainActor
+@Observable
+final class SettingsNavigation {
+    var selection: SettingsPage = .menuBar
+}
+
+struct SettingsRoot: View {
+    let store: SettingsStore
+    let monitor: SystemMonitor
+    @Bindable var navigation: SettingsNavigation
+    @State private var query = ""
+
+    private var modules: [ModuleSettings] {
+        store.settings.modules.filter { setting in
+            setting.id.isAvailable && (query.isEmpty || setting.id.title.localizedCaseInsensitiveContains(query))
+        }
+    }
+
+    var body: some View {
+        NavigationSplitView {
+            List(selection: $navigation.selection) {
+                row(.general, loc("General"), "gearshape", .gray)
+                row(.menuBar, loc("Menu Bar"), "menubar.rectangle", .blue)
+                ForEach(modules) { setting in
+                    Label {
+                        Text(setting.id.title)
+                    } icon: {
+                        ModuleIcon(setting.id, size: 18)
+                    }
+                    .padding(.leading, 14)
+                    .tag(SettingsPage.module(setting.id))
+                }
+                row(.widgets, loc("Widgets"), "square.grid.2x2", .purple)
+                row(.dock, loc("Dock"), "dock.rectangle", .teal)
+                row(.fans, loc("Fans"), "fan", .cyan)
+                row(.shortcuts, loc("Shortcuts"), "keyboard", .gray)
+                row(.permissions, loc("Permissions"), "checkmark.shield", .green)
+                row(.about, loc("About"), "info.circle", .gray)
+            }
+            .searchable(text: $query, placement: .sidebar)
+            .navigationSplitViewColumnWidth(220)
+        } detail: {
+            detail.frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private func row(_ page: SettingsPage, _ title: String, _ symbol: String, _ color: Color) -> some View {
+        Label {
+            Text(title)
+        } icon: {
+            Image(systemName: symbol)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 20, height: 20)
+                .background(color.gradient, in: .rect(cornerRadius: 5))
+        }
+        .tag(page)
+    }
+
+    @ViewBuilder
+    private var detail: some View {
+        switch navigation.selection {
+        case .general: GeneralPane(store: store)
+        case .menuBar: ModulesPane(store: store)
+        case let .module(id): ModulePane(module: id, store: store, monitor: monitor)
+        case .about: AboutPane()
+        default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
+        }
+    }
+}
+
+struct ModulesPane: View {
+    let store: SettingsStore
+
+    var body: some View {
+        Form {
+            Section {
+                ForEach(store.settings.modules.filter(\.id.isAvailable)) { setting in
+                    HStack(spacing: 10) {
+                        ModuleIcon(setting.id, size: 26)
+                        Text(setting.id.title)
+                        Spacer()
+                        ModePicker(module: setting.id, store: store).frame(width: 150)
+                    }
+                }
+            } header: {
+                Text(loc("Modules"))
+            } footer: {
+                Text(loc("In menu bar, Hub only or Off. Click a module in the sidebar for its options."))
+            }
+            Section {
+                HStack {
+                    Button(loc("All to Hub")) { setAll(.hubOnly) }
+                    Button(loc("All to menu bar")) { setAll(.menuBar) }
+                    Spacer()
+                    Button(loc("Restore defaults")) { store.update { $0.modules = AppSettings.defaultModules } }
+                }
+            }
+            Section(loc("Hiding")) {
+                Toggle(loc("Hide items behind a separator"), isOn: hidingEnabled)
+                Stepper(value: autoHide, in: 3 ... 60) {
+                    Text(loc("Hide again after \(store.settings.hiding.autoHideSeconds) s"))
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private var hidingEnabled: Binding<Bool> {
+        Binding(
+            get: { store.settings.hiding.isEnabled },
+            set: { value in store.update { $0.hiding.isEnabled = value } }
+        )
+    }
+
+    private var autoHide: Binding<Int> {
+        Binding(
+            get: { store.settings.hiding.autoHideSeconds },
+            set: { value in store.update { $0.hiding.autoHideSeconds = value } }
+        )
+    }
+
+    private func setAll(_ mode: ModuleMode) {
+        store.update { settings in
+            for index in settings.modules.indices where settings.modules[index].id.isAvailable {
+                settings.modules[index].mode = mode
+            }
+        }
+    }
+}
+
+struct ModePicker: View {
+    let module: ModuleID
+    let store: SettingsStore
+
+    var body: some View {
+        Picker("", selection: Binding(
+            get: { store.settings.module(module)?.mode ?? .off },
+            set: { value in store.update { $0.update(module) { $0.mode = value } } }
+        )) {
+            Text(loc("In menu bar")).tag(ModuleMode.menuBar)
+            Text(loc("Hub only")).tag(ModuleMode.hubOnly)
+            Text(loc("Off")).tag(ModuleMode.off)
+        }
+        .labelsHidden()
+    }
+}
+
+struct ModulePane: View {
+    let module: ModuleID
+    let store: SettingsStore
+    let monitor: SystemMonitor
+
+    private var style: Binding<DisplayStyle> {
+        Binding(
+            get: { store.settings.module(module)?.style ?? .figure },
+            set: { value in store.update { $0.update(module) { $0.style = value } } }
+        )
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                HStack(spacing: 10) {
+                    ModuleIcon(module, size: 32)
+                    Text(module.title).font(.title3.weight(.semibold))
+                    Spacer()
+                    ModePicker(module: module, store: store).frame(width: 150)
+                }
+            }
+            Section(loc("Display style")) {
+                Picker(loc("Style"), selection: style) {
+                    Text(loc("Symbol")).tag(DisplayStyle.symbol)
+                    Text(loc("Figure")).tag(DisplayStyle.figure)
+                    Text(loc("Graph")).tag(DisplayStyle.graph)
+                    Text(loc("Graph and figure")).tag(DisplayStyle.graphAndFigure)
+                    Text(loc("Labelled")).tag(DisplayStyle.labelled)
+                }
+                LabeledContent(loc("Preview")) {
+                    MenuBarItemView(
+                        module: module,
+                        style: style.wrappedValue,
+                        numbers: store.settings.numberStyle,
+                        monitor: monitor
+                    )
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+struct GeneralPane: View {
+    let store: SettingsStore
+    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle(loc("Launch at login"), isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) { _, enabled in
+                        if enabled {
+                            try? SMAppService.mainApp.register()
+                        } else {
+                            try? SMAppService.mainApp.unregister()
+                        }
+                    }
+            }
+            Section(loc("Numbers")) {
+                Picker(loc("Menu bar figures"), selection: Binding(
+                    get: { store.settings.numberStyle },
+                    set: { value in store.update { $0.numberStyle = value } }
+                )) {
+                    Text(loc("Compact")).tag(NumberStyle.compact)
+                    Text(loc("Precise")).tag(NumberStyle.precise)
+                }
+            }
+            Section(loc("Settings file")) {
+                LabeledContent("settings.json") {
+                    Button(loc("Reveal in Finder")) {
+                        NSWorkspace.shared.activateFileViewerSelecting([SettingsFile.defaultURL])
+                    }
+                }
+                if let error = store.lastError {
+                    Text(error).foregroundStyle(.red).font(.caption)
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
+}
+
+struct AboutPane: View {
+    private var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+    }
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text("GlassWork").font(.largeTitle.weight(.semibold))
+            Text(loc("Version \(version)")).foregroundStyle(.secondary)
+            Link(
+                "github.com/EvgenyBaulin/GlassWork",
+                destination: URL(string: "https://github.com/EvgenyBaulin/GlassWork")!
+            )
+            Text(loc("MIT License")).foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// Four steps with Skip: welcome, what to enable, permissions, done.
+struct WelcomeView: View {
+    let store: SettingsStore
+    let finish: () -> Void
+    @State private var step = 0
+    @State private var launchAtLogin = true
+
+    var body: some View {
+        VStack(spacing: 18) {
+            Spacer()
+            content
+            Spacer()
+            HStack {
+                Button(loc("Skip")) { complete() }.buttonStyle(.plain).foregroundStyle(.secondary)
+                Spacer()
+                Button(step == 3 ? loc("Done") : loc("Continue")) { advance() }
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .padding(28)
+        .frame(width: 520, height: 380)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch step {
+        case 0:
+            Text(loc("Welcome to GlassWork")).font(.largeTitle.weight(.semibold))
+            Text(loc("Live figures in your menu bar, with everything else one click away in the Hub."))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+        case 1:
+            Text(loc("What to enable")).font(.title.weight(.semibold))
+            Text(loc("Overview, CPU and Memory start in the menu bar. Everything else waits in the Hub."))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+        case 2:
+            Text(loc("Permissions")).font(.title.weight(.semibold))
+            Text(loc("Nothing is needed now. Each module asks for access only when you turn it on."))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+        default:
+            Text(loc("All set")).font(.title.weight(.semibold))
+            Toggle(loc("Launch at login"), isOn: $launchAtLogin).toggleStyle(.checkbox)
+        }
+    }
+
+    private func advance() {
+        if step == 3 {
+            complete()
+        } else {
+            step += 1
+        }
+    }
+
+    private func complete() {
+        if launchAtLogin {
+            try? SMAppService.mainApp.register()
+        }
+        store.update { $0.welcomeCompleted = true }
+        finish()
+    }
+}

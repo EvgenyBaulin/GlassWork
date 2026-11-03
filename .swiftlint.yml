@@ -10,6 +10,8 @@ disabled_rules:
   - trailing_comma
   - opening_brace
   - todo
+  - optional_data_string_conversion
+  - multiple_closures_with_trailing_closure
 opt_in_rules:
   - empty_count
   - first_where
@@ -21,6 +23,7 @@ line_length:
   warning: 120
   error: 160
   ignores_comments: true
+  ignores_interpolated_strings: true
 identifier_name:
   excluded: [id, x, y, i, ok]
 type_body_length:
