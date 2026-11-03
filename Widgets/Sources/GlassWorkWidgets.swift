@@ -96,7 +96,9 @@ struct MacHealthKindWidget: Widget {
 }
 
 struct UptimeKindWidget: Widget {
-    var body: some WidgetConfiguration { configuration(.uptime) }
+    var body: some WidgetConfiguration {
+        configuration(.uptime)
+    }
 }
 
 struct DigitalClockKindWidget: Widget {
