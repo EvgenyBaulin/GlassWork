@@ -42,6 +42,10 @@ public final class SystemMonitor {
     public let everyday = EverydayStore()
     /// Calendar events and reminders.
     public let agenda = AgendaStore()
+    /// These only reach the network or the disk once the app asks them to.
+    public let weather = WeatherStore()
+    public let rates = RatesStore()
+    public let clipboard = ClipboardStore()
 
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
@@ -133,6 +137,9 @@ public final class SystemMonitor {
         let reading = await sampler.read(demand, includeSlow: includeSlow)
         apply(reading, at: now)
         everyday.tick(at: now)
+        weather.tick(at: now)
+        rates.tick(at: now)
+        clipboard.tick(at: now)
         onUpdate?()
     }
 
