@@ -62,6 +62,17 @@ final class AppModel {
         panels.toggle(module, from: button)
     }
 
+    /// Keep Awake, Stopwatch and Appearance act on the click itself.
+    func performClickAction(_ module: ModuleID) {
+        let store = monitor.everyday
+        switch module {
+        case .keepAwake: store.toggleKeepAwake()
+        case .stopwatch: store.update { $0.stopwatch.toggle(at: Date()) }
+        case .appearance: Appearance.toggle()
+        default: break
+        }
+    }
+
     func toggleHub() {
         statusBar.revealHidden()
         panels.toggleHub(from: statusBar.hubButton)
@@ -120,7 +131,7 @@ final class AppModel {
         demand.cpu = everything || modes.contains(.cpu) || modes.contains(.overview)
         demand.memory = everything || modes.contains(.memory) || modes.contains(.overview)
         demand.network = everything || modes.contains(.network)
-        demand.disk = everything || modes.contains(.disk)
+        demand.disk = everything || modes.contains(.disk) || modes.contains(.eject)
         demand.battery = true
         demand.gpu = everything || modes.contains(.gpu)
         demand.sensors = everything || modes.contains(.sensors) || store.settings.alerts.isEnabled

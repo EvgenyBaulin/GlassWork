@@ -34,6 +34,8 @@ public struct ItemContent {
         case .battery: battery(monitor, style: style)
         case .sensors: sensors(monitor)
         case .uptime: uptime()
+        case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon: everyday(module, monitor.everyday)
+        case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
         default: ItemContent(figure: "—", template: "—")
         }
     }
@@ -108,6 +110,35 @@ public struct ItemContent {
             alert: (celsius ?? 0) >= 95 ? Palette.orange : nil,
             template: "100°C"
         )
+    }
+
+    private static func everyday(_ module: ModuleID, _ store: EverydayStore) -> ItemContent {
+        let now = Date()
+        switch module {
+        case .timers:
+            let next = store.data.timers.map { $0.remaining(at: now) }.min()
+            return ItemContent(figure: next?.clockText ?? "—", template: "88:88")
+        case .stopwatch:
+            return ItemContent(figure: store.data.stopwatch.elapsed(at: now).clockText, template: "88:88:88")
+        case .countdown:
+            let next = store.data.sortedDates(from: now).first
+            return ItemContent(figure: next.map { loc("\($0.daysLeft(from: now)) d") } ?? "—", template: "888 d")
+        case .worldClocks:
+            return ItemContent(figure: firstCityTime(store), template: "88:88 PM")
+        case .date:
+            return ItemContent(figure: now.formatted(.dateTime.weekday().day().month()), template: "Wed, 28 Sep")
+        default:
+            let times = Astronomy.sunTimes(on: now, latitude: 55.75, longitude: 37.62)
+            let next = [times.sunrise, times.sunset].compactMap(\.self).first { $0 > now }
+            return ItemContent(figure: next?.formatted(date: .omitted, time: .shortened) ?? "—", template: "88:88 PM")
+        }
+    }
+
+    private static func firstCityTime(_ store: EverydayStore) -> String {
+        guard let city = store.data.cities.first else { return "—" }
+        var style = Date.FormatStyle(date: .omitted, time: .shortened)
+        style.timeZone = TimeZone(identifier: city.timeZone) ?? .current
+        return Date().formatted(style)
     }
 
     private static func uptime() -> ItemContent {

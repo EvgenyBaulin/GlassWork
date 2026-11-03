@@ -36,6 +36,9 @@ public final class SystemMonitor {
     public private(set) var processes: [ProcessUsage] = []
     public private(set) var histories: [Metric: TieredHistory] = [:]
 
+    /// Timers, notes and other small modules, ticking along with the monitor.
+    public let everyday = EverydayStore()
+
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
     public var slowInterval: TimeInterval = 30
@@ -95,6 +98,7 @@ public final class SystemMonitor {
         }
         let reading = await sampler.read(demand, includeSlow: includeSlow)
         apply(reading, at: now)
+        everyday.tick(at: now)
         onUpdate?()
     }
 

@@ -22,6 +22,14 @@ public struct ModulePanel: View {
         case .gpu: GPUPanel(monitor: monitor)
         case .sensors: SensorsPanel(monitor: monitor)
         case .uptime: UptimePanel()
+        case .timers: TimersPanel(monitor: monitor)
+        case .notes: NotesPanel(monitor: monitor)
+        case .countdown: CountdownPanel(monitor: monitor)
+        case .worldClocks: WorldClocksPanel(monitor: monitor)
+        case .date: DatePanel()
+        case .sunMoon: SunMoonPanel()
+        case .colours: ColoursPanel(monitor: monitor)
+        case .eject: EjectPanel(monitor: monitor)
         default: EmptyView()
         }
     }
