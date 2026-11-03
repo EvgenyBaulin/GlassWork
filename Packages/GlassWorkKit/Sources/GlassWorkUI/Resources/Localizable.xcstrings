@@ -231,6 +231,16 @@
         }
       }
     },
+    "Activity": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активность"
+          }
+        }
+      }
+    },
     "Adapter": {
       "localizations": {
         "ru": {
@@ -247,6 +257,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавить"
+          }
+        }
+      }
+    },
+    "Add Widget": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить виджет"
           }
         }
       }
@@ -481,6 +501,16 @@
         }
       }
     },
+    "Calendar Month": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Календарь на месяц"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "ru": {
@@ -647,6 +677,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Для разработчика"
+          }
+        }
+      }
+    },
+    "Digital Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цифровые часы"
           }
         }
       }
@@ -1041,6 +1081,16 @@
         }
       }
     },
+    "Live desktop widgets": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Живые виджеты на столе"
+          }
+        }
+      }
+    },
     "Live figures in your menu bar, with everything else one click away in the Hub.": {
       "localizations": {
         "ru": {
@@ -1087,6 +1137,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Лицензия MIT"
+          }
+        }
+      }
+    },
+    "Mac Health": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Состояние Mac"
           }
         }
       }
@@ -1151,12 +1211,32 @@
         }
       }
     },
+    "Modular Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модульные часы"
+          }
+        }
+      }
+    },
     "Modules": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Модули"
+          }
+        }
+      }
+    },
+    "Moon": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Луна"
           }
         }
       }
@@ -1227,6 +1307,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Таймеры не запущены"
+          }
+        }
+      }
+    },
+    "Note": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заметка"
           }
         }
       }
@@ -1347,6 +1437,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыть Дисковую утилиту"
+          }
+        }
+      }
+    },
+    "Open GlassWork to start": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте GlassWork"
           }
         }
       }
@@ -1561,6 +1661,16 @@
         }
       }
     },
+    "Remove": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Убрать"
+          }
+        }
+      }
+    },
     "Renderer": {
       "localizations": {
         "ru": {
@@ -1607,6 +1717,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показать в Finder"
+          }
+        }
+      }
+    },
+    "Right-click the desktop and choose Edit Widgets to add system widgets.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Правый клик по рабочему столу → «Изменить виджеты», чтобы добавить системные виджеты."
+          }
+        }
+      }
+    },
+    "Running smoothly": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё работает"
           }
         }
       }
@@ -1701,6 +1831,16 @@
         }
       }
     },
+    "Size": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размер"
+          }
+        }
+      }
+    },
     "Skip": {
       "localizations": {
         "ru": {
@@ -1757,6 +1897,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Секундомер"
+          }
+        }
+      }
+    },
+    "Storage and Drives": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хранилище и диски"
           }
         }
       }
@@ -1831,12 +1981,32 @@
         }
       }
     },
+    "System widgets": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системные виджеты"
+          }
+        }
+      }
+    },
     "Temperature": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Температура"
+          }
+        }
+      }
+    },
+    "Temperature and Fans": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Температура и вентиляторы"
           }
         }
       }
@@ -1871,12 +2041,32 @@
         }
       }
     },
+    "Timer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Таймер"
+          }
+        }
+      }
+    },
     "Timers": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Таймеры"
+          }
+        }
+      }
+    },
+    "To-Do": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задачи"
           }
         }
       }
@@ -1911,6 +2101,16 @@
         }
       }
     },
+    "Top Apps": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Топ приложений"
+          }
+        }
+      }
+    },
     "Top processes": {
       "localizations": {
         "ru": {
@@ -1927,6 +2127,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Отменить изменение настроек"
+          }
+        }
+      }
+    },
+    "Up Next": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дальше"
           }
         }
       }
@@ -2011,6 +2221,16 @@
         }
       }
     },
+    "Widget": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виджет"
+          }
+        }
+      }
+    },
     "Widgets": {
       "localizations": {
         "ru": {
@@ -2047,6 +2267,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Запись"
+          }
+        }
+      }
+    },
+    "Year in Dots": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Год в точках"
           }
         }
       }

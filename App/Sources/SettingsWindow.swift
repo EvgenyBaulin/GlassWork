@@ -133,6 +133,7 @@ struct SettingsRoot: View {
         case .menuBar: ModulesPane(store: store)
         case let .module(id): ModulePane(module: id, store: store, monitor: monitor)
         case .shortcuts: ShortcutsPane()
+        case .widgets: WidgetsPane(store: store)
         case .about: AboutPane()
         default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
         }
@@ -346,6 +347,54 @@ extension GeneralPane {
                 }
             }
         )
+    }
+}
+
+struct WidgetsPane: View {
+    let store: SettingsStore
+    @State private var kind = WidgetKind.activity
+    @State private var size = WidgetSize.medium
+
+    var body: some View {
+        Form {
+            Section {
+                Text(loc("Right-click the desktop and choose Edit Widgets to add system widgets."))
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text(loc("System widgets"))
+            }
+            Section(loc("Live desktop widgets")) {
+                ForEach(store.settings.widgets.placements) { placement in
+                    HStack {
+                        Text(placement.kind.title)
+                        Spacer()
+                        Button(loc("Remove")) {
+                            store.update { $0.widgets.placements.removeAll { $0.id == placement.id } }
+                        }
+                    }
+                }
+                Picker(loc("Widget"), selection: $kind) {
+                    ForEach(WidgetKind.allCases) { Text($0.title).tag($0) }
+                }
+                Picker(loc("Size"), selection: $size) {
+                    Text("S").tag(WidgetSize.small)
+                    Text("M").tag(WidgetSize.medium)
+                    Text("L").tag(WidgetSize.large)
+                    Text("XL").tag(WidgetSize.extraLarge)
+                }
+                .pickerStyle(.segmented)
+                Button(loc("Add Widget")) { add() }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private func add() {
+        let visible = NSScreen.main?.visibleFrame ?? .zero
+        let count = Double(store.settings.widgets.placements.count)
+        let x = visible.minX + 24 + count * WidgetPlacement.gridStep
+        let y = visible.maxY - 24 - size.height
+        store.update { $0.widgets.placements.append(WidgetPlacement(kind: kind, size: size, x: x, y: y)) }
     }
 }
 

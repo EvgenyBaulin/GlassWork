@@ -1,0 +1,208 @@
+import GlassWorkCore
+import SwiftUI
+
+public extension WidgetKind {
+    var title: String {
+        switch self {
+        case .activity: loc("Activity")
+        case .battery: loc("Battery")
+        case .macHealth: loc("Mac Health")
+        case .uptime: loc("Uptime")
+        case .storage: loc("Storage and Drives")
+        case .temperature: loc("Temperature and Fans")
+        case .topApps: loc("Top Apps")
+        case .network: loc("Network")
+        case .digitalClock: loc("Digital Clock")
+        case .modularClock: loc("Modular Clock")
+        case .calendarMonth: loc("Calendar Month")
+        case .upNext: loc("Up Next")
+        case .endsIn: loc("Ends In")
+        case .todo: loc("To-Do")
+        case .note: loc("Note")
+        case .timer: loc("Timer")
+        case .countdown: loc("Countdown")
+        case .yearInDots: loc("Year in Dots")
+        case .moon: loc("Moon")
+        case .daylight: loc("Daylight")
+        }
+    }
+}
+
+/// One widget face, shared by WidgetKit and GlassWork's own desktop windows.
+public struct WidgetFace: View {
+    private let kind: WidgetKind
+    private let size: WidgetSize
+    private let snapshot: WidgetSnapshot
+    private let now: Date
+
+    public init(kind: WidgetKind, size: WidgetSize, snapshot: WidgetSnapshot, now: Date = .now) {
+        self.kind = kind
+        self.size = size
+        self.snapshot = snapshot
+        self.now = now
+    }
+
+    public var body: some View {
+        Group {
+            switch kind {
+            case .activity: ActivityWidget(size: size, snapshot: snapshot)
+            case .battery: BatteryWidget(size: size, snapshot: snapshot)
+            case .macHealth, .uptime: MacHealthWidget(size: size, snapshot: snapshot, now: now)
+            case .digitalClock: DigitalClockWidget(size: size, now: now)
+            default: PlaceholderWidget(kind: kind)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+struct PlaceholderWidget: View {
+    let kind: WidgetKind
+
+    var body: some View {
+        Text(kind.title).font(.headline).foregroundStyle(.secondary)
+    }
+}
+
+struct ActivityWidget: View {
+    let size: WidgetSize
+    let snapshot: WidgetSnapshot
+
+    private struct Ring {
+        let title: String
+        let value: Double
+        let tint: Color
+    }
+
+    private var rings: [Ring] {
+        [
+            Ring(title: loc("CPU"), value: snapshot.cpu?.total ?? 0, tint: Palette.blue),
+            Ring(title: loc("Memory"), value: snapshot.memory?.usedShare ?? 0, tint: Palette.green),
+            Ring(title: loc("GPU"), value: snapshot.gpu?.device ?? 0, tint: Palette.purple),
+        ]
+    }
+
+    var body: some View {
+        switch size {
+        case .small:
+            ring(rings[0], diameter: 112).frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .medium:
+            HStack(spacing: 14) { ForEach(rings, id: \.title) { ring($0, diameter: 92) } }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .large, .extraLarge:
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 14) { ForEach(rings, id: \.title) { ring($0, diameter: 92) } }
+                    .frame(maxWidth: .infinity)
+                Divider()
+                TopProcessRows(processes: snapshot.processes, limit: size == .large ? 5 : 8)
+            }
+        }
+    }
+
+    private func ring(_ item: Ring, diameter: CGFloat) -> some View {
+        VStack(spacing: 6) {
+            RingGauge(value: item.value, tint: item.tint, lineWidth: diameter / 9) {
+                Text(Format.percent(item.value))
+                    .font(.system(size: diameter / 5, weight: .semibold, design: .rounded))
+            }
+            .frame(width: diameter, height: diameter)
+            Text(item.title).font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
+        }
+    }
+}
+
+struct TopProcessRows: View {
+    let processes: [ProcessUsage]
+    let limit: Int
+
+    var body: some View {
+        let top = processes.sorted { $0.cpu > $1.cpu }.prefix(limit)
+        let peak = max(top.first?.cpu ?? 1, 0.1)
+        VStack(spacing: 6) {
+            ForEach(Array(top)) { process in
+                HStack(spacing: 8) {
+                    Text(process.name).lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
+                    ThinBar(value: process.cpu / peak, tint: Palette.blue).frame(width: 90)
+                    Text(String(format: "%.1f%%", process.cpu)).monospacedDigit().frame(width: 48, alignment: .trailing)
+                }
+                .font(.system(size: 12))
+            }
+        }
+    }
+}
+
+struct BatteryWidget: View {
+    let size: WidgetSize
+    let snapshot: WidgetSnapshot
+
+    var body: some View {
+        if let battery = snapshot.battery {
+            VStack(alignment: .leading, spacing: 4) {
+                Image(systemName: battery.isCharging ? "battery.100percent.bolt" : "battery.75percent")
+                    .font(.system(size: 34))
+                    .foregroundStyle(tint(battery))
+                Spacer()
+                Text(Format.percent(battery.charge))
+                    .font(.system(size: 40, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                Text(status(battery))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(battery.isCharging ? Palette.green : .secondary)
+            }
+        } else {
+            Text(loc("This Mac has no battery")).foregroundStyle(.secondary)
+        }
+    }
+
+    private func tint(_ battery: BatterySample) -> Color {
+        battery.charge <= 0.2 && !battery.isCharging ? Palette.red : Palette.green
+    }
+
+    private func status(_ battery: BatterySample) -> String {
+        battery.isCharging ? loc("Charging") : battery.isOnAC ? loc("Power Adapter") : loc("On battery")
+    }
+}
+
+struct MacHealthWidget: View {
+    let size: WidgetSize
+    let snapshot: WidgetSnapshot
+    let now: Date
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(loc("Running smoothly"), systemImage: "checkmark.circle.fill")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(Palette.green)
+            if let boot = snapshot.bootTime {
+                Text(CompactDuration.format(now.timeIntervalSince(boot)))
+                    .font(.system(size: 34, weight: .semibold, design: .rounded))
+            }
+            Spacer()
+            if let memory = snapshot.memory {
+                InfoRow(title: loc("Memory"), value: Format.percent(memory.usedShare))
+                InfoRow(title: loc("Swap used"), value: Format.bytes(Double(memory.swapUsed), style: .precise))
+            }
+        }
+    }
+}
+
+struct DigitalClockWidget: View {
+    let size: WidgetSize
+    let now: Date
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(now.formatted(.dateTime.weekday(.wide)).uppercased())
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Palette.orange)
+            Text(now, style: .time)
+                .font(.system(size: size == .small ? 38 : 60, weight: .semibold, design: .rounded))
+                .monospacedDigit()
+                .minimumScaleFactor(0.5)
+            Text(now.formatted(.dateTime.day().month(.wide)))
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+    }
+}
