@@ -35,6 +35,7 @@ public struct ItemContent {
         case .sensors: sensors(monitor)
         case .uptime: uptime()
         case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon: everyday(module, monitor.everyday)
+        case .calendar, .endsIn, .todos: agenda(module, monitor.agenda)
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
         default: ItemContent(figure: "—", template: "—")
         }
@@ -131,6 +132,28 @@ public struct ItemContent {
             let times = Astronomy.sunTimes(on: now, latitude: 55.75, longitude: 37.62)
             let next = [times.sunrise, times.sunset].compactMap(\.self).first { $0 > now }
             return ItemContent(figure: next?.formatted(date: .omitted, time: .shortened) ?? "—", template: "88:88 PM")
+        }
+    }
+
+    private static func agenda(_ module: ModuleID, _ store: AgendaStore) -> ItemContent {
+        let now = Date()
+        switch module {
+        case .todos:
+            let count = TodoFilter.all.apply(to: store.todos, now: now).count
+            return ItemContent(figure: store.remindersAccess == .granted ? "\(count)" : "—", template: "888")
+        case .endsIn:
+            let state = EndsInState(events: store.events, at: now)
+            let remaining = state.current.first?.end.timeIntervalSince(now)
+            let urgency = remaining.map(EndsInUrgency.init(remaining:))
+            return ItemContent(
+                figure: remaining?.clockText ?? "—",
+                alert: urgency == .lastMinute ? Palette.red : urgency == .soon ? Palette.orange : nil,
+                template: "8:88:88"
+            )
+        default:
+            let next = EndsInState(events: store.events, at: now).next
+            let text = next.map { $0.title.count > 16 ? "\($0.title.prefix(15))…" : $0.title }
+            return ItemContent(figure: text ?? "—", template: "MMMMMMMMMMMM")
         }
     }
 

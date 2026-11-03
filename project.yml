@@ -42,6 +42,7 @@ targets:
       properties:
         com.apple.security.application-groups:
           - $(APP_GROUP_ID)
+        com.apple.security.personal-information.calendars: true
     info:
       path: App/Info.plist
       properties:
@@ -52,6 +53,8 @@ targets:
         LSUIElement: true
         CFBundleLocalizations: [en, ru]
         GWAppGroupID: $(APP_GROUP_ID)
+        NSCalendarsFullAccessUsageDescription: GlassWork shows your events in the menu bar and in widgets.
+        NSRemindersFullAccessUsageDescription: GlassWork shows and ticks off your reminders.
         NSHumanReadableCopyright: Copyright © 2026 Evgeny Baulin. MIT License.
     settings:
       base:

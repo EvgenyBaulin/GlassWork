@@ -43,6 +43,9 @@ public extension ModuleID {
         case .eject: loc("Eject")
         case .sunMoon: loc("Sun and Moon")
         case .date: loc("Date")
+        case .calendar: loc("Calendar")
+        case .endsIn: loc("Ends In")
+        case .todos: loc("To-Dos")
         default: rawValue
         }
     }
@@ -68,7 +71,9 @@ public extension ModuleID {
         case .appearance: "circle.lefthalf.filled"
         case .eject: "eject"
         case .sunMoon: "sunrise"
-        case .date: "calendar"
+        case .date, .calendar: "calendar"
+        case .endsIn: "timer.circle"
+        case .todos: "checklist"
         default: "square.dashed"
         }
     }
@@ -81,7 +86,8 @@ public extension ModuleID {
         case .disk: Palette.cyan
         case .network: Palette.teal
         case .gpu: Palette.purple
-        case .sensors, .date: Palette.red
+        case .sensors, .date, .calendar, .endsIn: Palette.red
+        case .todos: Palette.blue
         case .worldClocks: Palette.blue
         case .timers, .stopwatch, .sunMoon: Palette.orange
         case .notes: Palette.yellow
@@ -119,6 +125,7 @@ public extension ModuleID {
         case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
         case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
         case .colours, .appearance, .eject, .sunMoon, .date: true
+        case .calendar, .endsIn, .todos: true
         default: false
         }
     }
