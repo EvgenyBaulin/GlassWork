@@ -22,6 +22,8 @@ struct TimeWidgetSnapshotTests {
         .weekend,
         .progress,
         .stopwatch,
+        .pomodoro,
+        .focusTime,
     ]
 
     private var sample: WidgetSnapshot {
@@ -37,6 +39,24 @@ struct TimeWidgetSnapshotTests {
         var stopwatch = Stopwatch()
         stopwatch.accumulated = 754
         snapshot.everyday.stopwatch = stopwatch
+        var pomodoro = PomodoroSession()
+        pomodoro.start(at: Self.now.addingTimeInterval(-40 * 60))
+        pomodoro.history = [
+            ScreenTimeLog.dayKey(Self.now.addingTimeInterval(-86400)): 6,
+            ScreenTimeLog.dayKey(Self.now.addingTimeInterval(-2 * 86400)): 3,
+        ]
+        snapshot.everyday.pomodoro = pomodoro
+        var log = ScreenTimeLog()
+        for (back, apps) in [
+            (2.0, [("Xcode", 5400.0)]),
+            (1.0, [("Xcode", 9000.0), ("Safari", 3000.0)]),
+            (0.0, [("Xcode", 7200.0), ("Safari", 1800.0), ("Mail", 600.0)]),
+        ] {
+            for (name, seconds) in apps {
+                log.record(app: name, seconds: seconds, at: Self.now.addingTimeInterval(-back * 86400))
+            }
+        }
+        snapshot.screenTime = log
         snapshot.place = WeatherPlace(id: 1, name: "Moscow", country: "Russia", latitude: 55.75, longitude: 37.62)
         return snapshot
     }

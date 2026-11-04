@@ -17,6 +17,8 @@ struct TimeWidgetFace: View {
         case .weekend: WeekendWidget(context: context)
         case .progress: ProgressWidget(context: context)
         case .stopwatch: StopwatchWidget(context: context)
+        case .pomodoro: PomodoroWidget(context: context)
+        case .focusTime: FocusTimeWidget(context: context)
         default: EmptyView()
         }
     }

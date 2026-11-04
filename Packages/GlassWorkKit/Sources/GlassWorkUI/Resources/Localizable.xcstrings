@@ -141,16 +141,6 @@
         }
       }
     },
-    "%lld days left": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Осталось дней: %lld"
-          }
-        }
-      }
-    },
     "%lld down": {
       "localizations": {
         "ru": {
@@ -275,6 +265,16 @@
         }
       }
     },
+    "+%@ vs yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@ к вчера"
+          }
+        }
+      }
+    },
     "1 h": {
       "localizations": {
         "ru": {
@@ -321,6 +321,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "О программе"
+          }
+        }
+      }
+    },
+    "Active": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активно"
           }
         }
       }
@@ -575,6 +585,16 @@
         }
       }
     },
+    "Apps today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения сегодня"
+          }
+        }
+      }
+    },
     "At current use": {
       "localizations": {
         "ru": {
@@ -611,6 +631,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Низкий заряд"
+          }
+        }
+      }
+    },
+    "Break": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перерыв"
           }
         }
       }
@@ -1005,6 +1035,16 @@
         }
       }
     },
+    "Days left: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Осталось дней: %lld"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "ru": {
@@ -1301,6 +1341,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Флип-часы"
+          }
+        }
+      }
+    },
+    "Focus": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фокус"
+          }
+        }
+      }
+    },
+    "Focus Time": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Время фокуса"
           }
         }
       }
@@ -1793,6 +1853,16 @@
         }
       }
     },
+    "Last 7 days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последние 7 дней"
+          }
+        }
+      }
+    },
     "Last day": {
       "localizations": {
         "ru": {
@@ -1899,6 +1969,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Закрепить"
+          }
+        }
+      }
+    },
+    "Long break": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Длинный перерыв"
           }
         }
       }
@@ -2183,6 +2263,16 @@
         }
       }
     },
+    "No data yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данных пока нет"
+          }
+        }
+      }
+    },
     "No devices with a battery connected": {
       "localizations": {
         "ru": {
@@ -2289,6 +2379,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Не отвечают: %@"
+          }
+        }
+      }
+    },
+    "Not started": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не запущено"
           }
         }
       }
@@ -2683,6 +2783,16 @@
         }
       }
     },
+    "Pomodoro": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Помодоро"
+          }
+        }
+      }
+    },
     "Power": {
       "localizations": {
         "ru": {
@@ -2953,6 +3063,36 @@
         }
       }
     },
+    "Rounds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раунды"
+          }
+        }
+      }
+    },
+    "Rounds per day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раунды по дням"
+          }
+        }
+      }
+    },
+    "Rounds today: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раундов сегодня: %lld"
+          }
+        }
+      }
+    },
     "Running": {
       "localizations": {
         "ru": {
@@ -3079,6 +3219,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Настройки…"
+          }
+        }
+      }
+    },
+    "Short break": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Короткий перерыв"
           }
         }
       }
@@ -3223,6 +3373,16 @@
         }
       }
     },
+    "Start a Pomodoro in the Timers panel": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустите Помодоро в панели таймеров"
+          }
+        }
+      }
+    },
     "Start a timer": {
       "localizations": {
         "ru": {
@@ -3259,6 +3419,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Состояние"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стоп"
           }
         }
       }
@@ -3633,6 +3803,16 @@
         }
       }
     },
+    "Turn on Screen Time tracking in Settings to see your focus.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите учёт экранного времени в настройках, чтобы видеть фокус."
+          }
+        }
+      }
+    },
     "Type to filter…": {
       "localizations": {
         "ru": {
@@ -3843,6 +4023,16 @@
         }
       }
     },
+    "Week average": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Среднее за неделю"
+          }
+        }
+      }
+    },
     "Weekend": {
       "localizations": {
         "ru": {
@@ -4013,6 +4203,16 @@
         }
       }
     },
+    "active today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "активно сегодня"
+          }
+        }
+      }
+    },
     "avg CPU": {
       "localizations": {
         "ru": {
@@ -4129,6 +4329,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "↑↓ выбор · ↩ вставить · 1–9 · esc"
+          }
+        }
+      }
+    },
+    "−%@ vs yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "−%@ к вчера"
           }
         }
       }

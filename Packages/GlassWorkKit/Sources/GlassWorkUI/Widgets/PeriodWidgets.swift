@@ -116,7 +116,7 @@ struct ProgressWidget: View {
     }
 
     private func daysLeftText(_ item: PeriodProgress) -> String {
-        item.daysLeft == 0 ? loc("Last day") : loc("\(item.daysLeft) days left")
+        item.daysLeft == 0 ? loc("Last day") : loc("Days left: \(item.daysLeft)")
     }
 }
 
@@ -309,10 +309,11 @@ struct StopwatchWidget: View {
         WidgetHeader(title: loc("Stopwatch"), symbol: "stopwatch", tint: Palette.orange)
     }
 
-    /// A running stopwatch counts on its own between WidgetKit refreshes.
+    /// In WidgetKit a running stopwatch counts on its own between refreshes; GlassWork's own windows redraw each
+    /// second.
     private func time(size: CGFloat) -> some View {
         Group {
-            if let startedAt = stopwatch.startedAt {
+            if let startedAt = stopwatch.startedAt, !context.showsSeconds {
                 Text(timerInterval: startedAt.addingTimeInterval(-stopwatch.accumulated) ... .distantFuture)
             } else {
                 Text(elapsed.elapsedText)

@@ -29,7 +29,7 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
     case digitalClock, modularClock, calendarMonth, upNext, endsIn, todo, note, timer, countdown, yearInDots, moon,
          daylight
     case clock, numeralsClock, minimalClock, flipClock, skyClock, dayAndNight
-    case weekend, progress, stopwatch
+    case weekend, progress, stopwatch, pomodoro, focusTime
 
     public var id: String {
         rawValue

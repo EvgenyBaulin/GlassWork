@@ -39,6 +39,8 @@ public extension WidgetKind {
         case .weekend: loc("Weekend")
         case .progress: loc("Progress")
         case .stopwatch: loc("Stopwatch")
+        case .pomodoro: loc("Pomodoro")
+        case .focusTime: loc("Focus Time")
         }
     }
 }
@@ -65,7 +67,8 @@ public extension WidgetKind {
         case .countdown: .countdown
         case .moon, .daylight, .skyClock, .dayAndNight: .sunMoon
         case .weekend, .progress: .date
-        case .stopwatch: .timers
+        case .stopwatch, .pomodoro: .timers
+        case .focusTime: .overview
         }
     }
 }
