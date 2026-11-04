@@ -68,9 +68,12 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
     private let service: FanHelperService
     private let queue: DispatchQueue
     private let requirement: String?
+    private let acceptsUnsigned: Bool
     private let now: @Sendable () -> TimeInterval
     private var watchdog: FanWatchdog
     private var timer: DispatchSourceTimer?
+    /// True from the first command that takes a fan until the fans are back with the system.
+    private var isArmed = false
 
     /// With `requirement` nil every connection is refused, unless `acceptsUnsigned` is set for a test.
     public init(
@@ -88,8 +91,6 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
         watchdog = FanWatchdog(now: now())
     }
 
-    private let acceptsUnsigned: Bool
-
     /// A crash may have left a fan in manual mode, so every launch starts by taking it back.
     public func start() {
         queue.async { [self] in
@@ -102,9 +103,9 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
         }
     }
 
-    /// Runs on `queue`. Exposed for the signal handler that ends the daemon.
+    /// For the signal handler that ends the daemon. Blocks until the fans are handed back.
     public func shutdown() {
-        queue.sync { _ = service.restoreAuto() }
+        queue.sync { restore() }
     }
 
     public func listener(_: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
@@ -129,6 +130,7 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
             let succeeded = command.map { service.execute($0) } ?? false
             // Stamped after the work: taking control can block for seconds.
             watchdog.contact(at: now())
+            isArmed = service.hasManualFans
             reply(succeeded)
         }
     }
@@ -143,15 +145,20 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
     private func clientLeft() {
         queue.async { [self] in
             if watchdog.clientLeft() {
-                service.restoreAuto()
+                restore()
             }
         }
     }
 
-    private func checkWatchdog() {
-        if watchdog.hasExpired(at: now()), service.hasManualFans {
-            service.restoreAuto()
+    /// Runs on `queue`. A restore that fails leaves the watchdog armed, so it is tried again.
+    func checkWatchdog() {
+        if isArmed, watchdog.hasExpired(at: now()) {
+            restore()
         }
+    }
+
+    private func restore() {
+        isArmed = !service.restoreAuto()
     }
 }
 

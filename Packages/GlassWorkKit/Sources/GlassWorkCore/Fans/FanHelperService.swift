@@ -26,6 +26,11 @@ public final class FanHelperService {
         public init() {}
     }
 
+    /// The only keys the helper may ever write: a fan's mode and target, and the unlock switch.
+    public static func isWritable(_ key: String) -> Bool {
+        key.wholeMatch(of: /Ftst|F[0-9](Md|md|Tg)/) != nil
+    }
+
     private let smc: FanSMCAccess
     private let timing: Timing
     private let pause: (TimeInterval) -> Void

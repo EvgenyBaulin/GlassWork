@@ -292,6 +292,15 @@ struct FanControlModelTests {
         #expect(!store.settings.fans.isControlEnabled)
     }
 
+    @Test func anApprovalErrorIsNotAFailure() {
+        let installer = FakeInstaller()
+        installer.failure = Failure()
+        installer.state = .needsApproval
+        let model = makeModel(installer: installer)
+        model.install()
+        #expect(model.helperState == .needsApproval)
+    }
+
     @Test func aFailedInstallIsShown() {
         let installer = FakeInstaller()
         installer.failure = Failure()
