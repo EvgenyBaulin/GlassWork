@@ -163,26 +163,6 @@ final class AppModel {
         panels.show(module, beside: frame)
     }
 
-    func toggleCard(_ module: ModuleID, from window: NSWindow, place: (CGSize) -> CGRect) {
-        panels.toggleCard(module, from: window, place: place)
-    }
-
-    func hasCard(from window: NSWindow) -> Bool {
-        panels.hasCard(from: window)
-    }
-
-    func open(_ destination: WidgetDestination) {
-        switch destination {
-        case let .module(module):
-            showPanelAtPointer(module)
-        case .widgetSettings:
-            panels.closeTransient()
-            settingsWindow.showWidgets()
-        case let .web(url):
-            NSWorkspace.shared.open(url)
-        }
-    }
-
     /// For a click on a system widget, whose frame the app never learns.
     func showPanelAtPointer(_ module: ModuleID) {
         showPanel(module, beside: CGRect(origin: NSEvent.mouseLocation, size: .zero))
@@ -547,6 +527,28 @@ extension AppModel {
         guard writeWidgetSnapshot() else { return }
         for kind in action.affectedKinds {
             WidgetCenter.shared.reloadTimelines(ofKind: kind.rawValue)
+        }
+    }
+}
+
+extension AppModel {
+    func toggleCard(_ module: ModuleID, from window: NSWindow, place: (CGSize) -> CGRect) {
+        panels.toggleCard(module, from: window, place: place)
+    }
+
+    func hasCard(from window: NSWindow) -> Bool {
+        panels.hasCard(from: window)
+    }
+
+    func open(_ destination: WidgetDestination) {
+        switch destination {
+        case let .module(module):
+            showPanelAtPointer(module)
+        case .widgetSettings:
+            panels.closeTransient()
+            settingsWindow.showWidgets()
+        case let .web(url):
+            NSWorkspace.shared.open(url)
         }
     }
 }
