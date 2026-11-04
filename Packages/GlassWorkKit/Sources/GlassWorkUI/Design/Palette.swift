@@ -141,7 +141,7 @@ public extension ModuleID {
         case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
         case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
         case .colours, .appearance, .eject, .sunMoon, .date: true
-        case .devServers, .docker, .ping, .vpn, .wifi: true
+        case .git, .devServers, .docker, .ping, .vpn, .wifi: true
         default: false
         }
     }

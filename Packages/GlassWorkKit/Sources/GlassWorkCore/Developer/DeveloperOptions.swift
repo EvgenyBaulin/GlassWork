@@ -10,6 +10,10 @@ public struct DeveloperOptions: Sendable, Equatable {
     }
 
     public var pingHost = PingHost.fallback
+    /// The repository shown in the menu bar.
+    public var gitRepository: String?
+    /// Repositories added by hand, on top of those found in `~/Developer`.
+    public var gitRepositories: [String] = []
 
     public init() {}
 
@@ -17,6 +21,18 @@ public struct DeveloperOptions: Sendable, Equatable {
         if let host = settings.module(.ping)?.options[Key.host], PingHost.isValid(host) {
             pingHost = host
         }
+        let git = settings.module(.git)?.options
+        gitRepository = git?[Key.repository]
+        gitRepositories = Self.decode(git?[Key.repositories])
+    }
+
+    /// Options are plain strings, so a list is stored one path per line.
+    public static func encode(_ paths: [String]) -> String? {
+        paths.isEmpty ? nil : paths.joined(separator: "\n")
+    }
+
+    public static func decode(_ text: String?) -> [String] {
+        text?.split(whereSeparator: \.isNewline).map(String.init) ?? []
     }
 }
 

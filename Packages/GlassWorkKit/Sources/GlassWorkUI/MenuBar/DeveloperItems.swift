@@ -5,6 +5,7 @@ import SwiftUI
 extension ItemContent {
     static func developer(_ module: ModuleID, _ store: DeveloperStore) -> ItemContent {
         switch module {
+        case .git: git(store.git, selected: store.options.gitRepository)
         case .devServers: devServers(store.devServers)
         case .docker: docker(store.docker)
         case .ping: ping(store.ping)
@@ -12,6 +13,37 @@ extension ItemContent {
         case .wifi: wifi(store.wifi, signal: store.wifiSignal.points.map(\.value))
         default: ItemContent(figure: "—", template: "—")
         }
+    }
+
+    static func git(_ reading: GitReading?, selected: String?) -> ItemContent {
+        let template = "feature/ab…cd ±99 ↑9 ↓9"
+        guard let repository = reading?.selected(path: selected), let status = repository.status else {
+            var item = ItemContent(figure: "—", template: template)
+            item.isFaint = true
+            return item
+        }
+        var item = ItemContent(figure: gitFigure(status), template: template)
+        item.glyph = .dots(filled: status.changed + status.conflicted, faint: 0)
+        item.symbol = status.conflicted > 0 ? "exclamationmark.triangle" : nil
+        item.detail = repository.name
+        return item
+    }
+
+    private static func gitFigure(_ status: GitStatus) -> String {
+        var parts = [DeveloperText.middleTruncated(status.head, to: 13)]
+        if status.isClean, status.ahead == 0, status.behind == 0 {
+            parts.append("✓")
+        }
+        if status.changed > 0 {
+            parts.append("±\(status.changed)")
+        }
+        if status.ahead > 0 {
+            parts.append("↑\(status.ahead)")
+        }
+        if status.behind > 0 {
+            parts.append("↓\(status.behind)")
+        }
+        return parts.joined(separator: " ")
     }
 
     static func devServers(_ reading: DevServerReading?) -> ItemContent {
@@ -101,6 +133,18 @@ extension ItemContent {
 enum DeveloperText {
     static func milliseconds(_ value: Double) -> String {
         loc("\(Int(value.rounded())) ms")
+    }
+
+    /// `25 minutes ago`, measured from `now` so a panel and its tests agree.
+    static func relative(_ date: Date, to now: Date) -> String {
+        RelativeDateTimeFormatter().localizedString(for: date, relativeTo: now)
+    }
+
+    /// `feature/ab…cd`: the end of a branch name is usually what tells branches apart.
+    static func middleTruncated(_ text: String, to limit: Int) -> String {
+        guard text.count > limit else { return text }
+        let tail = limit / 3
+        return "\(text.prefix(limit - tail - 1))…\(text.suffix(tail))"
     }
 
     /// With a true minus sign, as in `−58 dBm`.

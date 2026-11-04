@@ -139,6 +139,45 @@ struct DeveloperPanelSnapshotTests {
     @Test func devServersEmpty() {
         snapshotPanel(DevServersPanel(reading: .servers([])), name: "dev-servers-empty")
     }
+
+    private func repository(
+        _ path: String,
+        branch: String = "main",
+        changed: Int = 0,
+        ahead: Int = 0,
+        behind: Int = 0,
+        age: TimeInterval
+    ) -> GitRepository {
+        var status = GitStatus()
+        status.branch = branch
+        status.changed = changed
+        status.ahead = ahead
+        status.behind = behind
+        return GitRepository(path: path, status: status, lastCommit: start.addingTimeInterval(-age))
+    }
+
+    @Test(arguments: [true, false])
+    func git(dark: Bool) {
+        let reading = GitReading.repositories([
+            repository("/dev/glasswork", changed: 3, ahead: 2, age: 1500),
+            repository("/dev/pocket-api", branch: "feature/glass-cards", changed: 5, behind: 3, age: 7200),
+            repository("/dev/dotfiles", age: 259_200),
+        ])
+        let panel = GitPanel(reading: reading, selected: nil, manual: [], now: start)
+        snapshotPanel(panel, name: "git", dark: dark)
+    }
+
+    @Test func gitProblems() {
+        let reading = GitReading.repositories([
+            GitRepository(path: "/Users/dev/Documents/app", problem: .needsPermission, isManual: true),
+            GitRepository(path: "/dev/moved", problem: .missing, isManual: true),
+        ])
+        snapshotPanel(GitPanel(reading: reading, selected: nil, manual: []), name: "git-problems")
+    }
+
+    @Test func gitNotFound() {
+        snapshotPanel(GitPanel(reading: .notInstalled, selected: nil, manual: []), name: "git-missing")
+    }
 }
 
 @MainActor
@@ -215,6 +254,46 @@ struct DeveloperItemTests {
     @Test func devServersCount() {
         let server = DevServer(port: 3000, pid: 1, process: "node", project: "x", kind: .web)
         #expect(ItemContent.devServers(.servers([server])).figure == "1")
+    }
+
+    private func gitReading(_ change: (inout GitStatus) -> Void) -> GitReading {
+        var status = GitStatus()
+        status.branch = "main"
+        change(&status)
+        return .repositories([GitRepository(path: "/dev/app", status: status)])
+    }
+
+    @Test func gitShowsBranchChangesAndDirection() {
+        let reading = gitReading {
+            $0.changed = 3
+            $0.ahead = 2
+            $0.behind = 1
+        }
+        let item = ItemContent.git(reading, selected: nil)
+
+        #expect(item.figure == "main ±3 ↑2 ↓1")
+        #expect(item.glyph == .dots(filled: 3, faint: 0))
+    }
+
+    @Test func cleanRepositoryIsTicked() {
+        #expect(ItemContent.git(gitReading { _ in }, selected: nil).figure == "main ✓")
+    }
+
+    @Test func conflictsShowAWarningSymbol() {
+        let item = ItemContent.git(gitReading { $0.conflicted = 1 }, selected: nil)
+        #expect(item.symbol == "exclamationmark.triangle")
+    }
+
+    @Test func longBranchKeepsBothEnds() {
+        let text = DeveloperText.middleTruncated("feature/very-long-branch-name", to: 13)
+
+        #expect(text.count == 13)
+        #expect(text.hasPrefix("feature"))
+        #expect(text.hasSuffix("name"))
+    }
+
+    @Test func noRepositoryIsFaint() {
+        #expect(ItemContent.git(.repositories([]), selected: nil).isFaint)
     }
 
     @Test func pingGraphShowsTheWholeLogNotTheLastMinute() {

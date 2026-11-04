@@ -8,6 +8,7 @@ import Observation
 @MainActor
 @Observable
 public final class DeveloperStore {
+    public private(set) var git: GitReading?
     public private(set) var devServers: DevServerReading?
     public private(set) var docker: DockerReading?
     public private(set) var ping = PingLog()
@@ -30,11 +31,25 @@ public final class DeveloperStore {
     @ObservationIgnored public var onChange: (() -> Void)?
 
     @ObservationIgnored private let runner: ProcessRunning
+    @ObservationIgnored private let home: String
+    @ObservationIgnored private let locateGit: @Sendable () -> String?
     @ObservationIgnored private var lastRead: [ModuleID: Date] = [:]
     @ObservationIgnored private var reading: Set<ModuleID> = []
+    @ObservationIgnored private let gitWatcher = GitWatcher()
+    @ObservationIgnored private var changedRepositories: Set<String> = []
+    @ObservationIgnored private var lastChangeRead = Date.distantPast
 
-    public init(runner: ProcessRunning = ProcessRunner()) {
+    /// Builds touch files for minutes on end; one `git status` per repository in this time is plenty.
+    private static let gitChangeInterval: TimeInterval = 5
+
+    public init(
+        runner: ProcessRunning = ProcessRunner(),
+        home: String = NSHomeDirectory(),
+        locateGit: @escaping @Sendable () -> String? = { ToolLocator.git() }
+    ) {
         self.runner = runner
+        self.home = home
+        self.locateGit = locateGit
     }
 
     /// Reads every module in `demand` that is due.
@@ -43,6 +58,21 @@ public final class DeveloperStore {
             lastRead[module] = date
             read(module, at: date)
         }
+        if demand.contains(.git) {
+            readChangedRepositories(at: date)
+        } else {
+            gitWatcher.stop()
+        }
+    }
+
+    /// Paths FSEvents reported. They wait for the next tick, so nothing is read during sleep.
+    func repositoriesChanged(_ paths: [String]) {
+        let known = git?.repositories.map(\.path) ?? []
+        changedRepositories.formUnion(GitChangeFilter.repositories(changed: paths, in: known))
+    }
+
+    func isIdle(_ module: ModuleID) -> Bool {
+        !reading.contains(module)
     }
 
     private func isDue(_ module: ModuleID, at date: Date) -> Bool {
@@ -55,18 +85,56 @@ public final class DeveloperStore {
         switch module {
         case .wifi: 5
         case .vpn: 10
+        // FSEvents covers changes, so this pass only picks up new repositories.
+        case .git: 300
         default: 30
         }
     }
 
     private func read(_ module: ModuleID, at date: Date) {
         switch module {
+        case .git: readGit()
         case .devServers: readDevServers()
         case .docker: readDocker()
         case .ping: readPing(at: date)
         case .vpn: readVPN(at: date)
         case .wifi: readWiFi(at: date)
         default: break
+        }
+    }
+
+    private func readGit() {
+        let collector = GitCollector(runner: runner, home: home, locate: locateGit)
+        let manual = options.gitRepositories
+        load(.git) {
+            await collector.read(manual: manual)
+        } apply: { store, value in
+            store.git = value
+            store.watchRepositories()
+        }
+    }
+
+    private func readChangedRepositories(at date: Date) {
+        guard !changedRepositories.isEmpty,
+              !reading.contains(.git),
+              date.timeIntervalSince(lastChangeRead) >= Self.gitChangeInterval
+        else { return }
+        lastChangeRead = date
+        let changed = git?.repositories.filter { changedRepositories.contains($0.path) } ?? []
+        changedRepositories = []
+        let collector = GitCollector(runner: runner, home: home, locate: locateGit)
+        load(.git) {
+            await collector.refresh(changed)
+        } apply: { store, fresh in
+            store.git = store.git?.updating(fresh)
+        }
+    }
+
+    private func watchRepositories() {
+        // Protected folders stay unwatched: FSEvents there would also ask for permission.
+        let paths = git?.repositories.filter { $0.problem == nil }.map(\.path).sorted() ?? []
+        gitWatcher.watch(paths) { [weak self] changed in
+            Task { @MainActor in self?.repositoriesChanged(changed) }
         }
     }
 
@@ -140,6 +208,9 @@ public final class DeveloperStore {
         if options.pingHost != old.pingHost {
             ping = PingLog()
             lastRead[.ping] = nil
+        }
+        if options.gitRepositories != old.gitRepositories {
+            lastRead[.git] = nil
         }
     }
 }

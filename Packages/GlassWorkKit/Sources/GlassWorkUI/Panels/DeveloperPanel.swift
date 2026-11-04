@@ -8,6 +8,12 @@ struct DeveloperPanel: View {
 
     var body: some View {
         switch module {
+        case .git:
+            GitPanel(
+                reading: store.git,
+                selected: store.options.gitRepository,
+                manual: store.options.gitRepositories
+            )
         case .devServers: DevServersPanel(reading: store.devServers)
         case .docker: DockerPanel(reading: store.docker)
         case .ping: PingPanel(log: store.ping, host: store.options.pingHost)
