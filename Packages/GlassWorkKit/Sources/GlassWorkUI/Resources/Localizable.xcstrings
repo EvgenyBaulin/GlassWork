@@ -8166,6 +8166,98 @@
           }
         }
       }
+    },
+    "Copy text from screen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопировать текст с экрана"
+          }
+        }
+      }
+    },
+    "No text found": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст не найден"
+          }
+        }
+      }
+    },
+    "GlassWork needs Screen Recording": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlassWork нужна запись экрана"
+          }
+        }
+      }
+    },
+    "Add GlassWork in System Settings → Privacy & Security → Screen & System Audio Recording, then press ⇧⌘2 again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте GlassWork в Системных настройках: Конфиденциальность и безопасность → Запись экрана и системного аудио. Затем снова нажмите ⇧⌘2."
+          }
+        }
+      }
+    },
+    "%lld characters copied": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld character copied"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld characters copied"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Скопирован %lld символ"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Скопировано %lld символа"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Скопировано %lld символов"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Скопировано %lld символов"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"

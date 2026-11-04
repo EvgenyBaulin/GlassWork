@@ -19,6 +19,7 @@ final class AppModel {
     private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private lazy var dock = DockController(model: self)
     private lazy var clipboard = ClipboardController(model: self)
+    private lazy var textCapture = TextCaptureController(model: self)
     private lazy var location = LocationProvider(store: monitor.weather)
     private let hotKey = HotKey()
     private var hasOpenPanel = false
@@ -31,6 +32,7 @@ final class AppModel {
         observeFrontApp()
         hotKey.onPress = { [weak self] in self?.toggleHub() }
         hotKey.register()
+        _ = textCapture
         Task { await monitor.clipboard.load() }
         applySettings()
         fans.onFailsafe = { celsius in
@@ -228,6 +230,10 @@ final class AppModel {
 
     func closeQuickPaste() {
         clipboard.closeQuickPaste()
+    }
+
+    func copyToPasteboard(_ text: String) {
+        clipboard.copy(text)
     }
 
     func isStatusItem(_ window: NSWindow) -> Bool {

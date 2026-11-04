@@ -180,6 +180,14 @@ final class ClipboardController {
         }
     }
 
+    /// Copies text made inside the app. The next poll treats it like any other copy, so the history keeps
+    /// it only if recording is on and the app in front is not excluded.
+    func copy(_ text: String) {
+        let board = NSPasteboard.general
+        board.clearContents()
+        board.setString(text, forType: .string)
+    }
+
     private func write(_ entry: ClipboardEntry, plainText: Bool) {
         let board = NSPasteboard.general
         board.clearContents()
