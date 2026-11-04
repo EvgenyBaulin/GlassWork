@@ -257,6 +257,7 @@ struct ModulePane: View {
                     )
                 }
             }
+            ModuleOptions(module: module, store: store)
         }
         .formStyle(.grouped)
     }

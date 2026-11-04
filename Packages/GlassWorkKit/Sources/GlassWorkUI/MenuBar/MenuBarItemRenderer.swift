@@ -12,6 +12,8 @@ public final class MenuBarItemRenderer {
     private let monitor: SystemMonitor
     public var style: DisplayStyle
     public var numbers: NumberStyle
+    /// The look of the bar, needed by items that are not template images.
+    public var appearance: NSAppearance?
     private var bounds = CGRect.zero
     private var lastSignature: String?
 
@@ -36,10 +38,10 @@ public final class MenuBarItemRenderer {
         bounds = CGRect(origin: .zero, size: size)
         let image = NSImage(size: size)
         image.lockFocus()
-        draw(content)
+        (appearance ?? NSAppearance.currentDrawing()).performAsCurrentDrawingAppearance { draw(content) }
         image.unlockFocus()
-        // Template images follow the menu bar's light or dark look; alerts keep their color.
-        image.isTemplate = content.alert == nil
+        // Template images follow the menu bar's light or dark look; alerts and accents keep their color.
+        image.isTemplate = content.alert == nil && content.accent?.color == nil
         return image
     }
 
@@ -61,37 +63,50 @@ public final class MenuBarItemRenderer {
 
     private func signature(_ content: ItemContent, size: CGSize) -> String {
         var parts = [content.figure, content.secondLine ?? "", "\(style)", "\(size.width)", "\(content.alert != nil)"]
-        if style == .graph || style == .graphAndFigure, let metric = content.metric {
+        parts += [content.prefix ?? "", content.symbol ?? "", content.label ?? "", content.accent?.text ?? ""]
+        parts += ["\(content.isDimmed)", "\(content.accent?.color != nil)", appearance?.name.rawValue ?? ""]
+        if style == .graph || style == .graphAndFigure, let values = content.values {
+            parts.append("\(values)")
+        } else if style == .graph || style == .graphAndFigure, let metric = content.metric {
             parts.append("\(monitor.points(metric, in: .minute).last?.date.timeIntervalSince1970 ?? 0)")
         }
         return parts.joined(separator: "|")
     }
 
     private func draw(_ content: ItemContent) {
-        let color = content.alert.map(NSColor.init) ?? NSColor.black
+        let color = baseColor(content)
         var x = Self.padding
         switch style {
         case .symbol:
-            drawSymbol(at: &x, color: color)
+            drawSymbol(content, at: &x, color: color)
         case .figure:
-            drawSymbol(at: &x, color: color)
+            if content.showsSymbol {
+                drawSymbol(content, at: &x, color: color)
+            }
             drawFigure(content, at: x, color: color)
         case .graph:
-            drawSymbol(at: &x, color: color)
+            drawSymbol(content, at: &x, color: color)
             drawGraph(content, at: x, color: color)
         case .graphAndFigure:
             drawGraph(content, at: x, color: color)
             drawFigure(content, at: x + Self.graphWidth + Self.padding, color: color)
         case .labelled:
-            drawLabel(at: &x, color: color)
+            drawLabel(content, at: &x, color: color)
             drawFigure(content, at: x, color: color)
         }
     }
 
-    private func drawSymbol(at x: inout CGFloat, color: NSColor) {
+    /// A template image is tinted by the bar, so black means "the bar's color". An image with a colored
+    /// accent is drawn as it is and has to use the bar's text color itself.
+    private func baseColor(_ content: ItemContent) -> NSColor {
+        let color = content.alert.map(NSColor.init) ?? (content.accent?.color == nil ? .black : .labelColor)
+        return content.isDimmed ? color.withAlphaComponent(0.5) : color
+    }
+
+    private func drawSymbol(_ content: ItemContent, at x: inout CGFloat, color: NSColor) {
         let configuration = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
             .applying(.init(paletteColors: [color]))
-        if let image = NSImage(systemSymbolName: module.symbol, accessibilityDescription: nil)?
+        if let image = NSImage(systemSymbolName: content.symbol ?? module.symbol, accessibilityDescription: nil)?
             .withSymbolConfiguration(configuration)
         {
             let size = image.size
@@ -110,7 +125,7 @@ public final class MenuBarItemRenderer {
             .font: NSFont.monospacedDigitSystemFont(ofSize: size, weight: .medium),
             .foregroundColor: color,
         ]
-        let first = NSAttributedString(string: content.figure, attributes: attributes)
+        let first = NSAttributedString(string: content.text(for: style), attributes: attributes)
         if let second = content.secondLine {
             let lower = NSAttributedString(string: second, attributes: attributes)
             let height = first.size().height
@@ -118,13 +133,23 @@ public final class MenuBarItemRenderer {
             first.draw(at: CGPoint(x: x, y: bounds.midY - 1))
         } else {
             first.draw(at: CGPoint(x: x, y: (bounds.height - first.size().height) / 2))
+            drawAccent(content, at: x + first.size().width + Self.padding, attributes: attributes)
         }
     }
 
+    private func drawAccent(_ content: ItemContent, at x: CGFloat, attributes: [NSAttributedString.Key: Any]) {
+        guard let accent = content.accent else { return }
+        var colored = attributes
+        if let color = accent.color {
+            colored[.foregroundColor] = NSColor(color)
+        }
+        let text = NSAttributedString(string: accent.text, attributes: colored)
+        text.draw(at: CGPoint(x: x, y: (bounds.height - text.size().height) / 2))
+    }
+
     private func drawGraph(_ content: ItemContent, at x: CGFloat, color: NSColor) {
-        guard let metric = content.metric else { return }
-        let values = monitor.points(metric, in: .minute).suffix(30).map(\.value)
-        guard values.count > 1 else { return }
+        guard let values = content.graphValues(monitor), values.count > 1 else { return }
+        let color = content.accent?.color.map(NSColor.init) ?? color
         let upper = content.domain?.upperBound ?? max(values.max() ?? 1, 0.000_1)
         let lower = content.domain?.lowerBound ?? 0
         let height: CGFloat = 16
@@ -151,12 +176,14 @@ public final class MenuBarItemRenderer {
         line.stroke()
     }
 
-    private func drawLabel(at x: inout CGFloat, color: NSColor) {
+    private func drawLabel(_ content: ItemContent, at x: inout CGFloat, color: NSColor) {
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: 6.5, weight: .bold),
             .foregroundColor: color,
         ]
-        let letters = module.shortLabel.map { NSAttributedString(string: String($0), attributes: attributes) }
+        let letters = (content.label ?? module.shortLabel).map {
+            NSAttributedString(string: String($0), attributes: attributes)
+        }
         let lineHeight: CGFloat = 7
         var y = (bounds.height + lineHeight * CGFloat(letters.count)) / 2 - lineHeight - 1
         for letter in letters {

@@ -145,6 +145,13 @@ public struct WeatherReport: Codable, Sendable, Equatable, Identifiable {
     }
 }
 
+public extension Format {
+    /// Temperature as weather is written, 12°, in the unit the system uses.
+    static func degrees(_ celsius: Double) -> String {
+        temperature(celsius).filter { !$0.isLetter && !$0.isWhitespace }
+    }
+}
+
 /// What the app keeps for the offline state, and what a widget can read later.
 public struct WeatherSnapshot: Codable, Sendable, Equatable {
     public static let key = "weather"

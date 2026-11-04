@@ -179,7 +179,9 @@ final class ModuleItem: NSObject {
     }
 
     func update(style: DisplayStyle, numbers: NumberStyle) {
-        guard style != self.style || numbers != self.numbers else { return }
+        // A setting can change what the longest text is, such as which pair Rates shows.
+        let newWidth = MenuBarItemView.width(module: module, style: style, numbers: numbers, monitor: model.monitor)
+        guard style != self.style || numbers != self.numbers || newWidth != width else { return }
         self.style = style
         self.numbers = numbers
         render()
@@ -191,6 +193,7 @@ final class ModuleItem: NSObject {
     }
 
     func refresh() {
+        renderer.appearance = item.button?.effectiveAppearance
         let size = CGSize(width: width, height: NSStatusBar.system.thickness)
         if let image = renderer.image(size: size) {
             item.button?.image = image
@@ -202,6 +205,7 @@ final class ModuleItem: NSObject {
         item.length = width
         renderer.style = style
         renderer.numbers = numbers
+        renderer.appearance = item.button?.effectiveAppearance
         let size = CGSize(width: width, height: NSStatusBar.system.thickness)
         item.button?.image = renderer.image(size: size, force: true)
     }
