@@ -50,6 +50,7 @@ public struct ItemContent {
         default: "\(Int(value))"
         }
     }
+
     /// How fast the fan glyph turns, from 0 (stopped) to 1.
     public var spin = 0.0
 
