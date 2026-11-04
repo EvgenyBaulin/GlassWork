@@ -132,6 +132,7 @@ struct DockPane: View {
             }
             widgetsSection
             stacksSection
+            presetsSection
         }
         .formStyle(.grouped)
         .confirmationDialog(loc("Use GlassWork Dock?"), isPresented: $confirming) {
@@ -180,6 +181,57 @@ private extension DockPane {
             Text(loc("Widgets in Dock"))
         } footer: {
             Text(loc("Click runs the quick action, hold opens the widget as a card above the Dock."))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private extension DockPane {
+    var presets: [DockPreset] {
+        DockPresets.offered(in: store.settings.dock)
+    }
+
+    func use(_ preset: DockPreset) {
+        let current = presets.first { $0.id == store.settings.dock.activePreset }
+        store.update { DockPresets.apply(preset, current: current, to: &$0.dock) }
+    }
+
+    func presetRow(_ preset: DockPreset) -> some View {
+        let dock = store.settings.dock
+        let isActive = dock.activePreset == preset.id
+        return HStack {
+            VStack(alignment: .leading) {
+                Text(preset.title)
+                Text(loc("\(preset.widgets.count) widgets")).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if isActive {
+                Text(loc("In use")).font(.caption).foregroundStyle(Palette.blue)
+                Button(loc("Save Changes")) {
+                    store.update { settings in
+                        let saved = DockPresets.capture(settings.dock, id: preset.id, name: preset.name)
+                        DockPresets.store(saved, in: &settings.dock)
+                    }
+                }
+            } else {
+                Button(loc("Use")) { use(preset) }
+            }
+            if !preset.isBuiltIn {
+                Button(loc("Delete")) { store.update { DockPresets.remove(preset, from: &$0.dock) } }
+            } else if DockPresets.isEdited(preset, in: dock) {
+                Button(loc("Restore Original")) { store.update { DockPresets.remove(preset, from: &$0.dock) } }
+            }
+        }
+    }
+
+    var presetsSection: some View {
+        Section {
+            ForEach(presets) { presetRow($0) }
+        } header: {
+            Text(loc("Presets"))
+        } footer: {
+            Text(loc("A preset changes widgets and its own folders. Your apps and stacks stay."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

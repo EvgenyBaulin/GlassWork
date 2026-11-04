@@ -34,6 +34,8 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
     public var apps: [DockApp]
     public var symbol: String?
     public var sort = FolderSort.manual
+    /// Brought by a preset, and goes when another preset comes.
+    public var isFromPreset = false
 
     public init(name: String, apps: [DockApp]) {
         self.name = name
@@ -49,7 +51,7 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
 
 extension AppFolder {
     private enum CodingKeys: String, CodingKey {
-        case id, name, apps, symbol, sort
+        case id, name, apps, symbol, sort, isFromPreset
     }
 
     /// Missing keys fall back to defaults, so a file from an earlier version keeps loading.
@@ -62,6 +64,7 @@ extension AppFolder {
         id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
         symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
         sort = try container.decodeIfPresent(FolderSort.self, forKey: .sort) ?? .manual
+        isFromPreset = try container.decodeIfPresent(Bool.self, forKey: .isFromPreset) ?? false
     }
 }
 
@@ -103,6 +106,10 @@ public struct DockSettings: Codable, Sendable, Equatable {
     public var autoHides = false
     public var showsRecents = false
     public var items: [DockItem] = []
+    /// The preset in use, by id.
+    public var activePreset: String?
+    /// Built-ins the owner has changed, and presets of the owner's own.
+    public var presets: [DockPreset] = []
 
     public init() {}
 
@@ -121,6 +128,7 @@ public struct DockSettings: Codable, Sendable, Equatable {
 extension DockSettings {
     private enum CodingKeys: String, CodingKey {
         case isEnabled, position, iconSize, magnifies, magnifiedSize, autoHides, showsRecents, items
+        case activePreset, presets
     }
 
     /// An item this version cannot read is skipped, so the rest of the Dock survives it.
@@ -144,6 +152,8 @@ extension DockSettings {
         autoHides = try container.decodeIfPresent(Bool.self, forKey: .autoHides) ?? autoHides
         showsRecents = try container.decodeIfPresent(Bool.self, forKey: .showsRecents) ?? showsRecents
         items = try container.decodeIfPresent([LossyItem].self, forKey: .items)?.compactMap(\.value) ?? items
+        activePreset = try container.decodeIfPresent(String.self, forKey: .activePreset)
+        presets = try container.decodeIfPresent([DockPreset].self, forKey: .presets) ?? presets
     }
 }
 

@@ -46,6 +46,14 @@ public struct DockActions {
     public var openFile: (String) -> Void
     /// Opens a stack's folder in Finder.
     public var showFolder: (String) -> Void
+    /// Changes Dock settings other than the items, such as magnification.
+    public var change: ((inout DockSettings) -> Void) -> Void
+    /// Every preset on offer.
+    public var presets: () -> [DockPreset]
+    public var applyPreset: (DockPreset) -> Void
+    /// Asks for a name and saves the Dock as a preset.
+    public var savePreset: () -> Void
+    public var openSettings: () -> Void
 
     public init(
         open: @escaping (DockApp) -> Void,
@@ -57,7 +65,12 @@ public struct DockActions {
         perform: @escaping (DockAppCommand, DockApp) -> Void = { _, _ in },
         turnPage: @escaping (Int) -> Void = { _ in },
         openFile: @escaping (String) -> Void = { _ in },
-        showFolder: @escaping (String) -> Void = { _ in }
+        showFolder: @escaping (String) -> Void = { _ in },
+        change: @escaping ((inout DockSettings) -> Void) -> Void = { _ in },
+        presets: @escaping () -> [DockPreset] = { [] },
+        applyPreset: @escaping (DockPreset) -> Void = { _ in },
+        savePreset: @escaping () -> Void = {},
+        openSettings: @escaping () -> Void = {}
     ) {
         self.open = open
         self.clickWidget = clickWidget
@@ -69,6 +82,11 @@ public struct DockActions {
         self.turnPage = turnPage
         self.openFile = openFile
         self.showFolder = showFolder
+        self.change = change
+        self.presets = presets
+        self.applyPreset = applyPreset
+        self.savePreset = savePreset
+        self.openSettings = openSettings
     }
 }
 
@@ -148,14 +166,14 @@ public struct DockView: View {
     private func card(_ item: DockItem) -> some View {
         switch item {
         case let .folder(folder):
-            FolderCard(folder: folder, actions: actions) { state.openCard = nil }
+            FolderCard(folder: folder, actions: actions) { closeCard() }
         case let .stack(stack):
             let card = StackCard(
                 stack: stack,
                 files: state.files[stack.path] ?? [],
                 position: position,
                 actions: actions
-            ) { state.openCard = nil }
+            ) { closeCard() }
             // A fan stands straight on the desktop.
             if stack.showsFan(at: position) {
                 card
@@ -164,6 +182,14 @@ public struct DockView: View {
             }
         case .app, .widget:
             EmptyView()
+        }
+    }
+
+    /// A folder made from the menu and left empty goes with its card.
+    private func closeCard() {
+        state.openCard = nil
+        if settings.folders.contains(where: \.apps.isEmpty) {
+            actions.update(DockLayout.removingEmptyFolders)
         }
     }
 
@@ -223,6 +249,10 @@ public struct DockView: View {
             Color.clear
                 .frame(width: position.isVertical ? depth : nil, height: position.isVertical ? nil : depth)
                 .glassEffect(.regular, in: .rect(cornerRadius: 22))
+                .contentShape(.rect)
+                .contextMenu {
+                    DockBackgroundMenu(settings: state.settings, actions: actions) { state.openCard = $0 }
+                }
         }
         .onContinuousHover(coordinateSpace: .named(Self.canvas)) { phase in
             switch phase {
@@ -274,7 +304,9 @@ public struct DockView: View {
                 isLaunching: state.launching.contains(app.path),
                 position: position
             ) { actions.open(app) }
-                .contextMenu { DockAppMenu(app: app, actions: actions) }
+                .contextMenu {
+                    DockAppMenu(app: app, actions: actions, folders: settings.folders) { state.openCard = $0 }
+                }
                 .draggable(app.path)
                 .dropDestination(for: String.self) { paths, _ in
                     drop(paths) { dragged, items in DockLayout.drop(dragged, onto: app, in: items) }

@@ -123,6 +123,11 @@ final class AppModel {
         mainWindow.show()
     }
 
+    func showMainWindow(_ section: MainSection) {
+        panels.closeTransient()
+        mainWindow.show(section)
+    }
+
     /// The welcome comes first on a new Mac.
     func showMainWindowAtLaunch() {
         if store.settings.welcomeCompleted {

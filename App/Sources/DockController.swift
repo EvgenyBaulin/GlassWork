@@ -30,9 +30,7 @@ final class DockController {
     private var shrink: Task<Void, Never>?
     /// False while a Dock that hides itself is out of sight.
     private var isRevealed = true
-    private var pointerMonitors: [Any] = []
-    private var menuObservers: [NSObjectProtocol] = []
-    private var isMenuOpen = false
+    private lazy var pointerWatcher = DockPointerWatcher { [weak self] in self?.updateReveal() }
     private var hiding: Task<Void, Never>?
     private var cardDismissal: TransientDismissal?
     private lazy var folders = DockFolders { [weak self] in self?.state.files = $0 }
@@ -193,8 +191,42 @@ final class DockController {
             perform: { [weak self] in self?.perform($0, on: $1) },
             turnPage: { [weak self] in self?.turnPage(by: $0) },
             openFile: { NSWorkspace.shared.open(URL(filePath: $0)) },
-            showFolder: { NSWorkspace.shared.open(URL(filePath: $0, directoryHint: .isDirectory)) }
+            showFolder: { NSWorkspace.shared.open(URL(filePath: $0, directoryHint: .isDirectory)) },
+            change: { [weak self] change in self?.model.store.update { change(&$0.dock) } },
+            presets: { [weak self] in self?.presets ?? [] },
+            applyPreset: { [weak self] in self?.apply($0) },
+            savePreset: { [weak self] in self?.savePreset() },
+            openSettings: { [weak self] in self?.model.showMainWindow(.dock) }
         )
+    }
+
+    private var presets: [DockPreset] {
+        DockPresets.offered(in: state.settings)
+    }
+
+    private func apply(_ preset: DockPreset) {
+        let current = presets.first { $0.id == state.settings.activePreset }
+        model.store.update { DockPresets.apply(preset, current: current, to: &$0.dock) }
+    }
+
+    /// Asks for a name in a dialog of the app's own, which needs no permission.
+    private func savePreset() {
+        let alert = NSAlert()
+        alert.messageText = loc("Save Current as Preset")
+        alert.addButton(withTitle: loc("Save"))
+        alert.addButton(withTitle: loc("Cancel"))
+        let field = NSTextField(frame: CGRect(x: 0, y: 0, width: 240, height: 24))
+        field.placeholderString = loc("Preset name")
+        alert.accessoryView = field
+        alert.window.initialFirstResponder = field
+        NSApp.activate()
+        guard alert.runModal() == .alertFirstButtonReturn, !field.stringValue.isEmpty else { return }
+        let name = field.stringValue
+        model.store.update { settings in
+            let preset = DockPresets.capture(settings.dock, id: UUID().uuidString, name: name)
+            DockPresets.store(preset, in: &settings.dock)
+            settings.dock.activePreset = preset.id
+        }
     }
 
     private func turnPage(by count: Int) {
@@ -385,44 +417,16 @@ final class DockController {
         }
     }
 
-    /// Mouse monitors need no permission, and exist only while the Dock hides itself. Moves over the app's own
-    /// windows reach only the local one and moves over any other app only the global one.
     private func watchPointer(_ wanted: Bool) {
-        guard wanted != !pointerMonitors.isEmpty else { return }
+        guard wanted != pointerWatcher.isWatching else { return }
         guard wanted else {
-            pointerMonitors.forEach(NSEvent.removeMonitor)
-            pointerMonitors = []
-            menuObservers.forEach(NotificationCenter.default.removeObserver)
-            menuObservers = []
+            pointerWatcher.stop()
             hiding?.cancel()
             hiding = nil
-            isMenuOpen = false
             isRevealed = true
             return
         }
-        let moves: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged]
-        if let outside = NSEvent.addGlobalMonitorForEvents(matching: moves, handler: { [weak self] _ in
-            MainActor.assumeIsolated { self?.updateReveal() }
-        }) {
-            pointerMonitors.append(outside)
-        }
-        if let inside = NSEvent.addLocalMonitorForEvents(matching: moves, handler: { [weak self] event in
-            MainActor.assumeIsolated { self?.updateReveal() }
-            return event
-        }) {
-            pointerMonitors.append(inside)
-        }
-        // A context menu lies outside the Dock's window, and the Dock must not slide out from under it.
-        let names = [NSMenu.didBeginTrackingNotification, NSMenu.didEndTrackingNotification]
-        menuObservers = names.map { name in
-            NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
-                let isOpen = note.name == NSMenu.didBeginTrackingNotification
-                MainActor.assumeIsolated {
-                    self?.isMenuOpen = isOpen
-                    self?.updateReveal()
-                }
-            }
-        }
+        pointerWatcher.start()
     }
 
     /// Slides in at once. Slides out late, so a pointer crossing the gap does not chase the bar.
@@ -440,7 +444,8 @@ final class DockController {
                 position: settings.position,
                 screen: screen.frame
             ),
-            isHeld: isMenuOpen || requested == .folder || !state.launching.isEmpty || model.hasCard(from: window)
+            isHeld: pointerWatcher.isMenuOpen || requested == .folder || !state.launching.isEmpty
+                || model.hasCard(from: window)
         )
         if wanted {
             hiding?.cancel()

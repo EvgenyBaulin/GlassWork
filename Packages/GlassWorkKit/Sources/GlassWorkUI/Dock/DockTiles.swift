@@ -117,39 +117,6 @@ struct AppTile: View {
     }
 }
 
-/// Right-click on an app. Holding ⌥ swaps Hide and Quit for their stronger forms, as in the system Dock.
-struct DockAppMenu: View {
-    let app: DockApp
-    let actions: DockActions
-
-    var body: some View {
-        let commands = actions.commands(app)
-        if commands.contains(.open) {
-            button(loc("Open"), .open)
-        }
-        if commands.contains(.showAllWindows) {
-            button(loc("Show All Windows"), .showAllWindows)
-        }
-        if commands.contains(.hide) {
-            button(loc("Hide"), .hide).modifierKeyAlternate(.option) {
-                button(loc("Hide Others"), .hideOthers)
-            }
-            Divider()
-        }
-        button(loc("Show in Finder"), .showInFinder)
-        if commands.contains(.quit) {
-            Divider()
-            button(loc("Quit"), .quit).modifierKeyAlternate(.option) {
-                button(loc("Force Quit"), .forceQuit)
-            }
-        }
-    }
-
-    private func button(_ title: String, _ command: DockAppCommand) -> some View {
-        Button(title) { actions.perform(command, app) }
-    }
-}
-
 /// Glass square with a 3×3 grid of the folder's first apps.
 struct FolderTile: View {
     let folder: AppFolder
