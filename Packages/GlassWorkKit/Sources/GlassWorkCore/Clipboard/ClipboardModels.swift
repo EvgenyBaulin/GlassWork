@@ -83,6 +83,8 @@ public struct ClipboardEntry: Codable, Sendable, Equatable, Identifiable {
             return paths.count > 1 ? "\(name) +\(paths.count - 1)" : name
         case .image:
             return "\(pixelWidth ?? 0) × \(pixelHeight ?? 0)"
+        case .link:
+            return text.replacing(/^https?:\/\//, with: "")
         default:
             return text.split(whereSeparator: \.isNewline).first.map(String.init) ?? text
         }

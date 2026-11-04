@@ -12,6 +12,20 @@ public struct ItemContent {
     public var alert: Color?
     /// Longest expected text, so the item keeps one width as figures change.
     public var template: String
+    /// Replaces the module's symbol, for items whose glyph carries meaning.
+    public var symbol: String?
+    /// False for items that read fine as text alone.
+    public var showsSymbol = true
+    /// Drawn before the figure, except in the Labelled style, where the label says the same.
+    public var prefix: String?
+    /// Replaces the module's short label in the Labelled style.
+    public var label: String?
+    /// Drawn after the figure, in its own color.
+    public var accent: ItemAccent?
+    /// Graph points for modules that do not come from the system monitor.
+    public var values: [Double]?
+    /// Faded, because the data is old or the module is paused.
+    public var isDimmed = false
 
     /// Text for a raw metric value, used by tooltips.
     func format(_ value: Double) -> String {
@@ -42,6 +56,9 @@ public struct ItemContent {
                 template: "100%"
             )
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
+        case .weather: weather(monitor.weather)
+        case .rates: rates(monitor.rates)
+        case .clipboard: clipboard(monitor.clipboard)
         default: ItemContent(figure: "—", template: "—")
         }
     }
@@ -193,14 +210,19 @@ public struct MenuBarItemView: View {
         let content = ItemContent.content(module, monitor: monitor, style: numbers)
         HStack(spacing: 4) {
             switch style {
-            case .symbol: symbol
-            case .figure: symbol; figure(content)
-            case .graph: symbol; graph(content)
+            case .symbol: symbol(content)
+            case .figure:
+                if content.showsSymbol {
+                    symbol(content)
+                }
+                figure(content)
+            case .graph: symbol(content); graph(content)
             case .graphAndFigure: graph(content); figure(content)
-            case .labelled: label; figure(content)
+            case .labelled: label(content); figure(content)
             }
         }
         .foregroundStyle(content.alert ?? .primary)
+        .opacity(content.isDimmed ? 0.5 : 1)
         .frame(height: 22)
         .padding(.horizontal, 4)
         .allowsHitTesting(false)
@@ -220,7 +242,7 @@ public struct MenuBarItemView: View {
         let padding: CGFloat = 8
         return switch style {
         case .symbol: 16 + padding
-        case .figure: 16 + 4 + text + padding
+        case .figure: (content.showsSymbol ? 16 + 4 : 0) + text + padding
         case .graph: 16 + 4 + graphWidth + padding
         case .graphAndFigure: graphWidth + 4 + text + padding
         case .labelled: 8 + 4 + text + padding
@@ -229,15 +251,20 @@ public struct MenuBarItemView: View {
 
     private static let graphWidth: CGFloat = 34
 
-    private var symbol: some View {
-        Image(systemName: module.symbol)
+    private func symbol(_ content: ItemContent) -> some View {
+        Image(systemName: content.symbol ?? module.symbol)
             .font(.system(size: 12, weight: .medium))
             .frame(width: 16)
     }
 
     private func figure(_ content: ItemContent) -> some View {
         VStack(alignment: .leading, spacing: -1) {
-            Text(content.figure)
+            HStack(spacing: 4) {
+                Text(content.text(for: style))
+                if let accent = content.accent {
+                    Text(accent.text).foregroundStyle(accent.color ?? .primary)
+                }
+            }
             if let second = content.secondLine {
                 Text(second)
             }
@@ -250,19 +277,15 @@ public struct MenuBarItemView: View {
 
     @ViewBuilder
     private func graph(_ content: ItemContent) -> some View {
-        if let metric = content.metric {
-            Sparkline(
-                values: monitor.points(metric, in: .minute).suffix(30).map(\.value),
-                domain: content.domain,
-                color: content.alert ?? .primary
-            )
-            .frame(width: Self.graphWidth, height: 16)
+        if let values = content.graphValues(monitor) {
+            Sparkline(values: values, domain: content.domain, color: content.accent?.color ?? content.alert ?? .primary)
+                .frame(width: Self.graphWidth, height: 16)
         }
     }
 
-    private var label: some View {
+    private func label(_ content: ItemContent) -> some View {
         VStack(spacing: -1.5) {
-            ForEach(Array(module.shortLabel.enumerated()), id: \.offset) { _, letter in
+            ForEach(Array((content.label ?? module.shortLabel).enumerated()), id: \.offset) { _, letter in
                 Text(String(letter))
             }
         }

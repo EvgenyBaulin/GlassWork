@@ -47,6 +47,9 @@ public extension ModuleID {
         case .calendar: loc("Calendar")
         case .endsIn: loc("Ends In")
         case .todos: loc("To-Dos")
+        case .weather: loc("Weather")
+        case .rates: loc("Rates")
+        case .clipboard: loc("Clipboard")
         default: rawValue
         }
     }
@@ -76,6 +79,9 @@ public extension ModuleID {
         case .endsIn: "timer.circle"
         case .deviceBatteries: "battery.100percent.circle"
         case .todos: "checklist"
+        case .weather: "cloud.sun"
+        case .rates: "chart.line.uptrend.xyaxis"
+        case .clipboard: "list.clipboard"
         default: "square.dashed"
         }
     }
@@ -96,6 +102,9 @@ public extension ModuleID {
         case .countdown: Palette.purple
         case .colours: Palette.pink
         case .appearance: Palette.blue
+        case .weather: Palette.cyan
+        case .rates: Palette.green
+        case .clipboard: Palette.teal
         default: Palette.gray
         }
     }
@@ -112,6 +121,9 @@ public extension ModuleID {
         case .gpu: "GPU"
         case .sensors: "TMP"
         case .uptime: "UP"
+        case .weather: "WTH"
+        case .rates: "FX"
+        case .clipboard: "CLP"
         default: ""
         }
     }
@@ -128,6 +140,7 @@ public extension ModuleID {
         case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
         case .colours, .appearance, .eject, .sunMoon, .date: true
         case .calendar, .endsIn, .todos, .deviceBatteries: true
+        case .weather, .rates, .clipboard: true
         default: false
         }
     }

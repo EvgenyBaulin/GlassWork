@@ -45,9 +45,9 @@ public final class SystemMonitor {
     /// Screen time, commands, endpoints and GitHub.
     public let activity = ActivityStore()
     /// These only reach the network or the disk once the app asks them to.
-    public let weather = WeatherStore()
-    public let rates = RatesStore()
-    public let clipboard = ClipboardStore()
+    public let weather: WeatherStore
+    public let rates: RatesStore
+    public let clipboard: ClipboardStore
 
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
@@ -60,7 +60,15 @@ public final class SystemMonitor {
     @ObservationIgnored private var loop: Task<Void, Never>?
     @ObservationIgnored private var lastSlow = Date.distantPast
 
-    public init() {}
+    public init(
+        weather: WeatherStore = WeatherStore(),
+        rates: RatesStore = RatesStore(),
+        clipboard: ClipboardStore = ClipboardStore()
+    ) {
+        self.weather = weather
+        self.rates = rates
+        self.clipboard = clipboard
+    }
 
     public var isRunning: Bool {
         loop != nil

@@ -16,6 +16,8 @@ final class AppModel {
     private lazy var settingsWindow = SettingsWindowController(model: self)
     private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private lazy var dock = DockController(model: self)
+    private lazy var clipboard = ClipboardController(model: self)
+    private lazy var location = LocationProvider(store: monitor.weather)
     private let hotKey = HotKey()
     private var hasOpenPanel = false
     private var timer: Timer?
@@ -26,6 +28,7 @@ final class AppModel {
         observeFrontApp()
         hotKey.onPress = { [weak self] in self?.toggleHub() }
         hotKey.register()
+        Task { await monitor.clipboard.load() }
         applySettings()
         monitor.onUpdate = { [weak self] in
             self?.statusBar.refreshItems()
@@ -53,7 +56,10 @@ final class AppModel {
             openURL: { NSWorkspace.shared.open($0) },
             quitProcess: { process, force in
                 kill(process.pid, force ? SIGKILL : SIGTERM)
-            }
+            },
+            updateSettings: { [weak self] change in self?.store.update(change) },
+            useClipboardEntry: { [weak self] entry, plain in self?.clipboard.use(entry, plainText: plain) },
+            isPasteAllowed: { Accessibility.isTrusted }
         )
     }
 
@@ -133,10 +139,27 @@ final class AppModel {
         } onChange: { [weak self] in
             Task { @MainActor in self?.applySettings() }
         }
+        applyInfoModules()
         statusBar.apply(store.settings)
         desktopWidgets.apply(store.settings.widgets)
         dock.apply(store.settings.dock)
         updateDemand()
+    }
+
+    /// Goes first: the width of a menu bar item depends on these settings.
+    private func applyInfoModules() {
+        let settings = store.settings
+        monitor.weather.apply(settings.weather)
+        monitor.rates.apply(settings.rates)
+        monitor.clipboard.apply(settings.clipboard)
+        location.apply(isOn: settings.weather.useCurrentLocation && settings.module(.weather)?.mode != .off)
+        clipboard.apply(settings.clipboard, isEnabled: settings.module(.clipboard)?.mode != .off)
+    }
+
+    /// Network modules ask only while they are in the bar or a panel can show them.
+    private func isWanted(_ module: ModuleID) -> Bool {
+        let mode = store.settings.module(module)?.mode
+        return mode == .menuBar || (hasOpenPanel && mode != .off)
     }
 
     private func updateDemand() {
@@ -153,6 +176,12 @@ final class AppModel {
         demand.processes = everything
         demand.devices = everything || modes.contains(.deviceBatteries)
         monitor.demand = demand
+        monitor.weather.isActive = isWanted(.weather)
+        monitor.rates.isActive = isWanted(.rates)
+    }
+
+    func closePanels() {
+        panels.closeTransient()
     }
 
     /// Screen time counts only after the user turns it on.
@@ -186,12 +215,18 @@ final class AppModel {
         ]
         for name in pause {
             center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.monitor.stop() }
+                MainActor.assumeIsolated {
+                    self?.monitor.stop()
+                    self?.clipboard.setPaused(true)
+                }
             }
         }
         for name in resume {
             center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.monitor.start() }
+                MainActor.assumeIsolated {
+                    self?.monitor.start()
+                    self?.clipboard.setPaused(false)
+                }
             }
         }
     }
