@@ -244,8 +244,11 @@ struct LyricsWidget: View {
     }
 
     private func current(_ data: NowPlayingWidgetData) -> Int {
-        let progress = data.session.progress(at: now) ?? 0
-        return LyricsTiming.lineIndex(in: data.session.lyrics, progress: progress) ?? 0
+        let session = data.session
+        if let line = LyricsTiming.lineIndex(starts: session.lyricStarts, position: session.position(at: now)) {
+            return line
+        }
+        return LyricsTiming.lineIndex(in: session.lyrics, progress: session.progress(at: now) ?? 0) ?? 0
     }
 
     @ViewBuilder
@@ -317,7 +320,9 @@ struct LyricsWidget: View {
                 PlaybackBar(session: data.session, now: now, isSystemTimed: isSystemTimed)
                 TransportRow(session: data.session)
                 Spacer(minLength: 0)
-                Text(loc("Lyrics from the player")).font(.system(size: 11)).foregroundStyle(.tertiary)
+                Text(data.session.lyricStarts.isEmpty ? loc("Lyrics from the player") : loc("Lyrics from LRCLIB"))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
             }
             .frame(maxWidth: .infinity)
             Divider()
@@ -331,7 +336,10 @@ struct LyricsWidget: View {
                     currentSize: 19
                 )
                 Spacer(minLength: 0)
-                Text(loc("Line follows playback (estimated)")).font(.system(size: 11)).foregroundStyle(.tertiary)
+                Text(data.session.lyricStarts
+                    .isEmpty ? loc("Line follows playback (estimated)") : loc("Line follows playback"))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

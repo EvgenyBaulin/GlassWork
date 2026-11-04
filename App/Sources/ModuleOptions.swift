@@ -45,6 +45,13 @@ private struct NowPlayingOptions: View {
         )
     }
 
+    private var findsLyrics: Binding<Bool> {
+        Binding(
+            get: { options[ModuleOption.onlineLyrics] != "false" },
+            set: { set(ModuleOption.onlineLyrics, $0 ? "true" : "false") }
+        )
+    }
+
     var body: some View {
         Section(loc("Now Playing")) {
             LabeledContent(loc("Max width")) {
@@ -54,6 +61,10 @@ private struct NowPlayingOptions: View {
                 }
             }
             Toggle(loc("Hide when nothing is playing"), isOn: hidesWhenIdle)
+            Toggle(isOn: findsLyrics) {
+                Text(loc("Find lyrics online"))
+                Text(loc("For the Lyrics widget. Sends the song, artist and album to lrclib.net."))
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ final class NowPlayingBridge {
     private var pendingReload: Task<Void, Never>?
     private var lastRequest = Date.distantPast
     private(set) var hasSystemWidget = false
+    private(set) var hasSystemLyricsWidget = false
 
     private static let kinds = [WidgetKind.nowPlaying.rawValue, WidgetKind.lyrics.rawValue]
 
@@ -33,17 +34,22 @@ final class NowPlayingBridge {
                 NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID).map {
                     FileManager.default.displayName(atPath: $0.path).replacingOccurrences(of: ".app", with: "")
                 }
-            }
+            },
+            lyricsFetcher: URLSessionFetcher()
         )
     }
 
     /// Asks WidgetKit which widgets the user placed. Calls back only when the answer changes.
     func checkSystemWidgets(changed: @escaping @MainActor () -> Void) {
         WidgetCenter.shared.getCurrentConfigurations { [weak self] result in
-            let found = (try? result.get())?.contains { Self.kinds.contains($0.kind) } ?? false
+            let placed = (try? result.get())?.map(\.kind) ?? []
+            let found = placed.contains(where: Self.kinds.contains)
+            let foundLyrics = placed.contains(WidgetKind.lyrics.rawValue)
             Task { @MainActor in
-                guard let self, found != self.hasSystemWidget else { return }
+                guard let self,
+                      found != self.hasSystemWidget || foundLyrics != self.hasSystemLyricsWidget else { return }
                 self.hasSystemWidget = found
+                self.hasSystemLyricsWidget = foundLyrics
                 changed()
             }
         }
