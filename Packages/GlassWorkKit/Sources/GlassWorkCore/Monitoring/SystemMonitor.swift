@@ -14,6 +14,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var battery = false
     public var gpu = false
     public var sensors = false
+    public var sensorDetail = SensorDetail.summary
     public var processes = false
     /// The process list on the slow pace: `ps` every two seconds is too much for a widget.
     public var slowProcesses = false
@@ -149,9 +150,11 @@ public final class SystemMonitor {
     ///
     /// This serves system widgets, which refresh once a minute: sampling them on every tick would cost far more.
     public func readForWidgets(_ kinds: Set<WidgetKind>) async {
-        let extra = MonitorDemand(widgets: kinds).subtracting(demand)
+        var extra = MonitorDemand(widgets: kinds).subtracting(demand)
         guard isRunning, extra.readsSamples else { return }
-        await apply(sampler.read(extra, includeSlow: true), at: Date())
+        // Once a minute is rare enough, and a widget must not wait for the monitor's own pace.
+        extra.sensorDetail = .live
+        await apply(sampler.read(extra, includeSlow: true, temperature: temperatureSource), at: Date())
     }
 
     /// What `kinds` show, from the latest readings. Nothing is read here, so calling it often costs little.
@@ -296,7 +299,7 @@ public final class SystemMonitor {
         if includeSlow {
             lastSlow = now
         }
-        let reading = await sampler.read(demand, includeSlow: includeSlow)
+        let reading = await sampler.read(demand, includeSlow: includeSlow, temperature: temperatureSource)
         apply(reading, at: now)
         everyday.tick(at: now)
         developer.tick(at: now, demand: demand.developer)
@@ -411,9 +414,10 @@ actor Sampler {
     private var disk: DiskCounters?
     private var diskDate = Date()
     private lazy var sensorReader = SensorReader()
-    private var sensorTick = 0
+    private var sensorPace = SensorPace()
 
-    func read(_ demand: MonitorDemand, includeSlow: Bool) async -> Reading {
+    /// - Parameter temperature: What the temperature graph records, which the summary has to include.
+    func read(_ demand: MonitorDemand, includeSlow: Bool, temperature: SensorChoice) async -> Reading {
         var reading = Reading()
         if demand.cpu {
             readCPU(into: &reading)
@@ -430,8 +434,10 @@ actor Sampler {
         if demand.gpu {
             reading.gpus = GPUReader.samples()
         }
-        if demand.sensors {
-            reading.sensors = sensorReader?.sample()
+        if demand.sensors, sensorPace.isDue(demand.sensorDetail, at: Date()) {
+            // Alerts watch the average CPU temperature, whatever the graph shows.
+            let summary: Set<SensorChoice> = [temperature, .averageCPU]
+            reading.sensors = sensorReader?.sample(showing: demand.sensorDetail == .summary ? summary : nil)
         }
         if demand.processes || (includeSlow && demand.slowProcesses) {
             reading.processes = await ProcessList.read()
@@ -445,12 +451,6 @@ actor Sampler {
             }
         }
         return reading
-    }
-
-    /// Temperatures move slowly: every third read is enough unless a panel shows them live.
-    private func shouldReadSensors(detailed: Bool) -> Bool {
-        sensorTick += 1
-        return detailed || sensorTick % 3 == 1
     }
 
     private func readCPU(into reading: inout Reading) {

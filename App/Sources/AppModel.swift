@@ -280,6 +280,7 @@ final class AppModel {
         demand.gpu = demand.gpu || everything || modes.contains(.gpu)
         demand.sensors = demand.sensors || everything || isSettingsOpen || modes.contains(.sensors)
             || modes.contains(.fans) || store.settings.alerts.isEnabled
+        demand.sensorDetail = everything || isSettingsOpen ? .live : demand.sensorDetail
         demand.processes = everything
         demand.developer = store.settings.developerDemand(panelOpen: everything)
             .union(placed.compactMap(\.developerModule))
