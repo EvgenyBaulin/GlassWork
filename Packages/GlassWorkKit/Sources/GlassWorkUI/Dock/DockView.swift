@@ -160,20 +160,21 @@ public struct DockView: View {
         }
         .coordinateSpace(.named(Self.canvas))
         .onChange(of: space) { _, space in actions.needsSpace(space) }
+        .onChange(of: state.openCard) { _, open in removeEmptyFolders(keeping: open) }
     }
 
     @ViewBuilder
     private func card(_ item: DockItem) -> some View {
         switch item {
         case let .folder(folder):
-            FolderCard(folder: folder, actions: actions) { closeCard() }
+            FolderCard(folder: folder, actions: actions) { state.openCard = nil }
         case let .stack(stack):
             let card = StackCard(
                 stack: stack,
                 files: state.files[stack.path] ?? [],
                 position: position,
                 actions: actions
-            ) { closeCard() }
+            ) { state.openCard = nil }
             // A fan stands straight on the desktop.
             if stack.showsFan(at: position) {
                 card
@@ -185,11 +186,12 @@ public struct DockView: View {
         }
     }
 
-    /// A folder made from the menu and left empty goes with its card.
-    private func closeCard() {
-        state.openCard = nil
-        if settings.folders.contains(where: \.apps.isEmpty) {
-            actions.update(DockLayout.removingEmptyFolders)
+    /// A folder made from the menu and left empty goes with its card, however the card closed: its own button,
+    /// its tile, another card, or a click anywhere else.
+    private func removeEmptyFolders(keeping open: String?) {
+        let items = settings.items
+        if DockLayout.removingEmptyFolders(from: items, keeping: open) != items {
+            actions.update { DockLayout.removingEmptyFolders(from: $0, keeping: open) }
         }
     }
 

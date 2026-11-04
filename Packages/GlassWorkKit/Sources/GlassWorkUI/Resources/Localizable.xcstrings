@@ -12378,6 +12378,24 @@
               }
             }
           }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Next set: %lld more widget"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Next set: %lld more widgets"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -12858,6 +12876,24 @@
                 "stringUnit": {
                   "state": "translated",
                   "value": "%lld виджета"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld widget"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld widgets"
                 }
               }
             }

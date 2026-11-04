@@ -246,6 +246,21 @@ struct DockFolderMenuTests {
         #expect(DockLayout.removingEmptyFolders(from: items) == [.folder(full)])
     }
 
+    /// Just made and open, it must survive until apps can be dragged in.
+    @Test func theFolderOpenNowStaysEvenIfEmpty() {
+        let empty = AppFolder(name: "Empty", apps: [])
+        let items: [DockItem] = [.folder(empty)]
+        #expect(DockLayout.removingEmptyFolders(from: items, keeping: DockItem.folder(empty).id) == items)
+    }
+
+    /// Another card opening closes this one, and that counts.
+    @Test func anEmptyFolderGoesWhenAnotherCardOpens() {
+        let empty = AppFolder(name: "Empty", apps: [])
+        let full = AppFolder(name: "Full", apps: [mail])
+        let items: [DockItem] = [.folder(empty), .folder(full)]
+        #expect(DockLayout.removingEmptyFolders(from: items, keeping: DockItem.folder(full).id) == [.folder(full)])
+    }
+
     @Test func listsFoldersInOrder() {
         var dock = DockSettings()
         let first = AppFolder(name: "A", apps: [])

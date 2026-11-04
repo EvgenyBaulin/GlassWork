@@ -30,6 +30,11 @@ struct DockStringsTests {
         #expect(!position.title.hasPrefix("Dock position"))
     }
 
+    @Test func oneWidgetIsSingular() {
+        #expect(loc("\(1) widgets") == "1 widget")
+        #expect(loc("\(5) widgets") == "5 widgets")
+    }
+
     @Test func aStackStyleIsNotTheCoolingFan() {
         #expect(DockStackStyle.fan.title == "Fan")
         #expect(DockStackStyle.grid.title == "Grid")

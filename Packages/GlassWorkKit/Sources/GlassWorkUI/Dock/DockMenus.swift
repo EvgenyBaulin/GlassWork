@@ -146,7 +146,7 @@ struct DockBackgroundMenu: View {
         }
     }
 
-    /// Opens at once, so apps can be dragged in. Left empty, it goes when its card closes.
+    /// Opens at once, so apps can be dragged in. Left empty, it goes when its card closes, however that happens.
     private func makeFolder() {
         let folder = AppFolder(name: loc("New Folder"), apps: [])
         actions.update { DockLayout.addingFolder(folder, to: $0) }

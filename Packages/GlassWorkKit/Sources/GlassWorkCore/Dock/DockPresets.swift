@@ -237,10 +237,12 @@ public extension DockLayout {
     }
 
     /// An empty folder has no reason to stay once its card closes.
-    static func removingEmptyFolders(from items: [DockItem]) -> [DockItem] {
+    ///
+    /// - Parameter open: The card open now, by item id. A folder just made is empty until apps are dragged in.
+    static func removingEmptyFolders(from items: [DockItem], keeping open: String? = nil) -> [DockItem] {
         items.filter { item in
             if case let .folder(folder) = item {
-                return !folder.apps.isEmpty
+                return !folder.apps.isEmpty || item.id == open
             }
             return true
         }
