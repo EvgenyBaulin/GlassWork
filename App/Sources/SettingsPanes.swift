@@ -164,6 +164,7 @@ struct ShortcutsPane: View {
         Form {
             Section(loc("Shortcuts")) {
                 LabeledContent(loc("Open the Hub"), value: "⌃⌥Space")
+                LabeledContent(loc("Copy text from screen"), value: "⇧⌘2")
                 LabeledContent(loc("Open Settings"), value: "⌘,")
                 LabeledContent(loc("Undo a change in Settings"), value: "⌘Z")
             }
