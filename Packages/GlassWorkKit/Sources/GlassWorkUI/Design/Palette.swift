@@ -43,6 +43,7 @@ public extension ModuleID {
         case .eject: loc("Eject")
         case .sunMoon: loc("Sun and Moon")
         case .date: loc("Date")
+        case .deviceBatteries: loc("Device Batteries")
         case .calendar: loc("Calendar")
         case .endsIn: loc("Ends In")
         case .todos: loc("To-Dos")
@@ -73,6 +74,7 @@ public extension ModuleID {
         case .sunMoon: "sunrise"
         case .date, .calendar: "calendar"
         case .endsIn: "timer.circle"
+        case .deviceBatteries: "battery.100percent.circle"
         case .todos: "checklist"
         default: "square.dashed"
         }
@@ -82,7 +84,7 @@ public extension ModuleID {
         switch self {
         case .overview, .uptime: Palette.gray
         case .cpu: Palette.blue
-        case .memory, .battery: Palette.green
+        case .memory, .battery, .deviceBatteries: Palette.green
         case .disk: Palette.cyan
         case .network: Palette.teal
         case .gpu: Palette.purple
@@ -125,7 +127,7 @@ public extension ModuleID {
         case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
         case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
         case .colours, .appearance, .eject, .sunMoon, .date: true
-        case .calendar, .endsIn, .todos: true
+        case .calendar, .endsIn, .todos, .deviceBatteries: true
         default: false
         }
     }

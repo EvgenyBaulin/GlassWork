@@ -681,6 +681,16 @@
         }
       }
     },
+    "Device Batteries": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заряд устройств"
+          }
+        }
+      }
+    },
     "Digital Clock": {
       "localizations": {
         "ru": {
@@ -1327,6 +1337,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дальше"
+          }
+        }
+      }
+    },
+    "No devices with a battery connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет подключённых устройств с батареей"
           }
         }
       }

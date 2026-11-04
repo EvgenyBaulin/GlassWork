@@ -23,6 +23,7 @@ public struct ModulePanel: View {
         case .sensors: SensorsPanel(monitor: monitor)
         case .uptime: UptimePanel()
         case .timers: TimersPanel(monitor: monitor)
+        case .deviceBatteries: DeviceBatteriesPanel(monitor: monitor)
         case .calendar: CalendarPanel(monitor: monitor)
         case .endsIn: EndsInPanel(monitor: monitor)
         case .todos: TodosPanel(monitor: monitor)
