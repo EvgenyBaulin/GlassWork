@@ -17,10 +17,21 @@ final class SettingsWindowController {
         self.model = model
     }
 
+    func showFans() {
+        navigation.selection = .fans
+        navigation.fanCurveRequests += 1
+        show(module: nil)
+    }
+
     func show(module: ModuleID?) {
         navigation.selection = module.map(SettingsPage.module) ?? navigation.selection
         if window == nil {
-            let view = SettingsRoot(store: model.store, monitor: model.monitor, navigation: navigation)
+            let view = SettingsRoot(
+                store: model.store,
+                monitor: model.monitor,
+                fans: model.fans,
+                navigation: navigation
+            )
             let created = NSWindow(contentViewController: NSHostingController(rootView: view))
             created.title = loc("GlassWork Settings")
             created.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
@@ -30,7 +41,15 @@ final class SettingsWindowController {
             created.setFrameAutosaveName("GlassWorkSettings")
             created.isReleasedWhenClosed = false
             window = created
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.willCloseNotification,
+                object: created,
+                queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { self?.model.settingsChanged(isOpen: false) }
+            }
         }
+        model.settingsChanged(isOpen: true)
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
     }
@@ -61,11 +80,14 @@ enum SettingsPage: Hashable {
 @Observable
 final class SettingsNavigation {
     var selection: SettingsPage = .menuBar
+    /// Counts "Edit curves…" clicks. Each one opens the Curves tab, even if it was left.
+    var fanCurveRequests = 0
 }
 
 struct SettingsRoot: View {
     let store: SettingsStore
     let monitor: SystemMonitor
+    let fans: FanControlModel
     @Bindable var navigation: SettingsNavigation
     @State private var query = ""
 
@@ -135,6 +157,14 @@ struct SettingsRoot: View {
         case .shortcuts: ShortcutsPane()
         case .widgets: WidgetsPane(store: store)
         case .dock: DockPane(store: store)
+        case .fans:
+            FansSettingsPane(
+                control: fans,
+                sample: monitor.sensors,
+                isOnAC: monitor.battery?.isOnAC ?? true,
+                showsCurves: navigation.fanCurveRequests > 0
+            )
+            .id(navigation.fanCurveRequests)
         case .about: AboutPane()
         default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
         }
@@ -253,13 +283,41 @@ struct ModulePane: View {
                         module: module,
                         style: style.wrappedValue,
                         numbers: store.settings.numberStyle,
+                        options: options,
                         monitor: monitor
                     )
                 }
             }
             ModuleOptions(module: module, store: store)
+            if module == .sensors {
+                SensorsMenuBarSection(selection: sensor, sample: monitor.sensors)
+            }
+            if module == .fans {
+                FansMenuBarSection(showsEachFan: showsEachFan)
+            }
         }
         .formStyle(.grouped)
+    }
+
+    private var options: [String: String] {
+        store.settings.module(module)?.options ?? [:]
+    }
+
+    private var sensor: Binding<SensorChoice> {
+        Binding(
+            get: { .shown(by: options) },
+            set: { value in store.update { $0.update(module) { $0.options[ModuleOption.sensor] = value.rawValue } } }
+        )
+    }
+
+    private var showsEachFan: Binding<Bool> {
+        Binding(
+            get: { options[ModuleOption.fanFigure] == ModuleOption.eachFan },
+            set: { value in
+                let figure = value ? ModuleOption.eachFan : "average"
+                store.update { $0.update(module) { $0.options[ModuleOption.fanFigure] = figure } }
+            }
+        )
     }
 }
 

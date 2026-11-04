@@ -43,7 +43,21 @@ public struct FanReading: Codable, Sendable, Equatable, Identifiable {
     public var target: Double
     public var isManual: Bool
 
-    /// Speed as a share of the fan's own range.
+    public init(id: Int, rpm: Double, minimum: Double, maximum: Double, target: Double = 0, isManual: Bool = false) {
+        self.id = id
+        self.rpm = rpm
+        self.minimum = minimum
+        self.maximum = maximum
+        self.target = target
+        self.isManual = isManual
+    }
+
+    /// Apple silicon reports 0 for automatic, 1 for manual and 3 for system control, so only 1 is ours.
+    public static func isManualMode(_ value: Double) -> Bool {
+        value == 1
+    }
+
+    /// Speed as a share of the fan's own range. A fan stopped at idle reads 0, which is normal.
     public var share: Double {
         maximum > minimum ? min(max((rpm - minimum) / (maximum - minimum), 0), 1) : 0
     }
@@ -86,6 +100,11 @@ public struct SensorSample: Codable, Sendable, Equatable {
     }
 }
 
+public enum FanHardware {
+    /// Macs without fans hide the module altogether.
+    public static let hasFans = (SMCClient()?.read("FNum")?.number ?? 0) > 0
+}
+
 /// Reads temperature and fan keys. The key list is discovered once because enumeration is slow.
 public final class SensorReader: Sendable {
     private let client: SMCClient
@@ -114,13 +133,14 @@ public final class SensorReader: Sendable {
             client.read("F\(index)\(suffix)")?.number
         }
         guard let rpm = value("Ac") else { return nil }
+        let mode = value("Md") ?? value("md")
         return FanReading(
             id: index,
             rpm: rpm,
             minimum: value("Mn") ?? 0,
             maximum: value("Mx") ?? 0,
             target: value("Tg") ?? 0,
-            isManual: (value("Md") ?? 0) != 0
+            isManual: mode.map(FanReading.isManualMode) ?? false
         )
     }
 }

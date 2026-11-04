@@ -7,6 +7,8 @@
 - **GlassWorkWidgets.appex** is the WidgetKit extension. It is sandboxed, so it never runs tools or reads
   arbitrary files. It reads JSON snapshots that the app writes into the shared App Group container and
   performs small actions through App Intents.
+- **GlassWorkFanHelper** is an optional LaunchDaemon, the only process that runs as root and the only code
+  that writes to the SMC. It is installed with `SMAppService.daemon` when the user presses a button.
 
 ```
 collectors ──► app state ──► menu bar items / desktop windows / Dock
@@ -17,6 +19,28 @@ collectors ──► app state ──► menu bar items / desktop windows / Dock
 The App Group identifier is `$(TeamIdentifierPrefix)io.github.evgenybaulin.glasswork`. It is passed to code
 through the `GWAppGroupID` Info.plist key; `AppGroup.containerURL` falls back to Application Support for
 unsigned builds and tests.
+
+## Fan control
+
+Reading fan speeds needs nothing. Changing them goes through the helper:
+
+```
+FanEngine (pure) ──► FanControlModel ──► XPC ──► FanHelperServer ──► FanHelperService ──► SMC
+```
+
+- `FanEngine` turns temperatures, settings and time into commands: curve, smoothing, failsafe, power rules.
+  `FanControlModel` runs it every 2 s while a mode other than Auto is on. This loop reads sensors on its own,
+  because `SystemMonitor` pauses for a locked screen and the failsafe must not.
+- The helper accepts only "fan N: auto / max / target RPM" and a heartbeat, from a client signed by its own
+  team. An unsigned build has no team, so it is refused. The helper checks fan numbers and speeds against the
+  SMC's limits itself, and writes only fan mode, fan target and `Ftst` keys.
+- Fans return to Auto without the app's help: when the client disconnects, after 10 s of silence, when the
+  helper starts (a crash may have left a fan in manual mode) and on SIGTERM.
+- The app sends Auto before sleep, and a curve is applied again 10 s after wake. Average CPU above 95 °C
+  switches Curve and Custom to Max until the user picks a mode. A lost temperature reading returns to Auto.
+- `SMCWriter` lives in `Helper/Sources`, so neither the app nor the tests compile a write. The logic around it
+  runs against the `FanSMCAccess` protocol and is tested with a fake.
+- Apple silicon reports fan mode 0 (auto), 1 (manual) or 3 (system). Only 1 counts as manual.
 
 ## Modules
 
