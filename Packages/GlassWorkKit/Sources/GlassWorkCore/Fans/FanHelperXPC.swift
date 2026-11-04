@@ -95,7 +95,7 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
     /// A crash may have left a fan in manual mode, so every launch starts by taking it back.
     public func start() {
         queue.async { [self] in
-            service.restoreAuto()
+            restore()
             let source = DispatchSource.makeTimerSource(queue: queue)
             source.schedule(deadline: .now() + 1, repeating: 1)
             source.setEventHandler { [weak self] in self?.checkWatchdog() }
@@ -105,8 +105,12 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
     }
 
     /// For the signal handler that ends the daemon. Blocks until the fans are handed back.
-    public func shutdown() {
-        queue.sync { restore() }
+    /// Returns false when they could not be.
+    public func shutdown() -> Bool {
+        queue.sync {
+            restore()
+            return !isArmed
+        }
     }
 
     public func listener(_: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
@@ -133,7 +137,7 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
             watchdog.contact(at: now())
             // Trusts the command as well as the readback: a watchdog disarmed by mistake is the worse error.
             let tookFan = succeeded && command?.action != .auto
-            isArmed = tookFan || service.hasManualFans
+            isArmed = tookFan || !succeeded || service.hasManualFans
             reply(succeeded)
         }
     }

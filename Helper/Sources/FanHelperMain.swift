@@ -27,8 +27,7 @@ enum FanHelperMain {
         signal(SIGTERM, SIG_IGN)
         let termination = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
         termination.setEventHandler {
-            server.shutdown()
-            exit(EXIT_SUCCESS)
+            exit(server.shutdown() ? EXIT_SUCCESS : EXIT_FAILURE)
         }
         termination.resume()
 

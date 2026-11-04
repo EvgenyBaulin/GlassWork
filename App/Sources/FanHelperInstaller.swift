@@ -1,5 +1,6 @@
 import AppKit
 import GlassWorkCore
+import GlassWorkUI
 import ServiceManagement
 import UserNotifications
 
@@ -19,7 +20,11 @@ final class FanHelperInstaller: FanHelperInstalling {
         }
     }
 
+    /// The daemon runs as root from inside the app bundle, so the bundle must not be user-writable.
     func install() throws {
+        guard Bundle.main.bundleURL.path(percentEncoded: false).hasPrefix("/Applications/") else {
+            throw InstallLocationError()
+        }
         try service.register()
     }
 
@@ -33,6 +38,12 @@ final class FanHelperInstaller: FanHelperInstalling {
 
     func connect(onLost: @escaping @Sendable () -> Void) -> FanHelperClient? {
         FanHelperConnection.privileged(onLost: onLost)
+    }
+}
+
+private struct InstallLocationError: LocalizedError {
+    var errorDescription: String? {
+        loc("Move GlassWork to the Applications folder first.")
     }
 }
 

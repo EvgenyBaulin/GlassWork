@@ -10,6 +10,8 @@ final class FakeSMC: FanSMCAccess, @unchecked Sendable {
     private(set) var writes: [(key: String, bytes: [UInt8])] = []
     /// Number of writes of a key that fail before one succeeds.
     var refusals: [String: Int] = [:]
+    /// Keys whose writes report success but change nothing.
+    var ignored: Set<String> = []
 
     init(fans: Int = 2, mode: UInt8 = 3, modeKey: String = "Md", hasTestKey: Bool = true) {
         var values: [String: SMCClient.Value] = ["FNum": .init(type: "ui8 ", bytes: [UInt8(fans)])]
@@ -36,7 +38,7 @@ final class FakeSMC: FanSMCAccess, @unchecked Sendable {
                 return false
             }
             writes.append((key, bytes))
-            if let old = values[key] {
+            if !ignored.contains(key), let old = values[key] {
                 values[key] = .init(type: old.type, bytes: bytes)
             }
             return true
@@ -230,6 +232,68 @@ struct FanHelperServiceTests {
         #expect(smc.writes.isEmpty)
         #expect(!service(smc).hasManualFans)
     }
+}
+
+struct FanRestoreFailureTests {
+    private func service(_ smc: FakeSMC) -> FanHelperService {
+        var timing = FanHelperService.Timing()
+        timing.restoreAttempts = 2
+        return FanHelperService(smc: smc, timing: timing, pause: { _ in })
+    }
+
+    private let manual = SMCClient.Value(type: "ui8 ", bytes: [1])
+
+    @Test func anUnreadableFanCountIsNotARestoredMac() {
+        let smc = FakeSMC()
+        let helper = service(smc)
+        smc.set("F0Md", manual)
+        smc.set("FNum", nil)
+        #expect(!helper.restoreAuto())
+    }
+
+    @Test func anUnreadableTestKeyIsNotAClearedOne() {
+        let smc = FakeSMC()
+        let helper = service(smc)
+        smc.set("Ftst", nil)
+        #expect(!helper.restoreAuto())
+    }
+
+    @Test func aMacWithoutTheTestKeyStillRestores() {
+        #expect(service(FakeSMC(hasTestKey: false)).restoreAuto())
+    }
+
+    @Test func aWriteTheSMCIgnoresDoesNotCount() {
+        let smc = FakeSMC()
+        smc.set("F0Md", manual)
+        smc.ignored = ["F0Md"]
+        #expect(!service(smc).restoreAuto())
+    }
+
+    @Test func aLaunchThatCannotRestoreKeepsTrying() {
+        let smc = FakeSMC()
+        smc.set("F0Md", manual)
+        smc.ignored = ["F0Md"]
+        let queue = DispatchQueue(label: "restore-failure")
+        let clock = TestClock()
+        let server = FanHelperServer(
+            service: service(smc),
+            queue: queue,
+            requirement: nil,
+            now: { clock.time }
+        )
+        server.start()
+        queue.sync {}
+        #expect(smc.number("F0Md") == 1)
+        smc.ignored = []
+        clock.time = FanWatchdog.timeout + 1
+        queue.sync { server.checkWatchdog() }
+        #expect(smc.number("F0Md") == 0)
+    }
+}
+
+private final class TestClock: @unchecked Sendable {
+    // @unchecked: set between queue hops, never during one.
+    var time: TimeInterval = 0
 }
 
 struct FanKeyTests {

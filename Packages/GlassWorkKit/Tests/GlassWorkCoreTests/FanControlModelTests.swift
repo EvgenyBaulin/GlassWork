@@ -10,8 +10,20 @@ private final class FakeClient: FanHelperClient, @unchecked Sendable {
     var fails = false
     /// What a helper says when it no longer holds any fan.
     var holdsNothing = false
+    /// Keeps the next command in flight until `release()`, as a slow helper would.
+    var holdsNextSend = false
+    private(set) var gate: CheckedContinuation<Void, Never>?
+
+    func release() {
+        gate?.resume()
+        gate = nil
+    }
 
     func send(_ command: FanCommand) async -> Bool {
+        if holdsNextSend {
+            holdsNextSend = false
+            await withCheckedContinuation { gate = $0 }
+        }
         commands.append(command)
         return !fails
     }
@@ -110,6 +122,23 @@ struct FanControlModelTests {
         let installer = FakeInstaller()
         installer.state = .installed
         return installer
+    }
+
+    @Test func aNewerMaxIsNeverOvertakenByAnOlderBatch() async {
+        let installer = installed()
+        let model = makeModel(installer: installer)
+        installer.client.holdsNextSend = true
+        model.select(.custom)
+        while installer.client.gate == nil {
+            await Task.yield()
+        }
+        model.toggleMax()
+        for _ in 0 ..< 100 {
+            await Task.yield()
+        }
+        installer.client.release()
+        await model.step()
+        #expect(installer.client.commands.last?.action == .max)
     }
 
     @Test func nothingHappensWithoutTheHelper() async {

@@ -158,6 +158,7 @@ public struct FanEngine: Sendable {
             return commandMax(fans: sample.fans)
         }
         let fans = sample.fans.filter(\.hasValidRange)
+        let released = releaseFans(except: Set(fans.map(\.id)))
         let wanted: [Int: Double]
         if mode == .curve {
             guard let celsius = sample.celsius(for: input.settings.sensor) else {
@@ -176,7 +177,7 @@ public struct FanEngine: Sendable {
         // A stopped fan starts from its minimum: the SMC accepts nothing lower.
         let starts = Dictionary(uniqueKeysWithValues: fans.map { ($0.id, $0.clamped($0.rpm)) })
         let targets = limiter.limited(wanted, starts: starts, at: input.time)
-        return targets.keys.sorted().compactMap { fan in
+        return released + targets.keys.sorted().compactMap { fan in
             let action = FanCommand.Action.target((targets[fan] ?? 0).rounded())
             guard sent[fan] != action else { return nil }
             sent[fan] = action
@@ -185,10 +186,20 @@ public struct FanEngine: Sendable {
     }
 
     private mutating func commandMax(fans: [FanReading]) -> [FanCommand] {
-        fans.filter(\.hasValidRange).compactMap { fan in
-            guard sent[fan.id] != .max else { return nil }
-            sent[fan.id] = .max
-            return FanCommand(fan: fan.id, action: .max)
+        // A fan already held counts even with unreadable limits: the helper reads its own, and left
+        // out it would stay at a low target.
+        Set(fans.filter(\.hasValidRange).map(\.id)).union(sent.keys).sorted().compactMap { fan in
+            guard sent[fan] != .max else { return nil }
+            sent[fan] = .max
+            return FanCommand(fan: fan, action: .max)
+        }
+    }
+
+    /// A fan that can no longer be steered goes back to the system, not stuck at its last target.
+    private mutating func releaseFans(except kept: Set<Int>) -> [FanCommand] {
+        sent.keys.filter { !kept.contains($0) }.sorted().map { fan in
+            sent[fan] = nil
+            return FanCommand(fan: fan, action: .auto)
         }
     }
 
@@ -213,7 +224,7 @@ public struct FanEngine: Sendable {
 }
 
 public extension FanReading {
-    /// False when the limits could not be read, in which case the fan is left alone.
+    /// False when the limits could not be read, in which case the fan stays with the system.
     var hasValidRange: Bool {
         maximum > 0 && maximum >= minimum
     }

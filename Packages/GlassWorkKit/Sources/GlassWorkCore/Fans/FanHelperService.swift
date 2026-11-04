@@ -36,6 +36,8 @@ public final class FanHelperService {
     private let smc: FanSMCAccess
     private let timing: Timing
     private let pause: (TimeInterval) -> Void
+    /// Once the key has been seen, an unreadable `Ftst` is a failed read, not a Mac without one.
+    private var hasTestKey: Bool
 
     public init(
         smc: FanSMCAccess,
@@ -45,10 +47,12 @@ public final class FanHelperService {
         self.smc = smc
         self.timing = timing
         self.pause = pause
+        hasTestKey = smc.read("Ftst") != nil
     }
 
-    private var fanCount: Int {
-        Int(smc.read("FNum")?.number ?? 0)
+    /// Nil when the SMC did not answer, which must not pass for a Mac with nothing to restore.
+    private var fanCount: Int? {
+        smc.read("FNum")?.number.map { Int($0) }
     }
 
     /// The key's case differs between Mac models.
@@ -57,7 +61,7 @@ public final class FanHelperService {
     }
 
     public var hasManualFans: Bool {
-        (0 ..< fanCount).contains { fan in
+        (0 ..< (fanCount ?? 0)).contains { fan in
             modeKey(fan).flatMap { smc.read($0)?.number }.map(FanReading.isManualMode) ?? false
         }
     }
@@ -65,7 +69,7 @@ public final class FanHelperService {
     /// Returns true when the fan now does what was asked.
     @discardableResult
     public func execute(_ command: FanCommand) -> Bool {
-        guard (0 ..< fanCount).contains(command.fan) else { return false }
+        guard (0 ..< (fanCount ?? 0)).contains(command.fan) else { return false }
         switch command.action {
         case .auto:
             return restoreFan(command.fan) && releaseTestModeIfIdle()
@@ -81,6 +85,7 @@ public final class FanHelperService {
     /// Hands every fan back to the system. Writes nothing when no fan is ours.
     @discardableResult
     public func restoreAuto() -> Bool {
+        guard let fanCount else { return false }
         var succeeded = true
         for fan in 0 ..< fanCount where !restoreFan(fan) {
             succeeded = false
@@ -131,18 +136,22 @@ public final class FanHelperService {
         guard let key = modeKey(fan), let mode = smc.read(key), let number = mode.number else { return false }
         guard FanReading.isManualMode(number) else { return true }
         guard let automatic = mode.encoded(Mode.automatic) else { return false }
-        return writeRetrying(key, bytes: automatic)
+        return writeConfirmed(key, bytes: automatic) { !FanReading.isManualMode($0) }
     }
 
     private func releaseTestModeIfIdle() -> Bool {
-        guard !hasManualFans, let test = smc.read("Ftst"), test.number != 0 else { return true }
+        guard !hasManualFans else { return true }
+        guard let test = smc.read("Ftst") else { return !hasTestKey }
+        hasTestKey = true
+        guard test.number != 0 else { return true }
         guard let off = test.encoded(0) else { return false }
-        return writeRetrying("Ftst", bytes: off)
+        return writeConfirmed("Ftst", bytes: off) { $0 == 0 }
     }
 
-    private func writeRetrying(_ key: String, bytes: [UInt8]) -> Bool {
+    /// The SMC can accept a write and keep the old value, so only the readback counts.
+    private func writeConfirmed(_ key: String, bytes: [UInt8], until isDone: (Double) -> Bool) -> Bool {
         for attempt in 0 ..< timing.restoreAttempts {
-            if smc.write(key, bytes: bytes) {
+            if smc.write(key, bytes: bytes), smc.read(key)?.number.map(isDone) == true {
                 return true
             }
             if attempt < timing.restoreAttempts - 1 {

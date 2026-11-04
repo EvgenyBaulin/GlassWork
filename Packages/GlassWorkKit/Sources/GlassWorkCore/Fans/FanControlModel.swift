@@ -68,6 +68,7 @@ public final class FanControlModel {
     @ObservationIgnored private let now: () -> TimeInterval
     @ObservationIgnored private var client: FanHelperClient?
     @ObservationIgnored private var loop: Task<Void, Never>?
+    @ObservationIgnored private var lastPass: Task<Void, Never>?
     @ObservationIgnored private var activity: NSObjectProtocol?
 
     public init(
@@ -182,10 +183,16 @@ public final class FanControlModel {
     }
 
     public func willSleep() async {
-        let commands = engine.willSleep()
-        publish()
-        await deliver(commands)
-        stopLoop()
+        await inOrder { [weak self] in
+            guard let self else { return }
+            let commands = engine.willSleep()
+            publish()
+            await deliver(commands)
+            // A wake that came during the handback has already asked for the loop.
+            if engine.resumeTime == nil {
+                stopLoop()
+            }
+        }
     }
 
     public func didWake() {
@@ -198,6 +205,22 @@ public final class FanControlModel {
 
     /// One pass of the engine. Public so tests can drive it without waiting for the timer.
     public func step() async {
+        await inOrder { [weak self] in await self?.runStep() }
+    }
+
+    /// Passes run strictly one after another. Otherwise a batch of low targets still being sent
+    /// could reach a fan after a newer Max, and the engine would never send Max to it again.
+    private func inOrder(_ pass: @escaping @MainActor () async -> Void) async {
+        let previous = lastPass
+        let next = Task { @MainActor in
+            await previous?.value
+            await pass()
+        }
+        lastPass = next
+        await next.value
+    }
+
+    private func runStep() async {
         let sample = await readSensors()
         seedCustomTarget(from: sample)
         let commands = engine.step(FanEngineInput(

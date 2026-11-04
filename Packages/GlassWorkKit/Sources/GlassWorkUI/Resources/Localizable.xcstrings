@@ -5486,6 +5486,22 @@
           }
         }
       }
+    },
+    "Move GlassWork to the Applications folder first.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move GlassWork to the Applications folder first."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сначала переместите GlassWork в папку «Программы»."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

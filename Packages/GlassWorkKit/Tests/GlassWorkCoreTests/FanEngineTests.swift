@@ -126,6 +126,28 @@ struct FanEngineTests {
         #expect(engine.step(input(0, sample(fans: [broken]))).isEmpty)
     }
 
+    @Test func aHeldFanThatLosesItsLimitsGoesBackToTheSystem() {
+        var engine = FanEngine()
+        engine.select(.custom)
+        var settings = FanSettings()
+        settings.customRPM = 3000
+        _ = engine.step(input(0, sample(), settings: settings))
+        let broken = FanReading(id: 1, rpm: 2000, minimum: 0, maximum: 0)
+        let commands = engine.step(input(2, sample(fans: [Self.left, broken]), settings: settings))
+        #expect(commands.contains(FanCommand(fan: 1, action: .auto)))
+    }
+
+    @Test func theFailsafeStillRaisesAHeldFanWithoutLimits() {
+        var engine = FanEngine()
+        engine.select(.custom)
+        var settings = FanSettings()
+        settings.customRPM = 3000
+        _ = engine.step(input(0, sample(), settings: settings))
+        let broken = FanReading(id: 1, rpm: 2000, minimum: 0, maximum: 0)
+        let commands = engine.step(input(2, sample(cpu: 96, fans: [Self.left, broken]), settings: settings))
+        #expect(commands.contains(FanCommand(fan: 1, action: .max)))
+    }
+
     // MARK: Failsafe
 
     @Test(arguments: [FanMode.curve, .custom])
