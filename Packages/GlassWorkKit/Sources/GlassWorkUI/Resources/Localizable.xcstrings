@@ -13134,6 +13134,56 @@
           }
         }
       }
+    },
+    "Let macOS run the fans when the Mac is cool": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отдавать вентиляторы macOS, когда Mac холодный"
+          }
+        }
+      }
+    },
+    "Below": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ниже"
+          }
+        }
+      }
+    },
+    "The curve takes over again %@ above this.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кривая вернётся на %@ выше этого значения."
+          }
+        }
+      }
+    },
+    "When cool": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Когда холодно"
+          }
+        }
+      }
+    },
+    "The Mac is cool, so macOS runs the fans for now.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac холодный, поэтому пока вентиляторами управляет macOS."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -162,6 +162,21 @@ struct FanSnapshotTests {
         snapshot(panel(model(.installed)), width: 340, height: 480, name: "auto-\(scheme)", scheme: scheme)
     }
 
+    @Test(arguments: [ColorScheme.dark, .light])
+    func handOverControl(scheme: ColorScheme) {
+        let control = model(.installed) {
+            $0.fans.handsOverWhenCool = true
+            $0.fans.handOverCelsius = 45
+        }
+        snapshot(
+            Form { FanHandOverSection(control: control) }.formStyle(.grouped),
+            width: 460,
+            height: 190,
+            name: "hand-over-\(scheme)",
+            scheme: scheme
+        )
+    }
+
     @Test func panelInCurveMode() async {
         await snapshot(panel(running(.curve)), width: 340, height: 640, name: "curve")
     }
