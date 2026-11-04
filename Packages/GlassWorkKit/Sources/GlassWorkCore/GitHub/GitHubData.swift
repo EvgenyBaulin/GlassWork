@@ -24,6 +24,13 @@ public struct WorkflowRun: Codable, Sendable, Equatable, Identifiable {
     public var branch: String
     public var state: WorkflowState
     public var createdAt: Date
+    /// `owner/name`. Optional so runs saved before it existed still decode.
+    public var repository: String?
+
+    /// The name without the owner, which is what a small widget has room for.
+    public var repositoryName: String? {
+        repository?.split(separator: "/").last.map(String.init)
+    }
 }
 
 public struct ContributionDay: Codable, Sendable, Equatable {
@@ -61,8 +68,15 @@ public enum GitHubParser {
         }
     }
 
+    /// `gh api user/repos --jq .[].full_name`: one `owner/name` per line.
+    public static func repositories(_ text: String) -> [String] {
+        text.split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { $0.contains("/") }
+    }
+
     /// `gh run list --json databaseId,displayTitle,headBranch,status,conclusion,createdAt`.
-    public static func workflowRuns(_ json: Data) -> [WorkflowRun] {
+    public static func workflowRuns(_ json: Data, repository: String? = nil) -> [WorkflowRun] {
         struct Row: Decodable {
             let databaseId: Int
             let displayTitle: String
@@ -78,7 +92,8 @@ public enum GitHubParser {
                 name: $0.displayTitle,
                 branch: $0.headBranch,
                 state: state(status: $0.status, conclusion: $0.conclusion),
-                createdAt: $0.createdAt
+                createdAt: $0.createdAt,
+                repository: repository
             )
         }
     }

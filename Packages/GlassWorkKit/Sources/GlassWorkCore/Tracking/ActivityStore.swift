@@ -16,17 +16,34 @@ public final class ActivityStore {
     public private(set) var githubAvailable = true
 
     @ObservationIgnored private let store: SnapshotStore
+    /// Reports the exit status when `gh` fails, for the diagnostic log.
+    @ObservationIgnored public var onGitHubFailed: ((Int32) -> Void)?
+
     @ObservationIgnored private let runner: ProcessRunning
+    @ObservationIgnored private let locateGH: @Sendable () -> String?
+    @ObservationIgnored private var lastRunsRead: Date?
     @ObservationIgnored private var currentApp: String?
     @ObservationIgnored private var currentSince = Date()
     @ObservationIgnored private var pausedSince: Date?
 
-    private static let ghPaths = ["/opt/homebrew/bin/gh", "/usr/local/bin/gh"]
     private static let historyLimit = 30
+    /// Every repository costs a call, and this runs from a widget refresh, so the list stays short.
+    private static let repositoryLimit = 5
+    private static let runsPerRepository = 5
+    private static let runLimit = 12
+    private static let runFields = "databaseId,displayTitle,headBranch,status,conclusion,createdAt"
+    private static let idleRunsInterval: TimeInterval = 300
+    /// A run under way is what someone is waiting for, so it is checked more often.
+    private static let activeRunsInterval: TimeInterval = 60
 
-    public init(store: SnapshotStore = SnapshotStore(), runner: ProcessRunning = ProcessRunner()) {
+    public init(
+        store: SnapshotStore = SnapshotStore(),
+        runner: ProcessRunning = ProcessRunner(),
+        locateGH: @escaping @Sendable () -> String? = { ToolLocator.find("gh") }
+    ) {
         self.store = store
         self.runner = runner
+        self.locateGH = locateGH
         screenTime = store.read(ScreenTimeLog.self, for: ScreenTimeLog.key) ?? ScreenTimeLog()
     }
 
@@ -67,8 +84,9 @@ public final class ActivityStore {
         try? store.write(screenTime, for: ScreenTimeLog.key)
     }
 
+    /// A second click while it runs does nothing: a command must not start twice by accident.
     public func run(_ command: UserCommand) async {
-        running.insert(command.id)
+        guard running.insert(command.id).inserted else { return }
         commandResults[command.id] = await CommandRunner.run(command, using: runner)
         running.remove(command.id)
     }
@@ -81,15 +99,18 @@ public final class ActivityStore {
         }
     }
 
-    public func refreshGitHub() async {
-        guard let tool = Self.ghPaths.first(where: FileManager.default.isExecutableFile) else {
+    /// - Parameter includesRuns: Only the Actions widget needs runs, and they cost a call per repository.
+    public func refreshGitHub(includesRuns: Bool = false, at date: Date = Date()) async {
+        guard let tool = locateGH() else {
             githubAvailable = false
             return
         }
         let fields = "title,repository,number,url,updatedAt"
         let review = ["search", "prs", "--review-requested=@me", "--state=open", "--json", fields]
-        guard let output = try? await runner.run(tool, arguments: review, timeout: 20), output.status == 0 else {
+        let output = try? await runner.run(tool, arguments: review, timeout: 20)
+        guard let output, output.status == 0 else {
             githubAvailable = false
+            onGitHubFailed?(output?.status ?? -1)
             return
         }
         githubAvailable = true
@@ -98,5 +119,37 @@ public final class ActivityStore {
             + "{date contributionCount}}}}}}"
         let graph = try? await runner.run(tool, arguments: ["api", "graphql", "-f", "query=\(query)"], timeout: 20)
         contributions = GitHubParser.contributions(Data((graph?.stdout ?? "").utf8))
+        if includesRuns {
+            await refreshRuns(tool, at: date)
+        }
+    }
+
+    /// The latest runs across the repositories pushed to most recently. `gh run list` works on one repository
+    /// at a time and the app has no working folder, so `gh` is asked which ones those are: no local file is read.
+    private func refreshRuns(_ tool: String, at date: Date) async {
+        let isActive = runs.contains { $0.state == .running }
+        let interval = isActive ? Self.activeRunsInterval : Self.idleRunsInterval
+        if let lastRunsRead, date.timeIntervalSince(lastRunsRead) < interval {
+            return
+        }
+        lastRunsRead = date
+        let list = ["api", "user/repos?sort=pushed&per_page=\(Self.repositoryLimit)", "--jq", ".[].full_name"]
+        let repositories = try? await runner.run(tool, arguments: list, timeout: 20)
+        guard let repositories, repositories.status == 0 else {
+            onGitHubFailed?(repositories?.status ?? -1)
+            return
+        }
+        var fresh: [WorkflowRun] = []
+        for repository in GitHubParser.repositories(repositories.stdout) {
+            let arguments = [
+                "run", "list", "--repo", repository,
+                "--limit", String(Self.runsPerRepository), "--json", Self.runFields,
+            ]
+            // One repository without Actions, or one that fails, must not cost the others.
+            if let output = try? await runner.run(tool, arguments: arguments, timeout: 20), output.status == 0 {
+                fresh += GitHubParser.workflowRuns(Data(output.stdout.utf8), repository: repository)
+            }
+        }
+        runs = Array(fresh.sorted { $0.createdAt > $1.createdAt }.prefix(Self.runLimit))
     }
 }

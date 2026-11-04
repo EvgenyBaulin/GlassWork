@@ -34,7 +34,9 @@ public enum CommandRunner {
         using runner: ProcessRunning = ProcessRunner()
     ) async -> CommandResult {
         let start = Date()
-        let script = command.directory.map { "cd \(quoted($0)) && \(command.command)" } ?? command.command
+        // Quoting stops the shell from expanding `~`, so it is done here.
+        let folder = command.directory.map { NSString(string: $0).expandingTildeInPath }
+        let script = folder.map { "cd \(quoted($0)) && \(command.command)" } ?? command.command
         let output = try? await runner.run("/bin/zsh", arguments: ["-lc", script], timeout: command.timeout)
         return CommandResult(
             status: output?.status ?? -1,

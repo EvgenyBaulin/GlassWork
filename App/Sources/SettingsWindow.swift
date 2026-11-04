@@ -181,7 +181,7 @@ struct SettingsRoot: View {
         case let .module(id): ModulePane(module: id, store: store, monitor: monitor)
         case .shortcuts:
             ShortcutsPane(store: store, refused: shortcuts.refused) { shortcuts.setRecording($0) }
-        case .widgets: WidgetsPane(store: store)
+        case .widgets: WidgetsPane(store: store, activity: monitor.activity)
         case .dock: DockPane(store: store)
         case .fans:
             FansSettingsPane(

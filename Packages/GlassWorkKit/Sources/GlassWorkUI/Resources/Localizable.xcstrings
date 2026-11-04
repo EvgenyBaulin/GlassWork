@@ -13670,6 +13670,96 @@
           }
         }
       }
+    },
+    "Run “%@”?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустить «%@»?"
+          }
+        }
+      }
+    },
+    "Run": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустить"
+          }
+        }
+      }
+    },
+    "Untitled": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без названия"
+          }
+        }
+      }
+    },
+    "New command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новая команда"
+          }
+        }
+      }
+    },
+    "Working directory": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рабочая папка"
+          }
+        }
+      }
+    },
+    "Choose…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать…"
+          }
+        }
+      }
+    },
+    "Timeout": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тайм-аут"
+          }
+        }
+      }
+    },
+    "Ask before running": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спрашивать перед запуском"
+          }
+        }
+      }
+    },
+    "No recent runs": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запусков пока нет"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

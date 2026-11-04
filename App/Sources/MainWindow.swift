@@ -72,7 +72,7 @@ private struct MainWindowContent: View {
             ScrollView {
                 ModulePanel(module: .clipboard, monitor: model.monitor).frame(maxWidth: .infinity)
             }
-        case .widgets: WidgetsPane(store: model.store)
+        case .widgets: WidgetsPane(store: model.store, activity: model.monitor.activity)
         case .dock: DockPane(store: model.store)
         case .unlock:
             SectionPlaceholder(

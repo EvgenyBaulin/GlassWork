@@ -47,6 +47,7 @@ final class AppModel {
         // First, so nothing takes the default keys of a shortcut the user changed.
         shortcuts.apply(store.settings.shortcuts)
         shortcuts.onRefused = { [diagnostics] in diagnostics.record(.shortcutRefused(action: $0.id)) }
+        monitor.activity.onGitHubFailed = { [diagnostics] in diagnostics.record(.gitHubFailed(status: $0)) }
         shortcuts.bind(.hub) { [weak self] in self?.toggleHub() }
         shortcuts.setActive(.hub, true)
         _ = textCapture
@@ -410,7 +411,7 @@ final class AppModel {
                 await monitor.activity.check(store.settings.widgets.endpoints)
             }
             if !kinds.isDisjoint(with: WidgetKind.githubKinds) {
-                await monitor.activity.refreshGitHub()
+                await monitor.activity.refreshGitHub(includesRuns: kinds.contains(.githubActions))
             }
             if store.settings.widgets.tracksScreenTime, !kinds.isDisjoint(with: WidgetKind.screenTimeKinds) {
                 monitor.activity.flushScreenTime()
