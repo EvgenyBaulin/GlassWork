@@ -151,33 +151,6 @@ final class AppModel {
         }
     }
 
-    private func checkAlerts() {
-        let settings = store.settings.alerts
-        guard settings.isEnabled else { return }
-        let fired = thresholds.update(
-            battery: monitor.battery,
-            averageCPU: monitor.sensors?.averageCPU,
-            settings: settings
-        )
-        for alert in fired {
-            post(alert)
-        }
-    }
-
-    private func post(_ alert: ThresholdAlert) {
-        let content = UNMutableNotificationContent()
-        switch alert {
-        case .lowBattery:
-            content.title = loc("Battery is low")
-            content.body = monitor.battery.map { Format.percent($0.charge) } ?? ""
-        case .highTemperature:
-            content.title = loc("Mac is running hot")
-            content.body = monitor.sensors?.averageCPU.map(Format.temperature) ?? ""
-        }
-        let request = UNNotificationRequest(identifier: alert.rawValue, content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
-    }
-
     /// The fan and sensor panes show live readings, which no panel may be asking for.
     func settingsChanged(isOpen: Bool) {
         isSettingsOpen = isOpen
@@ -487,6 +460,33 @@ final class AppModel {
 }
 
 private extension AppModel {
+    func checkAlerts() {
+        let settings = store.settings.alerts
+        guard settings.isEnabled else { return }
+        let fired = thresholds.update(
+            battery: monitor.battery,
+            averageCPU: monitor.sensors?.averageCPU,
+            settings: settings
+        )
+        for alert in fired {
+            post(alert)
+        }
+    }
+
+    func post(_ alert: ThresholdAlert) {
+        let content = UNMutableNotificationContent()
+        switch alert {
+        case .lowBattery:
+            content.title = loc("Battery is low")
+            content.body = monitor.battery.map { Format.percent($0.charge) } ?? ""
+        case .highTemperature:
+            content.title = loc("Mac is running hot")
+            content.body = monitor.sensors?.averageCPU.map(Format.temperature) ?? ""
+        }
+        let request = UNNotificationRequest(identifier: alert.rawValue, content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+    }
+
     /// Only what is on screen counts, so the adapter process does not run for nothing.
     var wantsNowPlaying: Bool {
         let widgets = store.settings.widgets.placements.contains { $0.kind == .nowPlaying || $0.kind == .lyrics }
