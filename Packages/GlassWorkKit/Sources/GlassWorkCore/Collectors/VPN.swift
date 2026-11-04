@@ -172,7 +172,7 @@ public enum VPNReader {
             }
             result.append(InterfaceAddress(
                 interface: String(cString: entry.ifa_name),
-                address: String(cString: host),
+                address: String(decoding: host.prefix { $0 != 0 }.map(UInt8.init(bitPattern:)), as: UTF8.self),
                 isUp: entry.ifa_flags & UInt32(IFF_UP) != 0
             ))
         }

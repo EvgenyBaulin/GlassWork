@@ -21,26 +21,26 @@ public struct ItemContent {
     public var alert: Color?
     /// Longest expected text, so the item keeps one width as figures change.
     public var template: String
-    /// Graph values for modules that do not record a `Metric`.
-    public var values: [Double]?
-    public var glyph: ItemGlyph?
-    /// Replaces the module's symbol, for state shown by the symbol itself.
+    /// Replaces the module's symbol, for items whose glyph carries meaning.
     public var symbol: String?
+    /// False for items that read fine as text alone.
+    public var showsSymbol = true
+    /// Drawn before the figure, except in the Labelled style, where the label says the same.
+    public var prefix: String?
+    /// Replaces the module's short label in the Labelled style.
+    public var label: String?
+    /// Drawn after the figure, in its own color.
+    public var accent: ItemAccent?
+    /// Graph points for modules that do not come from the system monitor.
+    public var values: [Double]?
+    /// Faded, because the data is old or the module is paused.
+    public var isDimmed = false
+    /// Drawn by the graph styles instead of a sparkline.
+    public var glyph: ItemGlyph?
     /// How much of a variable symbol is drawn, from 0 to 1.
     public var symbolLevel: Double?
-    /// Drawn faintly: nothing to report, as opposed to an alert.
-    public var isFaint = false
     /// Extra tooltip line.
     public var detail: String?
-
-    /// What the graph styles draw.
-    func graphValues(_ monitor: SystemMonitor) -> [Double] {
-        if let values {
-            return values
-        }
-        guard let metric else { return [] }
-        return monitor.points(metric, in: .minute).suffix(30).map(\.value)
-    }
 
     /// Text for a raw metric value, used by tooltips.
     func format(_ value: Double) -> String {
@@ -64,8 +64,17 @@ public struct ItemContent {
         case .sensors: sensors(monitor)
         case .uptime: uptime()
         case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon: everyday(module, monitor.everyday)
+        case .calendar, .endsIn, .todos: agenda(module, monitor.agenda)
+        case .deviceBatteries:
+            ItemContent(
+                figure: monitor.deviceBatteries.first.map { Format.percent($0.charge) } ?? "—",
+                template: "100%"
+            )
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
         case _ where ModuleID.developerCollected.contains(module): developer(module, monitor.developer)
+        case .weather: weather(monitor.weather)
+        case .rates: rates(monitor.rates)
+        case .clipboard: clipboard(monitor.clipboard)
         default: ItemContent(figure: "—", template: "—")
         }
     }
@@ -164,6 +173,28 @@ public struct ItemContent {
         }
     }
 
+    private static func agenda(_ module: ModuleID, _ store: AgendaStore) -> ItemContent {
+        let now = Date()
+        switch module {
+        case .todos:
+            let count = TodoFilter.all.apply(to: store.todos, now: now).count
+            return ItemContent(figure: store.remindersAccess == .granted ? "\(count)" : "—", template: "888")
+        case .endsIn:
+            let state = EndsInState(events: store.events, at: now)
+            let remaining = state.current.first?.end.timeIntervalSince(now)
+            let urgency = remaining.map(EndsInUrgency.init(remaining:))
+            return ItemContent(
+                figure: remaining?.clockText ?? "—",
+                alert: urgency == .lastMinute ? Palette.red : urgency == .soon ? Palette.orange : nil,
+                template: "8:88:88"
+            )
+        default:
+            let next = EndsInState(events: store.events, at: now).next
+            let text = next.map { $0.title.count > 16 ? "\($0.title.prefix(15))…" : $0.title }
+            return ItemContent(figure: text ?? "—", template: "MMMMMMMMMMMM")
+        }
+    }
+
     private static func firstCityTime(_ store: EverydayStore) -> String {
         guard let city = store.data.cities.first else { return "—" }
         var style = Date.FormatStyle(date: .omitted, time: .shortened)
@@ -196,14 +227,18 @@ public struct MenuBarItemView: View {
         HStack(spacing: 4) {
             switch style {
             case .symbol: symbol(content)
-            case .figure: symbol(content); figure(content)
+            case .figure:
+                if content.showsSymbol {
+                    symbol(content)
+                }
+                figure(content)
             case .graph: symbol(content); graph(content)
             case .graphAndFigure: graph(content); figure(content)
-            case .labelled: label; figure(content)
+            case .labelled: label(content); figure(content)
             }
         }
         .foregroundStyle(content.alert ?? .primary)
-        .opacity(content.isFaint ? 0.45 : 1)
+        .opacity(content.isDimmed ? 0.5 : 1)
         .frame(height: 22)
         .padding(.horizontal, 4)
         .allowsHitTesting(false)
@@ -223,7 +258,7 @@ public struct MenuBarItemView: View {
         let padding: CGFloat = 8
         return switch style {
         case .symbol: 16 + padding
-        case .figure: 16 + 4 + text + padding
+        case .figure: (content.showsSymbol ? 16 + 4 : 0) + text + padding
         case .graph: 16 + 4 + graphWidth + padding
         case .graphAndFigure: graphWidth + 4 + text + padding
         case .labelled: 8 + 4 + text + padding
@@ -240,7 +275,12 @@ public struct MenuBarItemView: View {
 
     private func figure(_ content: ItemContent) -> some View {
         VStack(alignment: .leading, spacing: -1) {
-            Text(content.figure)
+            HStack(spacing: 4) {
+                Text(content.text(for: style))
+                if let accent = content.accent {
+                    Text(accent.text).foregroundStyle(accent.color ?? .primary)
+                }
+            }
             if let second = content.secondLine {
                 Text(second)
             }
@@ -271,18 +311,22 @@ public struct MenuBarItemView: View {
                 symbol(content)
             }
         case nil:
-            let values = content.graphValues(monitor)
-            if !values.isEmpty {
-                Sparkline(values: values, domain: content.domain, color: content.alert ?? .primary)
-                    .frame(width: Self.graphWidth, height: 16)
+            if let values = content.graphValues(monitor) {
+                Sparkline(
+                    values: values,
+                    domain: content.domain,
+                    color: content.accent?.color ?? content.alert ?? .primary
+                )
+                .frame(width: Self.graphWidth, height: 16)
             }
         }
     }
 
-    private var label: some View {
-        let isLong = module.shortLabel.count > 3
+    private func label(_ content: ItemContent) -> some View {
+        let text = content.label ?? module.shortLabel
+        let isLong = text.count > 3
         return VStack(spacing: isLong ? -1 : -1.5) {
-            ForEach(Array(module.shortLabel.enumerated()), id: \.offset) { _, letter in
+            ForEach(Array(text.enumerated()), id: \.offset) { _, letter in
                 Text(String(letter))
             }
         }

@@ -80,6 +80,19 @@ struct AstronomyTests {
         #expect(abs(daylight - 12.2 * 3600) < 900)
     }
 
+    @Test func moscowSunriseFallsInTheMorning() throws {
+        // 2024-03-20: sunrise about 03:30 UTC, sunset about 15:40 UTC.
+        let times = Astronomy.sunTimes(
+            on: Date(timeIntervalSince1970: 1_710_936_000),
+            latitude: 55.75,
+            longitude: 37.62
+        )
+        let sunrise = try #require(times.sunrise)
+        let sunset = try #require(times.sunset)
+        #expect(abs(sunrise.timeIntervalSince1970 - 1_710_905_400) < 900)
+        #expect(abs(sunset.timeIntervalSince1970 - 1_710_949_200) < 900)
+    }
+
     @Test func polarNightHasNoSunrise() {
         // 2024-12-21 12:00 UTC at 80° north.
         let times = Astronomy.sunTimes(on: Date(timeIntervalSince1970: 1_734_782_400), latitude: 80, longitude: 0)

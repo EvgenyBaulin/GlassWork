@@ -133,6 +133,8 @@ struct SettingsRoot: View {
         case .menuBar: ModulesPane(store: store)
         case let .module(id): ModulePane(module: id, store: store, monitor: monitor)
         case .shortcuts: ShortcutsPane()
+        case .widgets: WidgetsPane(store: store)
+        case .dock: DockPane(store: store)
         case .about: AboutPane()
         default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
         }
@@ -255,7 +257,7 @@ struct ModulePane: View {
                     )
                 }
             }
-            DeveloperOptionsSection(module: module, store: store)
+            ModuleOptions(module: module, store: store)
         }
         .formStyle(.grouped)
     }
@@ -347,19 +349,6 @@ extension GeneralPane {
                 }
             }
         )
-    }
-}
-
-struct ShortcutsPane: View {
-    var body: some View {
-        Form {
-            Section(loc("Shortcuts")) {
-                LabeledContent(loc("Open the Hub"), value: "⌃⌥Space")
-                LabeledContent(loc("Open Settings"), value: "⌘,")
-                LabeledContent(loc("Undo a change in Settings"), value: "⌘Z")
-            }
-        }
-        .formStyle(.grouped)
     }
 }
 

@@ -23,6 +23,10 @@ public struct ModulePanel: View {
         case .sensors: SensorsPanel(monitor: monitor)
         case .uptime: UptimePanel()
         case .timers: TimersPanel(monitor: monitor)
+        case .deviceBatteries: DeviceBatteriesPanel(monitor: monitor)
+        case .calendar: CalendarPanel(monitor: monitor)
+        case .endsIn: EndsInPanel(monitor: monitor)
+        case .todos: TodosPanel(monitor: monitor)
         case .notes: NotesPanel(monitor: monitor)
         case .countdown: CountdownPanel(monitor: monitor)
         case .worldClocks: WorldClocksPanel(monitor: monitor)
@@ -32,6 +36,9 @@ public struct ModulePanel: View {
         case .eject: EjectPanel(monitor: monitor)
         case _ where ModuleID.developerCollected.contains(module):
             DeveloperPanel(module: module, store: monitor.developer)
+        case .weather: WeatherPanel(store: monitor.weather)
+        case .rates: RatesPanel(store: monitor.rates)
+        case .clipboard: ClipboardPanel(store: monitor.clipboard)
         default: EmptyView()
         }
     }

@@ -28,6 +28,13 @@ struct DeveloperPanel: View {
     }
 }
 
+extension PanelActions {
+    /// Writes one `ModuleSettings.options` entry; nil removes it.
+    func setOption(_ module: ModuleID, _ key: String, _ value: String?) {
+        updateSettings { $0.update(module) { $0.options[key] = value } }
+    }
+}
+
 /// Options for the module's page in Settings.
 public struct DeveloperOptionsSection: View {
     private let module: ModuleID

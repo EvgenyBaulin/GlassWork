@@ -88,6 +88,6 @@ struct AIUsageItemTests {
         let item = ItemContent.aiUsage(AIUsageReading(tools: [], readAt: now), at: now)
 
         #expect(item.figure == "—")
-        #expect(item.isFaint)
+        #expect(item.isDimmed)
     }
 }

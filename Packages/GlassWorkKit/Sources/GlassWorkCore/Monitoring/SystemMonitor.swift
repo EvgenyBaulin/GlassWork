@@ -16,6 +16,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var sensors = false
     public var processes = false
     public var developer: Set<ModuleID> = []
+    public var devices = false
 
     public init() {}
 }
@@ -35,12 +36,21 @@ public final class SystemMonitor {
     public private(set) var gpus: [GPUSample] = []
     public private(set) var sensors: SensorSample?
     public private(set) var processes: [ProcessUsage] = []
+    public private(set) var deviceBatteries: [DeviceBattery] = []
     public private(set) var histories: [Metric: TieredHistory] = [:]
 
     /// Timers, notes and other small modules, ticking along with the monitor.
     public let everyday = EverydayStore()
     /// Git, Docker, Ping and the other developer modules, each at its own pace.
     public let developer = DeveloperStore()
+    /// Calendar events and reminders.
+    public let agenda = AgendaStore()
+    /// Screen time, commands, endpoints and GitHub.
+    public let activity = ActivityStore()
+    /// These only reach the network or the disk once the app asks them to.
+    public let weather: WeatherStore
+    public let rates: RatesStore
+    public let clipboard: ClipboardStore
 
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
@@ -53,7 +63,14 @@ public final class SystemMonitor {
     @ObservationIgnored private var loop: Task<Void, Never>?
     @ObservationIgnored private var lastSlow = Date.distantPast
 
-    public init() {
+    public init(
+        weather: WeatherStore = WeatherStore(),
+        rates: RatesStore = RatesStore(),
+        clipboard: ClipboardStore = ClipboardStore()
+    ) {
+        self.weather = weather
+        self.rates = rates
+        self.clipboard = clipboard
         developer.onChange = { [weak self] in self?.onUpdate?() }
     }
 
@@ -76,6 +93,42 @@ public final class SystemMonitor {
     public func stop() {
         loop?.cancel()
         loop = nil
+    }
+
+    /// Everything widgets show, read fresh regardless of the current demand.
+    public func widgetSnapshot() async -> WidgetSnapshot {
+        var full = MonitorDemand()
+        full.cpu = true
+        full.memory = true
+        full.network = true
+        full.disk = true
+        full.battery = true
+        full.gpu = true
+        full.sensors = true
+        full.processes = true
+        let date = Date()
+        await apply(sampler.read(full, includeSlow: true), at: date)
+        var snapshot = WidgetSnapshot(date: date)
+        snapshot.cpu = cpu
+        snapshot.cpuInfo = cpuInfo
+        snapshot.memory = memory
+        snapshot.gpu = gpus.first
+        snapshot.battery = battery
+        snapshot.volumes = volumes
+        snapshot.network = network
+        snapshot.sensors = sensors
+        snapshot.processes = Array(processes.sorted { $0.cpu > $1.cpu }.prefix(12))
+        snapshot.everyday = everyday.data
+        snapshot.events = agenda.events
+        snapshot.todos = agenda.todos
+        snapshot.bootTime = SystemClock.bootTime()
+        snapshot.screenTime = activity.screenTime
+        snapshot.commandResults = activity.commandResults
+        snapshot.endpointChecks = activity.endpointChecks
+        snapshot.reviews = activity.reviews
+        snapshot.runs = activity.runs
+        snapshot.contributions = activity.contributions
+        return snapshot
     }
 
     /// Reads right away, for example when a panel opens.
@@ -105,6 +158,9 @@ public final class SystemMonitor {
         apply(reading, at: now)
         everyday.tick(at: now)
         developer.tick(at: now, demand: demand.developer)
+        weather.tick(at: now)
+        rates.tick(at: now)
+        clipboard.tick(at: now)
         onUpdate?()
     }
 
@@ -182,6 +238,7 @@ actor Sampler {
         var gpus: [GPUSample]?
         var sensors: SensorSample?
         var processes: [ProcessUsage]?
+        var devices: [DeviceBattery]?
     }
 
     private var ticks: [CPUTicks] = []

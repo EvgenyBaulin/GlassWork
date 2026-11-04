@@ -31,7 +31,7 @@ struct ToolLocatorTests {
 
 struct DockerParserTests {
     @Test func readsContainers() throws {
-        let containers = try DockerParser.containers(fixture("docker-ps.jsonl"))
+        let containers = try DockerParser.containers(textFixture("docker-ps.jsonl"))
 
         #expect(containers.map(\.name) == ["postgres-dev", "minio", "redis-cache", "worker"])
         #expect(containers.map(\.isRunning) == [true, true, true, false])
@@ -41,7 +41,7 @@ struct DockerParserTests {
     }
 
     @Test func listsEachPublishedPortOnce() throws {
-        let containers = try DockerParser.containers(fixture("docker-ps.jsonl"))
+        let containers = try DockerParser.containers(textFixture("docker-ps.jsonl"))
 
         #expect(containers[0].ports == ["5432→5432"])
         #expect(containers[1].ports == ["9000-9001"])
@@ -90,7 +90,7 @@ struct DockerParserTests {
     }
 
     @Test func runsOnlyReadOnlyCommands() async throws {
-        let listing = try fixture("docker-ps.jsonl")
+        let listing = try textFixture("docker-ps.jsonl")
         let runner = FakeRunner { _, arguments in
             ProcessOutput(status: 0, stdout: arguments.first == "ps" ? listing : "orbstack\n", stderr: "")
         }
@@ -110,21 +110,21 @@ struct DevServerParserTests {
 
     private func servers() throws -> [DevServer] {
         try DevServerFilter.servers(
-            sockets: DevServerParser.sockets(fixture("lsof-listen.txt")),
-            directories: DevServerParser.workingDirectories(fixture("lsof-cwd.txt")),
-            processes: DevServerParser.processes(fixture("ps-processes.txt")),
+            sockets: DevServerParser.sockets(textFixture("lsof-listen.txt")),
+            directories: DevServerParser.workingDirectories(textFixture("lsof-cwd.txt")),
+            processes: DevServerParser.processes(textFixture("ps-processes.txt")),
             home: home
         )
     }
 
     @Test func mergesIPv4AndIPv6() throws {
-        let sockets = try DevServerParser.sockets(fixture("lsof-listen.txt"))
+        let sockets = try DevServerParser.sockets(textFixture("lsof-listen.txt"))
         #expect(sockets.count { $0.port == 3000 } == 1)
         #expect(sockets.count { $0.port == 57414 } == 1)
     }
 
     @Test func readsWorkingDirectories() throws {
-        let directories = try DevServerParser.workingDirectories(fixture("lsof-cwd.txt"))
+        let directories = try DevServerParser.workingDirectories(textFixture("lsof-cwd.txt"))
         #expect(directories[1041] == "/")
         #expect(directories[60210] == "/Users/dev/Developer/pocket-api")
     }
@@ -160,7 +160,7 @@ struct DevServerParserTests {
     }
 
     @Test func nothingFromTheCommandLineIsKeptButTheToolName() throws {
-        let details = try DevServerParser.processes(fixture("ps-processes.txt"))
+        let details = try DevServerParser.processes(textFixture("ps-processes.txt"))
         #expect(!"\(details)".contains("hunter2"))
     }
 
@@ -206,7 +206,7 @@ struct DevServerParserTests {
     }
 
     @Test func looksUpEveryProcessInOneCall() async throws {
-        let listing = try fixture("lsof-listen.txt")
+        let listing = try textFixture("lsof-listen.txt")
         let runner = FakeRunner { tool, arguments in
             let isListing = tool.hasSuffix("lsof") && arguments.first == "-nP"
             return ProcessOutput(status: 0, stdout: isListing ? listing : "", stderr: "")

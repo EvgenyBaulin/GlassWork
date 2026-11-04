@@ -202,7 +202,7 @@ struct DeveloperItemTests {
         let item = ItemContent.ping(log)
 
         #expect(item.alert == nil)
-        #expect(item.isFaint)
+        #expect(item.isDimmed)
     }
 
     @Test func connectedVPNIsAGreenFilledShield() {
@@ -219,7 +219,7 @@ struct DeveloperItemTests {
 
         #expect(item.symbol == "shield")
         #expect(item.alert == nil)
-        #expect(item.isFaint)
+        #expect(item.isDimmed)
     }
 
     @Test func wifiShowsBarsAndDecibels() {
@@ -248,7 +248,7 @@ struct DeveloperItemTests {
         let item = ItemContent.docker(.notRunning)
 
         #expect(item.figure == "—")
-        #expect(item.isFaint)
+        #expect(item.isDimmed)
     }
 
     @Test func devServersCount() {
@@ -293,7 +293,7 @@ struct DeveloperItemTests {
     }
 
     @Test func noRepositoryIsFaint() {
-        #expect(ItemContent.git(.repositories([]), selected: nil).isFaint)
+        #expect(ItemContent.git(.repositories([]), selected: nil).isDimmed)
     }
 
     @Test func pingGraphShowsTheWholeLogNotTheLastMinute() {

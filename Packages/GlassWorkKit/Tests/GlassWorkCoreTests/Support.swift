@@ -3,7 +3,7 @@ import Foundation
 import Testing
 
 /// Text of a real command output saved in `Fixtures`.
-func fixture(_ name: String) throws -> String {
+func textFixture(_ name: String) throws -> String {
     let url = try #require(Bundle.module.url(forResource: name, withExtension: nil, subdirectory: "Fixtures"))
     return try String(contentsOf: url, encoding: .utf8)
 }

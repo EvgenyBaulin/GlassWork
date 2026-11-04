@@ -4,12 +4,12 @@ import Testing
 
 struct PingParserTests {
     @Test func readsTheRoundTripTime() throws {
-        let output = try ProcessOutput(status: 0, stdout: fixture("ping-reply.txt"), stderr: "")
+        let output = try ProcessOutput(status: 0, stdout: textFixture("ping-reply.txt"), stderr: "")
         #expect(PingParser.outcome(output) == .reply(milliseconds: 5.86))
     }
 
     @Test func noReplyIsATimeout() throws {
-        let output = try ProcessOutput(status: 2, stdout: fixture("ping-timeout.txt"), stderr: "")
+        let output = try ProcessOutput(status: 2, stdout: textFixture("ping-timeout.txt"), stderr: "")
         #expect(PingParser.outcome(output) == .timeout)
     }
 

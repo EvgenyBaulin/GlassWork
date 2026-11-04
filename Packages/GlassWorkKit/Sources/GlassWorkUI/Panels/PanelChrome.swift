@@ -9,8 +9,12 @@ public struct PanelActions {
     public var openApp: (String) -> Void
     public var openURL: (URL) -> Void
     public var quitProcess: (ProcessUsage, Bool) -> Void
-    /// Writes one `ModuleSettings.options` entry; nil removes it.
-    public var setOption: (ModuleID, String, String?) -> Void
+    /// Changes settings from a panel, the same way the Settings window does.
+    public var updateSettings: ((inout AppSettings) -> Void) -> Void
+    /// Puts an entry back on the pasteboard. The flag asks for plain text.
+    public var useClipboardEntry: (ClipboardEntry, Bool) -> Void
+    /// Only checks. Asking macOS for access is left to the switch in Settings.
+    public var isPasteAllowed: () -> Bool
 
     public init(
         openSettings: @escaping (ModuleID) -> Void = { _ in },
@@ -18,14 +22,18 @@ public struct PanelActions {
         openApp: @escaping (String) -> Void = { _ in },
         openURL: @escaping (URL) -> Void = { _ in },
         quitProcess: @escaping (ProcessUsage, Bool) -> Void = { _, _ in },
-        setOption: @escaping (ModuleID, String, String?) -> Void = { _, _, _ in }
+        updateSettings: @escaping ((inout AppSettings) -> Void) -> Void = { _ in },
+        useClipboardEntry: @escaping (ClipboardEntry, Bool) -> Void = { _, _ in },
+        isPasteAllowed: @escaping () -> Bool = { false }
     ) {
         self.openSettings = openSettings
         self.detach = detach
         self.openApp = openApp
         self.openURL = openURL
         self.quitProcess = quitProcess
-        self.setOption = setOption
+        self.updateSettings = updateSettings
+        self.useClipboardEntry = useClipboardEntry
+        self.isPasteAllowed = isPasteAllowed
     }
 }
 

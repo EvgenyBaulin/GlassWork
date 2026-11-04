@@ -4,7 +4,7 @@ import Testing
 
 struct GitStatusParserTests {
     @Test func countsChangesAheadAndBehind() throws {
-        let status = try GitStatusParser.parse(fixture("git-status-ahead-behind.txt"))
+        let status = try GitStatusParser.parse(textFixture("git-status-ahead-behind.txt"))
 
         #expect(status.branch == "main")
         #expect(status.upstream == "origin/main")
@@ -15,7 +15,7 @@ struct GitStatusParserTests {
     }
 
     @Test func countsConflictsApart() throws {
-        let status = try GitStatusParser.parse(fixture("git-status-conflict.txt"))
+        let status = try GitStatusParser.parse(textFixture("git-status-conflict.txt"))
 
         #expect(status.conflicted == 1)
         #expect(status.changed == 0)
@@ -24,7 +24,7 @@ struct GitStatusParserTests {
     }
 
     @Test func detachedHeadShowsTheShortHash() throws {
-        let status = try GitStatusParser.parse(fixture("git-status-detached.txt"))
+        let status = try GitStatusParser.parse(textFixture("git-status-detached.txt"))
 
         #expect(status.branch == nil)
         #expect(status.head == "0776d55")
@@ -32,7 +32,7 @@ struct GitStatusParserTests {
     }
 
     @Test func aNewRepositoryHasNoCommit() throws {
-        let status = try GitStatusParser.parse(fixture("git-status-initial.txt"))
+        let status = try GitStatusParser.parse(textFixture("git-status-initial.txt"))
 
         #expect(status.commit == nil)
         #expect(status.head == "main")
@@ -128,7 +128,7 @@ struct GitCollectorTests {
     }
 
     private func runner() throws -> FakeRunner {
-        let status = try fixture("git-status-ahead-behind.txt")
+        let status = try textFixture("git-status-ahead-behind.txt")
         return FakeRunner { _, arguments in
             ProcessOutput(status: 0, stdout: arguments.contains("status") ? status : "1793770723\n", stderr: "")
         }
@@ -262,7 +262,7 @@ struct GitStoreTests {
             )
         }
         defer { try? FileManager.default.removeItem(at: root) }
-        let status = try fixture("git-status-detached.txt")
+        let status = try textFixture("git-status-detached.txt")
         let runner = FakeRunner { _, arguments in
             ProcessOutput(status: 0, stdout: arguments.contains("status") ? status : "", stderr: "")
         }

@@ -50,6 +50,13 @@ public extension ModuleID {
         case .eject: loc("Eject")
         case .sunMoon: loc("Sun and Moon")
         case .date: loc("Date")
+        case .deviceBatteries: loc("Device Batteries")
+        case .calendar: loc("Calendar")
+        case .endsIn: loc("Ends In")
+        case .todos: loc("To-Dos")
+        case .weather: loc("Weather")
+        case .rates: loc("Rates")
+        case .clipboard: loc("Clipboard")
         default: rawValue
         }
     }
@@ -82,7 +89,13 @@ public extension ModuleID {
         case .appearance: "circle.lefthalf.filled"
         case .eject: "eject"
         case .sunMoon: "sunrise"
-        case .date: "calendar"
+        case .date, .calendar: "calendar"
+        case .endsIn: "timer.circle"
+        case .deviceBatteries: "battery.100percent.circle"
+        case .todos: "checklist"
+        case .weather: "cloud.sun"
+        case .rates: "chart.line.uptrend.xyaxis"
+        case .clipboard: "list.clipboard"
         default: "square.dashed"
         }
     }
@@ -92,17 +105,21 @@ public extension ModuleID {
         case .overview, .uptime: Palette.gray
         case .cpu, .docker, .vpn, .wifi: Palette.blue
         case .aiUsage, .git: Palette.orange
-        case .memory, .battery, .devServers: Palette.green
+        case .memory, .battery, .deviceBatteries, .devServers: Palette.green
         case .disk: Palette.cyan
         case .network, .ping: Palette.teal
         case .gpu: Palette.purple
-        case .sensors, .date: Palette.red
+        case .sensors, .date, .calendar, .endsIn: Palette.red
+        case .todos: Palette.blue
         case .worldClocks: Palette.blue
         case .timers, .stopwatch, .sunMoon: Palette.orange
         case .notes: Palette.yellow
         case .countdown: Palette.purple
         case .colours: Palette.pink
         case .appearance: Palette.blue
+        case .weather: Palette.cyan
+        case .rates: Palette.green
+        case .clipboard: Palette.teal
         default: Palette.gray
         }
     }
@@ -126,6 +143,9 @@ public extension ModuleID {
         case .ping: "PING"
         case .vpn: "VPN"
         case .wifi: "SIG"
+        case .weather: "WTH"
+        case .rates: "FX"
+        case .clipboard: "CLP"
         default: ""
         }
     }
@@ -142,6 +162,8 @@ public extension ModuleID {
         case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
         case .colours, .appearance, .eject, .sunMoon, .date: true
         case .aiUsage, .git, .devServers, .docker, .ping, .vpn, .wifi: true
+        case .calendar, .endsIn, .todos, .deviceBatteries: true
+        case .weather, .rates, .clipboard: true
         default: false
         }
     }

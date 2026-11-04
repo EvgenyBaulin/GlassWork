@@ -147,16 +147,19 @@ struct HubTile: View {
                     badge
                 }
                 HStack(alignment: .bottom) {
-                    Text(content.figure)
+                    Text(content.text(for: .figure))
                         .font(.system(size: 19, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Spacer(minLength: 4)
-                    let values = content.graphValues(monitor)
-                    if !values.isEmpty {
-                        Sparkline(values: values, domain: content.domain, color: setting.id.tint)
-                            .frame(width: 52, height: 26)
+                    if let values = content.graphValues(monitor) {
+                        Sparkline(
+                            values: values,
+                            domain: content.domain,
+                            color: content.accent?.color ?? setting.id.tint
+                        )
+                        .frame(width: 52, height: 26)
                     }
                 }
             }

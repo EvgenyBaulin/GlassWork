@@ -20,7 +20,7 @@ extension ItemContent {
         let template = "feature/ab…cd ±99 ↑9 ↓9"
         guard let repository = reading?.selected(path: selected), let status = repository.status else {
             var item = ItemContent(figure: "—", template: template)
-            item.isFaint = true
+            item.isDimmed = true
             return item
         }
         var item = ItemContent(figure: gitFigure(status), template: template)
@@ -50,7 +50,7 @@ extension ItemContent {
     static func devServers(_ reading: DevServerReading?) -> ItemContent {
         guard case let .servers(servers) = reading else {
             var item = ItemContent(figure: "—", template: "99")
-            item.isFaint = true
+            item.isDimmed = true
             return item
         }
         var item = ItemContent(figure: "\(servers.count)", template: "99")
@@ -62,7 +62,7 @@ extension ItemContent {
     static func docker(_ reading: DockerReading?) -> ItemContent {
         guard case let .containers(containers, _) = reading else {
             var item = ItemContent(figure: "—", template: "99")
-            item.isFaint = true
+            item.isDimmed = true
             item.detail = reading == .notRunning ? loc("Docker is not running") : nil
             return item
         }
@@ -79,7 +79,7 @@ extension ItemContent {
             template: "999 ms"
         )
         item.values = log.replies
-        item.isFaint = log.isOffline
+        item.isDimmed = log.isOffline
         if let stats = log.stats {
             let low = DeveloperText.milliseconds(stats.minimum)
             let high = DeveloperText.milliseconds(stats.maximum)
@@ -97,7 +97,7 @@ extension ItemContent {
         )
         item.symbol = isConnected ? "shield.fill" : "shield"
         item.glyph = .symbol
-        item.isFaint = reading?.isConnecting == true || reading?.isConfigured != true
+        item.isDimmed = reading?.isConnecting == true || reading?.isConfigured != true
         item.detail = reading?.connectedService?.name
         return item
     }
@@ -117,7 +117,7 @@ extension ItemContent {
             item.figure = loc("Off")
         default:
             item.symbolLevel = 0
-            item.isFaint = true
+            item.isDimmed = true
         }
         return item
     }

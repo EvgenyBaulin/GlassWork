@@ -5,7 +5,7 @@ extension ItemContent {
     static func aiUsage(_ reading: AIUsageReading?, at date: Date = Date()) -> ItemContent {
         guard let peak = reading?.peak(at: date) else {
             var item = ItemContent(figure: "—", template: "100%")
-            item.isFaint = true
+            item.isDimmed = true
             return item
         }
         let share = peak.window.used(at: date)

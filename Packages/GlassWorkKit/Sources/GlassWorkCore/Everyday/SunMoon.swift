@@ -53,8 +53,9 @@ public enum Astronomy {
     /// Sunrise equation. Polar day and night return nil times.
     public static func sunTimes(on date: Date, latitude: Double, longitude: Double) -> SunTimes {
         let julian = date.timeIntervalSince1970 / 86400 + 2_440_587.5
-        let cycle = (julian - 2_451_545 + 0.0008 - longitude / 360).rounded()
-        let mean = 2_451_545 + 0.0009 + longitude / 360 + cycle
+        // East longitudes reach solar noon earlier, so they are subtracted.
+        let cycle = (julian - 2_451_545 - 0.0009 + longitude / 360).rounded()
+        let mean = 2_451_545 + 0.0009 - longitude / 360 + cycle
         let anomaly = (357.5291 + 0.98560028 * (mean - 2_451_545)).truncatingRemainder(dividingBy: 360)
         let radians = anomaly * .pi / 180
         let center = 1.9148 * sin(radians) + 0.02 * sin(2 * radians) + 0.0003 * sin(3 * radians)
