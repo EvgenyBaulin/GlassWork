@@ -12168,6 +12168,86 @@
           }
         }
       }
+    },
+    "In menu bar, Hub only or Off. Click a module in the sidebar for its options; drag to reorder.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В строке меню, только в Хабе или выключен. Нажмите на модуль в боковом меню, чтобы открыть его настройки. Порядок меняется перетаскиванием."
+          }
+        }
+      }
+    },
+    "All off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключить все"
+          }
+        }
+      }
+    },
+    "Reset order": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить порядок"
+          }
+        }
+      }
+    },
+    "Editing · drag ⋮⋮ to reorder · (−) turns a module off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Правка · ⋮⋮ меняет порядок · (−) выключает модуль"
+          }
+        }
+      }
+    },
+    "opens the Hub from anywhere · click the GlassWork icon also works": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "открывает Хаб откуда угодно · значок GlassWork тоже подойдёт"
+          }
+        }
+      }
+    },
+    "%lld off · + Add modules…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключено: %lld · + Добавить модули…"
+          }
+        }
+      }
+    },
+    "Every module is on.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все модули включены."
+          }
+        }
+      }
+    },
+    "Turn off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключить"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

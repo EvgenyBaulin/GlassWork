@@ -178,31 +178,24 @@ struct SettingsRoot: View {
 struct ModulesPane: View {
     let store: SettingsStore
 
+    /// A `List`, because rows only drag there: `onMove` does nothing inside a `Form`.
     var body: some View {
-        Form {
-            Section {
-                ForEach(store.settings.modules.filter(\.id.isAvailable)) { setting in
-                    HStack(spacing: 10) {
-                        ModuleIcon(setting.id, size: 26)
-                        Text(setting.id.title)
-                        Spacer()
-                        ModePicker(module: setting.id, store: store).frame(width: 150)
-                    }
-                }
-            } header: {
-                Text(loc("Modules"))
-            } footer: {
-                Text(loc("In menu bar, Hub only or Off. Click a module in the sidebar for its options."))
-            }
+        List {
+            Text(loc("In menu bar, Hub only or Off. Click a module in the sidebar for its options; drag to reorder."))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            ModuleOrderSections(store: store)
             Section {
                 HStack {
                     Button(loc("All to Hub")) { setAll(.hubOnly) }
                     Button(loc("All to menu bar")) { setAll(.menuBar) }
+                    Button(loc("All off")) { setAll(.off) }
                     Spacer()
+                    Button(loc("Reset order")) { store.update { $0.resetModuleOrder() } }
                     Button(loc("Restore defaults")) { store.update { $0.modules = AppSettings.defaultModules } }
                 }
             }
-            Section {
+            Section(loc("Hiding")) {
                 Toggle(loc("Hide items behind a separator"), isOn: hidingEnabled)
                 Stepper(value: autoHide, in: 3 ... 60) {
                     Text(loc("Hide again after \(store.settings.hiding.autoHideSeconds) s"))
@@ -210,16 +203,15 @@ struct ModulesPane: View {
                 LabeledContent(loc("To remove a macOS item for good, turn it off in System Settings.")) {
                     Button(loc("Menu Bar Settings…"), action: Self.openMenuBarSettings)
                 }
-            } header: {
-                Text(loc("Hiding"))
-            } footer: {
                 Text(loc("""
                 Everything left of ‹ hides, macOS items such as Wi-Fi and Battery too. \
                 Hold ⌘ and drag an item across ‹ to choose. The clock and Control Center always stay.
                 """))
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
         }
-        .formStyle(.grouped)
+        .listStyle(.inset)
     }
 
     /// Only opens the page: which macOS items are shown stays the user's change to make there.
@@ -253,23 +245,6 @@ struct ModulesPane: View {
     }
 }
 
-struct ModePicker: View {
-    let module: ModuleID
-    let store: SettingsStore
-
-    var body: some View {
-        Picker("", selection: Binding(
-            get: { store.settings.module(module)?.mode ?? .off },
-            set: { value in store.update { $0.update(module) { $0.mode = value } } }
-        )) {
-            Text(loc("In menu bar")).tag(ModuleMode.menuBar)
-            Text(loc("Hub only")).tag(ModuleMode.hubOnly)
-            Text(loc("Off")).tag(ModuleMode.off)
-        }
-        .labelsHidden()
-    }
-}
-
 struct ModulePane: View {
     let module: ModuleID
     let store: SettingsStore
@@ -294,11 +269,7 @@ struct ModulePane: View {
             }
             Section(loc("Display style")) {
                 Picker(loc("Style"), selection: style) {
-                    Text(loc("Symbol")).tag(DisplayStyle.symbol)
-                    Text(loc("Figure")).tag(DisplayStyle.figure)
-                    Text(loc("Graph")).tag(DisplayStyle.graph)
-                    Text(loc("Graph and figure")).tag(DisplayStyle.graphAndFigure)
-                    Text(loc("Labelled")).tag(DisplayStyle.labelled)
+                    ForEach(DisplayStyle.allCases, id: \.self) { Text($0.title).tag($0) }
                 }
                 LabeledContent(loc("Preview")) {
                     MenuBarItemView(
