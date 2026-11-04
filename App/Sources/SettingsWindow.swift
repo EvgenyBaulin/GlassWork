@@ -30,7 +30,7 @@ final class SettingsWindowController {
                 store: model.store,
                 monitor: model.monitor,
                 fans: model.fans,
-                tiles: model.windowTiles.status,
+                shortcuts: model.shortcuts,
                 navigation: navigation
             )
             let created = NSWindow(contentViewController: NSHostingController(rootView: view))
@@ -88,7 +88,7 @@ struct SettingsRoot: View {
     let store: SettingsStore
     let monitor: SystemMonitor
     let fans: FanControlModel
-    let tiles: WindowTilesStatus
+    let shortcuts: ShortcutCenter
     @Bindable var navigation: SettingsNavigation
     @State private var query = ""
 
@@ -179,7 +179,8 @@ struct SettingsRoot: View {
         case .general: GeneralPane(store: store)
         case .menuBar: ModulesPane(store: store)
         case let .module(id): ModulePane(module: id, store: store, monitor: monitor)
-        case .shortcuts: ShortcutsPane()
+        case .shortcuts:
+            ShortcutsPane(store: store, refused: shortcuts.refused) { shortcuts.setRecording($0) }
         case .widgets: WidgetsPane(store: store)
         case .dock: DockPane(store: store)
         case .fans:
@@ -190,7 +191,7 @@ struct SettingsRoot: View {
                 showsCurves: navigation.fanCurveRequests > 0
             )
             .id(navigation.fanCurveRequests)
-        case .windowTiles: WindowTilesPage(store: store, status: tiles)
+        case .windowTiles: WindowTilesPage(store: store, shortcuts: shortcuts)
         case .about: AboutPane()
         default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
         }

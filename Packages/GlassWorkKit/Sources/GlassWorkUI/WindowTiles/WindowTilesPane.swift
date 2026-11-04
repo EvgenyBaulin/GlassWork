@@ -9,6 +9,7 @@ public struct WindowTilesPane: View {
     private let isTrusted: Bool
     /// Shortcuts another app got to first, which therefore do nothing here.
     private let takenShortcuts: [String]
+    private let shortcuts: ShortcutSettings
     private let openAccessibilitySettings: () -> Void
 
     public init(
@@ -16,12 +17,14 @@ public struct WindowTilesPane: View {
         showsPreview: Binding<Bool>,
         isTrusted: Bool,
         takenShortcuts: [String] = [],
+        shortcuts: ShortcutSettings = ShortcutSettings(),
         openAccessibilitySettings: @escaping () -> Void
     ) {
         _isEnabled = isEnabled
         _showsPreview = showsPreview
         self.isTrusted = isTrusted
         self.takenShortcuts = takenShortcuts
+        self.shortcuts = shortcuts
         self.openAccessibilitySettings = openAccessibilitySettings
     }
 
@@ -37,7 +40,7 @@ public struct WindowTilesPane: View {
                 }
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 10)], spacing: 10) {
                     ForEach(TileLayout.allCases, id: \.self) { layout in
-                        TileCard(layout: layout)
+                        TileCard(layout: layout, shortcut: label(.place(layout)))
                     }
                 }
                 Text(footnote)
@@ -95,17 +98,25 @@ public struct WindowTilesPane: View {
     }
 
     private var footnote: String {
-        let previous = TileCommand.previousDisplay.shortcut.label
-        let next = TileCommand.nextDisplay.shortcut.label
+        let previous = label(.previousDisplay)
+        let next = label(.nextDisplay)
         return loc(
             "Press a half again to move through thirds. \(previous) and \(next) send a window to another display."
         )
     }
 }
 
+private extension WindowTilesPane {
+    /// A dash for a shortcut the user cleared.
+    func label(_ command: TileCommand) -> String {
+        shortcuts.shortcut(for: .tile(command))?.label ?? "—"
+    }
+}
+
 /// One layout: a small screen with the place filled in, its name and its shortcut.
 private struct TileCard: View {
     let layout: TileLayout
+    let shortcut: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -116,7 +127,7 @@ private struct TileCard: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
                 Spacer(minLength: 0)
-                Text(verbatim: TileCommand.place(layout).shortcut.label)
+                Text(verbatim: shortcut)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
                     .fixedSize()

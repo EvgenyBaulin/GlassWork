@@ -209,14 +209,16 @@ public struct HubView: View {
 
     private var footer: some View {
         HStack(spacing: 8) {
-            Text(verbatim: "⌃⌥Space")
-                .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 3)
-                .background(Color.primary.opacity(0.12), in: .rect(cornerRadius: 4))
-            Text(loc("opens the Hub from anywhere · click the GlassWork icon also works"))
-                .foregroundStyle(.tertiary)
-                .lineLimit(1)
+            if let shortcut = store.settings.shortcuts.shortcut(for: .hub) {
+                Text(verbatim: shortcut.label)
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.primary.opacity(0.12), in: .rect(cornerRadius: 4))
+                Text(loc("opens the Hub from anywhere · click the GlassWork icon also works"))
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+            }
             Spacer()
             if isEditing {
                 Button(loc("\(offModules.count) off · + Add modules…")) { isAddingModules.toggle() }

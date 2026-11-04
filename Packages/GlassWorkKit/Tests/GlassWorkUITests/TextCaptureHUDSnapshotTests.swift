@@ -10,8 +10,8 @@ struct TextCaptureNoticeTests {
     }
 
     @Test func onlyThePermissionMessageExplainsAnything() {
-        #expect(TextCaptureNotice.noText.detail == nil)
-        #expect(TextCaptureNotice.needsScreenRecording.detail != nil)
+        #expect(TextCaptureNotice.noText.detail(shortcut: "⇧⌘2") == nil)
+        #expect(TextCaptureNotice.needsScreenRecording.detail(shortcut: "⇧⌘2") != nil)
         #expect(TextCaptureNotice.needsScreenRecording.duration > TextCaptureNotice.noText.duration)
     }
 }

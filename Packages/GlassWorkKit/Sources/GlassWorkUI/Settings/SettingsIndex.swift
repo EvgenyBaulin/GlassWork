@@ -275,6 +275,16 @@ extension SettingsIndex {
             )
         }
         return [
+            page("shortcut.hub", "Open the Hub", "Открыть Хаб", .shortcuts, ["Shortcuts"]),
+            page("shortcut.quickPaste", "Clipboard history", "История буфера обмена", .shortcuts, ["Shortcuts"]),
+            page(
+                "shortcut.textCapture",
+                "Copy text from screen",
+                "Скопировать текст с экрана",
+                .shortcuts,
+                ["Shortcuts"]
+            ),
+            page("shortcut.quickQuit", "Quit an app", "Завершить приложение", .shortcuts, ["Shortcuts"]),
             page(
                 "general.log",
                 "Keep diagnostic log",

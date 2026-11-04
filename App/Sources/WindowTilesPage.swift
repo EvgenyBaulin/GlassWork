@@ -6,7 +6,7 @@ import SwiftUI
 /// window means moving this one line of `detail` with it.
 struct WindowTilesPage: View {
     let store: SettingsStore
-    let status: WindowTilesStatus
+    let shortcuts: ShortcutCenter
     @State private var isTrusted = Accessibility.isTrusted
 
     var body: some View {
@@ -14,7 +14,8 @@ struct WindowTilesPage: View {
             isEnabled: binding(\.isEnabled),
             showsPreview: binding(\.showsPreview),
             isTrusted: isTrusted,
-            takenShortcuts: status.takenShortcuts.map(\.label),
+            takenShortcuts: taken,
+            shortcuts: store.settings.shortcuts,
             openAccessibilitySettings: Accessibility.openSettings
         )
         .task {
@@ -23,6 +24,14 @@ struct WindowTilesPage: View {
                 isTrusted = Accessibility.isTrusted
                 try? await Task.sleep(for: .seconds(2))
             }
+        }
+    }
+
+    /// Shortcuts another app got to first, which therefore do nothing here.
+    private var taken: [String] {
+        TileCommand.all.compactMap { command in
+            let action = ShortcutAction.tile(command)
+            return shortcuts.refused.contains(action) ? store.settings.shortcuts.shortcut(for: action)?.label : nil
         }
     }
 

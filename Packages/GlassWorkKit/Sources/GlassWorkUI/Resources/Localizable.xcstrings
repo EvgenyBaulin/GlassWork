@@ -13330,6 +13330,286 @@
           }
         }
       }
+    },
+    "Clipboard history": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История буфера обмена"
+          }
+        }
+      }
+    },
+    "In the app": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В приложении"
+          }
+        }
+      }
+    },
+    "Press the new keys. They need ⌃, ⌥ or ⌘. Esc keeps %@.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите новое сочетание. Нужна клавиша ⌃, ⌥ или ⌘. Esc оставит %@."
+          }
+        }
+      }
+    },
+    "Click a field to record. ⌫ clears it, Esc cancels.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите на поле и введите сочетание. ⌫ очищает, Esc отменяет."
+          }
+        }
+      }
+    },
+    "Type shortcut…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите сочетание…"
+          }
+        }
+      }
+    },
+    "Record Shortcut": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Записать сочетание"
+          }
+        }
+      }
+    },
+    "%@ would stop that key from typing. Add ⌃, ⌥ or ⌘.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ перестанет печатать этот символ. Добавьте ⌃, ⌥ или ⌘."
+          }
+        }
+      }
+    },
+    "%1$@ is already %2$@. Replace it?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ уже занято: %2$@. Заменить?"
+          }
+        }
+      }
+    },
+    "%1$@ is used by %2$@ (macOS). It would stop working there.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ занято в macOS: %2$@. Там оно перестанет работать."
+          }
+        }
+      }
+    },
+    "Replace": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заменить"
+          }
+        }
+      }
+    },
+    "Use Anyway": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё равно использовать"
+          }
+        }
+      }
+    },
+    "Add GlassWork in System Settings → Privacy & Security → Screen & System Audio Recording, then press %@ again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте GlassWork в Системных настройках → Конфиденциальность и безопасность → Запись экрана и системного аудио, затем снова нажмите %@."
+          }
+        }
+      }
+    },
+    "Add GlassWork in System Settings → Privacy & Security → Screen & System Audio Recording, then try again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте GlassWork в Системных настройках → Конфиденциальность и безопасность → Запись экрана и системного аудио и попробуйте снова."
+          }
+        }
+      }
+    },
+    "Spotlight": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spotlight"
+          }
+        }
+      }
+    },
+    "App Switcher": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переключение приложений"
+          }
+        }
+      }
+    },
+    "Next window": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующее окно"
+          }
+        }
+      }
+    },
+    "Minimize": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сворачивание окна"
+          }
+        }
+      }
+    },
+    "Close window": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрытие окна"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копирование"
+          }
+        }
+      }
+    },
+    "Cut": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вырезание"
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отмена"
+          }
+        }
+      }
+    },
+    "Input source": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Смена раскладки"
+          }
+        }
+      }
+    },
+    "Mission Control": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mission Control"
+          }
+        }
+      }
+    },
+    "App windows": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Окна приложения"
+          }
+        }
+      }
+    },
+    "Previous Space": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предыдущий рабочий стол"
+          }
+        }
+      }
+    },
+    "Next Space": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующий рабочий стол"
+          }
+        }
+      }
+    },
+    "Lock Screen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Блокировка экрана"
+          }
+        }
+      }
+    },
+    "Screenshot": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Снимок экрана"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

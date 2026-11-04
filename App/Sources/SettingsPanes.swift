@@ -158,23 +158,3 @@ struct AppSettingsBinding {
         )
     }
 }
-
-struct ShortcutsPane: View {
-    var body: some View {
-        Form {
-            Section(loc("Shortcuts")) {
-                LabeledContent(loc("Open the Hub"), value: "⌃⌥Space")
-                LabeledContent(loc("Quit an app"), value: "⌃⌥Q")
-                LabeledContent(loc("Copy text from screen"), value: "⇧⌘2")
-                LabeledContent(loc("Open Settings"), value: "⌘,")
-                LabeledContent(loc("Undo a change in Settings"), value: "⌘Z")
-            }
-            Section(loc("Window Tiles")) {
-                ForEach(TileCommand.all, id: \.self) { command in
-                    LabeledContent(command.title, value: command.shortcut.label)
-                }
-            }
-        }
-        .formStyle(.grouped)
-    }
-}

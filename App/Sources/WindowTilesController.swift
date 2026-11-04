@@ -4,14 +4,6 @@ import GlassWorkUI
 import Observation
 import SwiftUI
 
-/// What the Settings page shows about the shortcuts.
-@MainActor
-@Observable
-final class WindowTilesStatus {
-    /// Shortcuts macOS would not give us, because another app holds them.
-    var takenShortcuts: [GlobalShortcut] = []
-}
-
 /// Sends the front window to a place on the screen from the keyboard.
 ///
 /// Nothing runs until Window Tiles is turned on in Settings. It only ever checks for Accessibility: the macOS
@@ -24,16 +16,13 @@ final class WindowTilesController {
         let plan: TilePlan
     }
 
-    /// Clear of the ids taken by the Hub, quick paste and text capture.
-    private static let firstHotKeyID: UInt32 = 100
     /// Long enough to see where the window goes, short enough not to feel like waiting.
     private static let previewLead = Duration.milliseconds(200)
     /// The zone stays a moment after the window arrives.
     private static let previewLinger = Duration.milliseconds(150)
 
-    let status = WindowTilesStatus()
     private unowned let model: AppModel
-    private var hotKeys: [HotKey] = []
+    private var isRunning = false
     private var memory: TileMemory?
     private var pending: PendingMove?
     private var preview: GlassPanel?
@@ -43,35 +32,24 @@ final class WindowTilesController {
 
     init(model: AppModel) {
         self.model = model
+        for command in TileCommand.all {
+            model.shortcuts.bind(.tile(command)) { [weak self] in self?.perform(command) }
+        }
     }
 
     /// Runs on every settings change, so it only acts when the switch itself moved.
     func apply(_ settings: WindowTilesSettings) {
-        guard settings.isEnabled == hotKeys.isEmpty else { return }
-        if settings.isEnabled {
-            start()
-        } else {
+        guard settings.isEnabled != isRunning else { return }
+        isRunning = settings.isEnabled
+        for command in TileCommand.all {
+            model.shortcuts.setActive(.tile(command), settings.isEnabled)
+        }
+        if !settings.isEnabled {
             stop()
         }
     }
 
-    private func start() {
-        var taken: [GlobalShortcut] = []
-        hotKeys = TileCommand.all.enumerated().map { index, command in
-            let hotKey = HotKey(shortcut: command.shortcut, id: Self.firstHotKeyID + UInt32(index))
-            hotKey.onPress = { [weak self] in self?.perform(command) }
-            if !hotKey.register() {
-                taken.append(command.shortcut)
-            }
-            return hotKey
-        }
-        status.takenShortcuts = taken
-    }
-
     private func stop() {
-        hotKeys.forEach { $0.unregister() }
-        hotKeys = []
-        status.takenShortcuts = []
         memory = nil
         pending = nil
         closePreview()
@@ -116,7 +94,8 @@ final class WindowTilesController {
             return
         }
         pending = move
-        showPreview(title: command.title(for: move.plan), shortcut: command.shortcut.label, frame: move.plan.frame)
+        let shortcut = model.store.settings.shortcuts.shortcut(for: .tile(command))?.label ?? ""
+        showPreview(title: command.title(for: move.plan), shortcut: shortcut, frame: move.plan.frame)
         previewTask = Task { [weak self] in
             try? await Task.sleep(for: Self.previewLead)
             guard !Task.isCancelled else { return }

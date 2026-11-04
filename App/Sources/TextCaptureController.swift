@@ -1,22 +1,20 @@
 import AppKit
-import Carbon.HIToolbox
 import GlassWorkCore
 import GlassWorkUI
 import SwiftUI
 
-/// ⇧⌘2: pick an area of the screen and copy the text in it.
+/// Pick an area of the screen and copy the text in it.
 @MainActor
 final class TextCaptureController {
     private unowned let model: AppModel
-    private let hotKey = HotKey(keyCode: kVK_ANSI_2, modifiers: shiftKey | cmdKey, id: 3)
     private var isCapturing = false
     private var hud: GlassPanel?
     private var hideTask: Task<Void, Never>?
 
     init(model: AppModel) {
         self.model = model
-        hotKey.onPress = { [weak self] in self?.start() }
-        hotKey.register()
+        model.shortcuts.bind(.textCapture) { [weak self] in self?.start() }
+        model.shortcuts.setActive(.textCapture, true)
     }
 
     private func start() {
@@ -52,7 +50,10 @@ final class TextCaptureController {
     private func show(_ notice: TextCaptureNotice) {
         hideTask?.cancel()
         hud?.close()
-        let hosting = NSHostingView(rootView: TextCaptureHUD(notice: notice).modifier(PanelGlass()))
+        let shortcut = model.store.settings.shortcuts.shortcut(for: .textCapture)?.label
+        let hosting = NSHostingView(
+            rootView: TextCaptureHUD(notice: notice, shortcut: shortcut).modifier(PanelGlass())
+        )
         hosting.sizingOptions = [.intrinsicContentSize]
         let window = GlassPanel()
         window.contentView = hosting

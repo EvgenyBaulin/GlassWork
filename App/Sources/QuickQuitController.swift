@@ -1,14 +1,12 @@
 import AppKit
-import Carbon.HIToolbox
 import GlassWorkCore
 import GlassWorkUI
 import SwiftUI
 
-/// ⌃⌥Q: the palette that quits an app from anywhere.
+/// The palette that quits an app from anywhere.
 @MainActor
 final class QuickQuitController {
     private unowned let model: AppModel
-    private let hotKey = HotKey(keyCode: kVK_ANSI_Q, modifiers: controlKey | optionKey, id: 4)
     private var panel: GlassPanel?
     private var state: QuickQuitState?
     private var dismissal: TransientDismissal?
@@ -20,8 +18,8 @@ final class QuickQuitController {
 
     init(model: AppModel) {
         self.model = model
-        hotKey.onPress = { [weak self] in self?.toggle() }
-        hotKey.register()
+        model.shortcuts.bind(.quickQuit) { [weak self] in self?.toggle() }
+        model.shortcuts.setActive(.quickQuit, true)
     }
 
     private func toggle() {
