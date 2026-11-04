@@ -26,6 +26,8 @@ public struct FanCurveChart: View {
     @Binding private var selection: Int?
     @State private var hover: Double?
     @State private var dragged: Int?
+    /// The curve while a point is being dragged. Saved once at the end, not on every mouse event.
+    @State private var draft: FanCurve?
     @FocusState private var isFocused: Bool
 
     private static let hitRadius: CGFloat = 14
@@ -74,6 +76,10 @@ public struct FanCurveChart: View {
             .onKeyPress(.delete) { deleteSelection() }
     }
 
+    private var shown: FanCurve {
+        draft ?? curve
+    }
+
     private var chart: some View {
         Chart {
             RectangleMark(
@@ -100,7 +106,7 @@ public struct FanCurveChart: View {
                     .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
                 }
             }
-            ForEach(Array(outline(curve).enumerated()), id: \.offset) { _, point in
+            ForEach(Array(outline(shown).enumerated()), id: \.offset) { _, point in
                 AreaMark(
                     x: .value("Temperature", point.celsius),
                     yStart: .value("Base", 0),
@@ -116,7 +122,7 @@ public struct FanCurveChart: View {
                 .foregroundStyle(Self.tint)
                 .lineStyle(StrokeStyle(lineWidth: 1.5, lineJoin: .round))
             }
-            ForEach(Array(curve.points.enumerated()), id: \.offset) { index, point in
+            ForEach(Array(shown.points.enumerated()), id: \.offset) { index, point in
                 PointMark(x: .value("Temperature", point.celsius), y: .value("Speed", point.percent))
                     .foregroundStyle(index == selection ? Color.accentColor : Self.tint)
                     .symbolSize(index == selection ? 70 : 36)
@@ -124,7 +130,7 @@ public struct FanCurveChart: View {
             if let live {
                 PointMark(
                     x: .value("Temperature", clampedTemperature(live.celsius)),
-                    y: .value("Speed", curve.percent(at: live.celsius))
+                    y: .value("Speed", shown.percent(at: live.celsius))
                 )
                 .foregroundStyle(Color.primary)
                 .symbolSize(44)
@@ -133,7 +139,7 @@ public struct FanCurveChart: View {
                 RuleMark(x: .value("Cursor", hover))
                     .foregroundStyle(Color.primary.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1))
-                PointMark(x: .value("Temperature", hover), y: .value("Speed", curve.percent(at: hover)))
+                PointMark(x: .value("Temperature", hover), y: .value("Speed", shown.percent(at: hover)))
                     .foregroundStyle(Self.tint)
                     .symbolSize(36)
             }
@@ -181,7 +187,7 @@ public struct FanCurveChart: View {
 
     private var readout: (celsius: Double, row: ChartTooltip.Row)? {
         if let hover {
-            let percent = curve.percent(at: hover)
+            let percent = shown.percent(at: hover)
             let rpm = FanCurve.rpm(percent: percent, in: rpmRange)
             let text = loc("\(Format.percent(percent / 100)) ≈ \(Format.rpm(rpm)) rpm")
             return (hover, .init(id: "hover", title: Format.temperature(hover), value: text, color: Self.tint))
@@ -241,9 +247,15 @@ public struct FanCurveChart: View {
                 guard let index, let target = curvePoint(at: value.location, proxy: proxy, plot: plot) else { return }
                 dragged = index
                 selection = index
-                onChange(curve.moving(index, to: target))
+                draft = curve.moving(index, to: target)
             }
-            .onEnded { _ in dragged = nil }
+            .onEnded { _ in
+                dragged = nil
+                if let draft {
+                    onChange(draft)
+                }
+                draft = nil
+            }
     }
 
     private func selectPoint(near location: CGPoint, proxy: ChartProxy, plot: CGRect) {

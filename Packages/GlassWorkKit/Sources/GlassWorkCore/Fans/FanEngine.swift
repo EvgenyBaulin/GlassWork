@@ -66,6 +66,11 @@ public struct FanEngine: Sendable {
         mode != .auto || !sent.isEmpty
     }
 
+    /// True when a fan has been told what to do and the helper should still hold it.
+    public var holdsFans: Bool {
+        !sent.isEmpty
+    }
+
     /// A choice made by the user. It always clears a pending notice or resume.
     public mutating func select(_ newMode: FanMode) {
         mode = newMode

@@ -133,6 +133,12 @@ struct FanHelperServiceTests {
         #expect(!smc.writtenKeys.contains("F0Tg"))
     }
 
+    @Test func unlockWaitsLongEnoughForASlowHandover() {
+        let smc = FakeSMC()
+        smc.refusals["F0Md"] = 100
+        #expect(service(smc).execute(FanCommand(fan: 0, action: .max)))
+    }
+
     @Test func noTestKeyMeansNoUnlock() {
         let smc = FakeSMC(hasTestKey: false)
         smc.refusals["F0Md"] = 1
@@ -252,10 +258,16 @@ struct FanWatchdogTests {
         #expect(!watchdog.hasExpired(at: 15))
     }
 
+    @Test func connectingAloneProvesNothing() {
+        var watchdog = FanWatchdog(now: 0)
+        watchdog.clientConnected()
+        #expect(watchdog.hasExpired(at: 11))
+    }
+
     @Test func theLastClientLeavingCounts() {
         var watchdog = FanWatchdog(now: 0)
-        watchdog.clientConnected(at: 1)
-        watchdog.clientConnected(at: 2)
+        watchdog.clientConnected()
+        watchdog.clientConnected()
         let first = watchdog.clientLeft()
         let second = watchdog.clientLeft()
         let extra = watchdog.clientLeft()
@@ -394,6 +406,50 @@ struct FanHelperXPCTests {
         harness.queue.sync { harness.server.checkWatchdog() }
 
         #expect(harness.smc.number("F0Md") == 1)
+        client.disconnect()
+    }
+
+    @Test func aHeartbeatAdmitsThatTheFansWereGivenBack() async {
+        let harness = Harness()
+        let client = harness.connect()
+        #expect(await client.send(FanCommand(fan: 0, action: .max)))
+        #expect(await client.heartbeat())
+
+        harness.clock.time = 11
+        harness.queue.sync { harness.server.checkWatchdog() }
+
+        #expect(await client.heartbeat() == false)
+        client.disconnect()
+    }
+
+    @Test func aHeartbeatBeforeAnyCommandHoldsNothing() async {
+        let harness = Harness()
+        let client = harness.connect()
+        #expect(await client.heartbeat() == false)
+        client.disconnect()
+    }
+
+    @Test func releasingEveryFanDisarmsTheWatchdog() async {
+        let harness = Harness()
+        let client = harness.connect()
+        #expect(await client.send(FanCommand(fan: 0, action: .max)))
+        #expect(await client.send(FanCommand(fan: 0, action: .auto)))
+        #expect(await client.heartbeat() == false)
+        client.disconnect()
+    }
+
+    @Test func aNewConnectionDoesNotRestartTheWatchdog() async {
+        let harness = Harness()
+        let client = harness.connect()
+        #expect(await client.send(FanCommand(fan: 0, action: .max)))
+
+        harness.clock.time = 11
+        let stranger = NSXPCConnection(listenerEndpoint: harness.listener.endpoint)
+        #expect(harness.server.listener(harness.listener, shouldAcceptNewConnection: stranger))
+        harness.queue.sync { harness.server.checkWatchdog() }
+
+        #expect(harness.smc.number("F0Md") == 0)
+        stranger.invalidate()
         client.disconnect()
     }
 
