@@ -61,7 +61,7 @@ private final class CountingFetcher: HTTPFetching, @unchecked Sendable {
         self.reply = Data(reply.utf8)
     }
 
-    var count: Int {
+    var requests: Int {
         lock.withLock { urls.count }
     }
 
@@ -94,8 +94,8 @@ struct OnlineLyricsTests {
         let fetcher = CountingFetcher(Self.reply)
         let store = NowPlayingStore(lyricsFetcher: fetcher)
         store.apply(.session(session()))
-        await settle { fetcher.count > 0 }
-        #expect(fetcher.count == 0)
+        await settle { fetcher.requests > 0 }
+        #expect(fetcher.requests == 0)
     }
 
     @Test func aTrackIsAskedForOnceAndKeepsItsLinesAcrossReports() async {
@@ -109,7 +109,7 @@ struct OnlineLyricsTests {
 
         store.apply(.session(session()))
         #expect(store.session?.lyrics == ["one", "two"])
-        #expect(fetcher.count == 1)
+        #expect(fetcher.requests == 1)
     }
 
     @Test func aNewTrackDoesNotKeepTheOldLines() async {
@@ -118,8 +118,8 @@ struct OnlineLyricsTests {
         store.wantsLyrics = true
         store.apply(.session(session()))
         store.apply(.session(session("Other")))
-        await settle { fetcher.count == 2 }
-        #expect(fetcher.count == 2)
+        await settle { fetcher.requests == 2 }
+        #expect(fetcher.requests == 2)
         #expect(store.session?.lyrics.isEmpty == true)
     }
 
@@ -128,8 +128,8 @@ struct OnlineLyricsTests {
         let store = NowPlayingStore(lyricsFetcher: fetcher)
         store.wantsLyrics = true
         store.apply(.session(session(lyrics: ["mine"])))
-        await settle { fetcher.count > 0 }
-        #expect(fetcher.count == 0)
+        await settle { fetcher.requests > 0 }
+        #expect(fetcher.requests == 0)
         #expect(store.session?.lyrics == ["mine"])
     }
 }
