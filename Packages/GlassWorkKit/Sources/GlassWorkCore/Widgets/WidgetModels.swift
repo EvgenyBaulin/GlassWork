@@ -25,6 +25,7 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
     case activity, battery, macHealth, storage, temperature, topApps, network
     /// Kept under its first identifier so widgets already on the desktop keep working.
     case uptime = "io.github.evgenybaulin.glasswork.uptime"
+    case screenTime, commands, endpoints, githubReviews, githubActions, contributions
     case digitalClock, modularClock, calendarMonth, upNext, endsIn, todo, note, timer, countdown, yearInDots, moon,
          daylight
 
@@ -51,6 +52,14 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var events: [AgendaEvent] = []
     public var todos: [TodoItem] = []
     public var bootTime: Date?
+    public var screenTime = ScreenTimeLog()
+    public var commands: [UserCommand] = []
+    public var commandResults: [UUID: CommandResult] = [:]
+    public var endpoints: [Endpoint] = []
+    public var endpointChecks: [UUID: [EndpointCheck]] = [:]
+    public var reviews: [PullRequest] = []
+    public var runs: [WorkflowRun] = []
+    public var contributions: [ContributionDay] = []
 
     public init(date: Date) {
         self.date = date
@@ -88,6 +97,9 @@ public struct WidgetSettings: Codable, Sendable, Equatable {
     public var layouts: [String: [WidgetPlacement]] = [:]
     public var refreshSeconds = 60
     public var glassDensity = 0.0
+    public var tracksScreenTime = false
+    public var commands: [UserCommand] = []
+    public var endpoints: [Endpoint] = []
 
     public init() {}
 }

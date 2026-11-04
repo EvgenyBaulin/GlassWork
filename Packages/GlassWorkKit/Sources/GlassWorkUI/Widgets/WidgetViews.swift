@@ -8,6 +8,12 @@ public extension WidgetKind {
         case .battery: loc("Battery")
         case .macHealth: loc("Mac Health")
         case .uptime: loc("Uptime")
+        case .screenTime: loc("Screen Time")
+        case .commands: loc("Commands")
+        case .endpoints: loc("Endpoints")
+        case .githubReviews: loc("Reviews")
+        case .githubActions: loc("GitHub Actions")
+        case .contributions: loc("GitHub Contributions")
         case .storage: loc("Storage and Drives")
         case .temperature: loc("Temperature and Fans")
         case .topApps: loc("Top Apps")
@@ -39,6 +45,7 @@ public extension WidgetKind {
         case .topApps: .cpu
         case .network: .network
         case .uptime: .uptime
+        case .screenTime, .commands, .endpoints, .githubReviews, .githubActions, .contributions: .overview
         case .digitalClock, .modularClock, .calendarMonth, .yearInDots: .date
         case .upNext: .calendar
         case .endsIn: .endsIn
@@ -72,6 +79,12 @@ public struct WidgetFace: View {
             case .battery: BatteryWidget(size: size, snapshot: snapshot)
             case .macHealth, .uptime: MacHealthWidget(size: size, snapshot: snapshot, now: now)
             case .digitalClock: DigitalClockWidget(size: size, now: now)
+            case .screenTime: ScreenTimeWidget(size: size, snapshot: snapshot, now: now)
+            case .commands: CommandsWidget(size: size, snapshot: snapshot)
+            case .endpoints: EndpointsWidget(size: size, snapshot: snapshot)
+            case .githubReviews: ReviewsWidget(size: size, snapshot: snapshot)
+            case .githubActions: ActionsWidget(size: size, snapshot: snapshot)
+            case .contributions: ContributionsWidget(size: size, snapshot: snapshot)
             case .modularClock: ModularClockWidget(size: size, now: now)
             case .calendarMonth: CalendarMonthWidget(now: now)
             case .upNext: UpNextWidget(size: size, snapshot: snapshot, now: now)

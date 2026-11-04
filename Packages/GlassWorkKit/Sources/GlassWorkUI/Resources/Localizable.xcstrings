@@ -91,6 +91,16 @@
         }
       }
     },
+    "%lld contributions": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вклад: %lld"
+          }
+        }
+      }
+    },
     "%lld d": {
       "localizations": {
         "ru": {
@@ -117,6 +127,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld дн."
+          }
+        }
+      }
+    },
+    "%lld down": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Недоступно: %lld"
           }
         }
       }
@@ -287,6 +307,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавить напоминание"
+          }
+        }
+      }
+    },
+    "Add commands in Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте команды в настройках"
           }
         }
       }
@@ -551,6 +581,26 @@
         }
       }
     },
+    "Command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Команда"
+          }
+        }
+      }
+    },
+    "Commands": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Команды"
+          }
+        }
+      }
+    },
     "Compact": {
       "localizations": {
         "ru": {
@@ -771,6 +821,16 @@
         }
       }
     },
+    "Endpoints": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эндпоинты"
+          }
+        }
+      }
+    },
     "Ends In": {
       "localizations": {
         "ru": {
@@ -787,6 +847,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Каждый день"
+          }
+        }
+      }
+    },
+    "Exit %lld · %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Код %1$lld · %2$@"
           }
         }
       }
@@ -907,6 +977,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Основные"
+          }
+        }
+      }
+    },
+    "GitHub Actions": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub Actions"
+          }
+        }
+      }
+    },
+    "GitHub Contributions": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вклад на GitHub"
           }
         }
       }
@@ -1311,6 +1401,16 @@
         }
       }
     },
+    "Name": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Название"
+          }
+        }
+      }
+    },
     "Network": {
       "localizations": {
         "ru": {
@@ -1387,6 +1487,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Таймеры не запущены"
+          }
+        }
+      }
+    },
+    "Not enough data yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока мало данных"
           }
         }
       }
@@ -1811,6 +1921,16 @@
         }
       }
     },
+    "Reviews": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ревью"
+          }
+        }
+      }
+    },
     "Right-click the desktop and choose Edit Widgets to add system widgets.": {
       "localizations": {
         "ru": {
@@ -1837,6 +1957,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "SSD"
+          }
+        }
+      }
+    },
+    "Screen Time": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Экранное время"
           }
         }
       }
@@ -1997,6 +2127,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Хранилище и диски"
+          }
+        }
+      }
+    },
+    "Stored only on this Mac for 30 days.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хранится только на этом Mac 30 дней."
+          }
+        }
+      }
+    },
+    "Streak: %lld days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Серия: %lld дн."
           }
         }
       }
@@ -2237,6 +2387,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Топ процессов"
+          }
+        }
+      }
+    },
+    "Track which app is in front": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считать, какое приложение на переднем плане"
           }
         }
       }
@@ -2507,6 +2667,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "мин"
+          }
+        }
+      }
+    },
+    "to review": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "на ревью"
           }
         }
       }

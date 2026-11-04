@@ -42,6 +42,8 @@ public final class SystemMonitor {
     public let everyday = EverydayStore()
     /// Calendar events and reminders.
     public let agenda = AgendaStore()
+    /// Screen time, commands, endpoints and GitHub.
+    public let activity = ActivityStore()
 
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
@@ -104,6 +106,12 @@ public final class SystemMonitor {
         snapshot.events = agenda.events
         snapshot.todos = agenda.todos
         snapshot.bootTime = SystemClock.bootTime()
+        snapshot.screenTime = activity.screenTime
+        snapshot.commandResults = activity.commandResults
+        snapshot.endpointChecks = activity.endpointChecks
+        snapshot.reviews = activity.reviews
+        snapshot.runs = activity.runs
+        snapshot.contributions = activity.contributions
         return snapshot
     }
 
