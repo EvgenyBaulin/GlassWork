@@ -29,8 +29,44 @@ struct ClockPlace: Identifiable {
         date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: zone))
     }
 
+    /// The time without AM or PM: "3:47", or "15:47" where the Mac shows 24 hours.
+    func digits(at date: Date) -> String {
+        date.formatted(Date.FormatStyle(timeZone: zone).hour(.defaultDigits(amPM: .omitted)).minute(.twoDigits))
+    }
+
+    func hourText(at date: Date) -> String {
+        date.formatted(Date.FormatStyle(timeZone: zone).hour(.defaultDigits(amPM: .omitted)))
+    }
+
+    func minuteText(at date: Date) -> String {
+        date.formatted(Date.FormatStyle(timeZone: zone).minute(.twoDigits))
+    }
+
+    /// "AM" or "PM"; nil where the Mac shows 24 hours.
+    func dayPeriod(at date: Date) -> String? {
+        let format = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: .current) ?? ""
+        guard format.contains("a") else { return nil }
+        let formatter = DateFormatter()
+        formatter.timeZone = zone
+        formatter.dateFormat = "a"
+        return formatter.string(from: date)
+    }
+
+    /// "UTC+3".
+    func utcOffset(at date: Date) -> String {
+        let hours = Double(zone.secondsFromGMT(for: date)) / 3600
+        let sign = hours < 0 ? "−" : "+"
+        return "UTC\(sign)\(abs(hours).formatted(.number.precision(.fractionLength(0 ... 1))))"
+    }
+
+    /// Three letters for a dial, such as MOS.
+    var code: String {
+        String(name.prefix(3)).uppercased()
+    }
+
     /// "Today", "Tomorrow" or "Yesterday", with the hours from this Mac when the zone differs.
     func caption(at date: Date) -> String {
+        guard id != Self.local.id else { return loc("Local") }
         let time = time(at: date)
         let day = switch time.dayOffset {
         case 1: loc("Tomorrow")
@@ -52,6 +88,8 @@ struct AnalogDial: View {
     var showsSeconds = true
     /// Day and night faces for world clocks: a pale dial by day, a dark one by night.
     var shadesByDaylight = false
+    /// Printed on the dial above the center.
+    var label: String?
 
     private var face: Color {
         guard shadesByDaylight else { return Color.primary.opacity(0.08) }
@@ -70,6 +108,12 @@ struct AnalogDial: View {
                 Circle().fill(face)
                 Circle().strokeBorder(ink.opacity(0.18), lineWidth: 1)
                 marks(side: side)
+                if let label {
+                    Text(verbatim: label)
+                        .font(.system(size: max(side * 0.075, 9), weight: .semibold))
+                        .foregroundStyle(ink.opacity(0.5))
+                        .offset(y: -side * 0.17)
+                }
                 hand(length: side * 0.26, width: max(side * 0.035, 2), angle: time.hourAngle, color: ink)
                 hand(length: side * 0.39, width: max(side * 0.022, 1.5), angle: time.minuteAngle, color: ink)
                 if showsSeconds {
@@ -103,6 +147,17 @@ struct AnalogDial: View {
                     )
             }
         } else {
+            if side > 80 {
+                ForEach(0 ..< 60, id: \.self) { minute in
+                    if minute % 5 != 0 {
+                        Capsule()
+                            .fill(ink.opacity(0.25))
+                            .frame(width: 1, height: side * 0.025)
+                            .offset(y: -side * 0.445)
+                            .rotationEffect(.degrees(Double(minute) * 6))
+                    }
+                }
+            }
             ForEach(0 ..< 12, id: \.self) { index in
                 Capsule()
                     .fill(ink.opacity(index % 3 == 0 ? 0.8 : 0.35))
@@ -160,8 +215,30 @@ struct PlaceDial: View {
                 shadesByDaylight: true
             )
             Text(place.name).font(.system(size: 11, weight: .semibold)).lineLimit(1)
-            Text(place.timeText(at: now)).font(.system(size: 11)).foregroundStyle(.secondary).monospacedDigit()
+            Text(place.caption(at: now)).font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
+            Text(place.timeText(at: now)).font(.system(size: 10)).foregroundStyle(.tertiary).monospacedDigit()
         }
+    }
+}
+
+/// A big time with AM or PM small beside it.
+struct ClockFigure: View {
+    let place: ClockPlace
+    let now: Date
+    let size: CGFloat
+    var weight = Font.Weight.semibold
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: size * 0.12) {
+            Text(place.digits(at: now))
+                .font(.system(size: size, weight: weight, design: .rounded))
+                .monospacedDigit()
+            if let period = place.dayPeriod(at: now) {
+                Text(period).font(.system(size: max(size * 0.36, 10), weight: .medium)).opacity(0.7)
+            }
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
     }
 }
 

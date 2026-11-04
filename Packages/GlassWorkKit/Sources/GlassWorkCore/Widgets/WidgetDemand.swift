@@ -7,11 +7,14 @@ public extension WidgetKind {
     ]
 
     /// Filled by the `gh` tool, which is worth running only for these.
-    static let githubKinds: Set<WidgetKind> = [.githubReviews, .githubActions, .contributions]
+    static let githubKinds: Set<WidgetKind> = [.github, .githubReviews, .githubActions, .contributions]
 
-    /// What the desktop gallery offers. Macs without fans never see the Fans widget.
+    /// Only in the system gallery: GlassWork's own desktop windows do not get new widgets.
+    static let systemOnlyKinds: Set<WidgetKind> = [.github, .todayAtAGlance, .photoFrame, .onThisDay, .birthdays]
+
+    /// What GlassWork's own desktop windows offer. Macs without fans never see the Fans widget.
     static var gallery: [WidgetKind] {
-        allCases.filter { $0 != .fans || FanHardware.hasFans }
+        allCases.filter { ($0 != .fans || FanHardware.hasFans) && !systemOnlyKinds.contains($0) }
     }
 
     /// The developer module that collects this widget's data.
@@ -41,7 +44,7 @@ public extension MonitorDemand {
         gpu = kinds.contains(.activity)
         network = kinds.contains(.network)
         disk = !kinds.isDisjoint(with: [.storage, .diskActivity])
-        battery = kinds.contains(.battery)
+        battery = !kinds.isDisjoint(with: [.battery, .todayAtAGlance])
         sensors = !kinds.isDisjoint(with: [.temperature, .fans])
         slowProcesses = !kinds.isDisjoint(with: [.activity, .topApps])
         developer = Set(kinds.compactMap(\.developerModule))

@@ -60,6 +60,11 @@ public extension WidgetKind {
         case .mostUsed: loc("Most Used")
         case .nowPlaying: loc("Now Playing")
         case .lyrics: loc("Lyrics")
+        case .github: loc("GitHub")
+        case .todayAtAGlance: loc("Today at a Glance")
+        case .photoFrame: loc("Photo Frame")
+        case .onThisDay: loc("On This Day")
+        case .birthdays: loc("Birthdays")
         }
     }
 }
@@ -101,6 +106,25 @@ public extension WidgetKind {
         case .diskActivity: .disk
         case .timeMachine, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed: .overview
         case .nowPlaying, .lyrics: .nowPlaying
+        case .github: .overview
+        case .todayAtAGlance: .calendar
+        case .photoFrame, .onThisDay, .birthdays: .overview
+        }
+    }
+}
+
+public extension WidgetKind {
+    /// Where a click on a system widget leads: the place that explains the widget or changes what it shows.
+    var destination: WidgetDestination {
+        switch self {
+        // No panel shows these. Settings is where they are turned on or filled in.
+        case .photoFrame, .onThisDay, .birthdays, .commands, .endpoints,
+             .screenTime, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed, .focusTime:
+            .widgetSettings
+        case .github, .githubReviews: WidgetLink.githubReviews.map(WidgetDestination.web) ?? .module(.overview)
+        case .githubActions, .contributions: WidgetLink.githubHome.map(WidgetDestination.web) ?? .module(.overview)
+        case .timeMachine: .module(.disk)
+        default: .module(module)
         }
     }
 }
@@ -200,7 +224,7 @@ struct ActivityWidget: View {
                 HStack(spacing: 14) { ForEach(rings, id: \.title) { ring($0, diameter: 92) } }
                     .frame(maxWidth: .infinity)
                 Divider()
-                TopProcessRows(processes: snapshot.processes, limit: size == .large ? 5 : 8)
+                TopProcessRows(processes: snapshot.topUsage, limit: size == .large ? 5 : 8)
             }
         }
     }
@@ -276,9 +300,7 @@ struct MacHealthWidget: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label(loc("Running smoothly"), systemImage: "checkmark.circle.fill")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(Palette.green)
+            MacHealthTitle(text: loc("Running smoothly"))
             if let boot = snapshot.bootTime {
                 Text(CompactDuration.format(now.timeIntervalSince(boot)))
                     .font(.system(size: 34, weight: .semibold, design: .rounded))
@@ -289,6 +311,20 @@ struct MacHealthWidget: View {
                 InfoRow(title: loc("Swap used"), value: Format.bytes(Double(memory.swapUsed), style: .precise))
             }
         }
+    }
+}
+
+/// The desktop gives a small widget less room than its nominal size, so the text shrinks instead of being cut.
+struct MacHealthTitle: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Image(systemName: "checkmark.circle.fill")
+            Text(text).lineLimit(1).minimumScaleFactor(0.6)
+        }
+        .font(.system(size: 13, weight: .medium))
+        .foregroundStyle(Palette.green)
     }
 }
 

@@ -54,6 +54,8 @@ public final class FanControlModel {
     public static let tick = 2.0
 
     public private(set) var mode = FanMode.auto
+    /// A curve is on, but the Mac is cool, so the system runs the fans.
+    public private(set) var isWithSystem = false
     public private(set) var notice: FanNotice?
     public private(set) var helperState = FanHelperState.notInstalled
 
@@ -284,6 +286,7 @@ public final class FanControlModel {
     private func publish() {
         let oldNotice = notice
         mode = engine.mode
+        isWithSystem = engine.isWithSystem
         notice = engine.notice
         if case let .failsafeMax(celsius, _) = notice, notice != oldNotice {
             onFailsafe?(celsius)

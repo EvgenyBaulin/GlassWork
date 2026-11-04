@@ -34,6 +34,8 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
     case devices, wifiSignal, diskActivity, timeMachine
     case screenTimeWeek, categories, breaks, appTime, mostUsed
     case nowPlaying, lyrics
+    case github, todayAtAGlance
+    case photoFrame, onThisDay, birthdays
 
     public var id: String {
         rawValue
@@ -54,6 +56,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var network: NetworkSample?
     public var sensors: SensorSample?
     public var processes: [ProcessUsage] = []
+    /// Apps with their helpers added up, under the name people know them by. Heaviest first.
+    public var apps: [ProcessUsage]?
     public var everyday = EverydayData()
     public var events: [AgendaEvent] = []
     public var todos: [TodoItem] = []
@@ -66,6 +70,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var reviews: [PullRequest] = []
     public var runs: [WorkflowRun] = []
     public var contributions: [ContributionDay] = []
+    /// Your pull requests and the ones waiting for you. Nil until `gh` has answered.
+    public var github: WidgetGitHub?
     /// The first weather place, used by the sun-based clocks; nil until one is saved.
     public var place: WeatherPlace?
     /// Today's word first, then the days before.
@@ -92,9 +98,21 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var timeMachine: TimeMachineStatus?
     /// Written to its own file by the app, so it is nil in the shared snapshot itself.
     public var nowPlaying: NowPlayingWidgetData?
+    /// Photos and birthdays the user turned on. The images themselves have their own files.
+    public var personal: PersonalWidgetData?
+    /// Filled by the extension with the images one timeline entry draws; never written to the snapshot file.
+    public var photoImages: [String: Data]?
 
     public init(date: Date) {
         self.date = date
+    }
+}
+
+public extension WidgetSnapshot {
+    /// What uses the CPU, by app. Raw processes stand in until apps have been read twice: CPU needs two reads.
+    var topUsage: [ProcessUsage] {
+        guard let apps, apps.contains(where: { $0.cpu > 0 }) else { return processes }
+        return apps
     }
 }
 
