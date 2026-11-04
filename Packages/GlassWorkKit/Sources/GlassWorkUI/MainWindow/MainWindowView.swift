@@ -111,11 +111,21 @@ public struct SectionPlaceholder: View {
     private let section: MainSection
     private let heading: String
     private let note: String
+    private let title: String
+    private let detail: String?
 
-    public init(_ section: MainSection, heading: String? = nil, note: String? = nil) {
+    public init(
+        _ section: MainSection,
+        heading: String? = nil,
+        note: String? = nil,
+        title: String? = nil,
+        detail: String? = nil
+    ) {
         self.section = section
         self.heading = heading ?? section.title
         self.note = note ?? loc("This section is not ready yet.")
+        self.title = title ?? loc("Coming soon")
+        self.detail = detail
     }
 
     public var body: some View {
@@ -126,7 +136,13 @@ public struct SectionPlaceholder: View {
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)
                     .background(section.tint.gradient, in: .rect(cornerRadius: 11))
-                Text(loc("Coming soon")).font(.system(size: 15, weight: .semibold))
+                Text(title).font(.system(size: 15, weight: .semibold))
+                if let detail {
+                    Text(detail)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 44)

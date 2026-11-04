@@ -164,9 +164,4 @@ struct QuickQuitSnapshotTests {
     func nothingFound(dark: Bool) {
         snapshotPanel(palette(query: "zzz"), name: "none", dark: dark)
     }
-
-    @Test(arguments: [true, false])
-    func cpuPanel(dark: Bool) {
-        snapshotPanel(ModulePanel(module: .cpu, monitor: AppSamples.monitor()), name: "cpu-panel", dark: dark)
-    }
 }

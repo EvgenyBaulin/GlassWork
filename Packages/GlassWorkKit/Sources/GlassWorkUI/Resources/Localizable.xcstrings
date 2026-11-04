@@ -11768,6 +11768,36 @@
           }
         }
       }
+    },
+    "How this will work is not decided yet.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как это будет работать, пока не решено."
+          }
+        }
+      }
+    },
+    "To be designed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё в работе"
+          }
+        }
+      }
+    },
+    "Nothing here stores your password until the method and its risks are agreed.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь ничего не хранит ваш пароль, пока не выбран способ и не оценены риски."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -75,7 +75,13 @@ private struct MainWindowContent: View {
         case .widgets: WidgetsPane(store: model.store)
         case .dock: DockPane(store: model.store)
         case .unlock:
-            SectionPlaceholder(.unlock, heading: loc("Unlock this Mac"))
+            SectionPlaceholder(
+                .unlock,
+                heading: loc("Unlock this Mac"),
+                note: loc("How this will work is not decided yet."),
+                title: loc("To be designed"),
+                detail: loc("Nothing here stores your password until the method and its risks are agreed.")
+            )
         case .overview, .windowTiles, .settings:
             SectionPlaceholder(route.section)
         }

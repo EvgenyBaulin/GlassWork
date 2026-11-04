@@ -95,8 +95,21 @@ struct MainSectionTests {
 struct MainWindowSnapshotTests {
     @Test(arguments: [true, false])
     func placeholder(dark: Bool) {
-        let view = SectionPlaceholder(.unlock, heading: "Unlock this Mac").frame(width: 640, height: 300)
+        let view = SectionPlaceholder(.overview).frame(width: 640, height: 300)
         snapshotPanel(view, name: "placeholder", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func unlock(dark: Bool) {
+        let view = SectionPlaceholder(
+            .unlock,
+            heading: "Unlock this Mac",
+            note: "How this will work is not decided yet.",
+            title: "To be designed",
+            detail: "Nothing here stores your password until the method and its risks are agreed."
+        )
+        .frame(width: 640, height: 300)
+        snapshotPanel(view, name: "unlock", dark: dark)
     }
 
     @Test(arguments: [true, false])
