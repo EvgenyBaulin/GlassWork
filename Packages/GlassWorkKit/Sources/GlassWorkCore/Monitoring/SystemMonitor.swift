@@ -263,7 +263,13 @@ public final class SystemMonitor {
     }
 
     /// Reads right away, for example when a panel opens.
-    public func refresh() {
+    ///
+    /// - Parameter includingSlow: Also reads what normally waits for the slow pace, such as disk space, for a
+    ///   screen that would otherwise stay empty until then.
+    public func refresh(includingSlow: Bool = false) {
+        if includingSlow {
+            lastSlow = .distantPast
+        }
         Task { await tick() }
     }
 

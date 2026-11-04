@@ -1,3 +1,4 @@
+import GlassWorkCore
 import Observation
 import SwiftUI
 
@@ -51,6 +52,27 @@ public enum MainSection: String, CaseIterable, Identifiable, Sendable {
     /// Settings has its own window, so choosing it opens that and leaves this one where it was.
     var opensOwnWindow: Bool {
         self == .settings
+    }
+
+    /// What this section reads while it is on screen. The rest of the app does not ask for most of it.
+    public var monitorDemand: MonitorDemand {
+        var demand = MonitorDemand()
+        switch self {
+        case .apps:
+            demand.cpu = true
+            demand.memory = true
+            demand.liveApps = true
+        case .overview:
+            demand.cpu = true
+            demand.memory = true
+            demand.network = true
+            demand.disk = true
+            demand.sensors = true
+            demand.liveApps = true
+        default:
+            break
+        }
+        return demand
     }
 }
 

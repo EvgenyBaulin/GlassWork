@@ -202,8 +202,8 @@ final class AppModel {
     func mainWindowChanged(visibleSection: MainSection?) {
         self.visibleSection = visibleSection
         updateDemand()
-        if visibleSection == .apps {
-            monitor.refresh()
+        if visibleSection == .apps || visibleSection == .overview {
+            monitor.refresh(includingSlow: true)
             monitor.apps.refresh()
         }
     }
@@ -264,15 +264,14 @@ final class AppModel {
         // Live windows and charts sample on every tick; other system widgets read once a minute.
         let placed = placedWidgetKinds
         var demand = MonitorDemand(widgets: desktopWidgetKinds.union(systemWidgetKinds.filter(\.keepsHistory)))
+            .adding(visibleSection?.monitorDemand ?? MonitorDemand())
         // A widget in the Dock shows a live figure, just as a menu bar item does.
         let docked = store.settings.dock.shownWidgets
         let modes = store.settings.modules.filter { $0.mode == .menuBar }.map(\.id) + docked
         let everything = hasOpenPanel
-        let showsApps = visibleSection == .apps
-        demand.liveApps = everything || showsApps || isQuickQuitOpen
-        demand.cpu = demand.cpu || everything || showsApps || modes.contains(.cpu) || modes.contains(.overview)
-        demand.memory = demand.memory || everything || showsApps || modes.contains(.memory)
-            || modes.contains(.overview)
+        demand.liveApps = demand.liveApps || everything || isQuickQuitOpen
+        demand.cpu = demand.cpu || everything || modes.contains(.cpu) || modes.contains(.overview)
+        demand.memory = demand.memory || everything || modes.contains(.memory) || modes.contains(.overview)
         demand.network = demand.network || everything || modes.contains(.network)
         let overviewShowsDisk = modes.contains(.overview)
             && store.settings.module(.overview)?.options.flag(ItemOption.showsDisk, default: false) == true

@@ -15702,6 +15702,26 @@
           }
         }
       }
+    },
+    "How your Mac is doing": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как работает Mac"
+          }
+        }
+      }
+    },
+    "Right now and over the last minute.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас и за последнюю минуту."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

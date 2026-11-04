@@ -52,6 +52,26 @@ public extension MonitorDemand {
         timeMachine = kinds.contains(.timeMachine)
     }
 
+    /// Everything either side asks for.
+    func adding(_ other: MonitorDemand) -> MonitorDemand {
+        var both = self
+        both.cpu = cpu || other.cpu
+        both.memory = memory || other.memory
+        both.network = network || other.network
+        both.disk = disk || other.disk
+        both.battery = battery || other.battery
+        both.gpu = gpu || other.gpu
+        both.sensors = sensors || other.sensors
+        both.processes = processes || other.processes
+        both.slowProcesses = slowProcesses || other.slowProcesses
+        both.liveApps = liveApps || other.liveApps
+        both.developer = developer.union(other.developer)
+        both.devices = devices || other.devices
+        both.timeMachine = timeMachine || other.timeMachine
+        both.nowPlaying = nowPlaying || other.nowPlaying
+        return both
+    }
+
     /// What this asks for that `other` does not read already.
     func subtracting(_ other: MonitorDemand) -> MonitorDemand {
         var rest = MonitorDemand()
