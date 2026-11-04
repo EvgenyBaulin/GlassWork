@@ -43,6 +43,7 @@ public extension ModuleID {
         case .worldClocks: loc("World Clocks")
         case .timers: loc("Timers")
         case .keepAwake: loc("Keep Awake")
+        case .nowPlaying: loc("Now Playing")
         case .notes: loc("Notes")
         case .countdown: loc("Countdown")
         case .stopwatch: loc("Stopwatch")
@@ -84,6 +85,7 @@ public extension ModuleID {
         case .worldClocks: "globe"
         case .timers: "timer"
         case .keepAwake: "cup.and.heat.waves"
+        case .nowPlaying: "music.note"
         case .notes: "note.text"
         case .countdown: "hourglass"
         case .stopwatch: "stopwatch"
@@ -117,7 +119,7 @@ public extension ModuleID {
         case .timers, .stopwatch, .sunMoon: Palette.orange
         case .notes: Palette.yellow
         case .countdown: Palette.purple
-        case .colours: Palette.pink
+        case .colours, .nowPlaying: Palette.pink
         case .appearance: Palette.blue
         case .weather: Palette.cyan
         case .rates: Palette.green
@@ -148,6 +150,7 @@ public extension ModuleID {
         case .wifi: "SIG"
         case .weather: "WTH"
         case .rates: "FX"
+        case .nowPlaying: "NOW"
         case .clipboard: "CLP"
         default: ""
         }
@@ -166,7 +169,7 @@ public extension ModuleID {
         case .colours, .appearance, .eject, .sunMoon, .date: true
         case .aiUsage, .git, .devServers, .docker, .ping, .vpn, .wifi: true
         case .calendar, .endsIn, .todos, .deviceBatteries: true
-        case .weather, .rates, .clipboard: true
+        case .weather, .rates, .clipboard, .nowPlaying: true
         case .fans: FanHardware.hasFans
         default: false
         }

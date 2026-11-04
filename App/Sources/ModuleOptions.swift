@@ -12,9 +12,48 @@ struct ModuleOptions: View {
         case .weather: WeatherOptions(store: store)
         case .rates: RatesOptions(store: store)
         case .clipboard: ClipboardOptions(store: store)
+        case .nowPlaying: NowPlayingOptions(store: store)
         case _ where ModuleID.developerCollected.contains(module):
             DeveloperOptionsSection(module: module, store: store)
         default: EmptyView()
+        }
+    }
+}
+
+private struct NowPlayingOptions: View {
+    let store: SettingsStore
+
+    private var options: [String: String] {
+        store.settings.module(.nowPlaying)?.options ?? [:]
+    }
+
+    private func set(_ key: String, _ value: String) {
+        store.update { $0.update(.nowPlaying) { $0.options[key] = value } }
+    }
+
+    private var maxWidth: Binding<Double> {
+        Binding(
+            get: { options[ModuleOption.maxWidth].flatMap(Double.init) ?? 180 },
+            set: { set(ModuleOption.maxWidth, String(Int($0))) }
+        )
+    }
+
+    private var hidesWhenIdle: Binding<Bool> {
+        Binding(
+            get: { options[ModuleOption.hideWhenIdle] != "false" },
+            set: { set(ModuleOption.hideWhenIdle, $0 ? "true" : "false") }
+        )
+    }
+
+    var body: some View {
+        Section(loc("Now Playing")) {
+            LabeledContent(loc("Max width")) {
+                HStack {
+                    Slider(value: maxWidth, in: 80 ... 400, step: 10)
+                    Text(loc("\(Int(maxWidth.wrappedValue)) pt")).monospacedDigit().foregroundStyle(.secondary)
+                }
+            }
+            Toggle(loc("Hide when nothing is playing"), isOn: hidesWhenIdle)
         }
     }
 }

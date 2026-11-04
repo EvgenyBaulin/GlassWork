@@ -191,6 +191,8 @@ while (1) {
         while ($buffer =~ s/^(.*)\n//) {
             my $line = $1;
             eval { perform($controller, $line) };
+            # The player answers within moments, and the button should show it.
+            $ticks = $fast_ticks - 4;
         }
     }
     $ticks++;

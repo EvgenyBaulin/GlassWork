@@ -42,6 +42,8 @@ public extension WidgetKind {
         case .pomodoro: loc("Pomodoro")
         case .focusTime: loc("Focus Time")
         case .wordOfDay: loc("Word of the Day")
+        case .nowPlaying: loc("Now Playing")
+        case .lyrics: loc("Lyrics")
         }
     }
 }
@@ -71,6 +73,7 @@ public extension WidgetKind {
         case .stopwatch, .pomodoro: .timers
         case .focusTime: .overview
         case .wordOfDay: .date
+        case .nowPlaying, .lyrics: .nowPlaying
         }
     }
 }
@@ -126,6 +129,10 @@ public struct WidgetFace: View {
             case .temperature: TemperatureWidget(size: size, snapshot: snapshot)
             case .topApps: TopAppsWidget(size: size, snapshot: snapshot)
             case .network: NetworkWidget(snapshot: snapshot)
+            case .nowPlaying:
+                NowPlayingWidget(size: size, data: snapshot.nowPlaying, now: now, isSystemTimed: !showsSeconds)
+            case .lyrics:
+                LyricsWidget(size: size, data: snapshot.nowPlaying, now: now, isSystemTimed: !showsSeconds)
             default:
                 TimeWidgetFace(
                     kind: kind,
