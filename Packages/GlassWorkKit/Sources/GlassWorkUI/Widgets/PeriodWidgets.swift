@@ -23,7 +23,7 @@ private extension PeriodProgress.Period {
     }
 }
 
-/// Day, week, month and year as bars and rings.
+/// Day, week, month, quarter and year as rows of dots.
 struct ProgressWidget: View {
     let context: TimeContext
 
@@ -34,89 +34,110 @@ struct ProgressWidget: View {
     var body: some View {
         switch context.size {
         case .small:
-            ring(progress(.year), diameter: 120)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            VStack(spacing: 4) {
+                ring(progress(.day), diameter: 104)
+                Text(PeriodProgress.Period.day.title).font(.system(size: 13, weight: .semibold))
+                Text(leftText(progress(.day))).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .medium:
-            VStack(spacing: 10) {
-                ForEach([PeriodProgress.Period.day, .week, .month, .year], id: \.self) { period in
-                    bar(progress(period))
+            VStack(spacing: 12) {
+                ForEach([PeriodProgress.Period.day, .week, .year], id: \.self) { period in
+                    row(progress(period), showsLeft: false)
                 }
             }
             .frame(maxHeight: .infinity)
         case .large:
-            VStack(alignment: .leading, spacing: 14) {
-                header
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                    ForEach([PeriodProgress.Period.day, .week, .month, .year], id: \.self) { period in
-                        ring(progress(period), diameter: 120)
-                    }
-                }
-                .frame(maxHeight: .infinity)
+            VStack(alignment: .leading, spacing: 10) {
+                WidgetCapsTitle(title: loc("Progress"), tint: Palette.orange)
+                rows
+                Spacer(minLength: 0)
             }
         case .extraLarge:
-            HStack(alignment: .top, spacing: 24) {
-                VStack(alignment: .leading, spacing: 8) {
-                    header
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                        ForEach([PeriodProgress.Period.day, .week, .month, .year], id: \.self) { period in
-                            ring(progress(period), diameter: 110)
-                        }
-                    }
+            HStack(spacing: 18) {
+                VStack(alignment: .leading, spacing: 10) {
+                    WidgetCapsTitle(title: loc("Progress"), tint: Palette.orange)
+                    rows
+                    Spacer(minLength: 0)
                 }
-                VStack(spacing: 14) {
-                    ForEach(PeriodProgress.Period.allCases, id: \.self) { period in
-                        detail(progress(period))
-                    }
-                }
-                .frame(maxHeight: .infinity)
+                Divider()
+                months.frame(width: 340)
             }
         }
     }
 
-    private var header: some View {
-        WidgetHeader(title: loc("Progress"), symbol: "chart.bar.fill", tint: Palette.green)
+    private var rows: some View {
+        VStack(spacing: 13) {
+            ForEach(PeriodProgress.Period.allCases, id: \.self) { period in
+                row(progress(period), showsLeft: true)
+            }
+        }
     }
 
     private func ring(_ item: PeriodProgress, diameter: CGFloat) -> some View {
-        VStack(spacing: 6) {
-            RingGauge(value: item.share, tint: item.period.tint, lineWidth: diameter / 9) {
-                VStack(spacing: 0) {
-                    Text(Format.percent(item.share))
-                        .font(.system(size: diameter / 5, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                    if context.size == .small {
-                        Text(daysLeftText(item)).font(.system(size: 10)).foregroundStyle(.secondary)
+        RingGauge(value: item.share, tint: item.period.tint, lineWidth: diameter / 9) {
+            VStack(spacing: 0) {
+                Text(Format.percent(item.share)).font(.widgetFigure(diameter / 4)).monospacedDigit()
+                Text(loc("of today")).font(.system(size: 10)).foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: diameter, height: diameter)
+    }
+
+    private func row(_ item: PeriodProgress, showsLeft: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(item.period.title).font(.system(size: 13, weight: .medium))
+                Spacer()
+                Text(Format.percent(item.share))
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundStyle(item.period.tint)
+                    .monospacedDigit()
+                    .widgetAccentable()
+            }
+            WidgetDotBar(value: item.share, tint: item.period.tint)
+            if showsLeft {
+                Text(leftText(item)).font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func leftText(_ item: PeriodProgress) -> String {
+        if item.period == .day {
+            return loc("\(CompactDuration.format(item.end.timeIntervalSince(context.now))) left")
+        }
+        return item.daysLeft == 0 ? loc("Last day") : loc("Days left: \(item.daysLeft)")
+    }
+
+    /// Twelve columns: full for months that are over, partly full for this one.
+    private var months: some View {
+        let calendar = Calendar.current
+        let month = calendar.component(.month, from: context.now)
+        let share = progress(.month).share
+        return VStack(alignment: .leading, spacing: 8) {
+            WidgetSection(title: loc("Year by month"))
+            HStack(alignment: .bottom, spacing: 5) {
+                ForEach(1 ... 12, id: \.self) { index in
+                    let fill = index < month ? 1 : index == month ? share : 0
+                    VStack(spacing: 4) {
+                        GeometryReader { geometry in
+                            ZStack(alignment: .bottom) {
+                                RoundedRectangle(cornerRadius: 5).fill(.quaternary)
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(Palette.green)
+                                    .frame(height: geometry.size.height * fill)
+                            }
+                        }
+                        Text(calendar.veryShortStandaloneMonthSymbols[index - 1])
+                            .font(.system(size: 9))
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
-            .frame(width: diameter, height: diameter)
-            if context.size != .small {
-                Text(item.period.title).font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
-            }
+            .frame(height: 130)
+            .widgetAccentable()
+            Spacer(minLength: 0)
         }
-    }
-
-    private func bar(_ item: PeriodProgress) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack {
-                Text(item.period.title).foregroundStyle(.secondary)
-                Spacer()
-                Text(Format.percent(item.share)).foregroundStyle(item.period.tint).monospacedDigit()
-            }
-            .font(.system(size: 12, weight: .medium))
-            ThinBar(value: item.share, tint: item.period.tint, height: 6)
-        }
-    }
-
-    private func detail(_ item: PeriodProgress) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            bar(item)
-            Text(daysLeftText(item)).font(.system(size: 11)).foregroundStyle(.secondary)
-        }
-    }
-
-    private func daysLeftText(_ item: PeriodProgress) -> String {
-        item.daysLeft == 0 ? loc("Last day") : loc("Days left: \(item.daysLeft)")
     }
 }
 
@@ -128,82 +149,123 @@ struct WeekendWidget: View {
         WeekendCountdown(at: context.now)
     }
 
+    private var tint: Color {
+        weekend.isWeekend ? Palette.green : Palette.purple
+    }
+
     var body: some View {
         let state = weekend
         switch context.size {
         case .small:
-            VStack(alignment: .leading, spacing: 4) {
-                header
-                Spacer()
-                headline(state, size: 46)
-                Text(caption(state)).font(.system(size: 13)).foregroundStyle(.secondary)
-                ThinBar(value: state.progress, tint: Palette.orange, height: 6)
-            }
+            countdown(state)
         case .medium:
-            HStack(spacing: 16) {
-                ring(state, diameter: 112)
-                VStack(alignment: .leading, spacing: 4) {
-                    header
-                    headline(state, size: 30)
-                    Text(caption(state)).font(.system(size: 13)).foregroundStyle(.secondary)
-                    Text(range(state.weekend)).font(.system(size: 12)).foregroundStyle(.secondary)
-                }
+            HStack(spacing: 14) {
+                countdown(state)
+                Divider()
+                workWeek(state)
             }
         case .large:
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 16) {
-                    ring(state, diameter: 120)
-                    VStack(alignment: .leading, spacing: 4) {
-                        header
-                        headline(state, size: 34)
-                        Text(caption(state)).font(.system(size: 13)).foregroundStyle(.secondary)
-                    }
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 14) {
+                    countdown(state)
+                    Divider()
+                    workWeek(state)
                 }
-                weekStrip
-                weekendRows(state)
+                .frame(height: 142)
+                Divider()
+                plans(state, limit: 3)
+                Spacer(minLength: 0)
             }
         case .extraLarge:
-            HStack(alignment: .top, spacing: 24) {
-                VStack(alignment: .leading, spacing: 12) {
-                    header
-                    ring(state, diameter: 170)
-                    headline(state, size: 34)
-                    Text(caption(state)).font(.system(size: 13)).foregroundStyle(.secondary)
-                }
-                VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 18) {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 14) {
+                        countdown(state)
+                        Divider()
+                        workWeek(state)
+                    }
+                    .frame(height: 142)
+                    Divider()
                     weekStrip
-                    weekendRows(state)
                     Spacer(minLength: 0)
                 }
+                .frame(width: 370)
+                Divider()
+                plans(state, limit: 5)
             }
         }
     }
 
-    private var header: some View {
-        WidgetHeader(title: loc("Weekend"), symbol: "beach.umbrella", tint: Palette.orange)
+    private func countdown(_ state: WeekendCountdown) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            WidgetCapsTitle(title: loc("Weekend"), tint: tint)
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Text(state.isWeekend ? loc("Now!") : figure(state).number)
+                    .font(.widgetFigure(state.isWeekend ? 34 : 46))
+                    .foregroundStyle(state.isWeekend ? tint : .primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .widgetAccentable()
+                if !state.isWeekend {
+                    Text(figure(state).unit).font(.system(size: 15, weight: .semibold)).lineLimit(1)
+                }
+            }
+            Text(caption(state)).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+            Spacer(minLength: 0)
+            dayDots
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func headline(_ state: WeekendCountdown, size: CGFloat) -> some View {
-        Text(state.isWeekend ? loc("Weekend!") : "\(state.daysUntil)")
-            .font(.system(size: size, weight: .semibold, design: .rounded))
-            .minimumScaleFactor(0.5)
-            .lineLimit(1)
+    /// One string, so the unit agrees with the number, drawn in two sizes.
+    private func figure(_ state: WeekendCountdown) -> (number: String, unit: String) {
+        let parts = loc("\(state.daysUntil) days away").split(separator: " ", maxSplits: 1).map(String.init)
+        return (parts.first ?? "\(state.daysUntil)", parts.dropFirst().first ?? "")
     }
 
     private func caption(_ state: WeekendCountdown) -> String {
-        if state.isWeekend {
-            return loc("\(CompactDuration.format(state.remaining)) left")
-        }
-        return state.daysUntil == 1 ? loc("day to go") : loc("days to go")
+        let time = CompactDuration.format(state.remaining)
+        guard !state.isWeekend else { return loc("\(time) left") }
+        return loc("\(time) · until \(state.weekend.start.formatted(.dateTime.weekday(.abbreviated)))")
     }
 
-    private func ring(_ state: WeekendCountdown, diameter: CGFloat) -> some View {
-        RingGauge(value: state.progress, tint: Palette.orange, lineWidth: diameter / 10) {
-            Image(systemName: state.isWeekend ? "party.popper" : "briefcase")
-                .font(.system(size: diameter / 3))
-                .foregroundStyle(Palette.orange)
+    /// One dot per day of this week: today ringed, weekend days filled.
+    private var dayDots: some View {
+        let calendar = Calendar.current
+        let week = calendar.dateInterval(of: .weekOfYear, for: context.now)?.start ?? context.now
+        return HStack(spacing: 4) {
+            ForEach(0 ..< 7, id: \.self) { offset in
+                let day = calendar.date(byAdding: .day, value: offset, to: week) ?? week
+                let isToday = calendar.isDate(day, inSameDayAs: context.now)
+                Text(day.formatted(.dateTime.weekday(.narrow)))
+                    .font(.system(size: 8, weight: .semibold))
+                    .frame(width: 16, height: 16)
+                    .background(
+                        calendar.isDateInWeekend(day) ? AnyShapeStyle(Palette.purple) : AnyShapeStyle(.quaternary),
+                        in: .circle
+                    )
+                    .overlay(Circle().strokeBorder(isToday ? Color.primary : .clear, lineWidth: 1.5))
+            }
         }
-        .frame(width: diameter, height: diameter)
+        .widgetAccentable()
+    }
+
+    private func workWeek(_ state: WeekendCountdown) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            WidgetSection(title: state.isWeekend ? loc("Weekend") : loc("Work week"))
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(Format.percent(state.progress)).font(.widgetFigure(20)).monospacedDigit()
+                Text(loc("done")).font(.system(size: 12)).foregroundStyle(.secondary)
+            }
+            WidgetDotBar(value: state.progress, tint: Palette.purple, count: 20)
+            Text(loc("\(CompactDuration.format(state.remaining)) left"))
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 0)
+            Text(range(state.weekend)).font(.system(size: 10)).foregroundStyle(.tertiary).lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func range(_ interval: DateInterval) -> String {
@@ -212,7 +274,34 @@ struct WeekendWidget: View {
         return "\(interval.start.formatted(style)) – \(last.formatted(style))"
     }
 
-    /// The next seven days, weekend days in orange and today ringed.
+    /// Calendar events during the weekend, then the weekends after it.
+    private func plans(_ state: WeekendCountdown, limit: Int) -> some View {
+        let events = context.snapshot.events.filter { state.weekend.contains($0.start) }
+        return VStack(alignment: .leading, spacing: 8) {
+            WidgetSection(title: loc("This weekend"))
+            if events.isEmpty {
+                Text(loc("No events yet")).font(.system(size: 12)).foregroundStyle(.secondary)
+            }
+            ForEach(events.prefix(limit)) { event in
+                HStack(spacing: 8) {
+                    Capsule().fill(tint).frame(width: 3, height: 30)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(event.title).font(.system(size: 13, weight: .semibold)).lineLimit(1)
+                        Text(event.start.formatted(.dateTime.weekday(.abbreviated).hour().minute()))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            Spacer(minLength: 0)
+            InfoRow(title: state.isWeekend ? loc("Now") : loc("Next weekend"), value: range(state.weekend))
+            if let following = state.following {
+                InfoRow(title: loc("After that"), value: range(following))
+            }
+        }
+    }
+
+    /// The next seven days, weekend days filled and today ringed.
     private var weekStrip: some View {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: context.now)
@@ -229,21 +318,12 @@ struct WeekendWidget: View {
                         .monospacedDigit()
                         .frame(width: 30, height: 30)
                         .background(
-                            isWeekend ? Palette.orange.opacity(0.85) : Color.primary.opacity(0.08),
+                            isWeekend ? Palette.purple.opacity(0.85) : Color.primary.opacity(0.08),
                             in: Circle()
                         )
                         .overlay(Circle().strokeBorder(offset == 0 ? Color.primary : .clear, lineWidth: 1.5))
                 }
                 .frame(maxWidth: .infinity)
-            }
-        }
-    }
-
-    private func weekendRows(_ state: WeekendCountdown) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            InfoRow(title: state.isWeekend ? loc("Now") : loc("Next weekend"), value: range(state.weekend))
-            if let following = state.following {
-                InfoRow(title: loc("After that"), value: range(following))
             }
         }
     }
@@ -269,44 +349,38 @@ struct StopwatchWidget: View {
         stopwatch.isRunning ? loc("Running") : elapsed > 0 ? loc("Paused") : loc("Ready")
     }
 
+    private var status: some View {
+        Text(statusText).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1)
+    }
+
+    /// "Running since 4:08 PM", or just the state.
+    private var statusText: String {
+        guard let started = stopwatch.startedAt else { return state }
+        return loc("Running since \(started.formatted(date: .omitted, time: .shortened))")
+    }
+
     var body: some View {
-        switch context.size {
-        case .small:
-            VStack(alignment: .leading, spacing: 4) {
-                header
-                Spacer()
-                time(size: 40)
-                Text(state).font(.system(size: 13, weight: .medium)).foregroundStyle(tint)
-            }
-        case .medium:
-            HStack(spacing: 16) {
-                ring(diameter: 120)
-                VStack(alignment: .leading, spacing: 4) {
-                    header
-                    time(size: 38)
-                    Text(state).font(.system(size: 13, weight: .medium)).foregroundStyle(tint)
-                    startedText
-                }
-            }
-        case .large, .extraLarge:
-            VStack(alignment: .leading, spacing: 14) {
-                header
-                ring(diameter: context.size == .large ? 190 : 230)
-                    .frame(maxWidth: .infinity)
-                time(size: context.size == .large ? 46 : 60)
-                    .frame(maxWidth: .infinity)
-                Divider()
-                InfoRow(title: loc("Status"), value: state)
-                InfoRow(title: loc("Elapsed"), value: elapsed.elapsedText)
-                if let started = stopwatch.startedAt {
-                    InfoRow(title: loc("Started"), value: started.formatted(date: .omitted, time: .shortened))
-                }
-            }
+        VStack(alignment: .leading, spacing: context.size == .small ? 6 : 8) {
+            WidgetCapsTitle(title: loc("Stopwatch"), tint: Palette.green)
+            time(size: figureSize)
+            status
+            Spacer(minLength: 0)
+            hint
         }
     }
 
-    private var header: some View {
-        WidgetHeader(title: loc("Stopwatch"), symbol: "stopwatch", tint: Palette.orange)
+    private var figureSize: CGFloat {
+        switch context.size {
+        case .small: 34
+        case .medium: 44
+        case .large: 62
+        case .extraLarge: 84
+        }
+    }
+
+    /// A click opens the Timers panel, where the controls are.
+    private var hint: some View {
+        Text(loc("Click to open Timers")).font(.system(size: 10)).foregroundStyle(.tertiary).lineLimit(1)
     }
 
     /// In WidgetKit a running stopwatch counts on its own between refreshes; GlassWork's own windows redraw each
@@ -322,28 +396,9 @@ struct StopwatchWidget: View {
                 Text(elapsed.elapsedText)
             }
         }
-        .font(.system(size: size, weight: .semibold, design: .rounded))
+        .font(.system(size: size, weight: .bold, design: .rounded))
         .monospacedDigit()
         .lineLimit(1)
         .minimumScaleFactor(0.5)
-    }
-
-    @ViewBuilder
-    private var startedText: some View {
-        if let started = stopwatch.startedAt {
-            Text(loc("Started \(started.formatted(date: .omitted, time: .shortened))"))
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    /// One turn is one minute.
-    private func ring(diameter: CGFloat) -> some View {
-        RingGauge(value: elapsed.truncatingRemainder(dividingBy: 60) / 60, tint: tint, lineWidth: diameter / 12) {
-            Image(systemName: stopwatch.isRunning ? "pause.fill" : "play.fill")
-                .font(.system(size: diameter / 4))
-                .foregroundStyle(tint)
-        }
-        .frame(width: diameter, height: diameter)
     }
 }

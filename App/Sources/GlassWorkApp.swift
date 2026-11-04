@@ -29,18 +29,18 @@ struct GlassWorkApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var model: AppModel?
     /// A click on a widget can be what launches the app, and then it arrives before the model exists.
-    private var pendingModule: ModuleID?
+    private var pendingDestination: WidgetDestination?
 
     func applicationDidFinishLaunching(_: Notification) {
         // Read first: the event is only there during launch.
         let isQuietLaunch = wasOpenedAtLogin
         model = AppModel()
-        if let pendingModule {
-            model?.showPanelAtPointer(pendingModule)
+        if let pendingDestination {
+            model?.open(pendingDestination)
         } else if !isQuietLaunch {
             model?.showMainWindowAtLaunch()
         }
-        pendingModule = nil
+        pendingDestination = nil
     }
 
     /// Logging in should bring back the menu bar, not put a window in front of everything.
@@ -52,11 +52,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_: NSApplication, open urls: [URL]) {
-        guard let module = urls.compactMap(WidgetLink.module).last else { return }
+        let store = SnapshotStore()
+        let destinations = urls.compactMap { url in
+            WidgetLink.destination(from: url, shownIn: store.read(WidgetSnapshot.self, for: WidgetSnapshot.key))
+        }
+        guard let destination = destinations.last else { return }
         if let model {
-            model.showPanelAtPointer(module)
+            model.open(destination)
         } else {
-            pendingModule = module
+            pendingDestination = destination
         }
     }
 

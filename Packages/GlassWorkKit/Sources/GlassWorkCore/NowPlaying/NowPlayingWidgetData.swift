@@ -24,6 +24,11 @@ public enum ArtworkImage {
     /// A JPEG no bigger than `pixels` on its long side, or nil for data that is not an image.
     public static func fitted(_ data: Data, pixels: Int = pixels) -> Data? {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+        return fitted(source, pixels: pixels)
+    }
+
+    /// Reading from a source spares loading a large photo whole, and it can be scaled twice.
+    public static func fitted(_ source: CGImageSource, pixels: Int) -> Data? {
         let options: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceCreateThumbnailWithTransform: true,

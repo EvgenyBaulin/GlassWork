@@ -172,6 +172,11 @@ struct FansPanelContent: View {
                     .foregroundStyle(.tint)
             }
             .font(.system(size: 12))
+            if control.isWithSystem {
+                Text(loc("The Mac is cool, so macOS runs the fans for now."))
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
             if let fan = fans.first(where: \.hasValidRange) {
                 FanCurveChart(
                     curve: control.settings.curve(forFan: fan.id, isOnAC: isOnAC),

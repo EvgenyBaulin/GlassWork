@@ -21,7 +21,8 @@ A Liquid Glass companion for macOS: live menu bar modules, desktop widgets and a
 
 Everything is read locally from this Mac. Nothing is logged or uploaded; network access is limited to the
 modules that need it (ping, endpoints, GitHub through your own `gh`, weather, exchange rates, and song lyrics
-from lrclib.net for the Lyrics widget, which you can turn off).
+from lrclib.net for the Lyrics widget, which you can turn off). The Photo Frame, On This Day and Birthdays widgets
+stay off until you turn them on in Settings; only then does the app read that folder, Photos or Contacts.
 
 ## Requirements
 

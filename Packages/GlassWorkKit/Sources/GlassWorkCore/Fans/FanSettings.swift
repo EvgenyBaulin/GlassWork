@@ -81,8 +81,21 @@ public struct FanSettings: Sendable, Equatable {
     /// One target per fan, by fan index, used with `customPerFan`.
     public var customRPMs: [Double] = []
     public var powerRules = FanPowerRules()
+    /// In Curve mode, leaves the fans to the system below `handOverCelsius` instead of holding the minimum.
+    public var handsOverWhenCool = false
+    public var handOverCelsius = 45.0
+
+    /// Stops well short of the failsafe, because the system would be running the fans in that range.
+    public static let handOverRange = 30.0 ... 80.0
 
     public init() {}
+
+    /// Nil when the option is off. A hand edit cannot put the threshold anywhere odd.
+    public var handOverThreshold: Double? {
+        guard handsOverWhenCool else { return nil }
+        guard handOverCelsius.isFinite else { return 45 }
+        return Swift.min(Swift.max(handOverCelsius, Self.handOverRange.lowerBound), Self.handOverRange.upperBound)
+    }
 
     public var presets: [FanPreset] {
         FanPreset.builtIn + userPresets
@@ -190,6 +203,7 @@ extension FanSettings: Codable {
     private enum CodingKeys: String, CodingKey {
         case launchMode, isControlEnabled, sensor, selectedPresetID, draftPoints, userPresets
         case separateCurves, fanPresetIDs, customPerFan, customRPM, customRPMs, powerRules
+        case handsOverWhenCool, handOverCelsius
     }
 
     public init(from decoder: Decoder) throws {
@@ -206,5 +220,7 @@ extension FanSettings: Codable {
         customRPM = container.lossy(.customRPM, 0)
         customRPMs = container.lossy(.customRPMs, [])
         powerRules = container.lossy(.powerRules, FanPowerRules())
+        handsOverWhenCool = container.lossy(.handsOverWhenCool, false)
+        handOverCelsius = container.lossy(.handOverCelsius, 45)
     }
 }

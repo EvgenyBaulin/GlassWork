@@ -26,3 +26,31 @@ struct WidgetModelTests {
         #expect(WidgetSize.large.height == 382)
     }
 }
+
+struct WidgetTopUsageTests {
+    private let chrome = ProcessUsage(pid: 1, name: "Google Chrome", cpu: 41, memory: 1)
+    private let helper = ProcessUsage(pid: 9, name: "Google Chrome He", cpu: 30, memory: 1)
+
+    @Test func appsComeFirstWhenTheyHaveFigures() {
+        var snapshot = WidgetSnapshot(date: Date())
+        snapshot.processes = [helper]
+        snapshot.apps = [chrome]
+        #expect(snapshot.topUsage == [chrome])
+    }
+
+    @Test(arguments: [nil, [], [ProcessUsage(pid: 1, name: "Google Chrome", cpu: 0, memory: 1)]] as [[ProcessUsage]?])
+    func processesStandInWithoutFigures(apps: [ProcessUsage]?) {
+        var snapshot = WidgetSnapshot(date: Date())
+        snapshot.processes = [helper]
+        snapshot.apps = apps
+        #expect(snapshot.topUsage == [helper])
+    }
+
+    @Test func aSnapshotFromAnEarlierVersionStillDecodes() throws {
+        let old = try JSONEncoder().encode(WidgetSnapshot(date: Date(timeIntervalSince1970: 0)))
+        var json = try #require(JSONSerialization.jsonObject(with: old) as? [String: Any])
+        json["apps"] = nil
+        let data = try JSONSerialization.data(withJSONObject: json)
+        #expect(try JSONDecoder().decode(WidgetSnapshot.self, from: data).apps == nil)
+    }
+}

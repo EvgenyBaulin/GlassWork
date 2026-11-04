@@ -197,7 +197,8 @@ struct FansWidget: View {
             presetSwitcher
         }
         HStack(spacing: 8) {
-            modeSwitcher(FanMode.allCases)
+            // Max has its own button right here, and a second one in the control would say the same thing.
+            modeSwitcher(FanMode.allCases.filter { $0 != .max })
             maxButton.frame(width: 84)
         }
         Spacer(minLength: 0)

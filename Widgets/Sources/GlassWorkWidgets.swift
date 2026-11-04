@@ -81,6 +81,11 @@ struct DataWidgets: WidgetBundle {
         DevServersKindWidget()
         ContainersKindWidget()
         AIUsageKindWidget()
+        GitHubKindWidget()
+        TodayKindWidget()
+        PhotoFrameKindWidget()
+        OnThisDayKindWidget()
+        BirthdaysKindWidget()
     }
 }
 
@@ -156,7 +161,7 @@ struct KindView: View {
         }
         .environment(\.widgetActions, .intents)
         .containerBackground(.fill.tertiary, for: .widget)
-        .widgetURL(WidgetLink.url(for: kind.module))
+        .widgetURL(WidgetLink.url(for: kind.destination))
     }
 }
 
@@ -484,6 +489,24 @@ struct BreaksKindWidget: Widget {
 struct AppTimeKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.appTime)
+    }
+}
+
+struct BirthdaysKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.birthdays)
+    }
+}
+
+struct GitHubKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.github)
+    }
+}
+
+struct TodayKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.todayAtAGlance)
     }
 }
 

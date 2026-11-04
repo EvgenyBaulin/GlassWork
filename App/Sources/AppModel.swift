@@ -10,7 +10,10 @@ import WidgetKit
 @MainActor
 final class AppModel {
     let store = SettingsStore()
-    let monitor = SystemMonitor(nowPlaying: NowPlayingBridge.makeStore())
+    let monitor = SystemMonitor(
+        nowPlaying: NowPlayingBridge.makeStore(),
+        personal: PersonalWidgetStore(library: SystemPhotoLibrary(), contacts: SystemBirthdays())
+    )
     private let fanSensors = FanSensorSource()
     private(set) lazy var fans = makeFans()
     private lazy var panels = PanelController(model: self)
@@ -166,6 +169,18 @@ final class AppModel {
 
     func hasCard(from window: NSWindow) -> Bool {
         panels.hasCard(from: window)
+    }
+
+    func open(_ destination: WidgetDestination) {
+        switch destination {
+        case let .module(module):
+            showPanelAtPointer(module)
+        case .widgetSettings:
+            panels.closeTransient()
+            settingsWindow.showWidgets()
+        case let .web(url):
+            NSWorkspace.shared.open(url)
+        }
     }
 
     /// For a click on a system widget, whose frame the app never learns.
@@ -416,8 +431,9 @@ final class AppModel {
                 await monitor.activity.check(store.settings.widgets.endpoints)
             }
             if !kinds.isDisjoint(with: WidgetKind.githubKinds) {
-                await monitor.activity.refreshGitHub()
+                await monitor.activity.refreshGitHub(includesDigest: kinds.contains(.github))
             }
+            await monitor.personal.refresh(store.settings.personalWidgets, for: kinds)
             if store.settings.widgets.tracksScreenTime, !kinds.isDisjoint(with: WidgetKind.screenTimeKinds) {
                 monitor.activity.flushScreenTime()
             }

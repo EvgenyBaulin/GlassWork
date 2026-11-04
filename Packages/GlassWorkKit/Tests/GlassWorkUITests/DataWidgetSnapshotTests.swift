@@ -1,6 +1,8 @@
+import AppKit
 import Foundation
 @testable import GlassWorkCore
 @testable import GlassWorkUI
+import SnapshotTesting
 import SwiftUI
 import Testing
 import WidgetKit
@@ -11,7 +13,8 @@ import WidgetKit
 struct DataWidgetSnapshotTests {
     nonisolated static let kinds: [WidgetKind] = [
         .fans, .weather, .rates, .git, .devServers, .containers, .devices, .wifiSignal, .diskActivity, .timeMachine,
-        .screenTime, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed,
+        .screenTime, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed, .github, .todayAtAGlance,
+        .photoFrame, .onThisDay, .birthdays,
     ]
 
     private func sample(_ kind: WidgetKind) -> WidgetSnapshot {
@@ -26,6 +29,9 @@ struct DataWidgetSnapshotTests {
         case .wifiSignal: DataSamples.wifi
         case .diskActivity: DataSamples.disk
         case .timeMachine: DataSamples.timeMachine(DataSamples.backedUp)
+        case .github: DataSamples.github
+        case .todayAtAGlance: DataSamples.today
+        case .photoFrame, .onThisDay, .birthdays: DataSamples.personal
         default: DataSamples.screenTime
         }
     }
@@ -64,6 +70,28 @@ struct DataWidgetSnapshotTests {
             snapshot.fans?.mode = .max
         }
         state(.fans, snapshot, "max", sizes: WidgetSize.allCases)
+    }
+
+    /// The desktop gives a small widget less room than its nominal size, so this is tighter than any real one.
+    @Test(arguments: ["Running smoothly", "Всё работает"])
+    func uptimeTitleFitsATightWidget(title: String) {
+        let view = MacHealthTitle(text: title).frame(width: 100, height: 20, alignment: .leading)
+        let host = NSHostingView(rootView: view.padding(8).background(.black).environment(\.colorScheme, .dark))
+        host.frame = CGRect(x: 0, y: 0, width: 116, height: 36)
+        withSnapshotTesting(record: .missing) {
+            assertSnapshot(of: host, as: .image(precision: 0.98), named: title == "Всё работает" ? "ru" : "en")
+        }
+    }
+
+    @Test func activityListsAppsByTheirNames() {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        snapshot.cpu = CPUSample(total: 0.27, user: 0.18, system: 0.09, idle: 0.73, cores: [0.3, 0.2])
+        snapshot.processes = [ProcessUsage(pid: 9, name: "com.apple.WebKit.WebContent", cpu: 40, memory: 1)]
+        snapshot.apps = [
+            ProcessUsage(pid: 1, name: "Google Chrome", cpu: 41.2, memory: 1),
+            ProcessUsage(pid: 2, name: "Xcode", cpu: 19.3, memory: 1),
+        ]
+        state(.activity, snapshot, "apps", sizes: [.large])
     }
 
     @Test func fansWithoutTheService() {
@@ -143,10 +171,64 @@ struct DataWidgetSnapshotTests {
 
     /// A new widget has no data for up to a minute, and must not claim that nothing exists.
     @Test(arguments: [
-        WidgetKind.fans, .weather, .git, .devServers, .containers, .devices, .wifiSignal,
+        WidgetKind.fans, .weather, .git, .devServers, .containers, .devices, .wifiSignal, .github,
+        .photoFrame, .onThisDay, .birthdays,
     ])
     func waitsForItsFirstData(kind: WidgetKind) {
         state(kind, WidgetSnapshot(date: sampleNow), "waiting", sizes: [.small])
+    }
+
+    @Test func githubStates() {
+        var signedOut = WidgetSnapshot(date: sampleNow)
+        signedOut.github = WidgetGitHub(access: .notSignedIn)
+        state(.github, signedOut, "signed-out", sizes: [.medium])
+        var noTool = WidgetSnapshot(date: sampleNow)
+        noTool.github = WidgetGitHub(access: .notInstalled)
+        state(.github, noTool, "no-tool", sizes: [.small])
+        var clear = DataSamples.github
+        clear.github?.requested = []
+        state(.github, clear, "nothing-to-review", sizes: [.small])
+    }
+
+    @Test func todayWithAnEmptyCalendar() {
+        var snapshot = DataSamples.today
+        snapshot.events = []
+        snapshot.battery = nil
+        state(.todayAtAGlance, snapshot, "empty", sizes: WidgetSize.allCases)
+    }
+
+    /// Nothing is read until the user turns these on, and each widget says so.
+    @Test(arguments: [WidgetKind.photoFrame, .onThisDay, .birthdays])
+    func personalWidgetsBeforeTheyAreOn(kind: WidgetKind) {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        snapshot.personal = PersonalWidgetData()
+        state(kind, snapshot, "off", sizes: [.small, .medium])
+    }
+
+    @Test func personalWidgetsWithoutAccess() {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        var data = PersonalWidgetData()
+        data.birthdays.state = .noAccess
+        data.onThisDay.state = .noAccess
+        data.photoFrame.state = .unreadable
+        data.photoFrame.folderName = "Travel 2025"
+        snapshot.personal = data
+        state(.birthdays, snapshot, "no-access", sizes: [.medium])
+        state(.onThisDay, snapshot, "no-access", sizes: [.medium])
+        state(.photoFrame, snapshot, "unreadable", sizes: [.medium])
+    }
+
+    @Test func personalWidgetsWithNothingToShow() {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        var data = PersonalWidgetData()
+        data.birthdays.state = .ready
+        data.onThisDay.state = .ready
+        data.photoFrame.state = .ready
+        data.photoFrame.folderName = "Travel 2025"
+        snapshot.personal = data
+        state(.birthdays, snapshot, "empty", sizes: [.small])
+        state(.onThisDay, snapshot, "empty", sizes: [.small])
+        state(.photoFrame, snapshot, "empty", sizes: [.small])
     }
 
     @Test func gitWithNoRepositories() {

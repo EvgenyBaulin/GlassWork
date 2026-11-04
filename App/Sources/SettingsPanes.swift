@@ -4,6 +4,7 @@ import SwiftUI
 
 struct WidgetsPane: View {
     let store: SettingsStore
+    let personal: PersonalWidgetStore
     @State private var kind = WidgetKind.activity
     @State private var size = WidgetSize.medium
     @State private var commandName = ""
@@ -18,6 +19,7 @@ struct WidgetsPane: View {
             } header: {
                 Text(loc("System widgets"))
             }
+            PersonalWidgetsSection(store: store, personal: personal)
             Section(loc("Live desktop widgets")) {
                 ForEach(store.settings.widgets.placements) { placement in
                     HStack {

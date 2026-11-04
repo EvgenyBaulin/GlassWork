@@ -23,6 +23,11 @@ final class SettingsWindowController {
         show(module: nil)
     }
 
+    func showWidgets() {
+        navigation.selection = .widgets
+        show(module: nil)
+    }
+
     func show(module: ModuleID?) {
         navigation.selection = module.map(SettingsPage.module) ?? navigation.selection
         if window == nil {
@@ -158,7 +163,7 @@ struct SettingsRoot: View {
         case .menuBar: ModulesPane(store: store)
         case let .module(id): ModulePane(module: id, store: store, monitor: monitor)
         case .shortcuts: ShortcutsPane()
-        case .widgets: WidgetsPane(store: store)
+        case .widgets: WidgetsPane(store: store, personal: monitor.personal)
         case .dock: DockPane(store: store)
         case .fans:
             FansSettingsPane(

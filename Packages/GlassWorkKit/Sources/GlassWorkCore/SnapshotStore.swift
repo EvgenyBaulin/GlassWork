@@ -36,6 +36,10 @@ public struct SnapshotStore: Sendable {
         try? Data(contentsOf: dataURL(for: key))
     }
 
+    public func removeData(for key: String) {
+        try? FileManager.default.removeItem(at: dataURL(for: key))
+    }
+
     private func dataURL(for key: String) -> URL {
         directory.appending(path: "\(key).data", directoryHint: .notDirectory)
     }
