@@ -42,6 +42,13 @@ extension UVLevel {
 }
 
 extension Format {
+    /// When data is from. The time alone would make yesterday's forecast look like today's.
+    static func dataTime(_ date: Date, now: Date) -> String {
+        Calendar.current.isDate(date, inSameDayAs: now)
+            ? date.formatted(date: .omitted, time: .shortened)
+            : date.formatted(.dateTime.weekday().day().month().hour().minute())
+    }
+
     static func windSpeed(_ metresPerSecond: Double) -> String {
         Measurement(value: metresPerSecond, unit: UnitSpeed.metersPerSecond).formatted(
             .measurement(width: .abbreviated, usage: .wind, numberFormatStyle: .number.precision(.fractionLength(0)))
@@ -52,6 +59,7 @@ extension Format {
 /// Today and the week ahead for one place, or the list of places.
 struct WeatherPanel: View {
     let store: WeatherStore
+    var now: Date?
     @State private var isEditing = false
     @State private var selectedID: WeatherPlace.ID?
     @Environment(\.panelActions) private var actions
@@ -81,9 +89,9 @@ struct WeatherPanel: View {
     }
 
     private var subtitle: String {
-        guard !isEditing, let shown else { return "Open-Meteo" }
-        let time = shown.fetchedAt.formatted(date: .omitted, time: .shortened)
-        return store.isStale ? loc("Last update \(time)") : loc("Updated \(time)")
+        // When the data is old the banner says from when, with more room than this line has.
+        guard !isEditing, !store.isStale, let shown else { return "Open-Meteo" }
+        return loc("Updated \(Format.dataTime(shown.fetchedAt, now: now ?? Date()))")
     }
 
     /// Nothing happens until the user chooses, so macOS is not asked for the position on its own.
@@ -116,7 +124,7 @@ struct WeatherPanel: View {
 
     @ViewBuilder
     private var banner: some View {
-        let last = shown?.fetchedAt.formatted(date: .omitted, time: .shortened)
+        let last = shown.map { Format.dataTime($0.fetchedAt, now: now ?? Date()) }
         if store.locationStatus == .denied {
             PanelBanner(
                 symbol: "location.slash",

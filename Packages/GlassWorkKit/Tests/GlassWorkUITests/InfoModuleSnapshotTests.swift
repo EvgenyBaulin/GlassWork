@@ -12,19 +12,27 @@ import Testing
 struct InfoModuleSnapshotTests {
     @Test(arguments: [true, false])
     func weatherForecast(dark: Bool) {
-        assertPanel(WeatherPanel(store: weatherStore()), dark: dark, name: "weather")
+        assertPanel(WeatherPanel(store: weatherStore(), now: sampleNow), dark: dark, name: "weather")
     }
 
     @Test(arguments: [true, false])
     func weatherFirstRunAsksBeforeUsingLocation(dark: Bool) {
-        assertPanel(WeatherPanel(store: weatherStore(nil)), dark: dark, name: "weather-first-run")
+        assertPanel(WeatherPanel(store: weatherStore(nil), now: sampleNow), dark: dark, name: "weather-first-run")
     }
 
     @Test(arguments: [true, false])
     func weatherOfflineShowsTheLastData(dark: Bool) async {
         let store = weatherStore()
         await store.refresh(at: sampleNow)
-        assertPanel(WeatherPanel(store: store), dark: dark, name: "weather-offline")
+        assertPanel(WeatherPanel(store: store, now: sampleNow), dark: dark, name: "weather-offline")
+    }
+
+    @Test(arguments: [true, false])
+    func weatherOfflineSaysWhichDayTheDataIsFrom(dark: Bool) async {
+        let store = weatherStore()
+        await store.refresh(at: sampleNow)
+        let nextDay = sampleNow.addingTimeInterval(86400)
+        assertPanel(WeatherPanel(store: store, now: nextDay), dark: dark, name: "weather-offline-old")
     }
 
     @Test(arguments: [true, false])
@@ -264,6 +272,15 @@ struct InfoItemContentTests {
     @Test(arguments: [("#6B5BB5", true), ("#FFF", true), ("#6B5BB5FF", true), ("#12", false), ("#GGGGGG", false)])
     func readsHexColors(text: String, isValid: Bool) {
         #expect((Color(hexText: text) != nil) == isValid)
+    }
+
+    @Test func dataFromTodayShowsOnlyTheTime() {
+        let today = Format.dataTime(sampleNow, now: sampleNow.addingTimeInterval(60))
+        let older = Format.dataTime(sampleNow, now: sampleNow.addingTimeInterval(86400))
+
+        #expect(today == sampleNow.formatted(date: .omitted, time: .shortened))
+        #expect(older.count > today.count)
+        #expect(older.hasSuffix(today))
     }
 
     @Test func captionUsesTheGivenTime() {
