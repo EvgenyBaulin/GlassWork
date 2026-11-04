@@ -1,0 +1,7 @@
+# branch.oid d64af9d4a8f2aa631ef3b22599ebedc75085a660
+# branch.head main
+# branch.upstream origin/main
+# branch.ab +1 -1
+1 .M N... 100644 100644 100644 967c233f0aa6e4559dd553bb71bcb700a4ea754a 967c233f0aa6e4559dd553bb71bcb700a4ea754a keep.txt
+2 R. N... 100644 100644 100644 587be6b4c3f93f93c489c0111bba5596147a26cb 587be6b4c3f93f93c489c0111bba5596147a26cb R100 new.txt	old.txt
+? untracked.txt

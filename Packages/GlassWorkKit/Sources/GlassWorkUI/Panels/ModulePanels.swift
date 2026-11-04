@@ -21,6 +21,7 @@ public struct ModulePanel: View {
         case .battery: BatteryPanel(monitor: monitor)
         case .gpu: GPUPanel(monitor: monitor)
         case .sensors: SensorsPanel(monitor: monitor)
+        case .fans: FansPanel(monitor: monitor)
         case .uptime: UptimePanel()
         case .timers: TimersPanel(monitor: monitor)
         case .deviceBatteries: DeviceBatteriesPanel(monitor: monitor)
@@ -34,6 +35,8 @@ public struct ModulePanel: View {
         case .sunMoon: SunMoonPanel()
         case .colours: ColoursPanel(monitor: monitor)
         case .eject: EjectPanel(monitor: monitor)
+        case _ where ModuleID.developerCollected.contains(module):
+            DeveloperPanel(module: module, store: monitor.developer)
         case .weather: WeatherPanel(store: monitor.weather)
         case .rates: RatesPanel(store: monitor.rates)
         case .clipboard: ClipboardPanel(store: monitor.clipboard)

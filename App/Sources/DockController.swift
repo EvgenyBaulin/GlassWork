@@ -47,8 +47,8 @@ final class DockController {
         window = panel
     }
 
+    /// Restores even with no window, so a Dock left hidden by a crash comes back once it is turned off.
     private func close() {
-        guard window != nil else { return }
         window?.close()
         window = nil
         host = nil
@@ -88,16 +88,18 @@ final class DockController {
 /// Saves the system Dock's auto-hide settings, hides it, and puts everything back.
 enum SystemDock {
     private static let savedKey = "SystemDockSavedSettings"
+    private static let keys = ["autohide", "autohide-delay"]
     private static var dock: CFString {
         "com.apple.dock" as CFString
     }
 
     static func hide() {
         guard UserDefaults.standard.dictionary(forKey: savedKey) == nil else { return }
-        let saved: [String: Any] = [
-            "autohide": CFPreferencesCopyAppValue("autohide" as CFString, dock) ?? false,
-            "autohide-delay": CFPreferencesCopyAppValue("autohide-delay" as CFString, dock) ?? 0.0,
-        ]
+        // A key the owner never set stays out of the saved values, so restoring removes it again.
+        var saved: [String: Any] = [:]
+        for key in keys {
+            saved[key] = CFPreferencesCopyAppValue(key as CFString, dock)
+        }
         UserDefaults.standard.set(saved, forKey: savedKey)
         write("autohide", true as CFBoolean)
         write("autohide-delay", 1000.0 as CFNumber)
@@ -106,8 +108,9 @@ enum SystemDock {
 
     static func restore() {
         guard let saved = UserDefaults.standard.dictionary(forKey: savedKey) else { return }
-        write("autohide", saved["autohide"] as CFPropertyList?)
-        write("autohide-delay", saved["autohide-delay"] as CFPropertyList?)
+        for key in keys {
+            write(key, saved[key] as CFPropertyList?)
+        }
         UserDefaults.standard.removeObject(forKey: savedKey)
         relaunch()
     }
@@ -117,7 +120,13 @@ enum SystemDock {
         CFPreferencesAppSynchronize(dock)
     }
 
+    /// The Dock reads these settings only at launch.
+    ///
+    /// Restarted through launchd: a Dock that quits cleanly counts as a successful exit and stays down.
     private static func relaunch() {
-        NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.dock").forEach { $0.terminate() }
+        let launchctl = Process()
+        launchctl.executableURL = URL(filePath: "/bin/launchctl")
+        launchctl.arguments = ["kickstart", "-k", "gui/\(getuid())/com.apple.Dock.agent"]
+        try? launchctl.run()
     }
 }

@@ -103,6 +103,7 @@ final class PanelController {
         }
         let view = ModulePanel(module: module, monitor: model.monitor)
             .environment(\.panelActions, model.actions)
+            .environment(\.fanControl, model.fans)
         let window = NSWindow(contentViewController: NSHostingController(rootView: view))
         window.title = module.title
         window.styleMask = [.titled, .closable, .fullSizeContentView]
@@ -137,6 +138,7 @@ final class PanelController {
         let root = view
             .modifier(PanelGlass())
             .environment(\.panelActions, model.actions)
+            .environment(\.fanControl, model.fans)
         let hosting = NSHostingView(rootView: root)
         hosting.sizingOptions = [.intrinsicContentSize]
         let window = GlassPanel()

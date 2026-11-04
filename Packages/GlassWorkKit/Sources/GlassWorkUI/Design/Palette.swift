@@ -31,7 +31,15 @@ public extension ModuleID {
         case .battery: loc("Battery")
         case .gpu: loc("GPU")
         case .sensors: loc("Sensors")
+        case .fans: loc("Fans")
         case .uptime: loc("Uptime")
+        case .aiUsage: loc("AI Usage")
+        case .git: loc("Git")
+        case .devServers: loc("Dev Servers")
+        case .docker: loc("Docker")
+        case .ping: loc("Ping")
+        case .vpn: loc("VPN")
+        case .wifi: loc("Wi-Fi")
         case .worldClocks: loc("World Clocks")
         case .timers: loc("Timers")
         case .keepAwake: loc("Keep Awake")
@@ -64,7 +72,15 @@ public extension ModuleID {
         case .battery: "battery.75percent"
         case .gpu: "cube"
         case .sensors: "thermometer.medium"
+        case .fans: "fan"
         case .uptime: "clock.arrow.circlepath"
+        case .aiUsage: "sparkle"
+        case .git: "arrow.triangle.branch"
+        case .devServers: "server.rack"
+        case .docker: "shippingbox"
+        case .ping: "dot.radiowaves.left.and.right"
+        case .vpn: "shield"
+        case .wifi: "wifi"
         case .worldClocks: "globe"
         case .timers: "timer"
         case .keepAwake: "cup.and.heat.waves"
@@ -89,10 +105,11 @@ public extension ModuleID {
     var tint: Color {
         switch self {
         case .overview, .uptime: Palette.gray
-        case .cpu: Palette.blue
-        case .memory, .battery, .deviceBatteries: Palette.green
-        case .disk: Palette.cyan
-        case .network: Palette.teal
+        case .cpu, .docker, .vpn, .wifi: Palette.blue
+        case .aiUsage, .git: Palette.orange
+        case .memory, .battery, .deviceBatteries, .devServers: Palette.green
+        case .disk, .fans: Palette.cyan
+        case .network, .ping: Palette.teal
         case .gpu: Palette.purple
         case .sensors, .date, .calendar, .endsIn: Palette.red
         case .todos: Palette.blue
@@ -120,7 +137,15 @@ public extension ModuleID {
         case .battery: "BAT"
         case .gpu: "GPU"
         case .sensors: "TMP"
+        case .fans: "FAN"
         case .uptime: "UP"
+        case .aiUsage: "AI"
+        case .git: "GIT"
+        case .devServers: "DEV"
+        case .docker: "CTR"
+        case .ping: "PING"
+        case .vpn: "VPN"
+        case .wifi: "SIG"
         case .weather: "WTH"
         case .rates: "FX"
         case .clipboard: "CLP"
@@ -139,8 +164,10 @@ public extension ModuleID {
         case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
         case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
         case .colours, .appearance, .eject, .sunMoon, .date: true
+        case .aiUsage, .git, .devServers, .docker, .ping, .vpn, .wifi: true
         case .calendar, .endsIn, .todos, .deviceBatteries: true
         case .weather, .rates, .clipboard: true
+        case .fans: FanHardware.hasFans
         default: false
         }
     }

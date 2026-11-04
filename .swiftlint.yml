@@ -1,5 +1,6 @@
 included:
   - App
+  - Helper
   - Widgets
   - Packages/GlassWorkKit/Sources
   - Packages/GlassWorkKit/Tests

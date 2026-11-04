@@ -83,18 +83,21 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var rates = RatesSettings()
     public var clipboard = ClipboardSettings()
     public var welcomeCompleted = false
+    public var fans = FanSettings()
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
         self.modules = modules
     }
 
-    /// First launch: Overview, CPU and Memory in the menu bar, everything else in the Hub.
+    /// First launch: Overview, CPU and Memory in the menu bar, developer modules off, the rest in the Hub.
     public static var defaultModules: [ModuleSettings] {
-        ModuleID.allCases.map { id in
+        let developerCollected = ModuleID.developerCollected
+        return ModuleID.allCases.map { id in
             switch id {
             case .overview: ModuleSettings(id: id, mode: .menuBar, style: .graphAndFigure)
             case .cpu: ModuleSettings(id: id, mode: .menuBar, style: .graphAndFigure)
             case .memory: ModuleSettings(id: id, mode: .menuBar, style: .labelled)
+            case _ where developerCollected.contains(id): ModuleSettings(id: id, mode: .off, style: .figure)
             default: ModuleSettings(id: id, mode: .hubOnly, style: .figure)
             }
         }
@@ -119,6 +122,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
         case version, modules, numberStyle, hiding, alerts, widgets, dock, weather, rates, clipboard, welcomeCompleted
+        case fans
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -136,6 +140,8 @@ extension AppSettings {
         rates = try container.decodeIfPresent(RatesSettings.self, forKey: .rates) ?? RatesSettings()
         clipboard = try container.decodeIfPresent(ClipboardSettings.self, forKey: .clipboard) ?? ClipboardSettings()
         welcomeCompleted = try container.decodeIfPresent(Bool.self, forKey: .welcomeCompleted) ?? false
+        // A broken hand edit of the fan section must not cost the rest of the file.
+        fans = (try? container.decodeIfPresent(FanSettings.self, forKey: .fans)) ?? FanSettings()
         normalize()
     }
 

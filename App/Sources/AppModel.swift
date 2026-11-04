@@ -11,6 +11,8 @@ import WidgetKit
 final class AppModel {
     let store = SettingsStore()
     let monitor = SystemMonitor()
+    private let fanSensors = FanSensorSource()
+    private(set) lazy var fans = makeFans()
     private lazy var panels = PanelController(model: self)
     private lazy var statusBar = StatusBarController(model: self)
     private lazy var settingsWindow = SettingsWindowController(model: self)
@@ -20,6 +22,7 @@ final class AppModel {
     private lazy var location = LocationProvider(store: monitor.weather)
     private let hotKey = HotKey()
     private var hasOpenPanel = false
+    private var isSettingsOpen = false
     private var timer: Timer?
     private var thresholds = ThresholdTracker()
 
@@ -30,6 +33,14 @@ final class AppModel {
         hotKey.register()
         Task { await monitor.clipboard.load() }
         applySettings()
+        fans.onFailsafe = { celsius in
+            FanNotifications.failsafe(
+                celsius: celsius,
+                title: loc("CPU \(Format.temperature(celsius)) — switched to Max"),
+                body: loc("Average CPU went above 95 °C. Max stays on until you pick a mode.")
+            )
+        }
+        fans.applyLaunchMode()
         monitor.onUpdate = { [weak self] in
             self?.statusBar.refreshItems()
             self?.checkAlerts()
@@ -43,6 +54,17 @@ final class AppModel {
         if !store.settings.welcomeCompleted {
             settingsWindow.showWelcome()
         }
+    }
+
+    private func makeFans() -> FanControlModel {
+        let sensors = fanSensors
+        return FanControlModel(
+            store: store,
+            installer: FanHelperInstaller(),
+            readSensors: { await sensors.sample() },
+            // A desktop Mac has no battery, so no reading means mains power.
+            isOnAC: { [weak self] in self?.monitor.battery?.isOnAC ?? true }
+        )
     }
 
     var actions: PanelActions {
@@ -59,7 +81,8 @@ final class AppModel {
             },
             updateSettings: { [weak self] change in self?.store.update(change) },
             useClipboardEntry: { [weak self] entry, plain in self?.clipboard.use(entry, plainText: plain) },
-            isPasteAllowed: { Accessibility.isTrusted }
+            isPasteAllowed: { Accessibility.isTrusted },
+            openFanCurves: { [weak self] in self?.showFanCurves() }
         )
     }
 
@@ -71,6 +94,11 @@ final class AppModel {
     func showSettings(module: ModuleID? = nil) {
         panels.closeTransient()
         settingsWindow.show(module: module)
+    }
+
+    func showFanCurves() {
+        panels.closeTransient()
+        settingsWindow.showFans()
     }
 
     func togglePanel(_ module: ModuleID, from button: NSStatusBarButton) {
@@ -132,6 +160,15 @@ final class AppModel {
         UNUserNotificationCenter.current().add(request)
     }
 
+    /// The fan and sensor panes show live readings, which no panel may be asking for.
+    func settingsChanged(isOpen: Bool) {
+        isSettingsOpen = isOpen
+        updateDemand()
+        if isOpen {
+            monitor.refresh()
+        }
+    }
+
     /// Runs now and again whenever settings change.
     private func applySettings() {
         withObservationTracking {
@@ -141,8 +178,10 @@ final class AppModel {
         }
         applyInfoModules()
         statusBar.apply(store.settings)
+        monitor.developer.options = DeveloperOptions(settings: store.settings)
         desktopWidgets.apply(store.settings.widgets)
         dock.apply(store.settings.dock)
+        monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
         updateDemand()
     }
 
@@ -172,8 +211,10 @@ final class AppModel {
         demand.disk = everything || modes.contains(.disk) || modes.contains(.eject)
         demand.battery = true
         demand.gpu = everything || modes.contains(.gpu)
-        demand.sensors = everything || modes.contains(.sensors) || store.settings.alerts.isEnabled
+        demand.sensors = everything || isSettingsOpen || modes.contains(.sensors) || modes.contains(.fans)
+            || store.settings.alerts.isEnabled
         demand.processes = everything
+        demand.developer = store.settings.developerDemand(panelOpen: everything)
         demand.devices = everything || modes.contains(.deviceBatteries)
         monitor.demand = demand
         monitor.weather.isActive = isWanted(.weather)
@@ -213,6 +254,16 @@ final class AppModel {
             NSWorkspace.screensDidWakeNotification,
             NSWorkspace.sessionDidBecomeActiveNotification,
         ]
+        // The fan loop keeps running through a locked screen, so only real sleep ends it.
+        center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                Task { await self.fans.willSleep() }
+            }
+        }
+        center.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.fans.didWake() }
+        }
         for name in pause {
             center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated {

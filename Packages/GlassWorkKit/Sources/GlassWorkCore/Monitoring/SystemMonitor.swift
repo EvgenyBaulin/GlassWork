@@ -15,6 +15,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var gpu = false
     public var sensors = false
     public var processes = false
+    public var developer: Set<ModuleID> = []
     public var devices = false
 
     public init() {}
@@ -37,9 +38,21 @@ public final class SystemMonitor {
     public private(set) var processes: [ProcessUsage] = []
     public private(set) var deviceBatteries: [DeviceBattery] = []
     public private(set) var histories: [Metric: TieredHistory] = [:]
+    public private(set) var fanHistories: [Int: TieredHistory] = [:]
+
+    /// What the temperature graph records. Changing it starts the graph afresh.
+    public var temperatureSource = SensorChoice.averageCPU {
+        didSet {
+            if temperatureSource != oldValue {
+                histories[.temperature] = nil
+            }
+        }
+    }
 
     /// Timers, notes and other small modules, ticking along with the monitor.
     public let everyday = EverydayStore()
+    /// Git, Docker, Ping and the other developer modules, each at its own pace.
+    public let developer = DeveloperStore()
     /// Calendar events and reminders.
     public let agenda = AgendaStore()
     /// Screen time, commands, endpoints and GitHub.
@@ -70,6 +83,7 @@ public final class SystemMonitor {
         self.weather = weather
         self.rates = rates
         self.clipboard = clipboard
+        developer.onChange = { [weak self] in self?.onUpdate?() }
     }
 
     public var isRunning: Bool {
@@ -140,6 +154,10 @@ public final class SystemMonitor {
         histories[metric]?.points(in: range) ?? []
     }
 
+    public func fanPoints(_ fan: Int, in range: TieredHistory.Range) -> [History<Double>.Point] {
+        fanHistories[fan]?.points(in: range) ?? []
+    }
+
     /// Battery power halves the polling rate and Low Power Mode quarters it.
     private var effectiveInterval: TimeInterval {
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
@@ -157,6 +175,7 @@ public final class SystemMonitor {
         let reading = await sampler.read(demand, includeSlow: includeSlow)
         apply(reading, at: now)
         everyday.tick(at: now)
+        developer.tick(at: now, demand: demand.developer)
         weather.tick(at: now)
         rates.tick(at: now)
         clipboard.tick(at: now)
@@ -194,11 +213,14 @@ public final class SystemMonitor {
         }
         if let value = reading.sensors {
             sensors = value
-            if let celsius = value.averageCPU {
+            if let celsius = value.celsius(for: temperatureSource) {
                 record(.temperature, celsius, date)
             }
             if let rpm = value.averageFanRPM {
                 record(.fan, rpm, date)
+            }
+            for fan in value.fans {
+                fanHistories[fan.id, default: TieredHistory()].append(fan.rpm, at: date)
             }
         }
     }

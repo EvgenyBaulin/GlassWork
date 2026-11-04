@@ -39,6 +39,7 @@ make help         # all commands
 |---|---|
 | `App/` | The GlassWork app: menu bar items, settings, desktop windows, Dock |
 | `Widgets/` | WidgetKit extension (sandboxed, reads shared snapshots) |
+| `Helper/` | Optional privileged daemon that changes fan speed |
 | `Packages/GlassWorkKit/` | `GlassWorkCore` (collectors, models, storage) and `GlassWorkUI` (shared views) |
 | `Config/` | Build settings; `Local.xcconfig` holds your signing team and is not committed |
 | `scripts/` | Helper scripts, including the optional background auto-update |

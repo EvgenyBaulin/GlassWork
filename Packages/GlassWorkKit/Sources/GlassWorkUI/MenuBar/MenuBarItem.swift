@@ -1,6 +1,29 @@
 import GlassWorkCore
 import SwiftUI
 
+/// A small drawing used instead of a sparkline.
+public enum ItemGlyph: Equatable {
+    case ring(Double)
+    /// One dot per thing, up to five: filled first, then faint.
+    case dots(filled: Int, faint: Int)
+    /// The module has no history to draw, so the graph repeats its symbol.
+    case symbol
+}
+
+/// Keys in `ModuleSettings.options`.
+public enum ModuleOption {
+    public static let sensor = "sensor"
+    public static let fanFigure = "figure"
+    public static let eachFan = "eachFan"
+}
+
+public extension SensorChoice {
+    /// The temperature a module's options ask for. Anything unreadable means the default.
+    static func shown(by options: [String: String]) -> SensorChoice {
+        options[ModuleOption.sensor].flatMap(SensorChoice.init(rawValue:)) ?? .averageCPU
+    }
+}
+
 /// What a module shows in the menu bar right now.
 @MainActor
 public struct ItemContent {
@@ -26,6 +49,12 @@ public struct ItemContent {
     public var values: [Double]?
     /// Faded, because the data is old or the module is paused.
     public var isDimmed = false
+    /// Drawn by the graph styles instead of a sparkline.
+    public var glyph: ItemGlyph?
+    /// How much of a variable symbol is drawn, from 0 to 1.
+    public var symbolLevel: Double?
+    /// Extra tooltip line.
+    public var detail: String?
 
     /// Text for a raw metric value, used by tooltips.
     func format(_ value: Double) -> String {
@@ -37,7 +66,15 @@ public struct ItemContent {
         }
     }
 
-    static func content(_ module: ModuleID, monitor: SystemMonitor, style: NumberStyle) -> ItemContent {
+    /// How fast the fan glyph turns, from 0 (stopped) to 1.
+    public var spin = 0.0
+
+    static func content(
+        _ module: ModuleID,
+        monitor: SystemMonitor,
+        style: NumberStyle,
+        options: [String: String] = [:]
+    ) -> ItemContent {
         switch module {
         case .overview: overview(monitor)
         case .cpu: percent(monitor.cpu?.total, metric: .cpu, style: style)
@@ -46,7 +83,7 @@ public struct ItemContent {
         case .disk: disk(monitor, style: style)
         case .network: network(monitor, style: style)
         case .battery: battery(monitor, style: style)
-        case .sensors: sensors(monitor)
+        case .sensors, .fans: thermal(module, monitor, options: options)
         case .uptime: uptime()
         case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon: everyday(module, monitor.everyday)
         case .calendar, .endsIn, .todos: agenda(module, monitor.agenda)
@@ -56,6 +93,7 @@ public struct ItemContent {
                 template: "100%"
             )
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
+        case _ where ModuleID.developerCollected.contains(module): developer(module, monitor.developer)
         case .weather: weather(monitor.weather)
         case .rates: rates(monitor.rates)
         case .clipboard: clipboard(monitor.clipboard)
@@ -124,15 +162,45 @@ public struct ItemContent {
         )
     }
 
-    private static func sensors(_ monitor: SystemMonitor) -> ItemContent {
-        let celsius = monitor.sensors?.averageCPU
+    private static func thermal(
+        _ module: ModuleID,
+        _ monitor: SystemMonitor,
+        options: [String: String]
+    ) -> ItemContent {
+        module == .fans ? fans(monitor, options: options) : sensors(monitor, options: options)
+    }
+
+    private static func sensors(_ monitor: SystemMonitor, options: [String: String]) -> ItemContent {
+        let choice = SensorChoice.shown(by: options)
+        let celsius = monitor.sensors?.celsius(for: choice)
         return ItemContent(
-            figure: celsius.map(Format.temperature) ?? "—",
+            figure: "\(choice.menuPrefix) \(celsius.map(Format.temperature) ?? "—")",
             metric: .temperature,
             domain: 20 ... 110,
             alert: (celsius ?? 0) >= 95 ? Palette.orange : nil,
-            template: "100°C"
+            template: "\(choice.menuPrefix) 100°"
         )
+    }
+
+    private static func fans(_ monitor: SystemMonitor, options: [String: String]) -> ItemContent {
+        let fans = monitor.sensors?.fans ?? []
+        let eachFan = options[ModuleOption.fanFigure] == ModuleOption.eachFan && fans.count >= 2
+        let average = monitor.sensors?.averageFanRPM
+        let figure = if eachFan {
+            loc("L \(Format.rpm(fans[0].rpm)) · R \(Format.rpm(fans[1].rpm))")
+        } else {
+            average.map { loc("\(Format.rpm($0)) rpm") } ?? "—"
+        }
+        var content = ItemContent(
+            figure: figure,
+            metric: .fan,
+            // Max is the only state that earns the alert color.
+            alert: fans.contains { $0.isManual && $0.target >= $0.maximum } ? Palette.orange : nil,
+            template: eachFan ? loc("L \(Format.rpm(5800)) · R \(Format.rpm(5800))") : loc("\(Format.rpm(5800)) rpm")
+        )
+        let moving = fans.filter { $0.rpm > 0 }
+        content.spin = moving.isEmpty ? 0 : max(moving.map(\.share).max() ?? 0, 0.1)
+        return content
     }
 
     private static func everyday(_ module: ModuleID, _ store: EverydayStore) -> ItemContent {
@@ -197,17 +265,25 @@ public struct MenuBarItemView: View {
     private let module: ModuleID
     private let style: DisplayStyle
     private let numbers: NumberStyle
+    private let options: [String: String]
     private let monitor: SystemMonitor
 
-    public init(module: ModuleID, style: DisplayStyle, numbers: NumberStyle, monitor: SystemMonitor) {
+    public init(
+        module: ModuleID,
+        style: DisplayStyle,
+        numbers: NumberStyle,
+        options: [String: String] = [:],
+        monitor: SystemMonitor
+    ) {
         self.module = module
         self.style = style
         self.numbers = numbers
+        self.options = options
         self.monitor = monitor
     }
 
     public var body: some View {
-        let content = ItemContent.content(module, monitor: monitor, style: numbers)
+        let content = ItemContent.content(module, monitor: monitor, style: numbers, options: options)
         HStack(spacing: 4) {
             switch style {
             case .symbol: symbol(content)
@@ -234,9 +310,10 @@ public struct MenuBarItemView: View {
         module: ModuleID,
         style: DisplayStyle,
         numbers: NumberStyle,
+        options: [String: String] = [:],
         monitor: SystemMonitor
     ) -> CGFloat {
-        let content = ItemContent.content(module, monitor: monitor, style: numbers)
+        let content = ItemContent.content(module, monitor: monitor, style: numbers, options: options)
         let font = NSFont.monospacedDigitSystemFont(ofSize: content.secondLine == nil ? 12 : 9, weight: .medium)
         let text = ceil((content.template as NSString).size(withAttributes: [.font: font]).width)
         let padding: CGFloat = 8
@@ -252,7 +329,7 @@ public struct MenuBarItemView: View {
     private static let graphWidth: CGFloat = 34
 
     private func symbol(_ content: ItemContent) -> some View {
-        Image(systemName: content.symbol ?? module.symbol)
+        Image(systemName: content.symbol ?? module.symbol, variableValue: content.symbolLevel)
             .font(.system(size: 12, weight: .medium))
             .frame(width: 16)
     }
@@ -277,19 +354,44 @@ public struct MenuBarItemView: View {
 
     @ViewBuilder
     private func graph(_ content: ItemContent) -> some View {
-        if let values = content.graphValues(monitor) {
-            Sparkline(values: values, domain: content.domain, color: content.accent?.color ?? content.alert ?? .primary)
+        switch content.glyph {
+        case let .ring(value):
+            Circle()
+                .trim(from: 0, to: min(max(value, 0), 1))
+                .stroke(style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .frame(width: 12, height: 12)
+        case let .dots(filled, faint):
+            HStack(spacing: 2) {
+                ForEach(0 ..< min(filled + faint, 5), id: \.self) { index in
+                    Circle().opacity(index < filled ? 1 : 0.3).frame(width: 5, height: 5)
+                }
+            }
+        case .symbol:
+            if style == .graphAndFigure {
+                symbol(content)
+            }
+        case nil:
+            if let values = content.graphValues(monitor) {
+                Sparkline(
+                    values: values,
+                    domain: content.domain,
+                    color: content.accent?.color ?? content.alert ?? .primary
+                )
                 .frame(width: Self.graphWidth, height: 16)
+            }
         }
     }
 
     private func label(_ content: ItemContent) -> some View {
-        VStack(spacing: -1.5) {
-            ForEach(Array((content.label ?? module.shortLabel).enumerated()), id: \.offset) { _, letter in
+        let text = content.label ?? module.shortLabel
+        let isLong = text.count > 3
+        return VStack(spacing: isLong ? -1 : -1.5) {
+            ForEach(Array(text.enumerated()), id: \.offset) { _, letter in
                 Text(String(letter))
             }
         }
-        .font(.system(size: 6.5, weight: .bold))
+        .font(.system(size: isLong ? 5 : 6.5, weight: .bold))
         .frame(width: 8)
     }
 }

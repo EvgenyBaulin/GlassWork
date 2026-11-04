@@ -40,6 +40,11 @@ public enum Format {
         "\(Int(value.rounded()))"
     }
 
+    /// With a thousands separator, for the large figure in a panel.
+    public static func groupedRPM(_ value: Double) -> String {
+        Int(value.rounded()).formatted(.number.grouping(.automatic))
+    }
+
     private static func number(_ value: Double) -> String {
         value < 10 && value != value.rounded() ? String(format: "%.1f", value) : "\(Int(value.rounded()))"
     }
