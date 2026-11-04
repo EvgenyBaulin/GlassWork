@@ -72,10 +72,7 @@ final class SettingsWindowController {
     }
 }
 
-enum SettingsPage: Hashable {
-    case general, menuBar, widgets, dock, fans, windowTiles, shortcuts, permissions, about
-    case module(ModuleID)
-}
+typealias SettingsPage = SettingsDestination
 
 @MainActor
 @Observable
@@ -83,6 +80,8 @@ final class SettingsNavigation {
     var selection: SettingsPage = .menuBar
     /// Counts "Edit curves…" clicks. Each one opens the Curves tab, even if it was left.
     var fanCurveRequests = 0
+    /// The search result last opened: its row stands out until the search is cleared.
+    var openedResult: String?
 }
 
 struct SettingsRoot: View {
@@ -94,13 +93,35 @@ struct SettingsRoot: View {
     @State private var query = ""
 
     private var modules: [ModuleSettings] {
-        store.settings.modules.filter { setting in
-            setting.id.isAvailable && (query.isEmpty || setting.id.title.localizedCaseInsensitiveContains(query))
-        }
+        store.settings.modules.filter(\.id.isAvailable)
     }
 
     var body: some View {
         NavigationSplitView {
+            sidebar
+                .searchable(text: $query, placement: .sidebar)
+                .onSubmit(of: .search) {
+                    if let first = SettingsIndex.search(query).first {
+                        open(first.result)
+                    }
+                }
+                .onChange(of: query) { _, new in
+                    if new.isEmpty {
+                        navigation.openedResult = nil
+                    }
+                }
+                .navigationSplitViewColumnWidth(220)
+        } detail: {
+            detail
+                .environment(\.settingsHighlight, navigation.openedResult)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background { undoButton }
+        }
+    }
+
+    @ViewBuilder
+    private var sidebar: some View {
+        if query.isEmpty {
             List(selection: $navigation.selection) {
                 row(.general, loc("General"), "gearshape", .gray)
                 row(.menuBar, loc("Menu Bar"), "menubar.rectangle", .blue)
@@ -121,13 +142,14 @@ struct SettingsRoot: View {
                 row(.permissions, loc("Permissions"), "checkmark.shield", .green)
                 row(.about, loc("About"), "info.circle", .gray)
             }
-            .searchable(text: $query, placement: .sidebar)
-            .navigationSplitViewColumnWidth(220)
-        } detail: {
-            detail
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background { undoButton }
+        } else {
+            SettingsSearchResults(query: query, opened: navigation.openedResult, open: open)
         }
+    }
+
+    private func open(_ result: SettingsResult) {
+        navigation.selection = result.destination
+        navigation.openedResult = result.id
     }
 
     /// Changes apply instantly; ⌘Z takes back the last one.

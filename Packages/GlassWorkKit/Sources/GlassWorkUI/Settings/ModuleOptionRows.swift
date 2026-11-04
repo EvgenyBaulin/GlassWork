@@ -6,6 +6,7 @@ public struct ModuleOptionRows: View {
     private let module: ModuleID
     private let store: SettingsStore
     @State private var showsAdvanced: Bool
+    @Environment(\.settingsHighlight) private var highlight
 
     public init(module: ModuleID, store: SettingsStore) {
         self.init(module: module, store: store, showsAdvanced: false)
@@ -28,7 +29,7 @@ public struct ModuleOptionRows: View {
         }
         if !advanced.isEmpty {
             Section {
-                DisclosureGroup(isExpanded: $showsAdvanced) {
+                DisclosureGroup(isExpanded: advancedIsOpen(advanced)) {
                     ForEach(advanced) { OptionRow(spec: $0, store: store) }
                 } label: {
                     HStack(spacing: 8) {
@@ -40,6 +41,16 @@ public struct ModuleOptionRows: View {
                 }
             }
         }
+    }
+}
+
+private extension ModuleOptionRows {
+    /// A search result inside Advanced has to be seen, so it opens the section.
+    func advancedIsOpen(_ rows: [ModuleOptionSpec]) -> Binding<Bool> {
+        Binding(
+            get: { showsAdvanced || rows.contains { $0.id == highlight } },
+            set: { showsAdvanced = $0 }
+        )
     }
 }
 
@@ -62,6 +73,7 @@ public struct HubOptionRows: View {
 struct OptionRow: View {
     let spec: ModuleOptionSpec
     let store: SettingsStore
+    @Environment(\.settingsHighlight) private var highlight
 
     private var value: Binding<String> {
         Binding(
@@ -75,6 +87,11 @@ struct OptionRow: View {
     }
 
     var body: some View {
+        control.listRowBackground(highlight == spec.id ? Palette.yellow.opacity(0.18) : nil)
+    }
+
+    @ViewBuilder
+    private var control: some View {
         switch spec.kind {
         case .toggle:
             Toggle(spec.localizedTitle, isOn: isOn)
