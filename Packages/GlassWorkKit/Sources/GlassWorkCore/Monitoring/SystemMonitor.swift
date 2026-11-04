@@ -15,6 +15,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var gpu = false
     public var sensors = false
     public var processes = false
+    public var developer: Set<ModuleID> = []
 
     public init() {}
 }
@@ -38,6 +39,8 @@ public final class SystemMonitor {
 
     /// Timers, notes and other small modules, ticking along with the monitor.
     public let everyday = EverydayStore()
+    /// Git, Docker, Ping and the other developer modules, each at its own pace.
+    public let developer = DeveloperStore()
 
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
@@ -50,7 +53,9 @@ public final class SystemMonitor {
     @ObservationIgnored private var loop: Task<Void, Never>?
     @ObservationIgnored private var lastSlow = Date.distantPast
 
-    public init() {}
+    public init() {
+        developer.onChange = { [weak self] in self?.onUpdate?() }
+    }
 
     public var isRunning: Bool {
         loop != nil
@@ -99,6 +104,7 @@ public final class SystemMonitor {
         let reading = await sampler.read(demand, includeSlow: includeSlow)
         apply(reading, at: now)
         everyday.tick(at: now)
+        developer.tick(at: now, demand: demand.developer)
         onUpdate?()
     }
 

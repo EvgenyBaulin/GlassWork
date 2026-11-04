@@ -49,6 +49,9 @@ final class AppModel {
             openURL: { NSWorkspace.shared.open($0) },
             quitProcess: { process, force in
                 kill(process.pid, force ? SIGKILL : SIGTERM)
+            },
+            setOption: { [weak self] module, key, value in
+                self?.store.update { $0.update(module) { $0.options[key] = value } }
             }
         )
     }
@@ -121,6 +124,7 @@ final class AppModel {
             Task { @MainActor in self?.applySettings() }
         }
         statusBar.apply(store.settings)
+        monitor.developer.options = DeveloperOptions(settings: store.settings)
         updateDemand()
     }
 
@@ -136,6 +140,7 @@ final class AppModel {
         demand.gpu = everything || modes.contains(.gpu)
         demand.sensors = everything || modes.contains(.sensors) || store.settings.alerts.isEnabled
         demand.processes = everything
+        demand.developer = store.settings.developerDemand(panelOpen: everything)
         monitor.demand = demand
     }
 

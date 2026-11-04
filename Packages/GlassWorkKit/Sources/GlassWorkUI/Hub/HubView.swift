@@ -153,13 +153,10 @@ struct HubTile: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
                     Spacer(minLength: 4)
-                    if let metric = content.metric {
-                        Sparkline(
-                            values: monitor.points(metric, in: .minute).suffix(30).map(\.value),
-                            domain: content.domain,
-                            color: setting.id.tint
-                        )
-                        .frame(width: 52, height: 26)
+                    let values = content.graphValues(monitor)
+                    if !values.isEmpty {
+                        Sparkline(values: values, domain: content.domain, color: setting.id.tint)
+                            .frame(width: 52, height: 26)
                     }
                 }
             }

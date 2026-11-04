@@ -32,6 +32,13 @@ public extension ModuleID {
         case .gpu: loc("GPU")
         case .sensors: loc("Sensors")
         case .uptime: loc("Uptime")
+        case .aiUsage: loc("AI Usage")
+        case .git: loc("Git")
+        case .devServers: loc("Dev Servers")
+        case .docker: loc("Docker")
+        case .ping: loc("Ping")
+        case .vpn: loc("VPN")
+        case .wifi: loc("Wi-Fi")
         case .worldClocks: loc("World Clocks")
         case .timers: loc("Timers")
         case .keepAwake: loc("Keep Awake")
@@ -58,6 +65,13 @@ public extension ModuleID {
         case .gpu: "cube"
         case .sensors: "thermometer.medium"
         case .uptime: "clock.arrow.circlepath"
+        case .aiUsage: "sparkle"
+        case .git: "arrow.triangle.branch"
+        case .devServers: "server.rack"
+        case .docker: "shippingbox"
+        case .ping: "dot.radiowaves.left.and.right"
+        case .vpn: "shield"
+        case .wifi: "wifi"
         case .worldClocks: "globe"
         case .timers: "timer"
         case .keepAwake: "cup.and.heat.waves"
@@ -76,10 +90,11 @@ public extension ModuleID {
     var tint: Color {
         switch self {
         case .overview, .uptime: Palette.gray
-        case .cpu: Palette.blue
-        case .memory, .battery: Palette.green
+        case .cpu, .docker, .vpn, .wifi: Palette.blue
+        case .aiUsage, .git: Palette.orange
+        case .memory, .battery, .devServers: Palette.green
         case .disk: Palette.cyan
-        case .network: Palette.teal
+        case .network, .ping: Palette.teal
         case .gpu: Palette.purple
         case .sensors, .date: Palette.red
         case .worldClocks: Palette.blue
@@ -104,6 +119,13 @@ public extension ModuleID {
         case .gpu: "GPU"
         case .sensors: "TMP"
         case .uptime: "UP"
+        case .aiUsage: "AI"
+        case .git: "GIT"
+        case .devServers: "DEV"
+        case .docker: "CTR"
+        case .ping: "PING"
+        case .vpn: "VPN"
+        case .wifi: "SIG"
         default: ""
         }
     }
@@ -119,6 +141,7 @@ public extension ModuleID {
         case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
         case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
         case .colours, .appearance, .eject, .sunMoon, .date: true
+        case .ping: true
         default: false
         }
     }

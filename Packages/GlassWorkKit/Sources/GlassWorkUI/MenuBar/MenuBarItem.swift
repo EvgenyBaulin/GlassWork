@@ -1,6 +1,15 @@
 import GlassWorkCore
 import SwiftUI
 
+/// A small drawing used instead of a sparkline.
+public enum ItemGlyph: Equatable {
+    case ring(Double)
+    /// One dot per thing, up to five: filled first, then faint.
+    case dots(filled: Int, faint: Int)
+    /// The module has no history to draw, so the graph repeats its symbol.
+    case symbol
+}
+
 /// What a module shows in the menu bar right now.
 @MainActor
 public struct ItemContent {
@@ -12,6 +21,26 @@ public struct ItemContent {
     public var alert: Color?
     /// Longest expected text, so the item keeps one width as figures change.
     public var template: String
+    /// Graph values for modules that do not record a `Metric`.
+    public var values: [Double]?
+    public var glyph: ItemGlyph?
+    /// Replaces the module's symbol, for state shown by the symbol itself.
+    public var symbol: String?
+    /// How much of a variable symbol is drawn, from 0 to 1.
+    public var symbolLevel: Double?
+    /// Drawn faintly: nothing to report, as opposed to an alert.
+    public var isFaint = false
+    /// Extra tooltip line.
+    public var detail: String?
+
+    /// What the graph styles draw.
+    func graphValues(_ monitor: SystemMonitor) -> [Double] {
+        if let values {
+            return values
+        }
+        guard let metric else { return [] }
+        return monitor.points(metric, in: .minute).suffix(30).map(\.value)
+    }
 
     /// Text for a raw metric value, used by tooltips.
     func format(_ value: Double) -> String {
@@ -36,6 +65,7 @@ public struct ItemContent {
         case .uptime: uptime()
         case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon: everyday(module, monitor.everyday)
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
+        case _ where ModuleID.developerCollected.contains(module): developer(module, monitor.developer)
         default: ItemContent(figure: "—", template: "—")
         }
     }
@@ -165,14 +195,15 @@ public struct MenuBarItemView: View {
         let content = ItemContent.content(module, monitor: monitor, style: numbers)
         HStack(spacing: 4) {
             switch style {
-            case .symbol: symbol
-            case .figure: symbol; figure(content)
-            case .graph: symbol; graph(content)
+            case .symbol: symbol(content)
+            case .figure: symbol(content); figure(content)
+            case .graph: symbol(content); graph(content)
             case .graphAndFigure: graph(content); figure(content)
             case .labelled: label; figure(content)
             }
         }
         .foregroundStyle(content.alert ?? .primary)
+        .opacity(content.isFaint ? 0.45 : 1)
         .frame(height: 22)
         .padding(.horizontal, 4)
         .allowsHitTesting(false)
@@ -201,8 +232,8 @@ public struct MenuBarItemView: View {
 
     private static let graphWidth: CGFloat = 34
 
-    private var symbol: some View {
-        Image(systemName: module.symbol)
+    private func symbol(_ content: ItemContent) -> some View {
+        Image(systemName: content.symbol ?? module.symbol, variableValue: content.symbolLevel)
             .font(.system(size: 12, weight: .medium))
             .frame(width: 16)
     }
@@ -222,13 +253,29 @@ public struct MenuBarItemView: View {
 
     @ViewBuilder
     private func graph(_ content: ItemContent) -> some View {
-        if let metric = content.metric {
-            Sparkline(
-                values: monitor.points(metric, in: .minute).suffix(30).map(\.value),
-                domain: content.domain,
-                color: content.alert ?? .primary
-            )
-            .frame(width: Self.graphWidth, height: 16)
+        switch content.glyph {
+        case let .ring(value):
+            Circle()
+                .trim(from: 0, to: min(max(value, 0), 1))
+                .stroke(style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .frame(width: 12, height: 12)
+        case let .dots(filled, faint):
+            HStack(spacing: 2) {
+                ForEach(0 ..< min(filled + faint, 5), id: \.self) { index in
+                    Circle().opacity(index < filled ? 1 : 0.3).frame(width: 5, height: 5)
+                }
+            }
+        case .symbol:
+            if style == .graphAndFigure {
+                symbol(content)
+            }
+        case nil:
+            let values = content.graphValues(monitor)
+            if !values.isEmpty {
+                Sparkline(values: values, domain: content.domain, color: content.alert ?? .primary)
+                    .frame(width: Self.graphWidth, height: 16)
+            }
         }
     }
 

@@ -56,28 +56,39 @@ public final class MenuBarItemRenderer {
         if let second = content.secondLine {
             text += "\n\(second)"
         }
+        if let detail = content.detail {
+            text += "\n\(detail)"
+        }
         return text
     }
 
     private func signature(_ content: ItemContent, size: CGSize) -> String {
         var parts = [content.figure, content.secondLine ?? "", "\(style)", "\(size.width)", "\(content.alert != nil)"]
-        if style == .graph || style == .graphAndFigure, let metric = content.metric {
-            parts.append("\(monitor.points(metric, in: .minute).last?.date.timeIntervalSince1970 ?? 0)")
+        parts += [content.symbol ?? "", "\(content.symbolLevel ?? -1)", "\(content.isFaint)"]
+        if style == .graph || style == .graphAndFigure {
+            if let values = content.values {
+                parts.append("\(values)")
+            } else if let glyph = content.glyph {
+                parts.append("\(glyph)")
+            } else if let metric = content.metric {
+                parts.append("\(monitor.points(metric, in: .minute).last?.date.timeIntervalSince1970 ?? 0)")
+            }
         }
         return parts.joined(separator: "|")
     }
 
     private func draw(_ content: ItemContent) {
-        let color = content.alert.map(NSColor.init) ?? NSColor.black
+        let solid = content.alert.map(NSColor.init) ?? NSColor.black
+        let color = content.isFaint ? solid.withAlphaComponent(0.45) : solid
         var x = Self.padding
         switch style {
         case .symbol:
-            drawSymbol(at: &x, color: color)
+            drawSymbol(content, at: &x, color: color)
         case .figure:
-            drawSymbol(at: &x, color: color)
+            drawSymbol(content, at: &x, color: color)
             drawFigure(content, at: x, color: color)
         case .graph:
-            drawSymbol(at: &x, color: color)
+            drawSymbol(content, at: &x, color: color)
             drawGraph(content, at: x, color: color)
         case .graphAndFigure:
             drawGraph(content, at: x, color: color)
@@ -88,12 +99,14 @@ public final class MenuBarItemRenderer {
         }
     }
 
-    private func drawSymbol(at x: inout CGFloat, color: NSColor) {
+    private func drawSymbol(_ content: ItemContent, at x: inout CGFloat, color: NSColor) {
         let configuration = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
             .applying(.init(paletteColors: [color]))
-        if let image = NSImage(systemSymbolName: module.symbol, accessibilityDescription: nil)?
-            .withSymbolConfiguration(configuration)
-        {
+        let name = content.symbol ?? module.symbol
+        let symbol = content.symbolLevel.map {
+            NSImage(systemSymbolName: name, variableValue: $0, accessibilityDescription: nil)
+        } ?? NSImage(systemSymbolName: name, accessibilityDescription: nil)
+        if let image = symbol?.withSymbolConfiguration(configuration) {
             let size = image.size
             let origin = CGPoint(
                 x: x + (Self.symbolWidth - size.width) / 2,
@@ -122,8 +135,11 @@ public final class MenuBarItemRenderer {
     }
 
     private func drawGraph(_ content: ItemContent, at x: CGFloat, color: NSColor) {
-        guard let metric = content.metric else { return }
-        let values = monitor.points(metric, in: .minute).suffix(30).map(\.value)
+        if let glyph = content.glyph {
+            drawGlyph(glyph, content, at: x, color: color)
+            return
+        }
+        let values = content.graphValues(monitor)
         guard values.count > 1 else { return }
         let upper = content.domain?.upperBound ?? max(values.max() ?? 1, 0.000_1)
         let lower = content.domain?.lowerBound ?? 0
@@ -149,6 +165,46 @@ public final class MenuBarItemRenderer {
         color.setStroke()
         line.lineWidth = 1
         line.stroke()
+    }
+
+    private func drawGlyph(_ glyph: ItemGlyph, _ content: ItemContent, at x: CGFloat, color: NSColor) {
+        switch glyph {
+        case let .ring(value):
+            drawRing(value, at: x, color: color)
+        case let .dots(filled, faint):
+            drawDots(filled: filled, faint: faint, at: x, color: color)
+        case .symbol:
+            if style == .graphAndFigure {
+                var position = x
+                drawSymbol(content, at: &position, color: color)
+            }
+        }
+    }
+
+    private func drawRing(_ value: Double, at x: CGFloat, color: NSColor) {
+        let radius: CGFloat = 6
+        let center = CGPoint(x: x + radius + 1, y: bounds.midY)
+        let track = NSBezierPath()
+        track.appendArc(withCenter: center, radius: radius, startAngle: 0, endAngle: 360)
+        track.lineWidth = 2.5
+        color.withAlphaComponent(0.25).setStroke()
+        track.stroke()
+        let arc = NSBezierPath()
+        let end = 90 - 360 * CGFloat(min(max(value, 0), 1))
+        arc.appendArc(withCenter: center, radius: radius, startAngle: 90, endAngle: end, clockwise: true)
+        arc.lineWidth = 2.5
+        arc.lineCapStyle = .round
+        color.setStroke()
+        arc.stroke()
+    }
+
+    private func drawDots(filled: Int, faint: Int, at x: CGFloat, color: NSColor) {
+        let size: CGFloat = 5
+        for index in 0 ..< min(filled + faint, 5) {
+            let origin = CGPoint(x: x + CGFloat(index) * (size + 2), y: bounds.midY - size / 2)
+            (index < filled ? color : color.withAlphaComponent(0.3)).setFill()
+            NSBezierPath(ovalIn: CGRect(origin: origin, size: CGSize(width: size, height: size))).fill()
+        }
     }
 
     private func drawLabel(at x: inout CGFloat, color: NSColor) {

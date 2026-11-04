@@ -9,19 +9,23 @@ public struct PanelActions {
     public var openApp: (String) -> Void
     public var openURL: (URL) -> Void
     public var quitProcess: (ProcessUsage, Bool) -> Void
+    /// Writes one `ModuleSettings.options` entry; nil removes it.
+    public var setOption: (ModuleID, String, String?) -> Void
 
     public init(
         openSettings: @escaping (ModuleID) -> Void = { _ in },
         detach: @escaping (ModuleID) -> Void = { _ in },
         openApp: @escaping (String) -> Void = { _ in },
         openURL: @escaping (URL) -> Void = { _ in },
-        quitProcess: @escaping (ProcessUsage, Bool) -> Void = { _, _ in }
+        quitProcess: @escaping (ProcessUsage, Bool) -> Void = { _, _ in },
+        setOption: @escaping (ModuleID, String, String?) -> Void = { _, _, _ in }
     ) {
         self.openSettings = openSettings
         self.detach = detach
         self.openApp = openApp
         self.openURL = openURL
         self.quitProcess = quitProcess
+        self.setOption = setOption
     }
 }
 
