@@ -97,7 +97,10 @@ struct NowPlayingProvider: TimelineProvider {
         else { return [] }
         guard kind == .lyrics else { return [end] }
         let position = session.position(at: now)
-        return LyricsTiming.lineStarts(in: session.lyrics, duration: duration)
+        let starts = session.lyricStarts.isEmpty
+            ? LyricsTiming.lineStarts(in: session.lyrics, duration: duration)
+            : session.lyricStarts
+        return starts
             .filter { $0 > position }
             .map { now.addingTimeInterval($0 - position) }
             .filter { $0.timeIntervalSince(now) < Self.horizon }

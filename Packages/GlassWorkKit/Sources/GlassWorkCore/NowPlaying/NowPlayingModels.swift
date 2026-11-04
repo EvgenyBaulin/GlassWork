@@ -31,8 +31,10 @@ public struct NowPlayingSession: Codable, Sendable, Equatable {
     public var canSeek = false
     public var queue: [NowPlayingTrack] = []
     public var artworkID: String?
-    /// Plain lines, for the players that send lyrics. They carry no timing.
+    /// From the player, or found online for a player that sends none.
     public var lyrics: [String] = []
+    /// When each line starts. Empty when the lyrics carry no timing.
+    public var lyricStarts: [TimeInterval] = []
 
     public init(
         track: NowPlayingTrack,
@@ -97,9 +99,15 @@ public enum NowPlayingCommand: Codable, Sendable, Equatable {
     }
 }
 
-/// The lyric line to highlight. Lyrics have no timing, so the line is estimated:
+/// The lyric line to highlight. Without timing the line is estimated:
 /// each line gets a share of the track in proportion to its length.
 public enum LyricsTiming {
+    /// The last line that has started. Before the first one, that first line.
+    public static func lineIndex(starts: [TimeInterval], position: TimeInterval) -> Int? {
+        guard !starts.isEmpty else { return nil }
+        return starts.lastIndex { $0 <= position } ?? 0
+    }
+
     public static func lineIndex(in lines: [String], progress: Double) -> Int? {
         guard !lines.isEmpty else { return nil }
         let total = Double(lines.reduce(0) { $0 + $1.count })
