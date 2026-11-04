@@ -13760,6 +13760,1012 @@
           }
         }
       }
+    },
+    "Day %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День %lld"
+          }
+        }
+      }
+    },
+    "s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "с"
+          }
+        }
+      }
+    },
+    "seconds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "секунды"
+          }
+        }
+      }
+    },
+    "Daylight %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Световой день %@"
+          }
+        }
+      }
+    },
+    "Sunrise %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Восход %@"
+          }
+        }
+      }
+    },
+    "Sunset %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закат %@"
+          }
+        }
+      }
+    },
+    "Tomorrow: sunrise %@, sunset %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завтра: восход %1$@, закат %2$@"
+          }
+        }
+      }
+    },
+    "Strip = 24 hours, marker = the time there now": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полоса — сутки, метка — время там сейчас"
+          }
+        }
+      }
+    },
+    "%@ of light": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ света"
+          }
+        }
+      }
+    },
+    "Same as yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как вчера"
+          }
+        }
+      }
+    },
+    "%@ longer than yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На %@ длиннее, чем вчера"
+          }
+        }
+      }
+    },
+    "%@ shorter than yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На %@ короче, чем вчера"
+          }
+        }
+      }
+    },
+    "Next days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ближайшие дни"
+          }
+        }
+      }
+    },
+    "Daylight through the year": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Световой день за год"
+          }
+        }
+      }
+    },
+    "Solar noon": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Солнечный полдень"
+          }
+        }
+      }
+    },
+    "of today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "дня"
+          }
+        }
+      }
+    },
+    "Year by month": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Год по месяцам"
+          }
+        }
+      }
+    },
+    "Now!": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас!"
+          }
+        }
+      }
+    },
+    "%@ · until %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · до %2$@"
+          }
+        }
+      }
+    },
+    "Work week": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рабочая неделя"
+          }
+        }
+      }
+    },
+    "done": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "прошло"
+          }
+        }
+      }
+    },
+    "This weekend": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В эти выходные"
+          }
+        }
+      }
+    },
+    "No events yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Событий пока нет"
+          }
+        }
+      }
+    },
+    "Running since %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Идёт с %@"
+          }
+        }
+      }
+    },
+    "Click to open Timers": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите, чтобы открыть таймеры"
+          }
+        }
+      }
+    },
+    "Ends %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закончится в %@"
+          }
+        }
+      }
+    },
+    "Session %lld of %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раунд %1$lld из %2$lld"
+          }
+        }
+      }
+    },
+    "Next: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дальше: %@"
+          }
+        }
+      }
+    },
+    "%lld min break": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "перерыв %lld мин"
+          }
+        }
+      }
+    },
+    "%lld min focus": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "фокус %lld мин"
+          }
+        }
+      }
+    },
+    "Similar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Похожие"
+          }
+        }
+      }
+    },
+    "GitHub": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub"
+          }
+        }
+      }
+    },
+    "Today at a Glance": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня одним взглядом"
+          }
+        }
+      }
+    },
+    "The gh tool is not installed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Инструмент gh не установлен"
+          }
+        }
+      }
+    },
+    "Not signed in to gh": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вход в gh не выполнен"
+          }
+        }
+      }
+    },
+    "Review requested": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждут вашего ревью"
+          }
+        }
+      }
+    },
+    "Your pull requests": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши запросы на слияние"
+          }
+        }
+      }
+    },
+    "Your checks": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши проверки"
+          }
+        }
+      }
+    },
+    "Click a pull request to open it on GitHub": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите на запрос, чтобы открыть его на GitHub"
+          }
+        }
+      }
+    },
+    "Requested of you or your teams": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрошено у вас или ваших команд"
+          }
+        }
+      }
+    },
+    "Nothing to review": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нечего проверять"
+          }
+        }
+      }
+    },
+    "Checks %lld of %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверки: %1$lld из %2$lld"
+          }
+        }
+      }
+    },
+    "%lld failing": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "сбоев: %lld"
+          }
+        }
+      }
+    },
+    "Changes requested": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Просят правки"
+          }
+        }
+      }
+    },
+    "Approved": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Одобрено"
+          }
+        }
+      }
+    },
+    "Checks passed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверки пройдены"
+          }
+        }
+      }
+    },
+    "in %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "через %@"
+          }
+        }
+      }
+    },
+    "No more events today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня событий больше нет"
+          }
+        }
+      }
+    },
+    "No events tomorrow": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завтра событий нет"
+          }
+        }
+      }
+    },
+    "Day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День"
+          }
+        }
+      }
+    },
+    "Later today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Позже сегодня"
+          }
+        }
+      }
+    },
+    "Photo Frame": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фоторамка"
+          }
+        }
+      }
+    },
+    "On This Day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В этот день"
+          }
+        }
+      }
+    },
+    "Birthdays": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дни рождения"
+          }
+        }
+      }
+    },
+    "No folder chosen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Папка не выбрана"
+          }
+        }
+      }
+    },
+    "Choose a folder in GlassWork. Photos stay on this Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите папку в GlassWork. Фото остаются на этом Mac."
+          }
+        }
+      }
+    },
+    "The folder cannot be read": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Папку не удаётся прочитать"
+          }
+        }
+      }
+    },
+    "No photos in %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В папке %@ нет фото"
+          }
+        }
+      }
+    },
+    "Photos: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фото: %lld"
+          }
+        }
+      }
+    },
+    "%lld years ago": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld year ago"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld years ago"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld год назад"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld года назад"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld лет назад"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld года назад"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Your photos from this day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши фото за этот день"
+          }
+        }
+      }
+    },
+    "No access to Photos": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет доступа к Фото"
+          }
+        }
+      }
+    },
+    "Turn this on in GlassWork. Photos stay on this Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите это в GlassWork. Фото остаются на этом Mac."
+          }
+        }
+      }
+    },
+    "Turn On": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включить"
+          }
+        }
+      }
+    },
+    "Turn Off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключить"
+          }
+        }
+      }
+    },
+    "No photos from this day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "За этот день фото нет"
+          }
+        }
+      }
+    },
+    "Photos taken today in past years appear here.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь появятся фото, снятые в этот день в прошлые годы."
+          }
+        }
+      }
+    },
+    "Birthdays from Contacts": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дни рождения из Контактов"
+          }
+        }
+      }
+    },
+    "No access to Contacts": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет доступа к Контактам"
+          }
+        }
+      }
+    },
+    "GlassWork reads only names and birthdays. Nothing leaves this Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlassWork читает только имена и дни рождения. Ничего не покидает этот Mac."
+          }
+        }
+      }
+    },
+    "No birthdays in Contacts": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В Контактах нет дней рождения"
+          }
+        }
+      }
+    },
+    "Add birthdays to your contacts to see them here.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте дни рождения в контакты, и они появятся здесь."
+          }
+        }
+      }
+    },
+    "People: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Людей: %lld"
+          }
+        }
+      }
+    },
+    "From Contacts · People: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Из Контактов · людей: %lld"
+          }
+        }
+      }
+    },
+    "turns %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "исполнится %lld"
+          }
+        }
+      }
+    },
+    "in %lld days to a birthday": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "in %lld day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "in %lld days"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "через %lld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "через %lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "через %lld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "через %lld дня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "These stay off until you turn them on. Photos and names stay on this Mac.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Они выключены, пока вы их не включите. Фото и имена остаются на этом Mac."
+          }
+        }
+      }
+    },
+    "Photos and birthdays": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фото и дни рождения"
+          }
+        }
+      }
+    },
+    "Change Folder…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сменить папку…"
+          }
+        }
+      }
+    },
+    "Choose Folder…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать папку…"
+          }
+        }
+      }
+    },
+    "Allow GlassWork in System Settings › Privacy & Security.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите GlassWork в Системных настройках › Конфиденциальность и безопасность."
+          }
+        }
+      }
+    },
+    "Choose": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать"
+          }
+        }
+      }
+    },
+    "%lld days away": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld days"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Let macOS run the fans when the Mac is cool": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отдавать вентиляторы macOS, когда Mac холодный"
+          }
+        }
+      }
+    },
+    "Below": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ниже"
+          }
+        }
+      }
+    },
+    "The curve takes over again %@ above this.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кривая вернётся на %@ выше этого значения."
+          }
+        }
+      }
+    },
+    "When cool": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Когда холодно"
+          }
+        }
+      }
+    },
+    "The Mac is cool, so macOS runs the fans for now.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac холодный, поэтому пока вентиляторами управляет macOS."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -81,6 +81,11 @@ struct DataWidgets: WidgetBundle {
         DevServersKindWidget()
         ContainersKindWidget()
         AIUsageKindWidget()
+        GitHubKindWidget()
+        TodayKindWidget()
+        PhotoFrameKindWidget()
+        OnThisDayKindWidget()
+        BirthdaysKindWidget()
     }
 }
 
@@ -105,6 +110,7 @@ struct SnapshotEntry: TimelineEntry {
 }
 
 struct SnapshotProvider: TimelineProvider {
+    let kind: WidgetKind
     private let store = SnapshotStore()
 
     func placeholder(in _: Context) -> SnapshotEntry {
@@ -119,6 +125,7 @@ struct SnapshotProvider: TimelineProvider {
     func getTimeline(in _: Context, completion: @escaping (Timeline<SnapshotEntry>) -> Void) {
         let start = Date.now
         let snapshot = store.read(WidgetSnapshot.self, for: WidgetSnapshot.key)
+        WidgetRefreshLog().record(kind: kind.rawValue, dataDate: snapshot?.date, at: start)
         let entries = (0 ..< 15).map {
             SnapshotEntry(date: start.addingTimeInterval(Double($0) * 60), snapshot: snapshot)
         }
@@ -154,13 +161,13 @@ struct KindView: View {
         }
         .environment(\.widgetActions, .intents)
         .containerBackground(.fill.tertiary, for: .widget)
-        .widgetURL(WidgetLink.url(for: kind.module))
+        .widgetURL(WidgetLink.url(for: kind.destination))
     }
 }
 
 @MainActor
 private func configuration(_ kind: WidgetKind) -> some WidgetConfiguration {
-    StaticConfiguration(kind: kind.rawValue, provider: SnapshotProvider()) { entry in
+    StaticConfiguration(kind: kind.rawValue, provider: SnapshotProvider(kind: kind)) { entry in
         KindView(kind: kind, entry: entry)
     }
     .configurationDisplayName(kind.title)
@@ -482,6 +489,24 @@ struct BreaksKindWidget: Widget {
 struct AppTimeKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.appTime)
+    }
+}
+
+struct BirthdaysKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.birthdays)
+    }
+}
+
+struct GitHubKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.github)
+    }
+}
+
+struct TodayKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.todayAtAGlance)
     }
 }
 

@@ -371,7 +371,7 @@ struct TopAppsWidget: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             WidgetHeader(title: loc("Top Apps"), symbol: "cpu", tint: Palette.blue)
-            TopProcessRows(processes: snapshot.processes, limit: size == .medium || size == .small ? 4 : 10)
+            TopProcessRows(processes: snapshot.topUsage, limit: size == .medium || size == .small ? 4 : 10)
         }
     }
 }

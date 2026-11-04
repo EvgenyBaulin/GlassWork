@@ -1,0 +1,76 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Action": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Действие"
+          }
+        }
+      }
+    },
+    "Control Playback": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Управление воспроизведением"
+          }
+        }
+      }
+    },
+    "Next Track": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующий трек"
+          }
+        }
+      }
+    },
+    "Play or Pause": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пуск или пауза"
+          }
+        }
+      }
+    },
+    "Playback action": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Действие воспроизведения"
+          }
+        }
+      }
+    },
+    "Previous Track": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предыдущий трек"
+          }
+        }
+      }
+    },
+    "Widget Action": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Действие виджета"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -12,6 +12,7 @@ public final class ActivityStore {
     public private(set) var reviews: [PullRequest] = []
     public private(set) var runs: [WorkflowRun] = []
     public private(set) var contributions: [ContributionDay] = []
+    public private(set) var github: WidgetGitHub?
     /// False when `gh` is missing or not signed in.
     public private(set) var githubAvailable = true
 
@@ -99,10 +100,17 @@ public final class ActivityStore {
         }
     }
 
-    /// - Parameter includesRuns: Only the Actions widget needs runs, and they cost a call per repository.
-    public func refreshGitHub(includesRuns: Bool = false, at date: Date = Date()) async {
+    /// - Parameters:
+    ///   - includesDigest: Adds the query behind the GitHub widget, which costs one more call.
+    ///   - includesRuns: Only the Actions widget needs runs, and they cost a call per repository.
+    public func refreshGitHub(
+        includesDigest: Bool = false,
+        includesRuns: Bool = false,
+        at date: Date = Date()
+    ) async {
         guard let tool = locateGH() else {
             githubAvailable = false
+            github = WidgetGitHub(access: .notInstalled)
             return
         }
         let fields = "title,repository,number,url,updatedAt"
@@ -110,6 +118,7 @@ public final class ActivityStore {
         let output = try? await runner.run(tool, arguments: review, timeout: 20)
         guard let output, output.status == 0 else {
             githubAvailable = false
+            github = WidgetGitHub(access: .notSignedIn)
             onGitHubFailed?(output?.status ?? -1)
             return
         }
@@ -119,8 +128,22 @@ public final class ActivityStore {
             + "{date contributionCount}}}}}}"
         let graph = try? await runner.run(tool, arguments: ["api", "graphql", "-f", "query=\(query)"], timeout: 20)
         contributions = GitHubParser.contributions(Data((graph?.stdout ?? "").utf8))
+        if includesDigest {
+            await refreshDigest(tool: tool, at: date)
+        }
         if includesRuns {
             await refreshRuns(tool, at: date)
+        }
+    }
+
+    /// A failed call leaves the last good lists on the widget.
+    private func refreshDigest(tool: String, at date: Date) async {
+        let arguments = ["api", "graphql", "-f", "query=\(GitHubParser.digestQuery)"]
+        let answer = try? await runner.run(tool, arguments: arguments, timeout: 20)
+        if let digest = GitHubParser.digest(Data((answer?.stdout ?? "").utf8)) {
+            github = WidgetGitHub(requested: digest.requested, mine: digest.mine, updatedAt: date)
+        } else if github?.access != .ready {
+            github = WidgetGitHub()
         }
     }
 

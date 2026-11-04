@@ -64,6 +64,46 @@ struct WidgetSection: View {
     }
 }
 
+/// A small colored heading in capitals, for widgets that lead with one big value.
+struct WidgetCapsTitle: View {
+    let title: String
+    let tint: Color
+
+    var body: some View {
+        Text(title.uppercased())
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundStyle(tint)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+            .widgetAccentable()
+    }
+}
+
+/// Progress as a row of dots: the filled ones are done.
+struct WidgetDotBar: View {
+    let value: Double
+    let tint: Color
+    var count = 30
+
+    var body: some View {
+        let filled = Int((min(max(value, 0), 1) * Double(count)).rounded())
+        GeometryReader { geometry in
+            let diameter = min(geometry.size.height, geometry.size.width / CGFloat(count) * 0.62)
+            HStack(spacing: 0) {
+                ForEach(0 ..< count, id: \.self) { index in
+                    Circle()
+                        .fill(index < filled ? AnyShapeStyle(tint) : AnyShapeStyle(.quaternary))
+                        .frame(width: diameter, height: diameter)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .frame(maxHeight: .infinity)
+        }
+        .frame(height: 6)
+        .widgetAccentable()
+    }
+}
+
 /// What a widget shows when it has nothing to show yet.
 struct WidgetEmptyState: View {
     let symbol: String

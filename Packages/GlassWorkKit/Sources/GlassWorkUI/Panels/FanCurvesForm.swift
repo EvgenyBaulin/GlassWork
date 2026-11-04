@@ -62,6 +62,7 @@ struct FanCurvesForm: View {
             } header: {
                 Text(loc("Smoothing"))
             }
+            FanHandOverSection(control: control)
             FanPowerRulesSection(control: control, isOnAC: isOnAC)
         }
         .formStyle(.grouped)
@@ -323,6 +324,45 @@ struct FanPointsTable: View {
         guard let selection, let removed = curve.removing(selection) else { return }
         self.selection = nil
         onChange(removed)
+    }
+}
+
+/// Below a set temperature the fans are left to macOS, which can stop them, instead of holding the minimum.
+struct FanHandOverSection: View {
+    let control: FanControlModel
+
+    private var settings: FanSettings {
+        control.settings
+    }
+
+    private var isOn: Binding<Bool> {
+        Binding(
+            get: { settings.handsOverWhenCool },
+            set: { value in control.updateSettings { $0.handsOverWhenCool = value } }
+        )
+    }
+
+    private var celsius: Binding<Double> {
+        Binding(
+            get: { settings.handOverCelsius },
+            set: { value in control.updateSettings { $0.handOverCelsius = value } }
+        )
+    }
+
+    var body: some View {
+        Section {
+            Toggle(loc("Let macOS run the fans when the Mac is cool"), isOn: isOn)
+            if settings.handsOverWhenCool {
+                Stepper(value: celsius, in: FanSettings.handOverRange, step: 1) {
+                    LabeledContent(loc("Below"), value: Format.temperature(settings.handOverCelsius))
+                }
+                Text(loc("The curve takes over again \(Format.temperature(FanHandOver.band)) above this."))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text(loc("When cool"))
+        }
     }
 }
 

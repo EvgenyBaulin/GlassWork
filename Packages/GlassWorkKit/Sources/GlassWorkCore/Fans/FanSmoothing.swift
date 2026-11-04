@@ -33,6 +33,52 @@ public struct FanTemperatureFilter: Sendable {
     }
 }
 
+/// Decides when a curve leaves the fans to the system, because the Mac is cool enough for them to stop.
+///
+/// Giving fans back and taking them again is a write to the SMC, so it must not happen on every small change: the
+/// fans return only `band` above the threshold, and once back they stay at least `minimumHold`.
+public struct FanHandOver: Sendable {
+    public static let band = 3.0
+    public static let minimumHold = 60.0
+
+    public private(set) var isWithSystem = false
+    private var takenBackAt: TimeInterval?
+
+    public init() {}
+
+    /// `threshold` nil means the option is off. Returns true when the fans should be with the system now.
+    public mutating func update(steady celsius: Double, threshold: Double?, at time: TimeInterval) -> Bool {
+        guard let threshold else {
+            takeBack(at: time)
+            return false
+        }
+        if isWithSystem {
+            if celsius >= threshold + Self.band {
+                takeBack(at: time)
+            }
+        } else if celsius < threshold, hasHeld(at: time) {
+            isWithSystem = true
+        }
+        return isWithSystem
+    }
+
+    private func hasHeld(at time: TimeInterval) -> Bool {
+        takenBackAt.map { time - $0 >= Self.minimumHold } ?? true
+    }
+
+    private mutating func takeBack(at time: TimeInterval) {
+        if isWithSystem {
+            takenBackAt = time
+        }
+        isWithSystem = false
+    }
+
+    public mutating func reset() {
+        isWithSystem = false
+        takenBackAt = nil
+    }
+}
+
 /// Limits how fast each fan's target may change.
 public struct FanSlewLimiter: Sendable {
     public static let maximumRate = 300.0

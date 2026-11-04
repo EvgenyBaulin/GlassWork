@@ -56,6 +56,7 @@ public struct FanEngine: Sendable {
     private var resumeAfterWake = false
     private var filter = FanTemperatureFilter()
     private var limiter = FanSlewLimiter()
+    private var handOver = FanHandOver()
     /// Last instruction per fan. A fan listed here is out of the system's hands.
     private var sent: [Int: FanCommand.Action] = [:]
 
@@ -64,6 +65,11 @@ public struct FanEngine: Sendable {
     /// True while the helper has to be kept informed that the app is alive.
     public var isActive: Bool {
         mode != .auto || !sent.isEmpty
+    }
+
+    /// True while a curve has left the fans to the system because the Mac is cool.
+    public var isWithSystem: Bool {
+        mode == .curve && handOver.isWithSystem
     }
 
     /// True when a fan has been told what to do and the helper should still hold it.
@@ -165,6 +171,16 @@ public struct FanEngine: Sendable {
                 return fallBack(.sensorLost)
             }
             let steady = filter.filtered(celsius, at: input.time)
+            let wasWithSystem = handOver.isWithSystem
+            let threshold = input.settings.handOverThreshold
+            if handOver.update(steady: steady, threshold: threshold, at: input.time) {
+                limiter.reset()
+                return released + release()
+            }
+            if wasWithSystem {
+                // The system moved the fans meanwhile: the ramp starts from what they do now.
+                limiter.reset()
+            }
             wanted = Dictionary(uniqueKeysWithValues: fans.map { fan in
                 let curve = input.settings.curve(forFan: fan.id, isOnAC: input.isOnAC)
                 return (fan.id, curve.rpm(at: steady, in: fan.minimum ... fan.maximum))
@@ -220,6 +236,7 @@ public struct FanEngine: Sendable {
     private mutating func resetSmoothing() {
         filter.reset()
         limiter.reset()
+        handOver.reset()
     }
 }
 
