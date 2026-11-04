@@ -57,6 +57,8 @@ public final class SystemMonitor {
     public let agenda = AgendaStore()
     /// Screen time, commands, endpoints and GitHub.
     public let activity = ActivityStore()
+    /// Looks words up in the system dictionary for the Word of the Day widget.
+    public let wordOfDay = WordOfDayProvider()
     /// These only reach the network or the disk once the app asks them to.
     public let weather: WeatherStore
     public let rates: RatesStore
@@ -138,6 +140,8 @@ public final class SystemMonitor {
         snapshot.reviews = activity.reviews
         snapshot.runs = activity.runs
         snapshot.contributions = activity.contributions
+        snapshot.place = weather.places.first
+        snapshot.words = wordOfDay.recent(6, at: date)
         return snapshot
     }
 

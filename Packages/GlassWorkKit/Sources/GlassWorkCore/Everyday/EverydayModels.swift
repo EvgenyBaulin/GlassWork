@@ -112,6 +112,8 @@ public struct EverydayData: Codable, Sendable, Equatable {
     public var stopwatch = Stopwatch()
     public var cities: [WorldCity] = []
     public var colors: [String] = []
+    /// Optional so data saved before Pomodoro existed still decodes.
+    public var pomodoro: PomodoroSession?
 
     public init() {}
 

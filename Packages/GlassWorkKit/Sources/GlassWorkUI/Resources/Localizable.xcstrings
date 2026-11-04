@@ -265,6 +265,16 @@
         }
       }
     },
+    "+%@ vs yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@ к вчера"
+          }
+        }
+      }
+    },
     "1 h": {
       "localizations": {
         "ru": {
@@ -311,6 +321,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "О программе"
+          }
+        }
+      }
+    },
+    "Active": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Активно"
           }
         }
       }
@@ -385,12 +405,32 @@
         }
       }
     },
+    "Add cities in World Clocks": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте города в мировых часах"
+          }
+        }
+      }
+    },
     "Add commands in Settings": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Добавьте команды в настройках"
+          }
+        }
+      }
+    },
+    "After that": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующие"
           }
         }
       }
@@ -545,6 +585,16 @@
         }
       }
     },
+    "Apps today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения сегодня"
+          }
+        }
+      }
+    },
     "At current use": {
       "localizations": {
         "ru": {
@@ -581,6 +631,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Низкий заряд"
+          }
+        }
+      }
+    },
+    "Break": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перерыв"
           }
         }
       }
@@ -765,6 +825,16 @@
         }
       }
     },
+    "Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Часы"
+          }
+        }
+      }
+    },
     "Cloudy": {
       "localizations": {
         "ru": {
@@ -945,12 +1015,32 @@
         }
       }
     },
+    "Day and Night": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День и ночь"
+          }
+        }
+      }
+    },
     "Daylight": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Световой день"
+          }
+        }
+      }
+    },
+    "Days left: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Осталось дней: %lld"
           }
         }
       }
@@ -1075,6 +1165,16 @@
         }
       }
     },
+    "Earlier": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раньше"
+          }
+        }
+      }
+    },
     "Edit": {
       "localizations": {
         "ru": {
@@ -1101,6 +1201,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Извлечь"
+          }
+        }
+      }
+    },
+    "Elapsed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прошло"
           }
         }
       }
@@ -1231,6 +1341,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "С флагом"
+          }
+        }
+      }
+    },
+    "Flip Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Флип-часы"
+          }
+        }
+      }
+    },
+    "Focus": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фокус"
+          }
+        }
+      }
+    },
+    "Focus Time": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Время фокуса"
           }
         }
       }
@@ -1723,6 +1863,26 @@
         }
       }
     },
+    "Last 7 days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последние 7 дней"
+          }
+        }
+      }
+    },
+    "Last day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последний день"
+          }
+        }
+      }
+    },
     "Launch at login": {
       "localizations": {
         "ru": {
@@ -1773,6 +1933,16 @@
         }
       }
     },
+    "Local": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Местное"
+          }
+        }
+      }
+    },
     "Local IP": {
       "localizations": {
         "ru": {
@@ -1809,6 +1979,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Закрепить"
+          }
+        }
+      }
+    },
+    "Long break": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Длинный перерыв"
+          }
+        }
+      }
+    },
+    "Longest day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Самый длинный день"
           }
         }
       }
@@ -1933,6 +2123,16 @@
         }
       }
     },
+    "Minimal Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Минимальные часы"
+          }
+        }
+      }
+    },
     "Moderate": {
       "localizations": {
         "ru": {
@@ -1993,6 +2193,16 @@
         }
       }
     },
+    "Moscow": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Москва"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "ru": {
@@ -2049,6 +2259,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дальше"
+          }
+        }
+      }
+    },
+    "Next 14 days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ближайшие 14 дней"
+          }
+        }
+      }
+    },
+    "Next weekend": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ближайшие выходные"
+          }
+        }
+      }
+    },
+    "No data yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данных пока нет"
           }
         }
       }
@@ -2163,6 +2403,16 @@
         }
       }
     },
+    "Not started": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не запущено"
+          }
+        }
+      }
+    },
     "Note": {
       "localizations": {
         "ru": {
@@ -2253,6 +2503,16 @@
         }
       }
     },
+    "Numerals Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Часы с цифрами"
+          }
+        }
+      }
+    },
     "Off": {
       "localizations": {
         "ru": {
@@ -2309,6 +2569,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыть Дисковую утилиту"
+          }
+        }
+      }
+    },
+    "Open GlassWork to look up today's word": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте GlassWork, чтобы найти слово дня"
           }
         }
       }
@@ -2379,6 +2649,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Прочие"
+          }
+        }
+      }
+    },
+    "Other cities": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другие города"
           }
         }
       }
@@ -2473,6 +2753,16 @@
         }
       }
     },
+    "Paused": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пауза"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "ru": {
@@ -2523,6 +2813,16 @@
         }
       }
     },
+    "Pomodoro": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Помодоро"
+          }
+        }
+      }
+    },
     "Power": {
       "localizations": {
         "ru": {
@@ -2569,6 +2869,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Просмотр"
+          }
+        }
+      }
+    },
+    "Progress": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогресс"
           }
         }
       }
@@ -2659,6 +2969,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Чтение · запись"
+          }
+        }
+      }
+    },
+    "Ready": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готов"
           }
         }
       }
@@ -2769,6 +3089,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Правый клик по рабочему столу → «Изменить виджеты», чтобы добавить системные виджеты."
+          }
+        }
+      }
+    },
+    "Rounds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раунды"
+          }
+        }
+      }
+    },
+    "Rounds per day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раунды по дням"
+          }
+        }
+      }
+    },
+    "Rounds today: %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раундов сегодня: %lld"
+          }
+        }
+      }
+    },
+    "Running": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Идёт"
           }
         }
       }
@@ -2893,12 +3253,32 @@
         }
       }
     },
+    "Short break": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Короткий перерыв"
+          }
+        }
+      }
+    },
     "Shortcuts": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Сочетания клавиш"
+          }
+        }
+      }
+    },
+    "Shortest day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Самый короткий день"
           }
         }
       }
@@ -2943,6 +3323,16 @@
         }
       }
     },
+    "Similar: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Похожие: %@"
+          }
+        }
+      }
+    },
     "Size": {
       "localizations": {
         "ru": {
@@ -2959,6 +3349,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пропустить"
+          }
+        }
+      }
+    },
+    "Sky Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Небо"
           }
         }
       }
@@ -3013,6 +3413,16 @@
         }
       }
     },
+    "Start a Pomodoro in the Timers panel": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустите Помодоро в панели таймеров"
+          }
+        }
+      }
+    },
     "Start a timer": {
       "localizations": {
         "ru": {
@@ -3029,6 +3439,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Запущен"
+          }
+        }
+      }
+    },
+    "Started %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущен в %@"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Состояние"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стоп"
           }
         }
       }
@@ -3113,12 +3553,32 @@
         }
       }
     },
+    "Sunrise in %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Восход через %@"
+          }
+        }
+      }
+    },
     "Sunset": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Закат"
+          }
+        }
+      }
+    },
+    "Sunset in %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закат через %@"
           }
         }
       }
@@ -3209,6 +3669,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "У этого Mac нет батареи"
+          }
+        }
+      }
+    },
+    "This month": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот месяц"
+          }
+        }
+      }
+    },
+    "This quarter": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот квартал"
           }
         }
       }
@@ -3359,6 +3839,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Попробовать снова"
+          }
+        }
+      }
+    },
+    "Turn on Screen Time tracking in Settings to see your focus.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите учёт экранного времени в настройках, чтобы видеть фокус."
           }
         }
       }
@@ -3573,6 +4063,36 @@
         }
       }
     },
+    "Week average": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Среднее за неделю"
+          }
+        }
+      }
+    },
+    "Weekend": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выходные"
+          }
+        }
+      }
+    },
+    "Weekend!": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выходные!"
+          }
+        }
+      }
+    },
     "Welcome to GlassWork": {
       "localizations": {
         "ru": {
@@ -3643,6 +4163,16 @@
         }
       }
     },
+    "Word of the Day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слово дня"
+          }
+        }
+      }
+    },
     "World Clocks": {
       "localizations": {
         "ru": {
@@ -3669,6 +4199,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Год в точках"
+          }
+        }
+      }
+    },
+    "Yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вчера"
           }
         }
       }
@@ -3713,6 +4253,16 @@
         }
       }
     },
+    "active today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "активно сегодня"
+          }
+        }
+      }
+    },
     "avg CPU": {
       "localizations": {
         "ru": {
@@ -3743,12 +4293,32 @@
         }
       }
     },
+    "day to go": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "день до выходных"
+          }
+        }
+      }
+    },
     "days to go": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "дн. осталось"
+          }
+        }
+      }
+    },
+    "h": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ч"
           }
         }
       }
@@ -3809,6 +4379,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "↑↓ выбор · ↩ вставить · 1–9 · esc"
+          }
+        }
+      }
+    },
+    "−%@ vs yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "−%@ к вчера"
           }
         }
       }

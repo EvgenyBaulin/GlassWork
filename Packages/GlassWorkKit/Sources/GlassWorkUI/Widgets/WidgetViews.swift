@@ -30,6 +30,18 @@ public extension WidgetKind {
         case .yearInDots: loc("Year in Dots")
         case .moon: loc("Moon")
         case .daylight: loc("Daylight")
+        case .clock: loc("Clock")
+        case .numeralsClock: loc("Numerals Clock")
+        case .minimalClock: loc("Minimal Clock")
+        case .flipClock: loc("Flip Clock")
+        case .skyClock: loc("Sky Clock")
+        case .dayAndNight: loc("Day and Night")
+        case .weekend: loc("Weekend")
+        case .progress: loc("Progress")
+        case .stopwatch: loc("Stopwatch")
+        case .pomodoro: loc("Pomodoro")
+        case .focusTime: loc("Focus Time")
+        case .wordOfDay: loc("Word of the Day")
         }
     }
 }
@@ -47,13 +59,18 @@ public extension WidgetKind {
         case .uptime: .uptime
         case .screenTime, .commands, .endpoints, .githubReviews, .githubActions, .contributions: .overview
         case .digitalClock, .modularClock, .calendarMonth, .yearInDots: .date
+        case .clock, .numeralsClock, .minimalClock, .flipClock: .worldClocks
         case .upNext: .calendar
         case .endsIn: .endsIn
         case .todo: .todos
         case .note: .notes
         case .timer: .timers
         case .countdown: .countdown
-        case .moon, .daylight: .sunMoon
+        case .moon, .daylight, .skyClock, .dayAndNight: .sunMoon
+        case .weekend, .progress: .date
+        case .stopwatch, .pomodoro: .timers
+        case .focusTime: .overview
+        case .wordOfDay: .date
         }
     }
 }
@@ -64,12 +81,21 @@ public struct WidgetFace: View {
     private let size: WidgetSize
     private let snapshot: WidgetSnapshot
     private let now: Date
+    private let showsSeconds: Bool
 
-    public init(kind: WidgetKind, size: WidgetSize, snapshot: WidgetSnapshot, now: Date = .now) {
+    /// `showsSeconds` is false in WidgetKit, which refreshes once a minute and would show stale seconds.
+    public init(
+        kind: WidgetKind,
+        size: WidgetSize,
+        snapshot: WidgetSnapshot,
+        now: Date = .now,
+        showsSeconds: Bool = true
+    ) {
         self.kind = kind
         self.size = size
         self.snapshot = snapshot
         self.now = now
+        self.showsSeconds = showsSeconds
     }
 
     public var body: some View {
@@ -100,6 +126,11 @@ public struct WidgetFace: View {
             case .temperature: TemperatureWidget(size: size, snapshot: snapshot)
             case .topApps: TopAppsWidget(size: size, snapshot: snapshot)
             case .network: NetworkWidget(snapshot: snapshot)
+            default:
+                TimeWidgetFace(
+                    kind: kind,
+                    context: TimeContext(size: size, snapshot: snapshot, now: now, showsSeconds: showsSeconds)
+                )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

@@ -36,6 +36,19 @@ public final class EverydayStore {
         finished.forEach { onTimerFinished?($0) }
     }
 
+    /// Starts a Pomodoro run, or stops the one under way and keeps its finished rounds.
+    public func togglePomodoro(at date: Date = Date()) {
+        update { data in
+            var session = data.pomodoro ?? PomodoroSession()
+            if session.isRunning {
+                session.stop(at: date)
+            } else {
+                session.start(at: date)
+            }
+            data.pomodoro = session
+        }
+    }
+
     public func toggleKeepAwake() {
         if isKeepingAwake {
             IOPMAssertionRelease(assertion)

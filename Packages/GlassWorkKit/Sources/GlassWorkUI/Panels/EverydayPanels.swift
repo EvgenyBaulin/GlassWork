@@ -14,6 +14,8 @@ struct TimersPanel: View {
                 Text(loc("No timers running")).foregroundStyle(.secondary).font(.system(size: 12))
             }
             Divider()
+            pomodoro(store)
+            Divider()
             PanelSection(title: loc("Start a timer")) {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 6) {
                     ForEach(Self.presets, id: \.self) { value in
@@ -29,6 +31,20 @@ struct TimersPanel: View {
                 Button(loc("Start")) {
                     store.startTimer(title: loc("\(Int(minutes)) min"), duration: minutes * 60)
                 }
+            }
+        }
+    }
+
+    private func pomodoro(_ store: EverydayStore) -> some View {
+        let session = store.data.pomodoro ?? PomodoroSession()
+        let state = session.state(at: Date())
+        return PanelSection(title: loc("Pomodoro")) {
+            HStack {
+                Text(state.map { loc("\($0.round) of \(session.roundsPerSet)") } ?? loc("Not started"))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button(session.isRunning ? loc("Stop") : loc("Start")) { store.togglePomodoro() }
             }
         }
     }

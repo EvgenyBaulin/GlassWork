@@ -28,6 +28,8 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
     case screenTime, commands, endpoints, githubReviews, githubActions, contributions
     case digitalClock, modularClock, calendarMonth, upNext, endsIn, todo, note, timer, countdown, yearInDots, moon,
          daylight
+    case clock, numeralsClock, minimalClock, flipClock, skyClock, dayAndNight
+    case weekend, progress, stopwatch, pomodoro, focusTime, wordOfDay
 
     public var id: String {
         rawValue
@@ -60,6 +62,10 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var reviews: [PullRequest] = []
     public var runs: [WorkflowRun] = []
     public var contributions: [ContributionDay] = []
+    /// The first weather place, used by the sun-based clocks; nil until one is saved.
+    public var place: WeatherPlace?
+    /// Today's word first, then the days before.
+    public var words: [WordOfDay] = []
 
     public init(date: Date) {
         self.date = date
