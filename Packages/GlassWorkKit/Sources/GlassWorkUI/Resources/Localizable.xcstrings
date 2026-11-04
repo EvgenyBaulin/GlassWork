@@ -12168,6 +12168,368 @@
           }
         }
       }
+    },
+    "Day %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День %lld"
+          }
+        }
+      }
+    },
+    "s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "с"
+          }
+        }
+      }
+    },
+    "seconds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "секунды"
+          }
+        }
+      }
+    },
+    "Daylight %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Световой день %@"
+          }
+        }
+      }
+    },
+    "Sunrise %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Восход %@"
+          }
+        }
+      }
+    },
+    "Sunset %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закат %@"
+          }
+        }
+      }
+    },
+    "Tomorrow: sunrise %@, sunset %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завтра: восход %1$@, закат %2$@"
+          }
+        }
+      }
+    },
+    "Strip = 24 hours, marker = the time there now": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полоса — сутки, метка — время там сейчас"
+          }
+        }
+      }
+    },
+    "%@ of light": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ света"
+          }
+        }
+      }
+    },
+    "Same as yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как вчера"
+          }
+        }
+      }
+    },
+    "%@ longer than yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На %@ длиннее, чем вчера"
+          }
+        }
+      }
+    },
+    "%@ shorter than yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На %@ короче, чем вчера"
+          }
+        }
+      }
+    },
+    "Next days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ближайшие дни"
+          }
+        }
+      }
+    },
+    "Daylight through the year": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Световой день за год"
+          }
+        }
+      }
+    },
+    "Solar noon": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Солнечный полдень"
+          }
+        }
+      }
+    },
+    "of today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "дня"
+          }
+        }
+      }
+    },
+    "Year by month": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Год по месяцам"
+          }
+        }
+      }
+    },
+    "Now!": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас!"
+          }
+        }
+      }
+    },
+    "%@ · until %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · до %2$@"
+          }
+        }
+      }
+    },
+    "Work week": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рабочая неделя"
+          }
+        }
+      }
+    },
+    "done": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "прошло"
+          }
+        }
+      }
+    },
+    "This weekend": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В эти выходные"
+          }
+        }
+      }
+    },
+    "No events yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Событий пока нет"
+          }
+        }
+      }
+    },
+    "Running since %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Идёт с %@"
+          }
+        }
+      }
+    },
+    "Click to open Timers": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите, чтобы открыть таймеры"
+          }
+        }
+      }
+    },
+    "Ends %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закончится в %@"
+          }
+        }
+      }
+    },
+    "Session %lld of %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раунд %1$lld из %2$lld"
+          }
+        }
+      }
+    },
+    "Next: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дальше: %@"
+          }
+        }
+      }
+    },
+    "%lld min break": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "перерыв %lld мин"
+          }
+        }
+      }
+    },
+    "%lld min focus": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "фокус %lld мин"
+          }
+        }
+      }
+    },
+    "Similar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Похожие"
+          }
+        }
+      }
+    },
+    "%lld days to the weekend": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld day"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld days"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дня"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"

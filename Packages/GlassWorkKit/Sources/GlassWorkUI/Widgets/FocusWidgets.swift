@@ -47,9 +47,11 @@ struct PomodoroWidget: View {
     var body: some View {
         switch context.size {
         case .small:
-            VStack(spacing: 4) {
-                ring(diameter: 110)
-                Text(phaseTitle).font(.system(size: 12, weight: .medium)).foregroundStyle(tint)
+            VStack(spacing: 6) {
+                WidgetHeader(title: phaseTitle, symbol: "timer", tint: tint)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                ring(diameter: 96)
+                dots
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .medium:
@@ -63,34 +65,66 @@ struct PomodoroWidget: View {
                     ring(diameter: 120)
                     summary
                 }
+                Divider()
                 schedule(limit: 3)
                 history(days: 7)
             }
         case .extraLarge:
-            HStack(alignment: .top, spacing: 24) {
+            HStack(spacing: 18) {
                 VStack(alignment: .leading, spacing: 12) {
-                    ring(diameter: 170)
-                        .frame(maxWidth: .infinity)
-                    summary
-                }
-                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 16) {
+                        ring(diameter: 130)
+                        summary
+                    }
+                    Divider()
                     schedule(limit: 4)
-                    history(days: 14)
                     Spacer(minLength: 0)
                 }
+                Divider()
+                VStack(alignment: .leading, spacing: 12) {
+                    history(days: 7, height: 190)
+                    Spacer(minLength: 0)
+                }
+                .frame(width: 330)
             }
         }
     }
 
     private var summary: some View {
         VStack(alignment: .leading, spacing: 5) {
-            WidgetHeader(title: loc("Pomodoro"), symbol: "timer", tint: Palette.red)
-            Text(phaseTitle).font(.system(size: 20, weight: .semibold, design: .rounded)).foregroundStyle(tint)
-            dots
+            Text(phaseTitle)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(tint)
+                .lineLimit(1)
+                .widgetAccentable()
+            if let state {
+                Text(loc("Ends \(state.phaseEnd.formatted(date: .omitted, time: .shortened))"))
+                    .font(.system(size: 13))
+                    .lineLimit(1)
+                HStack(spacing: 8) {
+                    dots
+                    Text(loc("Session \(state.round) of \(max(session.roundsPerSet, 1))"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+                if let next = session.upcoming(1, at: context.now).first {
+                    Text(loc("Next: \(nextTitle(next))"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
             Text(loc("Rounds today: \(session.completedToday(at: context.now))"))
-                .font(.system(size: 12))
+                .font(.system(size: 11))
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
+    }
+
+    private func nextTitle(_ next: PomodoroState) -> String {
+        let minutes = Int((next.duration / 60).rounded())
+        return next.phase.isBreak ? loc("\(minutes) min break") : loc("\(minutes) min focus")
     }
 
     /// One dot per round of the set, filled up to the one under way.
@@ -110,7 +144,7 @@ struct PomodoroWidget: View {
         RingGauge(value: state.map { 1 - $0.share(at: context.now) } ?? 0, tint: tint, lineWidth: diameter / 10) {
             if let state {
                 countdown(state)
-                    .font(.system(size: diameter / 4.4, weight: .semibold, design: .rounded))
+                    .font(.system(size: diameter / 4.4, weight: .bold, design: .rounded))
                     .monospacedDigit()
             } else {
                 Image(systemName: "play.fill").font(.system(size: diameter / 4)).foregroundStyle(tint)
@@ -152,10 +186,10 @@ struct PomodoroWidget: View {
         }
     }
 
-    private func history(days: Int) -> some View {
+    private func history(days: Int, height: CGFloat = 70) -> some View {
         let recent = session.recentDays(days, at: context.now)
         return VStack(alignment: .leading, spacing: 4) {
-            Text(loc("Rounds per day")).font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+            WidgetSection(title: loc("Last 7 days"))
             InteractiveChart(
                 series: [.daily(
                     id: "rounds",
@@ -164,8 +198,9 @@ struct PomodoroWidget: View {
                     values: recent.map { ($0.date, Double($0.count)) }
                 ) { "\(Int($0))" }],
                 domain: 0 ... max(Double(recent.map(\.count).max() ?? 0), 4),
-                height: 70,
-                tooltipDate: Date.FormatStyle(date: .abbreviated, time: .omitted)
+                height: height,
+                tooltipDate: Date.FormatStyle(date: .abbreviated, time: .omitted),
+                style: .bars(unit: .day, width: 18)
             )
         }
     }
@@ -240,7 +275,7 @@ struct FocusTimeWidget: View {
     }
 
     private var header: some View {
-        WidgetHeader(title: loc("Focus Time"), symbol: "scope", tint: Palette.blue)
+        WidgetCapsTitle(title: loc("Focus Time"), tint: Palette.purple)
     }
 
     private var empty: some View {
@@ -287,23 +322,24 @@ struct FocusTimeWidget: View {
                     Spacer()
                     Text(Format.percent(top.share)).font(.system(size: 12)).foregroundStyle(.secondary)
                 }
-                ThinBar(value: top.share, tint: Palette.blue, height: 6)
+                ThinBar(value: top.share, tint: Palette.purple, height: 6)
             }
         }
     }
 
     private func weekChart(_ stats: FocusStats) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(loc("Last 7 days")).font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+            WidgetSection(title: loc("Last 7 days"))
             InteractiveChart(
                 series: [.daily(
                     id: "focus",
                     title: loc("Active"),
-                    color: Palette.blue,
+                    color: Palette.purple,
                     values: stats.week.map { ($0.date, $0.seconds) }
                 ) { CompactDuration.format($0) }],
                 height: 80,
-                tooltipDate: Date.FormatStyle(date: .abbreviated, time: .omitted)
+                tooltipDate: Date.FormatStyle(date: .abbreviated, time: .omitted),
+                style: .bars(unit: .day, width: 18)
             )
         }
     }
@@ -319,7 +355,7 @@ struct FocusTimeWidget: View {
                 ForEach(top, id: \.app) { item in
                     HStack(spacing: 8) {
                         Text(item.app).lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
-                        ThinBar(value: item.seconds / peak, tint: Palette.blue).frame(width: 90)
+                        ThinBar(value: item.seconds / peak, tint: Palette.purple).frame(width: 90)
                         Text(CompactDuration.format(item.seconds))
                             .monospacedDigit()
                             .frame(width: 56, alignment: .trailing)

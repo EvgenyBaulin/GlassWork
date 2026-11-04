@@ -40,11 +40,11 @@ extension ChartSeries {
     }
 }
 
-private func timeText(_ date: Date?) -> String {
+func sunTimeText(_ date: Date?) -> String {
     date?.formatted(date: .omitted, time: .shortened) ?? "—"
 }
 
-/// Half-circle path of the sun with a dot at its position.
+/// Path of the sun over the horizon, a faint one under it, and a mark at its position.
 struct SunArc: View {
     let progress: Double
     let isMoon: Bool
@@ -52,29 +52,40 @@ struct SunArc: View {
     var body: some View {
         GeometryReader { geometry in
             let width = geometry.size.width
-            let radius = min(width / 2, geometry.size.height) - 8
-            let center = CGPoint(x: width / 2, y: geometry.size.height - 4)
+            let height = geometry.size.height
+            let radiusX = width / 2 - 10
+            let lift = height * 0.8 - 8
+            let center = CGPoint(x: width / 2, y: height * 0.8)
             let angle = Double.pi * (1 - min(max(progress, 0), 1))
             ZStack {
+                arc(center: center, radiusX: radiusX, radiusY: lift)
+                    .stroke(.white.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [2.5, 3]))
+                arc(center: center, radiusX: radiusX, radiusY: -height * 0.16)
+                    .stroke(.white.opacity(0.25), style: StrokeStyle(lineWidth: 1, dash: [2.5, 3]))
                 Path { path in
-                    path.addArc(
-                        center: center,
-                        radius: radius,
-                        startAngle: .degrees(180),
-                        endAngle: .degrees(0),
-                        clockwise: false
-                    )
+                    path.move(to: CGPoint(x: center.x - radiusX, y: center.y))
+                    path.addLine(to: CGPoint(x: center.x + radiusX, y: center.y))
                 }
-                .stroke(.white.opacity(0.35), style: StrokeStyle(lineWidth: 1.5, dash: [3, 4]))
-                Path { path in
-                    path.move(to: CGPoint(x: center.x - radius - 10, y: center.y))
-                    path.addLine(to: CGPoint(x: center.x + radius + 10, y: center.y))
-                }
-                .stroke(.white.opacity(0.35), lineWidth: 1)
+                .stroke(.white.opacity(0.5), lineWidth: 1)
                 Image(systemName: isMoon ? "moon.fill" : "sun.max.fill")
-                    .font(.system(size: 18))
+                    .font(.system(size: 16))
                     .foregroundStyle(isMoon ? Color.white : Palette.yellow)
-                    .position(x: center.x + radius * cos(angle), y: center.y - radius * sin(angle))
+                    .position(x: center.x + radiusX * cos(angle), y: center.y - lift * sin(angle))
+            }
+        }
+    }
+
+    /// Half an ellipse from left to right, as a polyline: a dash pattern on it stays even.
+    private func arc(center: CGPoint, radiusX: CGFloat, radiusY: CGFloat) -> Path {
+        Path { path in
+            for step in 0 ... 48 {
+                let angle = Double.pi * (1 - Double(step) / 48)
+                let point = CGPoint(x: center.x + radiusX * cos(angle), y: center.y - radiusY * sin(angle))
+                if step == 0 {
+                    path.move(to: point)
+                } else {
+                    path.addLine(to: point)
+                }
             }
         }
     }
@@ -106,76 +117,160 @@ struct SkyClockWidget: View {
     }
 
     var body: some View {
-        HStack(spacing: 14) {
-            skyPanel
-            if context.size == .extraLarge {
+        switch context.size {
+        case .small:
+            panel {
+                VStack(alignment: .leading, spacing: 2) {
+                    cityCaps
+                    ClockFigure(place: .local, now: now, size: 28)
+                    arc.frame(maxHeight: .infinity)
+                    Text(nextEvent(sky)).font(.system(size: 11)).lineLimit(1).minimumScaleFactor(0.8)
+                }
+            }
+        case .medium:
+            panel {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(place.name).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                        ClockFigure(place: .local, now: now, size: 34)
+                        countdown(sky).font(.system(size: 12, weight: .medium))
+                        Spacer(minLength: 0)
+                        Text(verbatim: "\(shortDate) · \(daylightText(sky))")
+                            .font(.system(size: 10))
+                            .opacity(0.8)
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(spacing: 4) {
+                        arc.frame(maxHeight: .infinity)
+                        sunTimes(sky).font(.system(size: 10))
+                    }
+                    .frame(width: 136)
+                }
+            }
+        case .large:
+            VStack(spacing: 10) {
+                panel {
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(place.name).font(.system(size: 12, weight: .semibold)).lineLimit(1)
+                            Spacer()
+                            countdown(sky).font(.system(size: 11, weight: .medium))
+                        }
+                        ClockFigure(place: .local, now: now, size: 30)
+                        arc.frame(maxHeight: .infinity)
+                    }
+                }
+                .frame(height: 196)
+                factRows(sky)
+            }
+        case .extraLarge:
+            HStack(spacing: 14) {
+                panel {
+                    VStack(alignment: .leading, spacing: 4) {
+                        cityCaps
+                        ClockFigure(place: .local, now: now, size: 40)
+                        countdown(sky).font(.system(size: 13, weight: .medium))
+                        arc.frame(maxHeight: .infinity)
+                        sunTimes(sky).font(.system(size: 11))
+                        Label(moonText, systemImage: "moon").font(.system(size: 11)).lineLimit(1)
+                    }
+                }
+                .frame(width: 340)
                 otherCities
             }
         }
     }
 
-    private var skyPanel: some View {
+    private func panel(@ViewBuilder content: () -> some View) -> some View {
+        content()
+            .foregroundStyle(.white)
+            .padding(context.size == .small ? 10 : 12)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(
+                LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom),
+                in: .rect(cornerRadius: 16)
+            )
+    }
+
+    private var cityCaps: some View {
+        Text(place.name.uppercased()).font(.system(size: 10, weight: .semibold)).opacity(0.85).lineLimit(1)
+    }
+
+    private var arc: some View {
         let state = sky
-        return VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(place.name).font(.system(size: 12, weight: .semibold))
-                Spacer()
-                Text(now.formatted(.dateTime.weekday(.abbreviated)).uppercased())
-                    .font(.system(size: 11, weight: .medium))
-                    .opacity(0.8)
-            }
-            Text(now.formatted(date: .omitted, time: .shortened))
-                .font(.system(size: context.size == .small ? 34 : 44, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-            SunArc(progress: state.dayProgress ?? state.nightProgress ?? 0.5, isMoon: state.dayProgress == nil)
-                .frame(maxHeight: context.size == .small ? 60 : 100)
-            if context.size != .small {
-                detail(state)
-            }
-        }
-        .foregroundStyle(.white)
-        .padding(14)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(
-            LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom),
-            in: .rect(cornerRadius: 18)
-        )
+        return SunArc(progress: state.dayProgress ?? state.nightProgress ?? 0.5, isMoon: state.dayProgress == nil)
+    }
+
+    private var shortDate: String {
+        now.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
+    }
+
+    private func daylightText(_ state: SkyState) -> String {
+        loc("Daylight \(state.sun.daylight.map(CompactDuration.format) ?? "—")")
+    }
+
+    private var moonText: String {
+        loc("Moon \(Format.percent(Astronomy.moonIllumination(at: now)))")
+    }
+
+    /// "Sunset 4:38 PM", whichever comes next.
+    private func nextEvent(_ state: SkyState) -> String {
+        guard let next = state.next else { return daylightText(state) }
+        return next.isSunrise ? loc("Sunrise \(sunTimeText(next.date))") : loc("Sunset \(sunTimeText(next.date))")
     }
 
     @ViewBuilder
-    private func detail(_ state: SkyState) -> some View {
+    private func countdown(_ state: SkyState) -> some View {
         if let next = state.next {
             let wait = CompactDuration.format(next.date.timeIntervalSince(now))
-            Text(next.isSunrise ? loc("Sunrise in \(wait)") : loc("Sunset in \(wait)"))
-                .font(.system(size: 13, weight: .semibold))
-        }
-        HStack {
-            Label(timeText(state.sun.sunrise), systemImage: "sunrise")
-            Spacer()
-            Label(timeText(state.sun.sunset), systemImage: "sunset")
-        }
-        .font(.system(size: 12))
-        if context.size != .medium {
-            Divider().overlay(.white.opacity(0.3))
-            skyRow(loc("Sunrise"), timeText(state.sun.sunrise))
-            skyRow(loc("Sunset"), timeText(state.sun.sunset))
-            skyRow(loc("Daylight"), state.sun.daylight.map(CompactDuration.format) ?? "—")
-            skyRow(loc("Moon"), Format.percent(Astronomy.moonIllumination(at: now)))
+            Text(next.isSunrise ? loc("Sunrise in \(wait)") : loc("Sunset in \(wait)")).lineLimit(1)
         }
     }
 
-    private func skyRow(_ title: String, _ value: String) -> some View {
+    private func sunTimes(_ state: SkyState) -> some View {
         HStack {
-            Text(title).opacity(0.8)
-            Spacer()
-            Text(value).monospacedDigit()
+            Label(sunTimeText(state.sun.sunrise), systemImage: "sunrise").lineLimit(1)
+            Spacer(minLength: 4)
+            Label(sunTimeText(state.sun.sunset), systemImage: "sunset").lineLimit(1)
         }
-        .font(.system(size: 12))
+    }
+
+    private func factRows(_ state: SkyState) -> some View {
+        let tomorrow = Astronomy.sunTimes(
+            on: now.addingTimeInterval(86400),
+            latitude: place.latitude,
+            longitude: place.longitude
+        )
+        return VStack(alignment: .leading, spacing: 7) {
+            factRow("sunrise", loc("Sunrise"), sunTimeText(state.sun.sunrise))
+            factRow("sunset", loc("Sunset"), sunTimeText(state.sun.sunset))
+            factRow("sun.max", loc("Daylight"), state.sun.daylight.map(CompactDuration.format) ?? "—")
+            factRow("moon", loc("Moon"), Format.percent(Astronomy.moonIllumination(at: now)))
+            Spacer(minLength: 0)
+            Text(loc("Tomorrow: sunrise \(sunTimeText(tomorrow.sunrise)), sunset \(sunTimeText(tomorrow.sunset))"))
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
+        }
+    }
+
+    private func factRow(_ symbol: String, _ title: String, _ value: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: symbol)
+                .font(.system(size: 12))
+                .foregroundStyle(Palette.orange)
+                .frame(width: 16)
+                .widgetAccentable()
+            Text(title).font(.system(size: 12))
+            Spacer()
+            Text(value).font(.system(size: 12)).foregroundStyle(.secondary).monospacedDigit()
+        }
     }
 
     private var otherCities: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(loc("Other cities")).font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+            WidgetSection(title: loc("Other cities"))
             if context.cities.isEmpty {
                 NoCitiesHint()
             }
@@ -186,6 +281,10 @@ struct SkyClockWidget: View {
                 }
             }
             Spacer(minLength: 0)
+            Text(loc("Strip = 24 hours, marker = the time there now"))
+                .font(.system(size: 10))
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -201,181 +300,17 @@ struct DayStrip: View {
             ZStack(alignment: .leading) {
                 Capsule().fill(Color(red: 0.12, green: 0.14, blue: 0.32))
                 Capsule()
-                    .fill(Palette.yellow.opacity(0.85))
+                    .fill(Palette.orange.opacity(0.9))
                     .frame(width: width / 2)
                     .offset(x: width / 4)
-                Circle()
-                    .fill(.white)
-                    .frame(width: 8, height: 8)
-                    .offset(x: width * time.dayShare - 4)
+                Rectangle()
+                    .fill(.primary)
+                    .frame(width: 2, height: 10)
+                    .offset(x: width * time.dayShare - 1)
             }
+            .frame(height: 5)
+            .frame(maxHeight: .infinity)
         }
-        .frame(height: 6)
-        .clipShape(Capsule())
-    }
-}
-
-/// A 24-hour dial: midnight at the bottom, noon at the top, daylight as a bright arc.
-struct DayDial<Content: View>: View {
-    let sun: SunTimes
-    let now: Date
-    @ViewBuilder let content: Content
-
-    private func share(_ date: Date?) -> Double? {
-        date.map { ClockTime(date: $0, timeZone: .current).dayShare }
-    }
-
-    var body: some View {
-        GeometryReader { geometry in
-            let side = min(geometry.size.width, geometry.size.height)
-            let line = max(side * 0.09, 6)
-            let radius = (side - line) / 2
-            let current = ClockTime(date: now, timeZone: .current).dayShare
-            let angle = (current * 360 + 90) * .pi / 180
-            ZStack {
-                Circle().stroke(Color(red: 0.16, green: 0.18, blue: 0.40), lineWidth: line)
-                daylightArcs(line: line)
-                Circle()
-                    .fill(.white)
-                    .frame(width: line * 0.9, height: line * 0.9)
-                    .shadow(radius: 2)
-                    .offset(x: radius * cos(angle), y: radius * sin(angle))
-                content
-            }
-            .frame(width: side - line, height: side - line)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .aspectRatio(1, contentMode: .fit)
-    }
-
-    @ViewBuilder
-    private func daylightArcs(line: CGFloat) -> some View {
-        if let rise = share(sun.sunrise), let set = share(sun.sunset) {
-            if rise < set {
-                arc(rise, set, line)
-            } else {
-                arc(rise, 1, line)
-                arc(0, set, line)
-            }
-        }
-    }
-
-    private func arc(_ start: Double, _ end: Double, _ line: CGFloat) -> some View {
-        Circle()
-            .trim(from: start, to: end)
-            .stroke(Palette.yellow, style: StrokeStyle(lineWidth: line, lineCap: .butt))
-            .rotationEffect(.degrees(90))
-    }
-}
-
-/// How the day is split between light and dark, now and across the year.
-struct DayAndNightWidget: View {
-    let context: TimeContext
-
-    private var place: SunPlace {
-        SunPlace(context.snapshot)
-    }
-
-    private var now: Date {
-        context.now
-    }
-
-    private var sun: SunTimes {
-        Astronomy.sunTimes(on: now, latitude: place.latitude, longitude: place.longitude)
-    }
-
-    var body: some View {
-        switch context.size {
-        case .small:
-            dial
-        case .medium:
-            HStack(spacing: 16) {
-                dial
-                facts
-            }
-        case .large:
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 16) {
-                    dial.frame(maxHeight: 170)
-                    facts
-                }
-                chart(days: 14, step: 1, title: loc("Next 14 days"))
-            }
-        case .extraLarge:
-            HStack(alignment: .top, spacing: 24) {
-                VStack(spacing: 12) {
-                    dial
-                    facts
-                }
-                VStack(alignment: .leading, spacing: 10) {
-                    chart(days: 366, step: 3, title: loc("This year"))
-                    solstices
-                }
-            }
-        }
-    }
-
-    private var dial: some View {
-        DayDial(sun: sun, now: now) {
-            VStack(spacing: 0) {
-                Text(now.formatted(date: .omitted, time: .shortened))
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .minimumScaleFactor(0.5)
-                if context.size == .small {
-                    Text(place.name).font(.system(size: 10)).foregroundStyle(.secondary)
-                }
-            }
-        }
-    }
-
-    private var facts: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(place.name).font(.system(size: 12, weight: .semibold)).foregroundStyle(Palette.yellow)
-            Text(sun.daylight.map(CompactDuration.format) ?? "—")
-                .font(.system(size: 30, weight: .semibold, design: .rounded))
-            InfoRow(title: loc("Sunrise"), value: timeText(sun.sunrise))
-            InfoRow(title: loc("Sunset"), value: timeText(sun.sunset))
-        }
-    }
-
-    private func series(days: Int, step: Int) -> [DaylightDay] {
-        Astronomy.daylight(
-            from: now,
-            days: days,
-            step: step,
-            latitude: place.latitude,
-            longitude: place.longitude
-        )
-    }
-
-    private func chart(days: Int, step: Int, title: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title).font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
-            InteractiveChart(
-                series: [.daylight(series(days: days, step: step))],
-                height: 100,
-                tooltipDate: Date.FormatStyle(date: .abbreviated, time: .omitted)
-            )
-        }
-    }
-
-    @ViewBuilder
-    private var solstices: some View {
-        let year = series(days: 366, step: 1)
-        if let longest = year.max(by: { $0.seconds < $1.seconds }),
-           let shortest = year.min(by: { $0.seconds < $1.seconds })
-        {
-            InfoRow(
-                title: loc("Longest day"),
-                value: "\(longest.date.formatted(.dateTime.day().month(.abbreviated))) · "
-                    + CompactDuration.format(longest.seconds)
-            )
-            InfoRow(
-                title: loc("Shortest day"),
-                value: "\(shortest.date.formatted(.dateTime.day().month(.abbreviated))) · "
-                    + CompactDuration.format(shortest.seconds)
-            )
-        }
+        .frame(height: 10)
     }
 }
