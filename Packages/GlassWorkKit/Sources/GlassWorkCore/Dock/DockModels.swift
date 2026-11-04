@@ -119,16 +119,6 @@ public enum DockLayout {
     }
 }
 
-/// Icon growth near the pointer.
-public enum DockMagnification {
-    /// Size of an icon whose center is `distance` points from the pointer.
-    public static func size(distance: Double, base: Double, magnified: Double, radius: Double = 120) -> Double {
-        guard abs(distance) < radius else { return base }
-        let closeness = cos(abs(distance) / radius * .pi / 2)
-        return base + (magnified - base) * closeness
-    }
-}
-
 /// Reads the apps pinned to the system Dock. Only reads, so first run can copy them.
 public enum SystemDockApps {
     public static func parse(_ persistentApps: [[String: Any]]) -> [DockApp] {
