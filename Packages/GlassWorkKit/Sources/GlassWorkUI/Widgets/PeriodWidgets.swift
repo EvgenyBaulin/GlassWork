@@ -219,7 +219,7 @@ struct WeekendWidget: View {
 
     /// One string, so the unit agrees with the number, drawn in two sizes.
     private func figure(_ state: WeekendCountdown) -> (number: String, unit: String) {
-        let parts = loc("\(state.daysUntil) days to the weekend").split(separator: " ", maxSplits: 1).map(String.init)
+        let parts = loc("\(state.daysUntil) days away").split(separator: " ", maxSplits: 1).map(String.init)
         return (parts.first ?? "\(state.daysUntil)", parts.dropFirst().first ?? "")
     }
 

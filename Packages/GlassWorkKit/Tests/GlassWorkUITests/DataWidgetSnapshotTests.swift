@@ -14,6 +14,7 @@ struct DataWidgetSnapshotTests {
     nonisolated static let kinds: [WidgetKind] = [
         .fans, .weather, .rates, .git, .devServers, .containers, .devices, .wifiSignal, .diskActivity, .timeMachine,
         .screenTime, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed, .github, .todayAtAGlance,
+        .photoFrame, .onThisDay, .birthdays,
     ]
 
     private func sample(_ kind: WidgetKind) -> WidgetSnapshot {
@@ -30,6 +31,7 @@ struct DataWidgetSnapshotTests {
         case .timeMachine: DataSamples.timeMachine(DataSamples.backedUp)
         case .github: DataSamples.github
         case .todayAtAGlance: DataSamples.today
+        case .photoFrame, .onThisDay, .birthdays: DataSamples.personal
         default: DataSamples.screenTime
         }
     }
@@ -170,6 +172,7 @@ struct DataWidgetSnapshotTests {
     /// A new widget has no data for up to a minute, and must not claim that nothing exists.
     @Test(arguments: [
         WidgetKind.fans, .weather, .git, .devServers, .containers, .devices, .wifiSignal, .github,
+        .photoFrame, .onThisDay, .birthdays,
     ])
     func waitsForItsFirstData(kind: WidgetKind) {
         state(kind, WidgetSnapshot(date: sampleNow), "waiting", sizes: [.small])
@@ -192,6 +195,40 @@ struct DataWidgetSnapshotTests {
         snapshot.events = []
         snapshot.battery = nil
         state(.todayAtAGlance, snapshot, "empty", sizes: WidgetSize.allCases)
+    }
+
+    /// Nothing is read until the user turns these on, and each widget says so.
+    @Test(arguments: [WidgetKind.photoFrame, .onThisDay, .birthdays])
+    func personalWidgetsBeforeTheyAreOn(kind: WidgetKind) {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        snapshot.personal = PersonalWidgetData()
+        state(kind, snapshot, "off", sizes: [.small, .medium])
+    }
+
+    @Test func personalWidgetsWithoutAccess() {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        var data = PersonalWidgetData()
+        data.birthdays.state = .noAccess
+        data.onThisDay.state = .noAccess
+        data.photoFrame.state = .unreadable
+        data.photoFrame.folderName = "Travel 2025"
+        snapshot.personal = data
+        state(.birthdays, snapshot, "no-access", sizes: [.medium])
+        state(.onThisDay, snapshot, "no-access", sizes: [.medium])
+        state(.photoFrame, snapshot, "unreadable", sizes: [.medium])
+    }
+
+    @Test func personalWidgetsWithNothingToShow() {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        var data = PersonalWidgetData()
+        data.birthdays.state = .ready
+        data.onThisDay.state = .ready
+        data.photoFrame.state = .ready
+        data.photoFrame.folderName = "Travel 2025"
+        snapshot.personal = data
+        state(.birthdays, snapshot, "empty", sizes: [.small])
+        state(.onThisDay, snapshot, "empty", sizes: [.small])
+        state(.photoFrame, snapshot, "empty", sizes: [.small])
     }
 
     @Test func gitWithNoRepositories() {

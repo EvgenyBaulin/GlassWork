@@ -9,8 +9,21 @@ struct WidgetLinkTests {
         #expect(WidgetLink.module(from: url) == module)
     }
 
-    @Test(arguments: ["glasswork://module/nothing", "glasswork://other/cpu", "https://module/cpu"])
+    @Test func theSettingsPaneSurvivesTheRoundTrip() throws {
+        let url = try #require(WidgetLink.url(for: WidgetDestination.widgetSettings))
+        #expect(WidgetLink.destination(from: url) == .widgetSettings)
+        #expect(WidgetLink.module(from: url) == nil)
+    }
+
+    @Test(arguments: [
+        "glasswork://module/nothing",
+        "glasswork://other/cpu",
+        "https://module/cpu",
+        "glasswork://settings/fans",
+        "glasswork://settings/widgets/request",
+        "https://settings/widgets",
+    ])
     func anythingElseIsIgnored(address: String) throws {
-        #expect(try WidgetLink.module(from: #require(URL(string: address))) == nil)
+        #expect(try WidgetLink.destination(from: #require(URL(string: address))) == nil)
     }
 }

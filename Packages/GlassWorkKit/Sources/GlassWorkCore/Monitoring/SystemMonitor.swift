@@ -66,6 +66,8 @@ public final class SystemMonitor {
     public let activity = ActivityStore()
     /// What each app uses, and its history.
     public let apps: AppUsageStore
+    /// The user's own photos and birthdays, for the widgets they turned on.
+    public let personal: PersonalWidgetStore
     /// Looks words up in the system dictionary for the Word of the Day widget.
     public let wordOfDay = WordOfDayProvider()
     /// These only reach the network or the disk once the app asks them to.
@@ -98,9 +100,11 @@ public final class SystemMonitor {
         rates: RatesStore = RatesStore(),
         clipboard: ClipboardStore = ClipboardStore(),
         nowPlaying: NowPlayingStore = NowPlayingStore(),
-        apps: AppUsageStore = AppUsageStore()
+        apps: AppUsageStore = AppUsageStore(),
+        personal: PersonalWidgetStore = PersonalWidgetStore()
     ) {
         self.apps = apps
+        self.personal = personal
         self.weather = weather
         self.rates = rates
         self.clipboard = clipboard
@@ -171,6 +175,9 @@ public final class SystemMonitor {
         snapshot.contributions = activity.contributions
         if kinds.contains(.github) {
             snapshot.github = activity.github
+        }
+        if !kinds.isDisjoint(with: WidgetKind.personalKinds) {
+            snapshot.personal = personal.data
         }
         snapshot.place = weather.places.first
         if kinds.contains(.wordOfDay) {

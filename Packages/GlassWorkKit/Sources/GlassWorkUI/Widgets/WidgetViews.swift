@@ -62,6 +62,9 @@ public extension WidgetKind {
         case .lyrics: loc("Lyrics")
         case .github: loc("GitHub")
         case .todayAtAGlance: loc("Today at a Glance")
+        case .photoFrame: loc("Photo Frame")
+        case .onThisDay: loc("On This Day")
+        case .birthdays: loc("Birthdays")
         }
     }
 }
@@ -105,7 +108,15 @@ public extension WidgetKind {
         case .nowPlaying, .lyrics: .nowPlaying
         case .github: .overview
         case .todayAtAGlance: .calendar
+        case .photoFrame, .onThisDay, .birthdays: .overview
         }
+    }
+}
+
+public extension WidgetKind {
+    /// Where a click leads. The widgets that read personal data are switched on in Settings, not in a panel.
+    var destination: WidgetDestination {
+        Self.personalKinds.contains(self) ? .widgetSettings : .module(module)
     }
 }
 

@@ -35,6 +35,7 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
     case screenTimeWeek, categories, breaks, appTime, mostUsed
     case nowPlaying, lyrics
     case github, todayAtAGlance
+    case photoFrame, onThisDay, birthdays
 
     public var id: String {
         rawValue
@@ -97,6 +98,10 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var timeMachine: TimeMachineStatus?
     /// Written to its own file by the app, so it is nil in the shared snapshot itself.
     public var nowPlaying: NowPlayingWidgetData?
+    /// Photos and birthdays the user turned on. The images themselves have their own files.
+    public var personal: PersonalWidgetData?
+    /// Filled by the extension with the images one timeline entry draws; never written to the snapshot file.
+    public var photoImages: [String: Data]?
 
     public init(date: Date) {
         self.date = date

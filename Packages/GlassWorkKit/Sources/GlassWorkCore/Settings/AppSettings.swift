@@ -78,6 +78,8 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var hiding = HidingSettings()
     public var alerts = AlertSettings()
     public var widgets = WidgetSettings()
+    /// Lives here rather than in `widgets`, whose decoding fails on a key an older file does not have.
+    public var personalWidgets = PersonalWidgetSettings()
     public var dock = DockSettings()
     public var weather = WeatherSettings()
     public var rates = RatesSettings()
@@ -123,7 +125,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
         case version, modules, numberStyle, hiding, alerts, widgets, dock, weather, rates, clipboard, welcomeCompleted
-        case fans, windowTiles
+        case fans, windowTiles, personalWidgets
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -145,6 +147,8 @@ extension AppSettings {
         fans = (try? container.decodeIfPresent(FanSettings.self, forKey: .fans)) ?? FanSettings()
         windowTiles = (try? container.decodeIfPresent(WindowTilesSettings.self, forKey: .windowTiles))
             ?? WindowTilesSettings()
+        personalWidgets = (try? container.decodeIfPresent(PersonalWidgetSettings.self, forKey: .personalWidgets))
+            ?? PersonalWidgetSettings()
         normalize()
     }
 

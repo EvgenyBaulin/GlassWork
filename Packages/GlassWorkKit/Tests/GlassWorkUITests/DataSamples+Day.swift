@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 @testable import GlassWorkCore
 
@@ -68,6 +69,53 @@ extension DataSamples {
             event("Standup", hours: 24, minutes: 15, color: "#3B82F6", call: true),
             event("Dentist", hours: 26, minutes: 60, color: "#FF9500"),
         ]
+        return snapshot
+    }
+
+    /// A plain picture, so these snapshots depend on nobody's photos.
+    private static func picture(_ hue: Double) -> Data {
+        let image = NSImage(size: NSSize(width: 120, height: 80), flipped: false) { rect in
+            NSColor(hue: hue, saturation: 0.6, brightness: 0.8, alpha: 1).setFill()
+            rect.fill()
+            NSColor(hue: hue, saturation: 0.8, brightness: 0.4, alpha: 1).setFill()
+            NSRect(x: 0, y: 0, width: rect.width, height: rect.height * 0.35).fill()
+            return true
+        }
+        return image.tiffRepresentation ?? Data()
+    }
+
+    static var personal: WidgetSnapshot {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        var data = PersonalWidgetData()
+        let calendar = Calendar.current
+        let year = calendar.component(.year, from: sampleNow)
+        func date(yearsBack: Int) -> Date {
+            calendar.date(byAdding: .year, value: -yearsBack, to: sampleNow) ?? sampleNow
+        }
+        let photos = (0 ..< 12).map { index in
+            WidgetPhoto(id: "photo-\(index)", date: date(yearsBack: index + 1), name: "IMG_\(2041 + index)")
+        }
+        data.photoFrame.state = .ready
+        data.photoFrame.folderName = "Travel \(year - 1)"
+        data.photoFrame.total = 48
+        data.photoFrame.photos = photos
+        data.onThisDay.state = .ready
+        data.onThisDay.photos = photos
+        data.birthdays.state = .ready
+        data.birthdays.total = 48
+        let names = ["Anna Petrova", "Mark Chen", "Kate Smirnova", "Dad", "Leo Novak", "Sofia Garcia"]
+        data.birthdays.people = names.enumerated().map { index, name in
+            let offset = [3, 10, 23, 31, 42, 56][index]
+            let day = calendar.date(byAdding: .day, value: offset, to: calendar.startOfDay(for: sampleNow)) ?? sampleNow
+            return WidgetBirthday(id: name, name: name, date: day, turns: name == "Dad" ? nil : 30 + index)
+        }
+        snapshot.personal = data
+        var images: [String: Data] = [:]
+        for (index, photo) in photos.enumerated() {
+            images[photo.id] = picture(Double(index) / 12)
+            images[photo.thumbnailID] = picture(Double(index) / 12)
+        }
+        snapshot.photoImages = images
         return snapshot
     }
 }
