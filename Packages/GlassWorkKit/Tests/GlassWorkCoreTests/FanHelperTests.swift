@@ -197,7 +197,7 @@ struct FanHelperServiceTests {
         let smc = FakeSMC(mode: 1)
         smc.set("Ftst", .init(type: "ui8 ", bytes: [1]))
         #expect(service(smc).execute(FanCommand(fan: 0, action: .auto)))
-        #expect(smc.number("F0Md") == 0)
+        #expect(smc.number("F0Md") == 3)
         #expect(smc.number("Ftst") == 1)
         #expect(service(smc).execute(FanCommand(fan: 1, action: .auto)))
         #expect(smc.number("Ftst") == 0)
@@ -221,7 +221,7 @@ struct FanHelperServiceTests {
         let smc = FakeSMC(mode: 1)
         smc.refusals["F0Md"] = 1000
         #expect(!service(smc).restoreAuto())
-        #expect(smc.number("F1Md") == 0)
+        #expect(smc.number("F1Md") == 3)
         #expect(service(smc).hasManualFans)
     }
 
@@ -258,6 +258,14 @@ struct FanRestoreFailureTests {
         #expect(!helper.restoreAuto())
     }
 
+    @Test func aMacThatRefusesTheSystemModeFallsBackToAuto() {
+        let smc = FakeSMC()
+        smc.set("F0Md", manual)
+        smc.refusals["F0Md"] = 1
+        #expect(service(smc).restoreAuto())
+        #expect(smc.number("F0Md") == 0)
+    }
+
     @Test func aMacWithoutTheTestKeyStillRestores() {
         #expect(service(FakeSMC(hasTestKey: false)).restoreAuto())
     }
@@ -287,7 +295,7 @@ struct FanRestoreFailureTests {
         smc.ignored = []
         clock.time = FanWatchdog.timeout + 1
         queue.sync { server.checkWatchdog() }
-        #expect(smc.number("F0Md") == 0)
+        #expect(smc.number("F0Md") == 3)
     }
 }
 
@@ -440,8 +448,8 @@ struct FanHelperXPCTests {
 
         client.disconnect()
 
-        await waitUntil { harness.smc.number("F0Md") == 0 }
-        #expect(harness.smc.number("F0Md") == 0)
+        await waitUntil { harness.smc.number("F0Md") == 3 }
+        #expect(harness.smc.number("F0Md") == 3)
     }
 
     @Test func silenceRestoresAutoAfterTenSeconds() async {
@@ -455,7 +463,7 @@ struct FanHelperXPCTests {
 
         harness.clock.time = 10.5
         harness.queue.sync { harness.server.checkWatchdog() }
-        #expect(harness.smc.number("F0Md") == 0)
+        #expect(harness.smc.number("F0Md") == 3)
         client.disconnect()
     }
 
@@ -512,7 +520,7 @@ struct FanHelperXPCTests {
         #expect(harness.server.listener(harness.listener, shouldAcceptNewConnection: stranger))
         harness.queue.sync { harness.server.checkWatchdog() }
 
-        #expect(harness.smc.number("F0Md") == 0)
+        #expect(harness.smc.number("F0Md") == 3)
         stranger.invalidate()
         client.disconnect()
     }
@@ -536,7 +544,7 @@ struct FanHelperXPCTests {
 
         harness.smc.refusals["F0Md"] = 0
         harness.queue.sync { harness.server.checkWatchdog() }
-        #expect(harness.smc.number("F0Md") == 0)
+        #expect(harness.smc.number("F0Md") == 3)
         client.disconnect()
     }
 
@@ -559,14 +567,14 @@ struct FanHelperXPCTests {
     @Test func startupTakesBackAFanLeftInManualMode() async {
         let harness = Harness(mode: 1)
         harness.server.start()
-        await waitUntil { harness.smc.number("F0Md") == 0 }
-        #expect(harness.smc.number("F0Md") == 0)
-        #expect(harness.smc.number("F1Md") == 0)
+        await waitUntil { harness.smc.number("F0Md") == 3 }
+        #expect(harness.smc.number("F0Md") == 3)
+        #expect(harness.smc.number("F1Md") == 3)
     }
 
     @Test func shutdownRestoresAuto() {
         let harness = Harness(mode: 1)
         _ = harness.server.shutdown()
-        #expect(harness.smc.number("F0Md") == 0)
+        #expect(harness.smc.number("F0Md") == 3)
     }
 }

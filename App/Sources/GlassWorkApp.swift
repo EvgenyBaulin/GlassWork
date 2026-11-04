@@ -51,6 +51,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             == OSType(keyAELaunchedAsLogInItem)
     }
 
+    /// Logging in should bring back the menu bar, not put a window in front of everything.
+    private var wasOpenedAtLogin: Bool {
+        let event = NSAppleEventManager.shared().currentAppleEvent
+        return event?.eventID == AEEventID(kAEOpenApplication)
+            && event?.paramDescriptor(forKeyword: AEKeyword(keyAEPropData))?.enumCodeValue
+            == OSType(keyAELaunchedAsLogInItem)
+    }
+
     func application(_: NSApplication, open urls: [URL]) {
         guard let destination = urls.compactMap(WidgetLink.destination).last else { return }
         if let model {

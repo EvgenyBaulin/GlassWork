@@ -80,6 +80,7 @@ struct NowPlayingProvider: TimelineProvider {
     func getTimeline(in _: Context, completion: @escaping (Timeline<SnapshotEntry>) -> Void) {
         let now = Date.now
         let current = snapshot()
+        WidgetRefreshLog().record(kind: kind.rawValue, dataDate: current.date, at: now)
         let dates = [now] + changeDates(in: current, from: now)
         let entries = dates.map { SnapshotEntry(date: $0, snapshot: current) }
         completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(Self.horizon))))
