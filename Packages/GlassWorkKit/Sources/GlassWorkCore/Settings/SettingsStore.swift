@@ -12,6 +12,7 @@ public final class SettingsStore {
     @ObservationIgnored public let backups: SettingsBackups
     @ObservationIgnored private let file: SettingsFile
     @ObservationIgnored private var watcher: DispatchSourceFileSystemObject?
+    @ObservationIgnored private var fileWatcher: DispatchSourceFileSystemObject?
 
     private static let undoLimit = 50
 
@@ -72,7 +73,8 @@ public final class SettingsStore {
         }
     }
 
-    /// Watches the folder: saves replace the file atomically, which would end a watch on the file itself.
+    /// Watches the folder, which sees the file being replaced, and the file, which sees a write in place.
+    /// Neither is enough alone: a save replaces the file, and `nano` or `open(path, "w")` write inside it.
     private func watch() {
         let folder = file.url.deletingLastPathComponent()
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -84,10 +86,34 @@ public final class SettingsStore {
             queue: .main
         )
         source.setEventHandler { [weak self] in
-            MainActor.assumeIsolated { self?.reload() }
+            MainActor.assumeIsolated {
+                self?.watchFile()
+                self?.reload()
+            }
         }
         source.setCancelHandler { close(descriptor) }
         source.resume()
         watcher = source
+        watchFile()
+    }
+
+    /// A watch follows the file it was opened on, so every replacement needs a new one. The folder's event
+    /// covers that, including a file that did not exist at launch. Before the first save there is nothing to open.
+    private func watchFile() {
+        fileWatcher?.cancel()
+        fileWatcher = nil
+        let descriptor = open(file.url.path(percentEncoded: false), O_EVTONLY)
+        guard descriptor >= 0 else { return }
+        let source = DispatchSource.makeFileSystemObjectSource(
+            fileDescriptor: descriptor,
+            eventMask: [.write, .extend, .delete, .rename],
+            queue: .main
+        )
+        source.setEventHandler { [weak self] in
+            MainActor.assumeIsolated { self?.reload() }
+        }
+        source.setCancelHandler { close(descriptor) }
+        source.resume()
+        fileWatcher = source
     }
 }
