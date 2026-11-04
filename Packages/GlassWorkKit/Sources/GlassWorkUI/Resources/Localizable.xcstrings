@@ -12236,6 +12236,106 @@
           }
         }
       }
+    },
+    "Remove from Dock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Убрать из Dock"
+          }
+        }
+      }
+    },
+    "Widgets in Dock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виджеты в Dock"
+          }
+        }
+      }
+    },
+    "Click runs the quick action, hold opens the widget as a card above the Dock.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик запускает быстрое действие, удержание открывает виджет карточкой над Dock."
+          }
+        }
+      }
+    },
+    "Click: start 25 min": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик: запустить на 25 мин"
+          }
+        }
+      }
+    },
+    "Click: start or stop": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик: запустить или остановить"
+          }
+        }
+      }
+    },
+    "Click: turn on or off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик: включить или выключить"
+          }
+        }
+      }
+    },
+    "Click: play or pause": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик: играть или пауза"
+          }
+        }
+      }
+    },
+    "Click: open in browser": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик: открыть в браузере"
+          }
+        }
+      }
+    },
+    "Click: join call": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик: подключиться к звонку"
+          }
+        }
+      }
+    },
+    "Click: open card": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик: открыть карточку"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

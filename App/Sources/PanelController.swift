@@ -67,9 +67,34 @@ final class PanelController {
     private var dismissal: TransientDismissal?
     private var detached: [ModuleID: NSWindow] = [:]
     private var resize: NSObjectProtocol?
+    /// The window a card opened from. Clicks on it are left to the card's tile, which toggles the card itself.
+    private var anchor: NSWindow?
 
     init(model: AppModel) {
         self.model = model
+    }
+
+    /// True while a card opened from this window is showing.
+    func hasCard(from window: NSWindow) -> Bool {
+        anchor === window
+    }
+
+    /// Opens a module's panel as a card of the Dock, or closes it if it is already open.
+    ///
+    /// - Parameter place: Where the card goes, given its size.
+    func toggleCard(_ module: ModuleID, from window: NSWindow, place: (CGSize) -> CGRect) {
+        let wasOpen = content == .module(module) && anchor === window
+        closeTransient()
+        guard !wasOpen else { return }
+        anchor = window
+        show(.module(module), from: nil, view: AnyView(ModulePanel(module: module, monitor: model.monitor)))
+        guard let panel else { return }
+        panel.setFrame(place(panel.frame.size), display: false)
+        // The edge to keep has just moved.
+        if let resize {
+            NotificationCenter.default.removeObserver(resize)
+        }
+        resize = panel.keepTopEdge()
     }
 
     func toggle(_ module: ModuleID, from button: NSStatusBarButton) {
@@ -105,6 +130,7 @@ final class PanelController {
         panel?.close()
         panel = nil
         content = nil
+        anchor = nil
         model.panelsChanged(hasOpenPanel: !detached.isEmpty)
     }
 
@@ -169,7 +195,10 @@ final class PanelController {
         model.panelsChanged(hasOpenPanel: true)
         let dismissal = TransientDismissal(
             panel: window,
-            isStatusItem: { [weak self] in self?.model.isStatusItem($0) ?? false },
+            isStatusItem: { [weak self] in
+                guard let self else { return false }
+                return model.isStatusItem($0) || $0 === anchor
+            },
             dismiss: { [weak self] in self?.closeTransient() }
         )
         dismissal.start()

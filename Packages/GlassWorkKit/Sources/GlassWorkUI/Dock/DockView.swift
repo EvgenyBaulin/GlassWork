@@ -11,11 +11,29 @@ public extension DockPosition {
     }
 }
 
+public extension ModuleID {
+    /// What a click on this widget in the Dock does, for Settings.
+    var dockClickTitle: String {
+        switch self {
+        case .timers: loc("Click: start 25 min")
+        case .stopwatch: loc("Click: start or stop")
+        case .keepAwake: loc("Click: turn on or off")
+        case .nowPlaying: loc("Click: play or pause")
+        case .devServers: loc("Click: open in browser")
+        case .calendar, .endsIn: loc("Click: join call")
+        default: loc("Click: open card")
+        }
+    }
+}
+
 /// What the Dock can ask the app to do.
 @MainActor
 public struct DockActions {
     public var open: (DockApp) -> Void
-    public var showPanel: (ModuleID) -> Void
+    /// A click on a widget runs its quick action.
+    public var clickWidget: (ModuleID) -> Void
+    /// Press and hold on a widget opens its card.
+    public var holdWidget: (ModuleID) -> Void
     public var update: (([DockItem]) -> [DockItem]) -> Void
     /// Tells the window what to make room for.
     public var needsSpace: (DockSpace) -> Void
@@ -25,14 +43,16 @@ public struct DockActions {
 
     public init(
         open: @escaping (DockApp) -> Void,
-        showPanel: @escaping (ModuleID) -> Void,
+        clickWidget: @escaping (ModuleID) -> Void,
+        holdWidget: @escaping (ModuleID) -> Void,
         update: @escaping (([DockItem]) -> [DockItem]) -> Void,
         needsSpace: @escaping (DockSpace) -> Void,
         commands: @escaping (DockApp) -> [DockAppCommand] = { _ in [] },
         perform: @escaping (DockAppCommand, DockApp) -> Void = { _, _ in }
     ) {
         self.open = open
-        self.showPanel = showPanel
+        self.clickWidget = clickWidget
+        self.holdWidget = holdWidget
         self.update = update
         self.needsSpace = needsSpace
         self.commands = commands
@@ -204,8 +224,16 @@ public struct DockView: View {
                 drop(paths) { dragged, items in DockLayout.drop(dragged, into: folder, in: items) }
             }
         case let .widget(module):
-            WidgetTile(module: module, size: size, monitor: monitor, position: position) {
-                actions.showPanel(module)
+            WidgetTile(
+                module: module,
+                size: size,
+                monitor: monitor,
+                position: position,
+                click: { actions.clickWidget(module) },
+                hold: { actions.holdWidget(module) }
+            )
+            .contextMenu {
+                Button(loc("Remove from Dock")) { actions.update { DockLayout.removing(item, from: $0) } }
             }
         }
     }
@@ -267,13 +295,19 @@ struct DockIndicated<Icon: View>: View {
 
     var body: some View {
         switch position {
-        case .bottom: VStack(spacing: 3) { icon
+        case .bottom:
+            VStack(spacing: 3) {
+                icon
                 dot
             }
-        case .left: HStack(spacing: 3) { dot
+        case .left:
+            HStack(spacing: 3) {
+                dot
                 icon
             }
-        case .right: HStack(spacing: 3) { icon
+        case .right:
+            HStack(spacing: 3) {
+                icon
                 dot
             }
         }
@@ -490,17 +524,23 @@ struct FolderCard: View {
     }
 }
 
-/// Live mini view of a module. Click opens its card.
+/// Live mini view of a module. Click runs its quick action, press and hold opens its card.
 struct WidgetTile: View {
     let module: ModuleID
     let size: CGFloat
     let monitor: SystemMonitor
     var position = DockPosition.bottom
-    let action: () -> Void
+    let click: () -> Void
+    let hold: () -> Void
+    @State private var press = DockPress()
 
     var body: some View {
         let content = ItemContent.content(module, monitor: monitor, style: .compact)
-        Button(action: action) {
+        Button {
+            if press.released() {
+                click()
+            }
+        } label: {
             DockIndicated(position: position, isLit: false) {
                 VStack(spacing: 1) {
                     Image(systemName: module.symbol).font(.system(size: size * 0.28)).foregroundStyle(module.tint)
@@ -515,6 +555,15 @@ struct WidgetTile: View {
             }
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(LongPressGesture(minimumDuration: DockPress.holdDuration).onEnded { _ in
+            press.held()
+            hold()
+        })
+        .onHover { isInside in
+            if !isInside {
+                press.left()
+            }
+        }
         .help(module.title)
     }
 }

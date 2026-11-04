@@ -155,6 +155,14 @@ final class AppModel {
         panels.show(module, beside: frame)
     }
 
+    func toggleCard(_ module: ModuleID, from window: NSWindow, place: (CGSize) -> CGRect) {
+        panels.toggleCard(module, from: window, place: place)
+    }
+
+    func hasCard(from window: NSWindow) -> Bool {
+        panels.hasCard(from: window)
+    }
+
     /// For a click on a system widget, whose frame the app never learns.
     func showPanelAtPointer(_ module: ModuleID) {
         showPanel(module, beside: CGRect(origin: NSEvent.mouseLocation, size: .zero))
@@ -168,6 +176,7 @@ final class AppModel {
     func panelsChanged(hasOpenPanel: Bool) {
         self.hasOpenPanel = hasOpenPanel
         updateDemand()
+        dock.cardsChanged()
         if hasOpenPanel {
             monitor.refresh()
             monitor.apps.refresh()
@@ -238,14 +247,16 @@ final class AppModel {
     /// Network modules ask only while they are in the bar or a panel can show them.
     private func isWanted(_ module: ModuleID) -> Bool {
         let mode = store.settings.module(module)?.mode
-        return mode == .menuBar || (hasOpenPanel && mode != .off)
+        return mode == .menuBar || (hasOpenPanel && mode != .off) || store.settings.dock.shownWidgets.contains(module)
     }
 
     private func updateDemand() {
         // Live windows and charts sample on every tick; other system widgets read once a minute.
         let placed = placedWidgetKinds
         var demand = MonitorDemand(widgets: desktopWidgetKinds.union(systemWidgetKinds.filter(\.keepsHistory)))
-        let modes = store.settings.modules.filter { $0.mode == .menuBar }.map(\.id)
+        // A widget in the Dock shows a live figure, just as a menu bar item does.
+        let docked = store.settings.dock.shownWidgets
+        let modes = store.settings.modules.filter { $0.mode == .menuBar }.map(\.id) + docked
         let everything = hasOpenPanel
         let showsApps = visibleSection == .apps
         demand.liveApps = everything || showsApps || isQuickQuitOpen
@@ -261,6 +272,7 @@ final class AppModel {
         demand.processes = everything
         demand.developer = store.settings.developerDemand(panelOpen: everything)
             .union(placed.compactMap(\.developerModule))
+            .union(docked.intersection(ModuleID.developerCollected))
         // Only on request: the module is in the Hub by default, and the read may raise a Bluetooth prompt.
         demand.devices = placed.contains(.devices) || modes.contains(.deviceBatteries)
         demand.timeMachine = placed.contains(.timeMachine)

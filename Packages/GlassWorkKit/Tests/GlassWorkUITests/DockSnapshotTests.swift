@@ -33,7 +33,13 @@ struct DockSnapshotTests {
         let view = DockView(
             state: state,
             monitor: SystemMonitor(),
-            actions: DockActions(open: { _ in }, showPanel: { _ in }, update: { _ in }, needsSpace: { _ in }),
+            actions: DockActions(
+                open: { _ in },
+                clickWidget: { _ in },
+                holdWidget: { _ in },
+                update: { _ in },
+                needsSpace: { _ in }
+            ),
             pointer: pointer
         )
         return view.frame(width: size.width, height: size.height)
@@ -76,6 +82,19 @@ struct DockSnapshotTests {
     @Test(arguments: [true, false])
     func magnifiedOnTheRight(dark: Bool) {
         snapshotPanel(dock(space: .magnified, pointer: 0, position: .right), name: "right-middle", dark: dark)
+    }
+
+    /// A widget keeps its slot's size and leaves the dot's place empty, so it lines up with the apps.
+    @Test(arguments: [true, false])
+    func widgetsBesideApps(dark: Bool) {
+        let monitor = SystemMonitor()
+        let row = HStack(alignment: .bottom, spacing: 8) {
+            AppTile(app: apps[0], size: 48, isRunning: true) {}
+            WidgetTile(module: .cpu, size: 48, monitor: monitor, click: {}, hold: {})
+            WidgetTile(module: .memory, size: 48, monitor: monitor, click: {}, hold: {})
+        }
+        .padding(8)
+        snapshotPanel(row, name: "widgets", dark: dark)
     }
 
     /// Not running, running, and a launch at the top of its jump.

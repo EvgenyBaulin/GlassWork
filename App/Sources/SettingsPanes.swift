@@ -130,6 +130,7 @@ struct DockPane: View {
                 .pickerStyle(.segmented)
                 Toggle(loc("Automatically hide and show"), isOn: dock.autoHides)
             }
+            widgetsSection
         }
         .formStyle(.grouped)
         .confirmationDialog(loc("Use GlassWork Dock?"), isPresented: $confirming) {
@@ -141,6 +142,45 @@ struct DockPane: View {
                     settings.dock.isEnabled = true
                 }
             }
+        }
+    }
+}
+
+private extension DockPane {
+    var widgets: [ModuleID] {
+        store.settings.dock.widgets
+    }
+
+    func setWidgets(_ widgets: [ModuleID]) {
+        store.update { $0.dock.items = DockLayout.setting(widgets: widgets, in: $0.dock.items) }
+    }
+
+    var widgetsSection: some View {
+        Section {
+            ForEach(widgets) { module in
+                HStack {
+                    Text(module.title)
+                    Spacer()
+                    Text(module.dockClickTitle).font(.caption).foregroundStyle(.secondary)
+                    Button(loc("Remove")) { setWidgets(widgets.filter { $0 != module }) }
+                }
+            }
+            .onMove { source, destination in
+                var moved = widgets
+                moved.move(fromOffsets: source, toOffset: destination)
+                setWidgets(moved)
+            }
+            Menu(loc("Add Widget")) {
+                ForEach(ModuleID.dockWidgets.filter { !widgets.contains($0) }) { module in
+                    Button(module.title) { setWidgets(widgets + [module]) }
+                }
+            }
+        } header: {
+            Text(loc("Widgets in Dock"))
+        } footer: {
+            Text(loc("Click runs the quick action, hold opens the widget as a card above the Dock."))
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }

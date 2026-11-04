@@ -98,6 +98,9 @@ final class DockController {
 
     /// Restores even with no window, so a Dock left hidden by a crash comes back once it is turned off.
     private func close() {
+        if let window, model.hasCard(from: window) {
+            model.closePanels()
+        }
         shrink?.cancel()
         watchPointer(false)
         isRevealed = true
@@ -117,10 +120,52 @@ final class DockController {
         SystemDock.restore()
     }
 
+    /// The Dock stays while a card it opened is up, and goes once it closes.
+    func cardsChanged() {
+        updateReveal()
+    }
+
+    private func click(_ module: ModuleID) {
+        let monitor = model.monitor
+        let context = DockWidgetContext(
+            timers: monitor.everyday.data.timers,
+            devServers: monitor.developer.devServers,
+            events: monitor.agenda.events
+        )
+        switch DockWidgetClick.resolve(module, context: context, at: Date()) {
+        case .showCard: toggleCard(module)
+        case let .perform(action): model.perform(action)
+        case .toggleStopwatch: monitor.everyday.update { $0.stopwatch.toggle(at: Date()) }
+        case .toggleKeepAwake: monitor.everyday.toggleKeepAwake()
+        case .togglePlayback: monitor.nowPlaying.perform(.toggle)
+        case let .open(url): NSWorkspace.shared.open(url)
+        }
+    }
+
+    private func toggleCard(_ module: ModuleID) {
+        guard module.hasDockCard, let window, let screen else { return }
+        let settings = state.settings
+        let bar = frame(for: .rest, on: screen)
+        let pointer = NSEvent.mouseLocation
+        model.toggleCard(module, from: window) { size in
+            DockBarLayout.cardFrame(
+                size: size,
+                pointer: pointer,
+                bar: bar,
+                settings: settings,
+                visible: screen.visibleFrame
+            )
+        }
+    }
+
     private var actions: DockActions {
         DockActions(
-            open: { [weak self] in self?.launch($0) },
-            showPanel: { [weak self] in self?.model.showSettings(module: $0) },
+            open: { [weak self] app in
+                self?.model.closePanels()
+                self?.launch(app)
+            },
+            clickWidget: { [weak self] in self?.click($0) },
+            holdWidget: { [weak self] in self?.toggleCard($0) },
             update: { [weak self] change in
                 self?.model.store.update { $0.dock.items = change($0.dock.items) }
             },
@@ -349,7 +394,7 @@ final class DockController {
                 position: settings.position,
                 screen: screen.frame
             ),
-            isHeld: isMenuOpen || requested == .folder || !state.launching.isEmpty
+            isHeld: isMenuOpen || requested == .folder || !state.launching.isEmpty || model.hasCard(from: window)
         )
         if wanted {
             hiding?.cancel()

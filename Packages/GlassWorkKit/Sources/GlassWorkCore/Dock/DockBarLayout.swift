@@ -30,6 +30,8 @@ public struct DockBarLayout: Equatable, Sendable {
     public static let folderCardWidth = 430.0
     public static let folderCardHeight = 450.0
     public static let folderCardGap = 10.0
+    /// How close a card may come to the screen's edges.
+    static let cardMargin = 8.0
     /// How far the Dock stands above the bottom edge of the screen.
     public static let screenGap = 4.0
 
@@ -132,6 +134,31 @@ public struct DockBarLayout: Equatable, Sendable {
                 x: isRevealed ? screen.maxX - screenGap - size.width : screen.maxX,
                 y: middleY - size.height / 2
             )
+        }
+        return CGRect(x: origin.x.rounded(), y: origin.y.rounded(), width: size.width, height: size.height)
+    }
+
+    /// Where a widget's card goes: past the tallest an icon can grow, centered on the pointer and kept on screen.
+    ///
+    /// - Parameter bar: The Dock window at rest.
+    /// - Parameter visible: The part of the screen a card may use.
+    public static func cardFrame(
+        size: CGSize,
+        pointer: CGPoint,
+        bar: CGRect,
+        settings: DockSettings,
+        visible: CGRect
+    ) -> CGRect {
+        let reach = growth(settings) + folderCardGap
+        func fit(_ value: Double, _ low: Double, _ high: Double) -> Double {
+            min(max(value, low + cardMargin), max(high - cardMargin, low + cardMargin))
+        }
+        let alongX = fit(pointer.x - size.width / 2, visible.minX, visible.maxX - size.width)
+        let alongY = fit(pointer.y - size.height / 2, visible.minY, visible.maxY - size.height)
+        let origin = switch settings.position {
+        case .bottom: CGPoint(x: alongX, y: bar.maxY + reach)
+        case .left: CGPoint(x: bar.maxX + reach, y: alongY)
+        case .right: CGPoint(x: bar.minX - reach - size.width, y: alongY)
         }
         return CGRect(x: origin.x.rounded(), y: origin.y.rounded(), width: size.width, height: size.height)
     }
