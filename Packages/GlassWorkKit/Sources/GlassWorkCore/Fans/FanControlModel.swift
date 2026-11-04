@@ -68,6 +68,7 @@ public final class FanControlModel {
     @ObservationIgnored private let now: () -> TimeInterval
     @ObservationIgnored private var client: FanHelperClient?
     @ObservationIgnored private var loop: Task<Void, Never>?
+    @ObservationIgnored private var activity: NSObjectProtocol?
 
     public init(
         store: SettingsStore,
@@ -209,7 +210,8 @@ public final class FanControlModel {
         await deliver(commands)
         if engine.isActive || engine.resumeTime != nil {
             startLoop()
-            if client != nil, await client?.heartbeat() == false {
+            // Nothing outstanding means nothing to lose: the wait after a wake holds no fans.
+            if client != nil, await client?.heartbeat() == false, engine.holdsFans {
                 helperWentAway()
             }
         } else {
@@ -267,6 +269,11 @@ public final class FanControlModel {
 
     private func startLoop() {
         guard loop == nil else { return }
+        // App Nap could delay the loop past the helper's watchdog while the screen is off.
+        activity = ProcessInfo.processInfo.beginActivity(
+            options: .userInitiatedAllowingIdleSystemSleep,
+            reason: "Fan control"
+        )
         loop = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(Self.tick))
@@ -279,5 +286,9 @@ public final class FanControlModel {
     private func stopLoop() {
         loop?.cancel()
         loop = nil
+        if let activity {
+            ProcessInfo.processInfo.endActivity(activity)
+        }
+        activity = nil
     }
 }

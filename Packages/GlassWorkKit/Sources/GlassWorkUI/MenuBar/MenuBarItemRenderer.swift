@@ -16,6 +16,7 @@ public final class MenuBarItemRenderer {
     private var bounds = CGRect.zero
     private var lastSignature: String?
     /// The fan glyph turns one step per refresh. A real animation would cost far more than it shows.
+    /// The symbol looks the same every 90°, so steps stay well below that.
     private var spinAngle: CGFloat = 0
 
     private static let padding: CGFloat = 4
@@ -41,7 +42,7 @@ public final class MenuBarItemRenderer {
     public func image(size: CGSize, force: Bool = false) -> NSImage? {
         let content = ItemContent.content(module, monitor: monitor, style: numbers, options: options)
         if content.spin > 0, style == .symbol || style == .figure || style == .graph {
-            spinAngle = (spinAngle + 30 + 60 * content.spin).truncatingRemainder(dividingBy: 360)
+            spinAngle = (spinAngle + 20 + 40 * content.spin).truncatingRemainder(dividingBy: 360)
         }
         let current = signature(content, size: size)
         guard force || current != lastSignature else { return nil }

@@ -8,6 +8,8 @@ private final class FakeClient: FanHelperClient, @unchecked Sendable {
     private(set) var heartbeats = 0
     private(set) var disconnects = 0
     var fails = false
+    /// What a helper says when it no longer holds any fan.
+    var holdsNothing = false
 
     func send(_ command: FanCommand) async -> Bool {
         commands.append(command)
@@ -16,7 +18,7 @@ private final class FakeClient: FanHelperClient, @unchecked Sendable {
 
     func heartbeat() async -> Bool {
         heartbeats += 1
-        return !fails
+        return !fails && !holdsNothing
     }
 
     func disconnect() {
@@ -185,6 +187,35 @@ struct FanControlModelTests {
         await model.step()
         #expect(model.mode == .auto)
         #expect(!model.isRunning)
+    }
+
+    @Test func aHelperThatLetGoEndsControl() async {
+        let installer = installed()
+        let model = makeModel(installer: installer)
+        model.select(.max)
+        await model.step()
+        installer.client.holdsNothing = true
+        await model.step()
+        #expect(model.mode == .auto)
+        #expect(model.notice == .returnedToAuto(.helperLost))
+    }
+
+    @Test func waitingAfterWakeSurvivesAHelperHoldingNothing() async {
+        let installer = installed()
+        let clock = Clock()
+        let model = makeModel(installer: installer, clock: clock)
+        model.select(.curve)
+        await model.step()
+        await model.willSleep()
+        clock.time = 1000
+        model.didWake()
+        installer.client.holdsNothing = true
+        clock.time = 1005
+        await model.step()
+        installer.client.holdsNothing = false
+        clock.time = 1010
+        await model.step()
+        #expect(model.mode == .curve)
     }
 
     @Test func failsafeIsReportedOnce() async {

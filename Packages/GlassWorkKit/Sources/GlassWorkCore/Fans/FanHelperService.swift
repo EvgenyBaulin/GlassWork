@@ -21,7 +21,9 @@ public final class FanHelperService {
     public struct Timing: Sendable {
         public var unlockDelay = 3.0
         public var retryDelay = 0.25
-        public var attempts = 20
+        /// macOS can take a long time to hand fans over, so this waits about 30 s.
+        public var unlockAttempts = 120
+        public var restoreAttempts = 20
 
         public init() {}
     }
@@ -115,7 +117,7 @@ public final class FanHelperService {
             return false
         }
         pause(timing.unlockDelay)
-        for _ in 0 ..< timing.attempts {
+        for _ in 0 ..< timing.unlockAttempts {
             if smc.write(key, bytes: manual) {
                 return true
             }
@@ -139,11 +141,11 @@ public final class FanHelperService {
     }
 
     private func writeRetrying(_ key: String, bytes: [UInt8]) -> Bool {
-        for attempt in 0 ..< timing.attempts {
+        for attempt in 0 ..< timing.restoreAttempts {
             if smc.write(key, bytes: bytes) {
                 return true
             }
-            if attempt < timing.attempts - 1 {
+            if attempt < timing.restoreAttempts - 1 {
                 pause(timing.retryDelay)
             }
         }
@@ -162,9 +164,10 @@ public struct FanWatchdog: Sendable {
         lastContact = now
     }
 
-    public mutating func clientConnected(at time: TimeInterval) {
+    /// Counts a connection but does not restart the timer: at this point the client's signature is
+    /// unchecked. Only messages, which the check lets through, prove that the app is alive.
+    public mutating func clientConnected() {
         clients += 1
-        lastContact = time
     }
 
     /// True when that was the last client, so fans must return to Auto right away.

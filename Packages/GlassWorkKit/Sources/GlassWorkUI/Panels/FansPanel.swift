@@ -57,6 +57,7 @@ struct FansPanel: View {
                 fans: sample?.fans ?? [],
                 averageCPU: sample?.averageCPU,
                 curveCelsius: sample?.celsius(for: control.settings.sensor),
+                isOnAC: monitor.battery?.isOnAC ?? true,
                 points: { monitor.fanPoints($0, in: range) }
             )
             // Approval happens in System Settings, so the state may have changed since last time.
@@ -71,6 +72,7 @@ struct FansPanelContent: View {
     let fans: [FanReading]
     let averageCPU: Double?
     let curveCelsius: Double?
+    var isOnAC = true
     let points: (Int) -> [History<Double>.Point]
     var curveHover: Double?
     @Environment(\.panelActions) private var actions
@@ -172,7 +174,7 @@ struct FansPanelContent: View {
             .font(.system(size: 12))
             if let fan = fans.first(where: \.hasValidRange) {
                 FanCurveChart(
-                    curve: control.settings.curve(forFan: fan.id, isOnAC: true),
+                    curve: control.settings.curve(forFan: fan.id, isOnAC: isOnAC),
                     rpmRange: fan.minimum ... fan.maximum,
                     live: curveCelsius.map { FanCurveChart.Live(celsius: $0, rpm: fan.rpm) },
                     height: 96,

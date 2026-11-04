@@ -33,6 +33,7 @@ public enum FanHelperIdentity {
 @objc public protocol FanHelperXPC {
     /// `action` is a `FanCommand.WireAction`; `rpm` matters only for a target.
     func setFan(_ fan: Int, action: Int, rpm: Double, reply: @escaping @Sendable (Bool) -> Void)
+    /// Replies true while the helper still holds the fans, false once it has given them back.
     func heartbeat(reply: @escaping @Sendable (Bool) -> Void)
 }
 
@@ -120,7 +121,7 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
         let departure = Departure { [weak self] in self?.clientLeft() }
         connection.invalidationHandler = { departure.fire() }
         connection.interruptionHandler = { departure.fire() }
-        queue.async { [self] in watchdog.clientConnected(at: now()) }
+        queue.async { [self] in watchdog.clientConnected() }
         connection.resume()
         return true
     }
@@ -130,7 +131,9 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
             let succeeded = command.map { service.execute($0) } ?? false
             // Stamped after the work: taking control can block for seconds.
             watchdog.contact(at: now())
-            isArmed = service.hasManualFans
+            // Trusts the command as well as the readback: a watchdog disarmed by mistake is the worse error.
+            let tookFan = succeeded && command?.action != .auto
+            isArmed = tookFan || service.hasManualFans
             reply(succeeded)
         }
     }
@@ -138,7 +141,7 @@ public final class FanHelperServer: NSObject, NSXPCListenerDelegate, @unchecked 
     fileprivate func heartbeat(reply: @escaping @Sendable (Bool) -> Void) {
         queue.async { [self] in
             watchdog.contact(at: now())
-            reply(true)
+            reply(isArmed)
         }
     }
 

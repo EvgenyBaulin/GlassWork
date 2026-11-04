@@ -135,7 +135,7 @@ public struct ItemContent {
         let eachFan = options[ModuleOption.fanFigure] == ModuleOption.eachFan && fans.count >= 2
         let average = monitor.sensors?.averageFanRPM
         let figure = if eachFan {
-            "L \(Format.rpm(fans[0].rpm)) · R \(Format.rpm(fans[1].rpm))"
+            loc("L \(Format.rpm(fans[0].rpm)) · R \(Format.rpm(fans[1].rpm))")
         } else {
             average.map { loc("\(Format.rpm($0)) rpm") } ?? "—"
         }
@@ -144,7 +144,7 @@ public struct ItemContent {
             metric: .fan,
             // Max is the only state that earns the alert color.
             alert: fans.contains { $0.isManual && $0.target >= $0.maximum } ? Palette.orange : nil,
-            template: eachFan ? "L 5800 · R 5800" : loc("5800 rpm")
+            template: eachFan ? loc("L \(Format.rpm(5800)) · R \(Format.rpm(5800))") : loc("\(Format.rpm(5800)) rpm")
         )
         let moving = fans.filter { $0.rpm > 0 }
         content.spin = moving.isEmpty ? 0 : max(moving.map(\.share).max() ?? 0, 0.1)
