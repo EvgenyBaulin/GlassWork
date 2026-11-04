@@ -301,8 +301,8 @@ struct WeatherForecast: View {
         return ChartTooltip(
             date: day.date,
             rows: [
-                .init(id: "high", title: loc("High"), value: Format.degrees(day.high), color: Palette.orange),
-                .init(id: "low", title: loc("Low"), value: Format.degrees(day.low), color: Palette.cyan),
+                .init(id: "high", title: loc("Highest"), value: Format.degrees(day.high), color: Palette.orange),
+                .init(id: "low", title: loc("Lowest"), value: Format.degrees(day.low), color: Palette.cyan),
             ],
             dateStyle: style
         )
