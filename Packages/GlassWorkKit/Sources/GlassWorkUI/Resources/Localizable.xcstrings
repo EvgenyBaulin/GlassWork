@@ -8563,6 +8563,70 @@
         }
       }
     },
+    "Lyrics from LRCLIB": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lyrics from LRCLIB"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст с LRCLIB"
+          }
+        }
+      }
+    },
+    "Line follows playback": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Line follows playback"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Строка идёт за песней"
+          }
+        }
+      }
+    },
+    "Find lyrics online": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find lyrics online"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Искать тексты в интернете"
+          }
+        }
+      }
+    },
+    "For the Lyrics widget. Sends the song, artist and album to lrclib.net.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For the Lyrics widget. Sends the song, artist and album to lrclib.net."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для виджета Lyrics. Название песни, исполнитель и альбом уходят на lrclib.net."
+          }
+        }
+      }
+    },
     "Click to show or hide. Hold ⌘ and drag an item across ‹ to choose.": {
       "localizations": {
         "ru": {

@@ -20,6 +20,7 @@ public enum ModuleOption {
     public static let maxWidth = "maxWidth"
     public static let defaultMaxWidth = 180.0
     public static let hideWhenIdle = "hideWhenIdle"
+    public static let onlineLyrics = "onlineLyrics"
 }
 
 public extension SensorChoice {

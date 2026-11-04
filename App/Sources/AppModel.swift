@@ -227,6 +227,7 @@ final class AppModel {
         demand.developer = store.settings.developerDemand(panelOpen: everything)
         demand.devices = everything || modes.contains(.deviceBatteries)
         demand.nowPlaying = wantsNowPlaying
+        monitor.nowPlaying.wantsLyrics = wantsLyrics
         monitor.demand = demand
         monitor.weather.isActive = isWanted(.weather)
         monitor.rates.isActive = isWanted(.rates)
@@ -236,6 +237,11 @@ final class AppModel {
     private var wantsNowPlaying: Bool {
         let widgets = store.settings.widgets.placements.contains { $0.kind == .nowPlaying || $0.kind == .lyrics }
         return isWanted(.nowPlaying) || widgets || nowPlaying.hasSystemWidget
+    }
+
+    private var wantsLyrics: Bool {
+        guard store.settings.module(.nowPlaying)?.options[ModuleOption.onlineLyrics] != "false" else { return false }
+        return store.settings.widgets.placements.contains { $0.kind == .lyrics } || nowPlaying.hasSystemLyricsWidget
     }
 
     private func checkSystemWidgets() {

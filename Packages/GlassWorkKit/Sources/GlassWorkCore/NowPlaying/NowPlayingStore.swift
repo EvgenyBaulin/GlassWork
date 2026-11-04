@@ -12,6 +12,10 @@ public final class NowPlayingStore {
     /// macOS refused the adapter, so restarting it would not help.
     public private(set) var isUnavailable = false
     public var outputDevice: String?
+    /// True while a Lyrics widget exists and online lyrics are allowed. Nothing is sent otherwise.
+    public var wantsLyrics = false {
+        didSet { findLyrics() }
+    }
 
     /// Called when a widget would look different. Position reports alone do not count.
     @ObservationIgnored public var onChange: (() -> Void)?
@@ -26,6 +30,10 @@ public final class NowPlayingStore {
     @ObservationIgnored private var retryAt = Date.distantPast
     @ObservationIgnored private var keepRunningUntil = Date.distantPast
     @ObservationIgnored private var generation = 0
+    @ObservationIgnored private let lyricsFetcher: (any HTTPFetching)?
+    /// One request per track, whatever the answer: a song with no lyrics stays that way.
+    @ObservationIgnored private var askedLyricsURL: URL?
+    @ObservationIgnored private var foundLyrics: FoundLyrics?
 
     private static let unavailableStatus: Int32 = 3
     private static let longestRetry: TimeInterval = 300
@@ -35,10 +43,12 @@ public final class NowPlayingStore {
     /// `appName` names an app from its bundle identifier. Browsers report a helper process otherwise.
     public init(
         makeSource: @escaping @Sendable () -> NowPlayingSource? = { nil },
-        appName: @escaping @MainActor (String) -> String? = { _ in nil }
+        appName: @escaping @MainActor (String) -> String? = { _ in nil },
+        lyricsFetcher: (any HTTPFetching)? = nil
     ) {
         self.makeSource = makeSource
         self.appName = appName
+        self.lyricsFetcher = lyricsFetcher
     }
 
     public var isRunning: Bool {
@@ -104,9 +114,10 @@ public final class NowPlayingStore {
         switch event {
         case let .session(reported):
             let old = session
-            let new = reported.map(named)
+            let new = reported.map(named).map(withFoundLyrics)
             session = new
             hasLoaded = true
+            findLyrics()
             if new?.artworkID != old?.artworkID {
                 artwork = nil
             }
@@ -122,6 +133,36 @@ public final class NowPlayingStore {
             hasLoaded = true
             changed()
         }
+    }
+
+    private func findLyrics() {
+        guard wantsLyrics, let lyricsFetcher, let session, session.lyrics.isEmpty,
+              let url = LRCLib.url(for: session.track), url != askedLyricsURL
+        else { return }
+        askedLyricsURL = url
+        foundLyrics = nil
+        Task { [weak self] in
+            let data = try? await lyricsFetcher.data(from: url)
+            self?.received(data.flatMap(LRCLib.lyrics), from: url)
+        }
+    }
+
+    private func received(_ lyrics: FoundLyrics?, from url: URL) {
+        guard url == askedLyricsURL, let lyrics else { return }
+        foundLyrics = lyrics
+        session = session.map(withFoundLyrics)
+        changed()
+    }
+
+    /// The player reports every second, and each report would otherwise wipe the lines found.
+    private func withFoundLyrics(_ session: NowPlayingSession) -> NowPlayingSession {
+        guard session.lyrics.isEmpty, let foundLyrics, LRCLib.url(for: session.track) == askedLyricsURL else {
+            return session
+        }
+        var filled = session
+        filled.lyrics = foundLyrics.lines
+        filled.lyricStarts = foundLyrics.starts
+        return filled
     }
 
     private func changed() {
