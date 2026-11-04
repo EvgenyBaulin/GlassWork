@@ -10,6 +10,7 @@ public struct DeveloperOptions: Sendable, Equatable {
     }
 
     public var pingHost = PingHost.fallback
+    public var aiRefreshMinutes = 5
     /// The repository shown in the menu bar.
     public var gitRepository: String?
     /// Repositories added by hand, on top of those found in `~/Developer`.
@@ -20,6 +21,11 @@ public struct DeveloperOptions: Sendable, Equatable {
     public init(settings: AppSettings) {
         if let host = settings.module(.ping)?.options[Key.host], PingHost.isValid(host) {
             pingHost = host
+        }
+        if let minutes = settings.module(.aiUsage)?.options[Key.refreshMinutes].flatMap({ Int($0) }),
+           (1 ... 1440).contains(minutes)
+        {
+            aiRefreshMinutes = minutes
         }
         let git = settings.module(.git)?.options
         gitRepository = git?[Key.repository]

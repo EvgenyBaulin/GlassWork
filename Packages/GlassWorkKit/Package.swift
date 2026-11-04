@@ -15,14 +15,18 @@ let package = Package(
     targets: [
         .target(name: "GlassWorkCore"),
         .target(name: "GlassWorkUI", dependencies: ["GlassWorkCore"], resources: [.process("Resources")]),
-        .testTarget(name: "GlassWorkCoreTests", dependencies: ["GlassWorkCore"], resources: [.copy("Fixtures")]),
+        .testTarget(
+            name: "GlassWorkCoreTests",
+            dependencies: ["GlassWorkCore"],
+            resources: [.copy("Fixtures"), .copy("AIUsage/AIUsageFixtures")]
+        ),
         .testTarget(
             name: "GlassWorkUITests",
             dependencies: [
                 "GlassWorkUI",
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ],
-            exclude: ["__Snapshots__"]
+            exclude: ["__Snapshots__", "AIUsage/__Snapshots__"]
         ),
     ],
     swiftLanguageModes: [.v6]

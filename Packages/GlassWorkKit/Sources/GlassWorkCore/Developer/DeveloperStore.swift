@@ -8,6 +8,7 @@ import Observation
 @MainActor
 @Observable
 public final class DeveloperStore {
+    public private(set) var aiUsage: AIUsageReading?
     public private(set) var git: GitReading?
     public private(set) var devServers: DevServerReading?
     public private(set) var docker: DockerReading?
@@ -65,6 +66,13 @@ public final class DeveloperStore {
         }
     }
 
+    /// Reads a module now, for its refresh button.
+    public func refresh(_ module: ModuleID, at date: Date = Date()) {
+        guard !reading.contains(module) else { return }
+        lastRead[module] = date
+        read(module, at: date)
+    }
+
     /// Paths FSEvents reported. They wait for the next tick, so nothing is read during sleep.
     func repositoriesChanged(_ paths: [String]) {
         let known = git?.repositories.map(\.path) ?? []
@@ -83,6 +91,7 @@ public final class DeveloperStore {
 
     private func interval(of module: ModuleID) -> TimeInterval {
         switch module {
+        case .aiUsage: TimeInterval(options.aiRefreshMinutes * 60)
         case .wifi: 5
         case .vpn: 10
         // FSEvents covers changes, so this pass only picks up new repositories.
@@ -93,6 +102,7 @@ public final class DeveloperStore {
 
     private func read(_ module: ModuleID, at date: Date) {
         switch module {
+        case .aiUsage: readAIUsage(at: date)
         case .git: readGit()
         case .devServers: readDevServers()
         case .docker: readDocker()
@@ -100,6 +110,15 @@ public final class DeveloperStore {
         case .vpn: readVPN(at: date)
         case .wifi: readWiFi(at: date)
         default: break
+        }
+    }
+
+    private func readAIUsage(at date: Date) {
+        let collector = AIUsageCollector(runner: runner, home: home)
+        load(.aiUsage) {
+            await collector.read(at: date)
+        } apply: { store, value in
+            store.aiUsage = value
         }
     }
 

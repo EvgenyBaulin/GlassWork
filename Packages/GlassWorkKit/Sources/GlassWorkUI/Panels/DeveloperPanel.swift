@@ -8,6 +8,10 @@ struct DeveloperPanel: View {
 
     var body: some View {
         switch module {
+        case .aiUsage:
+            AIUsagePanel(reading: store.aiUsage, refreshMinutes: store.options.aiRefreshMinutes) {
+                store.refresh(.aiUsage)
+            }
         case .git:
             GitPanel(
                 reading: store.git,
@@ -36,6 +40,14 @@ public struct DeveloperOptionsSection: View {
 
     public var body: some View {
         switch module {
+        case .aiUsage:
+            Section(loc("Usage")) {
+                Picker(loc("Refresh every"), selection: refreshMinutes) {
+                    ForEach([1, 5, 15, 30, 60], id: \.self) { minutes in
+                        Text(loc("\(minutes) min")).tag(minutes)
+                    }
+                }
+            }
         case .ping:
             Section(loc("Host")) {
                 PingHostField(host: option(DeveloperOptions.Key.host) ?? PingHost.fallback) { host in
@@ -45,6 +57,13 @@ public struct DeveloperOptionsSection: View {
         default:
             EmptyView()
         }
+    }
+
+    private var refreshMinutes: Binding<Int> {
+        Binding(
+            get: { DeveloperOptions(settings: store.settings).aiRefreshMinutes },
+            set: { setOption(DeveloperOptions.Key.refreshMinutes, String($0)) }
+        )
     }
 
     private func option(_ key: String) -> String? {

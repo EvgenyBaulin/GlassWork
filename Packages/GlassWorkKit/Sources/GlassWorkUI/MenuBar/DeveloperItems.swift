@@ -5,6 +5,7 @@ import SwiftUI
 extension ItemContent {
     static func developer(_ module: ModuleID, _ store: DeveloperStore) -> ItemContent {
         switch module {
+        case .aiUsage: aiUsage(store.aiUsage)
         case .git: git(store.git, selected: store.options.gitRepository)
         case .devServers: devServers(store.devServers)
         case .docker: docker(store.docker)
