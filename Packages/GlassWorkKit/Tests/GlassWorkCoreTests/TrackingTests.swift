@@ -61,7 +61,10 @@ struct CommandTests {
 
 struct GitHubParserTests {
     @Test func parsesPullRequests() {
-        let json = #"[{"title":"Fix","repository":{"nameWithOwner":"me/app"},"number":7,"url":"https://x/7","updatedAt":"2026-11-03T10:00:00Z"}]"#
+        let json = #"""
+        [{"title": "Fix", "repository": {"nameWithOwner": "me/app"}, "number": 7,
+          "url": "https://x/7", "updatedAt": "2026-11-03T10:00:00Z"}]
+        """#
         let list = GitHubParser.pullRequests(Data(json.utf8))
         #expect(list.first?.repository == "me/app")
         #expect(list.first?.number == 7)
@@ -78,7 +81,13 @@ struct GitHubParserTests {
     }
 
     @Test func parsesContributionsAndStreak() {
-        let json = #"{"data":{"viewer":{"contributionsCollection":{"contributionCalendar":{"weeks":[{"contributionDays":[{"date":"2026-11-01","contributionCount":0},{"date":"2026-11-02","contributionCount":3},{"date":"2026-11-03","contributionCount":1}]}]}}}}}"#
+        let json = #"""
+        {"data": {"viewer": {"contributionsCollection": {"contributionCalendar": {"weeks": [{"contributionDays": [
+            {"date": "2026-11-01", "contributionCount": 0},
+            {"date": "2026-11-02", "contributionCount": 3},
+            {"date": "2026-11-03", "contributionCount": 1}
+        ]}]}}}}}
+        """#
         let days = GitHubParser.contributions(Data(json.utf8))
         #expect(days.count == 3)
         #expect(GitHubParser.currentStreak(days) == 2)
