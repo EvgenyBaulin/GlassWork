@@ -12,6 +12,8 @@ struct GlassWorkWidgets: WidgetBundle {
         UptimeKindWidget()
         DigitalClockKindWidget()
         MoreWidgets().body
+        DataWidgets().body
+        MacWidgets().body
     }
 }
 
@@ -67,6 +69,34 @@ struct TimeWidgets: WidgetBundle {
     }
 }
 
+/// Live readings and developer tools.
+struct DataWidgets: WidgetBundle {
+    var body: some Widget {
+        FansKindWidget()
+        WeatherKindWidget()
+        RatesKindWidget()
+        GitKindWidget()
+        DevServersKindWidget()
+        ContainersKindWidget()
+        AIUsageKindWidget()
+    }
+}
+
+/// The Mac's accessories and backups, and the rest of Screen Time.
+struct MacWidgets: WidgetBundle {
+    var body: some Widget {
+        DevicesKindWidget()
+        WifiSignalKindWidget()
+        DiskActivityKindWidget()
+        TimeMachineKindWidget()
+        ScreenTimeWeekKindWidget()
+        CategoriesKindWidget()
+        BreaksKindWidget()
+        AppTimeKindWidget()
+        MostUsedKindWidget()
+    }
+}
+
 struct SnapshotEntry: TimelineEntry {
     let date: Date
     let snapshot: WidgetSnapshot?
@@ -86,7 +116,10 @@ struct SnapshotProvider: TimelineProvider {
     /// One entry a minute, so clocks and ages stay right between the app's refreshes.
     func getTimeline(in _: Context, completion: @escaping (Timeline<SnapshotEntry>) -> Void) {
         let start = Date.now
-        let entries = (0 ..< 15).map { entry(at: start.addingTimeInterval(Double($0) * 60)) }
+        let snapshot = store.read(WidgetSnapshot.self, for: WidgetSnapshot.key)
+        let entries = (0 ..< 15).map {
+            SnapshotEntry(date: start.addingTimeInterval(Double($0) * 60), snapshot: snapshot)
+        }
         completion(Timeline(entries: entries, policy: .atEnd))
     }
 
@@ -117,6 +150,7 @@ struct KindView: View {
                 Text(loc("Open GlassWork to start")).foregroundStyle(.secondary)
             }
         }
+        .environment(\.widgetActions, .intents)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
@@ -355,5 +389,101 @@ struct FocusTimeKindWidget: Widget {
 struct WordOfDayKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.wordOfDay)
+    }
+}
+
+struct FansKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.fans)
+    }
+}
+
+struct WeatherKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.weather)
+    }
+}
+
+struct RatesKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.rates)
+    }
+}
+
+struct GitKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.git)
+    }
+}
+
+struct DevServersKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.devServers)
+    }
+}
+
+struct ContainersKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.containers)
+    }
+}
+
+struct AIUsageKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.aiUsage)
+    }
+}
+
+struct DevicesKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.devices)
+    }
+}
+
+struct WifiSignalKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.wifiSignal)
+    }
+}
+
+struct DiskActivityKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.diskActivity)
+    }
+}
+
+struct TimeMachineKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.timeMachine)
+    }
+}
+
+struct ScreenTimeWeekKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.screenTimeWeek)
+    }
+}
+
+struct CategoriesKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.categories)
+    }
+}
+
+struct BreaksKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.breaks)
+    }
+}
+
+struct AppTimeKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.appTime)
+    }
+}
+
+struct MostUsedKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.mostUsed)
     }
 }

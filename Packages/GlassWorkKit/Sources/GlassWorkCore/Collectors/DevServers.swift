@@ -12,8 +12,8 @@ public struct ListeningSocket: Sendable, Equatable {
     }
 }
 
-public struct DevServer: Sendable, Equatable, Identifiable {
-    public enum Kind: Sendable, Equatable {
+public struct DevServer: Codable, Sendable, Equatable, Identifiable {
+    public enum Kind: Codable, Sendable, Equatable {
         /// Speaks HTTP, so it can be opened in a browser.
         case web
         /// A database or similar: there is an address to copy but nothing to open.
@@ -65,9 +65,16 @@ public struct DevServer: Sendable, Equatable, Identifiable {
     }
 }
 
-public enum DevServerReading: Sendable, Equatable {
+public enum DevServerReading: Codable, Sendable, Equatable {
     case servers([DevServer])
     case failed
+
+    public var servers: [DevServer] {
+        if case let .servers(servers) = self {
+            return servers
+        }
+        return []
+    }
 }
 
 public struct ProcessDetails: Sendable, Equatable {

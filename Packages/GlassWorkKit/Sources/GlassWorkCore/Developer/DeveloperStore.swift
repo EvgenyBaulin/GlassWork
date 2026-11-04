@@ -17,8 +17,13 @@ public final class DeveloperStore {
     /// When the connection was first seen, which is close enough to when it started.
     public private(set) var vpnSince: Date?
     public private(set) var wifi: WiFiReading?
-    /// The last minute of signal, on `WiFiSignal`'s scale.
-    public private(set) var wifiSignal = History<Double>(capacity: 13)
+    /// The last ten minutes of signal, on `WiFiSignal`'s scale.
+    public private(set) var wifiSignal = History<Double>(capacity: 120)
+
+    /// What the menu bar and the panel draw: the last minute.
+    public var wifiLastMinute: [History<Double>.Point] {
+        Array(wifiSignal.points.suffix(13))
+    }
 
     public var options = DeveloperOptions() {
         didSet {

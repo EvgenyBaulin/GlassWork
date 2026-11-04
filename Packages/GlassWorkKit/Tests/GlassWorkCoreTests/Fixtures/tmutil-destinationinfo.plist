@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Destinations</key>
+	<array>
+		<dict>
+			<key>ID</key>
+			<string>37D23440-86CF-4F4C-9202-60385D325F9C</string>
+			<key>Name</key>
+			<string>Macintosh HD</string>
+			<key>Kind</key>
+			<string>Local</string>
+		</dict>
+	</array>
+</dict>
+</plist>

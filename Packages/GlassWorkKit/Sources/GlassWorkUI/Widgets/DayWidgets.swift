@@ -1,5 +1,6 @@
 import GlassWorkCore
 import SwiftUI
+import WidgetKit
 
 /// Colored heading used across widgets.
 struct WidgetHeader: View {
@@ -11,6 +12,9 @@ struct WidgetHeader: View {
         Label(title, systemImage: symbol)
             .font(.system(size: 12, weight: .semibold))
             .foregroundStyle(tint)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+            .widgetAccentable()
     }
 }
 
@@ -158,7 +162,9 @@ struct TodoWidget: View {
             Text("\(open.count)").font(.system(size: 30, weight: .semibold, design: .rounded))
             ForEach(open.prefix(limit)) { item in
                 HStack(spacing: 6) {
-                    Image(systemName: "circle").foregroundStyle(Color(hex: item.listColor))
+                    WidgetActionButton(action: .setTodo(id: item.id, completed: true)) {
+                        Image(systemName: "circle").foregroundStyle(Color(hex: item.listColor))
+                    }
                     Text(item.title).lineLimit(1)
                 }
                 .font(.system(size: 13))
@@ -202,8 +208,36 @@ struct TimerWidget: View {
                         .font(.system(size: 24, weight: .semibold, design: .rounded))
                 }
             }
+            if let timer {
+                WidgetActionButton(action: .toggleTimer(timer.id)) {
+                    Image(systemName: timer.isPaused ? "play.fill" : "pause.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Palette.orange)
+                        .frame(width: 44, height: 22)
+                        .background(.quaternary, in: .capsule)
+                }
+            } else {
+                presets
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private extension TimerWidget {
+    /// Starting from the widget uses the same lengths as the Timers panel.
+    var presets: some View {
+        HStack(spacing: 4) {
+            ForEach([5, 10, 25], id: \.self) { minutes in
+                WidgetActionButton(action: .startTimer(seconds: Double(minutes) * 60)) {
+                    Text(verbatim: "\(minutes)")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Palette.orange)
+                        .frame(width: 34, height: 20)
+                        .background(.quaternary, in: .capsule)
+                }
+            }
+        }
     }
 }
 
@@ -284,9 +318,19 @@ struct StorageWidget: View {
             if size != .small {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(snapshot.volumes.dropFirst().prefix(4)) { volume in
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(volume.name).font(.system(size: 13, weight: .medium)).lineLimit(1)
-                            ThinBar(value: 1 - volume.freeShare, tint: Palette.cyan)
+                        HStack(spacing: 6) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(volume.name).font(.system(size: 13, weight: .medium)).lineLimit(1)
+                                ThinBar(value: 1 - volume.freeShare, tint: Palette.cyan)
+                            }
+                            if volume.isEjectable {
+                                WidgetActionButton(action: .eject(path: volume.path)) {
+                                    Image(systemName: "eject.fill")
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: 22, height: 22)
+                                }
+                            }
                         }
                     }
                 }

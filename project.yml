@@ -86,6 +86,7 @@ targets:
         product: GlassWorkUI
       - sdk: WidgetKit.framework
       - sdk: SwiftUI.framework
+      - sdk: AppIntents.framework
     entitlements:
       path: Widgets/GlassWorkWidgets.entitlements
       properties:

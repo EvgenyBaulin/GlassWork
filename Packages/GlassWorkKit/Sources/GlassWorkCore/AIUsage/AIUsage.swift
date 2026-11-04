@@ -1,6 +1,6 @@
 import Foundation
 
-public enum AITool: String, CaseIterable, Sendable, Identifiable {
+public enum AITool: String, Codable, CaseIterable, Sendable, Identifiable {
     case claudeCode, codex, geminiCLI, openCode, copilotCLI, droid
 
     public var id: String {
@@ -31,8 +31,8 @@ public enum AITool: String, CaseIterable, Sendable, Identifiable {
     }
 }
 
-public struct AIWindow: Sendable, Equatable {
-    public enum Kind: Sendable, Equatable {
+public struct AIWindow: Codable, Sendable, Equatable {
+    public enum Kind: Codable, Sendable, Equatable {
         case fiveHour, week
     }
 
@@ -56,7 +56,7 @@ public struct AIWindow: Sendable, Equatable {
     }
 }
 
-public struct AIToolUsage: Sendable, Equatable, Identifiable {
+public struct AIToolUsage: Codable, Sendable, Equatable, Identifiable {
     public let tool: AITool
     public var windows: [AIWindow]
     public var updatedAt: Date?
@@ -79,7 +79,7 @@ public struct AIToolUsage: Sendable, Equatable, Identifiable {
     }
 }
 
-public struct AIUsageReading: Sendable, Equatable {
+public struct AIUsageReading: Codable, Sendable, Equatable {
     /// Share of a limit that turns the module orange.
     public static let alertShare = 0.9
 

@@ -19,6 +19,7 @@ public final class ActivityStore {
     @ObservationIgnored private let runner: ProcessRunning
     @ObservationIgnored private var currentApp: String?
     @ObservationIgnored private var currentSince = Date()
+    @ObservationIgnored private var pausedSince: Date?
 
     private static let ghPaths = ["/opt/homebrew/bin/gh", "/usr/local/bin/gh"]
     private static let historyLimit = 30
@@ -30,13 +31,40 @@ public final class ActivityStore {
     }
 
     /// Credits the time to the app that was in front and starts the next one's clock.
-    public func appBecameActive(_ name: String?, at date: Date = Date()) {
-        if let currentApp {
-            screenTime.record(app: currentApp, seconds: date.timeIntervalSince(currentSince), at: date)
-            try? store.write(screenTime, for: ScreenTimeLog.key)
+    public func appBecameActive(_ name: String?, category: AppCategory? = nil, at date: Date = Date()) {
+        creditCurrentApp(at: date)
+        if let name, let category {
+            screenTime.categories[name] = category
         }
         currentApp = name
         currentSince = date
+    }
+
+    /// Counts the time so far without changing the app, so widgets see a long session as it runs.
+    public func flushScreenTime(at date: Date = Date()) {
+        creditCurrentApp(at: date)
+        currentSince = date
+    }
+
+    /// The screen locked or went to sleep: the time from here on is not at the Mac.
+    public func screenWentAway(at date: Date = Date()) {
+        guard pausedSince == nil else { return }
+        creditCurrentApp(at: date)
+        pausedSince = date
+    }
+
+    public func screenCameBack(at date: Date = Date()) {
+        guard let start = pausedSince else { return }
+        pausedSince = nil
+        currentSince = date
+        screenTime.recordBreak(from: start, to: date)
+        try? store.write(screenTime, for: ScreenTimeLog.key)
+    }
+
+    private func creditCurrentApp(at date: Date) {
+        guard let currentApp, pausedSince == nil else { return }
+        screenTime.record(app: currentApp, seconds: date.timeIntervalSince(currentSince), at: date)
+        try? store.write(screenTime, for: ScreenTimeLog.key)
     }
 
     public func run(_ command: UserCommand) async {

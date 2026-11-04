@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AutoBackup</key>
+	<false/>
+	<key>Destinations</key>
+	<array>
+		<dict>
+			<key>DestinationID</key>
+			<string>37D23440-86CF-4F4C-9202-60385D325F9C</string>
+			<key>LastKnownVolumeName</key>
+			<string>37D23440-86CF-4F4C-9202-60385D325F9C</string>
+		</dict>
+	</array>
+	<key>LastBackupActivity</key>
+	<string>2024-11-04-152715</string>
+	<key>PreferencesVersion</key>
+	<integer>6</integer>
+	<key>RequiresACPower</key>
+	<false/>
+</dict>
+</plist>

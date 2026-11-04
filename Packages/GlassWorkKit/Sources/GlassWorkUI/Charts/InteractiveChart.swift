@@ -1,6 +1,25 @@
 import Charts
 import GlassWorkCore
 import SwiftUI
+import WidgetKit
+
+/// How a chart draws its values. Bars with a `unit` fill that span of time; others get a fixed width.
+public enum ChartStyle: Equatable, Sendable {
+    case area
+    case bars(unit: Calendar.Component? = nil, width: CGFloat = 3)
+    /// Series pile up on each other, so the height of a bar is their sum.
+    case stackedBars(unit: Calendar.Component)
+    /// Series stand side by side, for comparing two periods.
+    case groupedBars(unit: Calendar.Component)
+
+    fileprivate var unit: Calendar.Component? {
+        switch self {
+        case .area: nil
+        case let .bars(unit, _): unit
+        case let .stackedBars(unit), let .groupedBars(unit): unit
+        }
+    }
+}
 
 /// One line of a chart.
 public struct ChartSeries: Identifiable {
@@ -43,8 +62,13 @@ public struct InteractiveChart: View {
     private let mirrored: Bool
     private let height: CGFloat
     private let tooltipDate: Date.FormatStyle
+    private let style: ChartStyle
+    private let reference: Double?
+    private let emphasized: Date?
     @State private var hover: Date?
 
+    /// `reference` draws a dashed line at that value, such as an average.
+    /// `emphasized` keeps one bar in full color and tones down the rest, for today among other days.
     /// `initialHover` starts the chart as if the cursor were there, for tests of the hover state.
     public init(
         series: [ChartSeries],
@@ -52,6 +76,9 @@ public struct InteractiveChart: View {
         mirrored: Bool = false,
         height: CGFloat = 76,
         tooltipDate: Date.FormatStyle = Date.FormatStyle(date: .omitted, time: .standard),
+        style: ChartStyle = .area,
+        reference: Double? = nil,
+        emphasized: Date? = nil,
         initialHover: Date? = nil
     ) {
         self.series = series
@@ -59,6 +86,9 @@ public struct InteractiveChart: View {
         self.mirrored = mirrored
         self.height = height
         self.tooltipDate = tooltipDate
+        self.style = style
+        self.reference = reference
+        self.emphasized = emphasized
         _hover = State(initialValue: initialHover)
     }
 
@@ -75,6 +105,7 @@ public struct InteractiveChart: View {
             }
             .frame(height: height)
             .animation(.easeOut(duration: 0.15), value: hover == nil)
+            .widgetAccentable()
     }
 
     private var plottedSeries: [ChartSeries] {
@@ -85,23 +116,19 @@ public struct InteractiveChart: View {
         Chart {
             ForEach(Array(plottedSeries.enumerated()), id: \.element.id) { index, line in
                 ForEach(line.points, id: \.date) { point in
-                    AreaMark(
-                        x: .value("Time", point.date),
-                        yStart: .value("Base", mirrored ? 0 : yDomain.lowerBound),
-                        yEnd: .value("Value", plotted(point.value, index: index)),
-                        series: .value("Series", line.id)
-                    )
-                    .foregroundStyle(line.color.opacity(hover == nil ? 0.28 : 0.16))
-                    LineMark(
-                        x: .value("Time", point.date),
-                        y: .value("Value", plotted(point.value, index: index)),
-                        series: .value("Series", line.id)
-                    )
-                    .foregroundStyle(line.color)
-                    .lineStyle(StrokeStyle(lineWidth: 1.5, lineJoin: .round))
+                    if style == .area {
+                        areaMarks(point, line: line, index: index)
+                    } else {
+                        barMark(point, line: line, index: index)
+                    }
                 }
             }
-            if let hover {
+            if let reference {
+                RuleMark(y: .value("Reference", reference))
+                    .foregroundStyle(Palette.orange)
+                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+            }
+            if let hover, style == .area {
                 RuleMark(x: .value("Cursor", hover))
                     .foregroundStyle(.primary.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1))
@@ -119,12 +146,92 @@ public struct InteractiveChart: View {
         }
     }
 
+    @ChartContentBuilder
+    private func areaMarks(_ point: History<Double>.Point, line: ChartSeries, index: Int) -> some ChartContent {
+        AreaMark(
+            x: .value("Time", point.date),
+            yStart: .value("Base", mirrored ? 0 : yDomain.lowerBound),
+            yEnd: .value("Value", plotted(point.value, index: index)),
+            series: .value("Series", line.id)
+        )
+        .foregroundStyle(line.color.opacity(hover == nil ? 0.28 : 0.16))
+        LineMark(
+            x: .value("Time", point.date),
+            y: .value("Value", plotted(point.value, index: index)),
+            series: .value("Series", line.id)
+        )
+        .foregroundStyle(line.color)
+        .lineStyle(StrokeStyle(lineWidth: 1.5, lineJoin: .round))
+    }
+
+    /// The bar under the cursor stays bright while the others step back.
+    @ChartContentBuilder
+    private func barMark(_ point: History<Double>.Point, line: ChartSeries, index: Int) -> some ChartContent {
+        let color = line.color.opacity(barOpacity(at: point.date))
+        if case .stackedBars = style {
+            BarMark(
+                x: .value("Time", point.date, unit: style.unit ?? .day),
+                y: .value("Value", point.value),
+                width: .ratio(0.7)
+            )
+            .foregroundStyle(color)
+        } else if case let .groupedBars(unit) = style {
+            BarMark(
+                x: .value("Time", point.date, unit: unit),
+                y: .value("Value", point.value),
+                width: .ratio(0.8)
+            )
+            .position(by: .value("Series", line.id))
+            .foregroundStyle(color)
+            .cornerRadius(2)
+        } else if let unit = style.unit {
+            BarMark(
+                x: .value("Time", point.date, unit: unit),
+                yStart: .value("Base", 0),
+                yEnd: .value("Value", plotted(point.value, index: index)),
+                width: .ratio(0.7)
+            )
+            .foregroundStyle(color)
+            .cornerRadius(2)
+        } else {
+            BarMark(
+                x: .value("Time", point.date),
+                yStart: .value("Base", 0),
+                yEnd: .value("Value", plotted(point.value, index: index)),
+                width: .fixed(barWidth)
+            )
+            .foregroundStyle(color)
+            .cornerRadius(1)
+        }
+    }
+
+    private func barOpacity(at date: Date) -> Double {
+        if let hover {
+            return hover == date ? 1 : 0.35
+        }
+        if let emphasized {
+            return emphasized == date ? 1 : 0.55
+        }
+        return 1
+    }
+
+    private var barWidth: CGFloat {
+        if case let .bars(_, width) = style {
+            return width
+        }
+        return 3
+    }
+
     private var yDomain: ClosedRange<Double> {
         if mirrored {
             return -1.05 ... 1.05
         }
         if let domain {
             return domain
+        }
+        if case .stackedBars = style {
+            let sums = Dictionary(plottedSeries.flatMap(\.points).map { ($0.date, $0.value) }, uniquingKeysWith: +)
+            return 0 ... max((sums.values.max() ?? 1) * 1.05, 0.000_1)
         }
         return 0 ... max((plottedSeries.flatMap(\.points).map(\.value).max() ?? 1) * 1.1, 0.000_1)
     }
@@ -286,7 +393,10 @@ public struct ThinBar: View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 Capsule().fill(.quaternary)
-                Capsule().fill(tint).frame(width: max(geometry.size.width * value, value > 0 ? height : 0))
+                Capsule()
+                    .fill(tint)
+                    .frame(width: max(geometry.size.width * value, value > 0 ? height : 0))
+                    .widgetAccentable()
             }
         }
         .frame(height: height)
