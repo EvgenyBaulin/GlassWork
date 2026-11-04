@@ -69,12 +69,14 @@ public enum DockItem: Codable, Sendable, Equatable, Identifiable {
     case app(DockApp)
     case folder(AppFolder)
     case widget(ModuleID)
+    case stack(DockStack)
 
     public var id: String {
         switch self {
         case let .app(app): "app-\(app.path)"
         case let .folder(folder): "folder-\(folder.id)"
         case let .widget(module): "widget-\(module.rawValue)"
+        case let .stack(stack): "stack-\(stack.id)"
         }
     }
 }
@@ -110,7 +112,7 @@ public struct DockSettings: Codable, Sendable, Equatable {
             switch item {
             case let .app(app): [app]
             case let .folder(folder): folder.apps
-            case .widget: []
+            case .widget, .stack: []
             }
         }
     }

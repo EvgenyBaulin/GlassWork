@@ -131,6 +131,7 @@ struct DockPane: View {
                 Toggle(loc("Automatically hide and show"), isOn: dock.autoHides)
             }
             widgetsSection
+            stacksSection
         }
         .formStyle(.grouped)
         .confirmationDialog(loc("Use GlassWork Dock?"), isPresented: $confirming) {
@@ -179,6 +180,58 @@ private extension DockPane {
             Text(loc("Widgets in Dock"))
         } footer: {
             Text(loc("Click runs the quick action, hold opens the widget as a card above the Dock."))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private extension DockPane {
+    func add(_ stack: DockStack) {
+        store.update { $0.dock.items = DockLayout.adding(stack, to: $0.dock.items) }
+    }
+
+    func chooseFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        add(DockStack(path: url.path(percentEncoded: false), name: url.lastPathComponent))
+    }
+
+    /// Adding Downloads here is the only thing that makes the app read it.
+    var stacksSection: some View {
+        Section {
+            ForEach(store.settings.dock.stacks) { stack in
+                HStack {
+                    Text(stack.name)
+                    Spacer()
+                    if !stack.isDownloads {
+                        Picker(loc("Display as"), selection: Binding(
+                            get: { stack.style },
+                            set: { style in
+                                store.update { $0.dock.items = DockLayout.setting(style, of: stack, in: $0.dock.items) }
+                            }
+                        )) {
+                            ForEach(DockStackStyle.allCases, id: \.self) { Text($0.title).tag($0) }
+                        }
+                        .labelsHidden()
+                        .fixedSize()
+                    }
+                    Button(loc("Remove")) {
+                        store.update { $0.dock.items = DockLayout.removing(.stack(stack), from: $0.dock.items) }
+                    }
+                }
+            }
+            HStack {
+                Button(loc("Add Downloads")) { add(.downloads(name: loc("Downloads"))) }
+                    .disabled(store.settings.dock.stacks.contains(where: \.isDownloads))
+                Button(loc("Add Folder…")) { chooseFolder() }
+            }
+        } header: {
+            Text(loc("Stacks"))
+        } footer: {
+            Text(loc("macOS may ask for access to a folder when you add it."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

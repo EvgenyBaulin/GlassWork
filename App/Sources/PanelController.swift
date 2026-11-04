@@ -41,18 +41,6 @@ final class GlassPanel: NSPanel {
     }
 }
 
-/// Liquid Glass tinted so text stays readable over bright wallpapers.
-struct PanelGlass: ViewModifier {
-    @Environment(\.colorScheme) private var scheme
-
-    func body(content: Content) -> some View {
-        let tint = scheme == .dark
-            ? Color(red: 0.11, green: 0.10, blue: 0.165).opacity(0.55)
-            : Color.white.opacity(0.7)
-        content.glassEffect(.regular.tint(tint), in: .rect(cornerRadius: 16))
-    }
-}
-
 /// Shows module panels and the Hub under the menu bar.
 @MainActor
 final class PanelController {

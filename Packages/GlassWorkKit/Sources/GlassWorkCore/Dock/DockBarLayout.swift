@@ -138,6 +138,18 @@ public struct DockBarLayout: Equatable, Sendable {
         return CGRect(x: origin.x.rounded(), y: origin.y.rounded(), width: size.width, height: size.height)
     }
 
+    /// How far along the bar a slot's middle lies at rest, measured from the middle of the Dock.
+    public static func slotCenter(_ index: Int, count: Int, base: Double) -> Double {
+        let step = base + spacing
+        return -restWidth(count: count, base: base) / 2 + padding + base / 2 + Double(index) * step
+    }
+
+    /// How far a card moves along the bar to stand by its tile and still fit in the window.
+    public static func cardOffset(center: Double, cardLength: Double, windowLength: Double) -> Double {
+        let reach = max((windowLength - cardLength) / 2, 0)
+        return min(max(center, -reach), reach)
+    }
+
     /// Where a widget's card goes: past the tallest an icon can grow, centered on the pointer and kept on screen.
     ///
     /// - Parameter bar: The Dock window at rest.
@@ -241,8 +253,27 @@ public final class DockLiveState {
     public var running: Set<String> = []
     /// Paths of Dock apps that were clicked and have not started yet.
     public var launching: Set<String> = []
+    /// The room along the screen's edge. Unlimited until the app has measured a screen.
+    public var available = Double.infinity
+    /// The set of widgets wanted.
+    public var page = 0
+    /// The folder or stack open above the Dock, by item id.
+    public var openCard: String?
+    /// What each stack holds, by folder path. Filled only for stacks in the Dock.
+    public var files: [String: [DockFile]] = [:]
 
     public init(settings: DockSettings = DockSettings()) {
         self.settings = settings
+    }
+
+    public var arrangement: DockArrangement {
+        DockArrangement(items: settings.items, iconSize: settings.iconSize, length: available, page: page)
+    }
+
+    /// The settings as shown: icons may have shrunk to fit the screen.
+    public var fittedSettings: DockSettings {
+        var fitted = settings
+        fitted.iconSize = arrangement.iconSize
+        return fitted
     }
 }

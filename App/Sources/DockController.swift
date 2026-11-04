@@ -3,6 +3,13 @@ import GlassWorkCore
 import GlassWorkUI
 import SwiftUI
 
+/// Borderless panels refuse the keyboard, and a card has fields to type in. It takes it only when one is clicked.
+private final class DockPanel: NSPanel {
+    override var canBecomeKey: Bool {
+        true
+    }
+}
+
 /// Shows GlassWork's Dock and hides the system one while it runs.
 ///
 /// Nothing here runs until the owner turns the Dock on in Settings.
@@ -27,6 +34,8 @@ final class DockController {
     private var menuObservers: [NSObjectProtocol] = []
     private var isMenuOpen = false
     private var hiding: Task<Void, Never>?
+    private var cardDismissal: TransientDismissal?
+    private lazy var folders = DockFolders { [weak self] in self?.state.files = $0 }
 
     /// Long enough for icons to settle before the window closes in around them.
     private static let shrinkDelay = Duration.milliseconds(300)
@@ -47,6 +56,7 @@ final class DockController {
         }
         state.settings = settings
         watchPointer(settings.autoHides)
+        folders.watch(settings.foldersToRead)
         refreshRunning()
         place()
         updateReveal()
@@ -58,7 +68,7 @@ final class DockController {
     }
 
     private func open() {
-        let panel = NSPanel(
+        let panel = DockPanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
@@ -69,6 +79,7 @@ final class DockController {
         panel.level = .dock
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary]
         panel.isReleasedWhenClosed = false
+        panel.becomesKeyOnlyIfNeeded = true
         // Hide Others in any app counts this app too now that it has a Dock icon.
         panel.canHide = false
         let hosting = NSHostingView(rootView: DockView(state: state, monitor: model.monitor, actions: actions))
@@ -103,6 +114,10 @@ final class DockController {
         }
         shrink?.cancel()
         watchPointer(false)
+        folders.watch([])
+        state.openCard = nil
+        state.page = 0
+        updateCardDismissal(isOpen: false)
         isRevealed = true
         if let screens {
             NotificationCenter.default.removeObserver(screens)
@@ -171,11 +186,31 @@ final class DockController {
             },
             needsSpace: { [weak self] space in
                 self?.requested = space
+                self?.updateCardDismissal(isOpen: space == .folder)
                 self?.updateSpace()
             },
             commands: { [weak self] in self?.commands(for: $0) ?? [] },
-            perform: { [weak self] in self?.perform($0, on: $1) }
+            perform: { [weak self] in self?.perform($0, on: $1) },
+            turnPage: { [weak self] in self?.turnPage(by: $0) },
+            openFile: { NSWorkspace.shared.open(URL(filePath: $0)) },
+            showFolder: { NSWorkspace.shared.open(URL(filePath: $0, directoryHint: .isDirectory)) }
         )
+    }
+
+    private func turnPage(by count: Int) {
+        state.page = max(state.arrangement.page + count, 0)
+        place()
+    }
+
+    /// A card closes on Esc, on a click anywhere else, and when another app comes forward.
+    private func updateCardDismissal(isOpen: Bool) {
+        guard isOpen != (cardDismissal != nil) else { return }
+        cardDismissal?.stop()
+        cardDismissal = nil
+        guard isOpen, let window else { return }
+        let dismissal = TransientDismissal(panel: window) { [weak self] in self?.state.openCard = nil }
+        dismissal.start()
+        cardDismissal = dismissal
     }
 
     private func runningApp(_ app: DockApp) -> NSRunningApplication? {
@@ -300,9 +335,10 @@ final class DockController {
     }
 
     private func frame(for space: DockSpace, on screen: NSScreen, isRevealed: Bool = true) -> CGRect {
-        let settings = state.settings
+        let settings = state.fittedSettings
+        let count = state.arrangement.slots.count
         return DockBarLayout.windowFrame(
-            size: DockBarLayout.windowSize(for: space, count: settings.items.count, settings: settings),
+            size: DockBarLayout.windowSize(for: space, count: count, settings: settings),
             position: settings.position,
             screen: screen.frame,
             topInset: screen.frame.maxY - screen.visibleFrame.maxY,
@@ -313,6 +349,7 @@ final class DockController {
     /// A hidden Dock leaves the screen list as well: the frame alone could land on a neighbouring display.
     private func place(sliding: Bool = false) {
         guard let window, let screen else { return }
+        measureRoom(on: screen)
         let target = frame(for: space, on: screen, isRevealed: isRevealed)
         if isRevealed {
             window.orderFront(nil)
@@ -331,6 +368,15 @@ final class DockController {
             window.setFrame(target, display: true)
         }
         leaveScreenIfHidden()
+    }
+
+    /// A side Dock has only what is left below the menu bar.
+    private func measureRoom(on screen: NSScreen) {
+        let length = state.settings.position.isVertical ? screen.visibleFrame.height : screen.frame.width
+        let room = length - 2 * DockBarLayout.screenGap
+        if state.available != room {
+            state.available = room
+        }
     }
 
     private func leaveScreenIfHidden() {
