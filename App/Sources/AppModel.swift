@@ -246,21 +246,6 @@ final class AppModel {
         desktopWidgetKinds.union(systemWidgetKinds)
     }
 
-    /// Only what is on screen counts, so the adapter process does not run for nothing.
-    private var wantsNowPlaying: Bool {
-        let widgets = store.settings.widgets.placements.contains { $0.kind == .nowPlaying || $0.kind == .lyrics }
-        return isWanted(.nowPlaying) || widgets || nowPlaying.hasSystemWidget
-    }
-
-    private var wantsLyrics: Bool {
-        guard store.settings.module(.nowPlaying)?.options[ModuleOption.onlineLyrics] != "false" else { return false }
-        return store.settings.widgets.placements.contains { $0.kind == .lyrics } || nowPlaying.hasSystemLyricsWidget
-    }
-
-    private func checkSystemWidgets() {
-        nowPlaying.checkSystemWidgets { [weak self] in self?.updateDemand() }
-    }
-
     func closePanels() {
         panels.closeTransient()
     }
@@ -478,5 +463,22 @@ final class AppModel {
         for kind in action.affectedKinds {
             WidgetCenter.shared.reloadTimelines(ofKind: kind.rawValue)
         }
+    }
+}
+
+private extension AppModel {
+    /// Only what is on screen counts, so the adapter process does not run for nothing.
+    var wantsNowPlaying: Bool {
+        let widgets = store.settings.widgets.placements.contains { $0.kind == .nowPlaying || $0.kind == .lyrics }
+        return isWanted(.nowPlaying) || widgets || nowPlaying.hasSystemWidget
+    }
+
+    var wantsLyrics: Bool {
+        guard store.settings.module(.nowPlaying)?.options[ModuleOption.onlineLyrics] != "false" else { return false }
+        return store.settings.widgets.placements.contains { $0.kind == .lyrics } || nowPlaying.hasSystemLyricsWidget
+    }
+
+    func checkSystemWidgets() {
+        nowPlaying.checkSystemWidgets { [weak self] in self?.updateDemand() }
     }
 }
