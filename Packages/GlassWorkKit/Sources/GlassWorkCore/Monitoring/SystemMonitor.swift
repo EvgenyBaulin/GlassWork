@@ -57,6 +57,23 @@ public final class SystemMonitor {
         }
     }
 
+    /// The interface the Network module follows. Nil adds up all of them.
+    public var networkInterface: String?
+
+    /// The GPU the module shows. Everything reads the first one, so this one goes first.
+    public var gpuName: String? {
+        didSet {
+            gpus = gpus.startingWith(gpuName)
+        }
+    }
+
+    /// The volume the Disk module shows. Nil keeps the startup disk first.
+    public var volumePath: String? {
+        didSet {
+            volumes = volumes.startingWith(volumePath)
+        }
+    }
+
     /// Timers, notes and other small modules, ticking along with the monitor.
     public let everyday = EverydayStore()
     /// Git, Docker, Ping and the other developer modules, each at its own pace.
@@ -160,6 +177,7 @@ public final class SystemMonitor {
     /// What `kinds` show, from the latest readings. Nothing is read here, so calling it often costs little.
     public func widgetSnapshot(for kinds: Set<WidgetKind>, at date: Date = Date()) -> WidgetSnapshot {
         var snapshot = WidgetSnapshot(date: date)
+        snapshot.temperatureUnit = Format.temperatureUnit
         snapshot.cpu = cpu
         snapshot.cpuInfo = cpuInfo
         snapshot.memory = memory
@@ -350,8 +368,8 @@ public final class SystemMonitor {
             record(.memory, value.usedShare, date)
         }
         if let value = reading.gpus {
-            gpus = value
-            if let first = value.first {
+            gpus = value.startingWith(gpuName)
+            if let first = gpus.first {
                 record(.gpu, first.device, date)
             }
         }
@@ -370,7 +388,7 @@ public final class SystemMonitor {
     }
 
     private func applyStorage(_ reading: Sampler.Reading, at date: Date) {
-        if let value = reading.network {
+        if let value = reading.network?.only(networkInterface) {
             network = value
             record(.download, value.download, date)
             record(.upload, value.upload, date)
@@ -381,12 +399,22 @@ public final class SystemMonitor {
             record(.diskWrite, value.write, date)
         }
         if let value = reading.volumes {
-            volumes = value
+            volumes = value.startingWith(volumePath)
         }
     }
 
     private func record(_ metric: Metric, _ value: Double, _ date: Date) {
         histories[metric, default: TieredHistory()].append(value, at: date)
+    }
+}
+
+extension Array where Element: Identifiable, Element.ID == String {
+    /// The chosen one first and the rest in their order. A choice that is gone changes nothing.
+    func startingWith(_ id: String?) -> [Element] {
+        guard let id, let index = firstIndex(where: { $0.id == id }) else { return self }
+        var ordered = self
+        ordered.insert(ordered.remove(at: index), at: 0)
+        return ordered
     }
 }
 

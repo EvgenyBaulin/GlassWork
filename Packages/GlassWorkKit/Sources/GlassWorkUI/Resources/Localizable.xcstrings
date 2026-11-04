@@ -15722,6 +15722,102 @@
           }
         }
       }
+    },
+    "Temperature units": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Единицы температуры"
+          }
+        }
+      }
+    },
+    "°C": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "°C"
+          }
+        }
+      }
+    },
+    "°F": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "°F"
+          }
+        }
+      }
+    },
+    "Startup disk": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузочный диск"
+          }
+        }
+      }
+    },
+    "%@ (not connected)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (не подключено)"
+          }
+        }
+      }
+    },
+    "Interval": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как часто"
+          }
+        }
+      }
+    },
+    "10 s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 с"
+          }
+        }
+      }
+    },
+    "30 s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 с"
+          }
+        }
+      }
+    },
+    "Timeout (ping)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timeout"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждать ответ"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -62,11 +62,15 @@ public struct PingLog: Sendable, Equatable {
         }
     }
 
+    /// One echo every 30 seconds, the default.
     public static let capacity = 60
     /// Misses in a row before the host counts as down.
     public static let downAfter = 3
+    /// What the log covers, however often the host is asked.
+    private static let span = 1800
 
     public private(set) var samples: [Sample] = []
+    private var limit = PingLog.capacity
 
     public init(samples: [Sample] = []) {
         self.samples = Array(samples.suffix(Self.capacity))
@@ -74,8 +78,18 @@ public struct PingLog: Sendable, Equatable {
 
     public mutating func append(_ outcome: PingOutcome, at date: Date) {
         samples.append(Sample(date: date, outcome: outcome))
-        if samples.count > Self.capacity {
-            samples.removeFirst(samples.count - Self.capacity)
+        trim()
+    }
+
+    /// Keeps the same half hour when the pace changes.
+    public mutating func follow(intervalSeconds: Int) {
+        limit = max(Self.span / max(intervalSeconds, 1), 1)
+        trim()
+    }
+
+    private mutating func trim() {
+        if samples.count > limit {
+            samples.removeFirst(samples.count - limit)
         }
     }
 
@@ -139,12 +153,18 @@ public struct PingCollector: Sendable {
         self.runner = runner
     }
 
-    public func read(host: String) async -> PingOutcome {
+    /// - Parameter timeoutSeconds: How long to wait for the reply. The process gets a little longer to exit.
+    public func read(host: String, timeoutSeconds: Int = 3) async -> PingOutcome {
         guard PingHost.isValid(host) else { return .unresolved }
-        let arguments = ["-n", "-c", "1", "-t", "3", "--", host]
-        guard let output = try? await runner.run("/sbin/ping", arguments: arguments, timeout: 5) else {
+        let arguments = Self.arguments(host: host, timeoutSeconds: timeoutSeconds)
+        let limit = TimeInterval(timeoutSeconds + 2)
+        guard let output = try? await runner.run("/sbin/ping", arguments: arguments, timeout: limit) else {
             return .timeout
         }
         return PingParser.outcome(output)
+    }
+
+    static func arguments(host: String, timeoutSeconds: Int) -> [String] {
+        ["-n", "-c", "1", "-t", String(timeoutSeconds), "--", host]
     }
 }

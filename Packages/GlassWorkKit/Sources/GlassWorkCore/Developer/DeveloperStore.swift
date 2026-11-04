@@ -99,6 +99,7 @@ public final class DeveloperStore {
         case .aiUsage: TimeInterval(options.aiRefreshMinutes * 60)
         case .wifi: 5
         case .vpn: 10
+        case .ping: TimeInterval(options.pingIntervalSeconds)
         // FSEvents covers changes, so this pass only picks up new repositories.
         case .git: 300
         default: 30
@@ -234,6 +235,7 @@ public final class DeveloperStore {
             ping = PingLog()
             lastRead[.ping] = nil
         }
+        ping.follow(intervalSeconds: options.pingIntervalSeconds)
         if options.gitRepositories != old.gitRepositories
             || options.gitAutoDiscover != old.gitAutoDiscover
             || options.gitSearchDepth != old.gitSearchDepth

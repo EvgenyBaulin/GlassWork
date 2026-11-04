@@ -47,6 +47,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public static let key = "widgets"
 
     public var date: Date
+    /// How the app writes temperatures, which the widgets follow.
+    public var temperatureUnit: TemperatureUnit?
     public var cpu: CPUSample?
     public var cpuInfo: CPUInfo?
     public var memory: MemorySample?

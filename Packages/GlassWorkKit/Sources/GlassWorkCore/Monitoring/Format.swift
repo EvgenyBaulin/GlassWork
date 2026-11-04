@@ -1,7 +1,21 @@
 import Foundation
+import Synchronization
+
+/// How temperatures are written. System follows the Mac's region.
+public enum TemperatureUnit: String, Codable, Sendable, CaseIterable {
+    case system, celsius, fahrenheit
+}
 
 /// Text for figures. Compact fits the menu bar, precise is for panels.
 public enum Format {
+    private static let chosenUnit = Mutex(TemperatureUnit.system)
+
+    /// What `temperature(_:)` writes. The app sets it from Settings, and widgets from their snapshot.
+    public static var temperatureUnit: TemperatureUnit {
+        get { chosenUnit.withLock { $0 } }
+        set { chosenUnit.withLock { $0 = newValue } }
+    }
+
     public static func percent(_ share: Double, style: NumberStyle = .compact) -> String {
         switch style {
         case .compact: "\(Int((share * 100).rounded()))%"
@@ -53,10 +67,18 @@ public enum Format {
     }
 
     public static func temperature(_ celsius: Double) -> String {
+        temperature(celsius, unit: temperatureUnit)
+    }
+
+    public static func temperature(_ celsius: Double, unit: TemperatureUnit) -> String {
         let measurement = Measurement(value: celsius, unit: UnitTemperature.celsius)
-        return measurement.formatted(
-            .measurement(width: .narrow, usage: .weather, numberFormatStyle: .number.precision(.fractionLength(0)))
-        )
+        let shown = unit == .fahrenheit ? measurement.converted(to: .fahrenheit) : measurement
+        // The narrow form can drop the letter, and someone who picked a unit should see it.
+        return shown.formatted(.measurement(
+            width: unit == .system ? .narrow : .abbreviated,
+            usage: unit == .system ? .weather : .asProvided,
+            numberFormatStyle: .number.precision(.fractionLength(0))
+        ))
     }
 
     public static func rpm(_ value: Double) -> String {

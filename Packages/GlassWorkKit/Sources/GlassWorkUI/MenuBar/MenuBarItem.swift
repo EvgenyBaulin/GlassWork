@@ -149,7 +149,7 @@ public struct ItemContent {
             domain: 20 ... 110,
             alert: (celsius ?? 0) >= Double(options.number(ItemOption.warnAbove, default: 95))
                 ? Palette.orange : nil,
-            template: "\(choice.menuPrefix) 100°"
+            template: "\(choice.menuPrefix) \(Format.temperature(100))"
         )
     }
 

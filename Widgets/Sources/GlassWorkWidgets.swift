@@ -124,7 +124,7 @@ struct SnapshotProvider: TimelineProvider {
     /// One entry a minute, so clocks and ages stay right between the app's refreshes.
     func getTimeline(in _: Context, completion: @escaping (Timeline<SnapshotEntry>) -> Void) {
         let start = Date.now
-        let snapshot = store.read(WidgetSnapshot.self, for: WidgetSnapshot.key)
+        let snapshot = readSnapshot()
         WidgetRefreshLog().record(kind: kind.rawValue, dataDate: snapshot?.date, at: start)
         let entries = (0 ..< 15).map {
             SnapshotEntry(date: start.addingTimeInterval(Double($0) * 60), snapshot: snapshot)
@@ -133,7 +133,13 @@ struct SnapshotProvider: TimelineProvider {
     }
 
     private func entry(at date: Date) -> SnapshotEntry {
-        SnapshotEntry(date: date, snapshot: store.read(WidgetSnapshot.self, for: WidgetSnapshot.key))
+        SnapshotEntry(date: date, snapshot: readSnapshot())
+    }
+
+    private func readSnapshot() -> WidgetSnapshot? {
+        let snapshot = store.read(WidgetSnapshot.self, for: WidgetSnapshot.key)
+        Format.temperatureUnit = snapshot?.temperatureUnit ?? .system
+        return snapshot
     }
 }
 

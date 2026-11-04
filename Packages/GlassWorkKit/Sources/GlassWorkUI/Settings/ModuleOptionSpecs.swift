@@ -13,9 +13,29 @@ public struct OptionChoice: Sendable, Equatable {
     }
 }
 
+/// A list only the Mac can fill in, so it is read when the row appears.
+public enum LiveOptionSource: Sendable, Equatable {
+    case networkInterfaces, gpus, volumes
+
+    /// English text for the empty value, which leaves the choice to the Mac.
+    var automaticTitle: String {
+        self == .volumes ? "Startup disk" : "Automatic"
+    }
+
+    /// Names of real things, which need no translation.
+    func choices() -> [OptionChoice] {
+        switch self {
+        case .networkInterfaces: NetworkReader.interfaces().map { OptionChoice($0.name, $0.title) }
+        case .gpus: GPUReader.samples().map { OptionChoice($0.name, $0.name) }
+        case .volumes: DiskReader.volumes().map { OptionChoice($0.path, $0.name) }
+        }
+    }
+}
+
 public enum OptionKind: Sendable, Equatable {
     case toggle
     case choice([OptionChoice])
+    case live(LiveOptionSource)
     case number(ClosedRange<Int>, step: Int, unit: String)
     case text(placeholder: String)
 }
@@ -46,7 +66,7 @@ public struct ModuleOptionSpec: Sendable, Identifiable {
 
 // swiftlint:disable function_parameter_count
 /// A row that stores into `ModuleSettings.options` and removes the entry again at the default.
-private func option(
+func option(
     _ module: ModuleID,
     _ key: String,
     _ title: String,
@@ -69,7 +89,7 @@ private func option(
     )
 }
 
-private func toggle(
+func toggle(
     _ module: ModuleID,
     _ key: String,
     _ title: String,
@@ -115,7 +135,7 @@ private func hub(
 // swiftlint:enable function_parameter_count
 
 public extension ModuleOptionSpec {
-    static let all: [ModuleOptionSpec] = system + everyday + developer + hubRows
+    static let all: [ModuleOptionSpec] = system + hardware + everyday + developer + hubRows
 
     static func rows(for module: ModuleID) -> [ModuleOptionSpec] {
         all.filter { $0.module == module }
