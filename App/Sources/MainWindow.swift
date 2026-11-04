@@ -15,6 +15,11 @@ final class MainWindowController {
         navigation.onChange = { [weak self] in self?.reportVisibleSection() }
     }
 
+    func show(_ section: MainSection) {
+        navigation.go(to: MainRoute(section: section))
+        show()
+    }
+
     func show() {
         if window == nil {
             window = makeWindow()

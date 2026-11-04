@@ -1,43 +1,102 @@
 import GlassWorkCore
 import SwiftUI
 
+public extension DockPosition {
+    var title: String {
+        switch self {
+        case .bottom: loc("Dock position bottom")
+        case .left: loc("Dock position left")
+        case .right: loc("Dock position right")
+        }
+    }
+}
+
+public extension ModuleID {
+    /// What a click on this widget in the Dock does, for Settings.
+    var dockClickTitle: String {
+        switch self {
+        case .timers: loc("Click: start 25 min")
+        case .stopwatch: loc("Click: start or stop")
+        case .keepAwake: loc("Click: turn on or off")
+        case .nowPlaying: loc("Click: play or pause")
+        case .devServers: loc("Click: open in browser")
+        case .calendar, .endsIn: loc("Click: join call")
+        default: loc("Click: open card")
+        }
+    }
+}
+
 /// What the Dock can ask the app to do.
 @MainActor
 public struct DockActions {
     public var open: (DockApp) -> Void
-    public var showPanel: (ModuleID) -> Void
+    /// A click on a widget runs its quick action.
+    public var clickWidget: (ModuleID) -> Void
+    /// Press and hold on a widget opens its card.
+    public var holdWidget: (ModuleID) -> Void
     public var update: (([DockItem]) -> [DockItem]) -> Void
     /// Tells the window what to make room for.
     public var needsSpace: (DockSpace) -> Void
     /// What the right-click menu offers for an app right now.
     public var commands: (DockApp) -> [DockAppCommand]
     public var perform: (DockAppCommand, DockApp) -> Void
+    /// Moves the widgets on show by this many sets.
+    public var turnPage: (Int) -> Void
+    /// Opens a file from a stack.
+    public var openFile: (String) -> Void
+    /// Opens a stack's folder in Finder.
+    public var showFolder: (String) -> Void
+    /// Changes Dock settings other than the items, such as magnification.
+    public var change: ((inout DockSettings) -> Void) -> Void
+    /// Every preset on offer.
+    public var presets: () -> [DockPreset]
+    public var applyPreset: (DockPreset) -> Void
+    /// Asks for a name and saves the Dock as a preset.
+    public var savePreset: () -> Void
+    public var openSettings: () -> Void
 
     public init(
         open: @escaping (DockApp) -> Void,
-        showPanel: @escaping (ModuleID) -> Void,
+        clickWidget: @escaping (ModuleID) -> Void,
+        holdWidget: @escaping (ModuleID) -> Void,
         update: @escaping (([DockItem]) -> [DockItem]) -> Void,
         needsSpace: @escaping (DockSpace) -> Void,
         commands: @escaping (DockApp) -> [DockAppCommand] = { _ in [] },
-        perform: @escaping (DockAppCommand, DockApp) -> Void = { _, _ in }
+        perform: @escaping (DockAppCommand, DockApp) -> Void = { _, _ in },
+        turnPage: @escaping (Int) -> Void = { _ in },
+        openFile: @escaping (String) -> Void = { _ in },
+        showFolder: @escaping (String) -> Void = { _ in },
+        change: @escaping ((inout DockSettings) -> Void) -> Void = { _ in },
+        presets: @escaping () -> [DockPreset] = { [] },
+        applyPreset: @escaping (DockPreset) -> Void = { _ in },
+        savePreset: @escaping () -> Void = {},
+        openSettings: @escaping () -> Void = {}
     ) {
         self.open = open
-        self.showPanel = showPanel
+        self.clickWidget = clickWidget
+        self.holdWidget = holdWidget
         self.update = update
         self.needsSpace = needsSpace
         self.commands = commands
         self.perform = perform
+        self.turnPage = turnPage
+        self.openFile = openFile
+        self.showFolder = showFolder
+        self.change = change
+        self.presets = presets
+        self.applyPreset = applyPreset
+        self.savePreset = savePreset
+        self.openSettings = openSettings
     }
 }
 
-/// The Dock: apps, folders and live widgets on a glass bar.
+/// The Dock: apps, folders, stacks and live widgets on a glass bar.
 public struct DockView: View {
     private let state: DockLiveState
     private let monitor: SystemMonitor
     private let actions: DockActions
     /// Distance from the middle of the Dock, which stays put however wide the bar gets.
     @State private var pointer: Double?
-    @State private var openFolderID: AppFolder.ID?
 
     private static let canvas = "dock"
     /// Quick enough to feel attached to the pointer, long enough not to pop.
@@ -52,76 +111,158 @@ public struct DockView: View {
     }
 
     private var settings: DockSettings {
-        state.settings
+        state.fittedSettings
     }
 
     private var running: Set<String> {
         state.running
     }
 
+    private var position: DockPosition {
+        settings.position
+    }
+
     /// Read fresh from settings, so renaming a folder does not leave the card holding the old one.
-    private var openFolder: AppFolder? {
-        settings.items.lazy.compactMap { item -> AppFolder? in
-            if case let .folder(folder) = item, folder.id == openFolderID {
-                return folder
-            }
-            return nil
-        }.first
+    private var openItem: DockItem? {
+        settings.items.first { $0.id == state.openCard }
     }
 
     private var space: DockSpace {
-        if openFolder != nil {
+        if openItem != nil {
             return .folder
         }
         return pointer == nil ? .rest : .magnified
     }
 
-    /// Everything hangs from the bottom edge, so the window can change size without the bar moving.
+    /// The edge of the screen the Dock stands on.
+    private var edge: Alignment {
+        switch position {
+        case .bottom: .bottom
+        case .left: .leading
+        case .right: .trailing
+        }
+    }
+
+    /// Everything hangs from the screen's edge, so the window can change size without the bar moving.
     public var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .bottom) {
-                if let openFolder {
-                    FolderCard(folder: openFolder, actions: actions) { openFolderID = nil }
-                        .padding(.bottom, cardLift)
+            let length = position.isVertical ? proxy.size.height : proxy.size.width
+            ZStack(alignment: edge) {
+                if let openItem {
+                    let offset = cardOffset(of: openItem, windowLength: length)
+                    card(openItem)
+                        .padding(cardEdge, cardLift)
+                        .offset(x: position.isVertical ? 0 : offset, y: position.isVertical ? offset : 0)
                 }
-                bar(middle: proxy.size.width / 2)
+                bar(middle: length / 2)
             }
-            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottom)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: edge)
         }
         .coordinateSpace(.named(Self.canvas))
         .onChange(of: space) { _, space in actions.needsSpace(space) }
+        .onChange(of: state.openCard) { _, open in removeEmptyFolders(keeping: open) }
+    }
+
+    @ViewBuilder
+    private func card(_ item: DockItem) -> some View {
+        switch item {
+        case let .folder(folder):
+            FolderCard(folder: folder, actions: actions) { state.openCard = nil }
+        case let .stack(stack):
+            let card = StackCard(
+                stack: stack,
+                files: state.files[stack.path] ?? [],
+                position: position,
+                actions: actions
+            ) { state.openCard = nil }
+            // A fan stands straight on the desktop.
+            if stack.showsFan(at: position) {
+                card
+            } else {
+                card.modifier(PanelGlass())
+            }
+        case .app, .widget:
+            EmptyView()
+        }
+    }
+
+    /// A folder made from the menu and left empty goes with its card, however the card closed: its own button,
+    /// its tile, another card, or a click anywhere else.
+    private func removeEmptyFolders(keeping open: String?) {
+        let items = settings.items
+        if DockLayout.removingEmptyFolders(from: items, keeping: open) != items {
+            actions.update { DockLayout.removingEmptyFolders(from: $0, keeping: open) }
+        }
+    }
+
+    /// A card stands by its tile for as far as the window allows.
+    private func cardOffset(of item: DockItem, windowLength: Double) -> Double {
+        let slots = state.arrangement.slots
+        guard let index = slots.firstIndex(of: .item(item)) else { return 0 }
+        return DockBarLayout.cardOffset(
+            center: DockBarLayout.slotCenter(index, count: slots.count, base: settings.iconSize),
+            cardLength: position.isVertical ? DockBarLayout.folderCardHeight : DockBarLayout.folderCardWidth,
+            windowLength: windowLength
+        )
+    }
+
+    private var cardEdge: Edge.Set {
+        switch position {
+        case .bottom: .bottom
+        case .left: .leading
+        case .right: .trailing
+        }
     }
 
     private var cardLift: Double {
         DockBarLayout.restHeight(base: settings.iconSize) + DockBarLayout.growth(settings) + DockBarLayout.folderCardGap
     }
 
+    private var stack: AnyLayout {
+        switch position {
+        case .bottom: AnyLayout(HStackLayout(alignment: .bottom, spacing: DockBarLayout.spacing))
+        case .left: AnyLayout(VStackLayout(alignment: .leading, spacing: DockBarLayout.spacing))
+        case .right: AnyLayout(VStackLayout(alignment: .trailing, spacing: DockBarLayout.spacing))
+        }
+    }
+
     private func bar(middle: Double) -> some View {
+        let arrangement = state.arrangement
         let layout = DockBarLayout(
-            count: settings.items.count,
+            count: arrangement.slots.count,
             base: settings.iconSize,
             magnified: settings.magnifiedSize,
             pointer: settings.magnifies ? pointer : nil
         )
-        return HStack(alignment: .bottom, spacing: DockBarLayout.spacing) {
-            ForEach(Array(settings.items.enumerated()), id: \.element.id) { index, item in
-                tile(item, size: layout.sizes[index])
+        return stack {
+            ForEach(Array(arrangement.slots.enumerated()), id: \.element.id) { index, slot in
+                self.slot(slot, size: layout.sizes[index], arrangement: arrangement)
+                    .overlay(alignment: position.isVertical ? .bottom : .trailing) {
+                        if arrangement.dividers.contains(index) {
+                            DockDivider(position: position, length: settings.iconSize)
+                        }
+                    }
             }
         }
         .padding(DockBarLayout.padding)
-        .background(alignment: .bottom) {
-            // Keeps its height: icons grow up and out of it.
+        .background(alignment: edge) {
+            // Keeps its depth: icons grow out of it, away from the screen's edge.
+            let depth = DockBarLayout.restHeight(base: settings.iconSize)
             Color.clear
-                .frame(height: DockBarLayout.restHeight(base: settings.iconSize))
+                .frame(width: position.isVertical ? depth : nil, height: position.isVertical ? nil : depth)
                 .glassEffect(.regular, in: .rect(cornerRadius: 22))
+                .contentShape(.rect)
+                .contextMenu {
+                    DockBackgroundMenu(settings: state.settings, actions: actions) { state.openCard = $0 }
+                }
         }
         .onContinuousHover(coordinateSpace: .named(Self.canvas)) { phase in
             switch phase {
-            case let .active(location): movePointer(to: location.x - middle)
+            case let .active(location): movePointer(to: (position.isVertical ? location.y : location.x) - middle)
             case .ended: movePointer(to: nil)
             }
         }
-        .offset(x: layout.centerX)
+        .offset(x: position.isVertical ? 0 : layout.centerX, y: position.isVertical ? layout.centerX : 0)
     }
 
     /// Entering and leaving animate. Moving does not need to: sizes already change continuously.
@@ -135,6 +276,26 @@ public struct DockView: View {
     }
 
     @ViewBuilder
+    private func slot(_ slot: DockSlot, size: CGFloat, arrangement: DockArrangement) -> some View {
+        switch slot {
+        case let .item(item):
+            tile(item, size: size)
+        case .previousPage:
+            DockPagerTile(direction: .previous, size: size, arrangement: arrangement, position: position) {
+                actions.turnPage(-1)
+            }
+        case .nextPage:
+            DockPagerTile(direction: .next, size: size, arrangement: arrangement, position: position) {
+                actions.turnPage(1)
+            }
+        }
+    }
+
+    private func toggleCard(_ item: DockItem) {
+        state.openCard = state.openCard == item.id ? nil : item.id
+    }
+
+    @ViewBuilder
     private func tile(_ item: DockItem, size: CGFloat) -> some View {
         switch item {
         case let .app(app):
@@ -142,9 +303,12 @@ public struct DockView: View {
                 app: app,
                 size: size,
                 isRunning: running.contains(app.path),
-                isLaunching: state.launching.contains(app.path)
+                isLaunching: state.launching.contains(app.path),
+                position: position
             ) { actions.open(app) }
-                .contextMenu { DockAppMenu(app: app, actions: actions) }
+                .contextMenu {
+                    DockAppMenu(app: app, actions: actions, folders: settings.folders) { state.openCard = $0 }
+                }
                 .draggable(app.path)
                 .dropDestination(for: String.self) { paths, _ in
                     drop(paths) { dragged, items in DockLayout.drop(dragged, onto: app, in: items) }
@@ -154,15 +318,29 @@ public struct DockView: View {
                 folder: folder,
                 size: size,
                 isRunning: folder.apps.contains { running.contains($0.path) },
-                isLaunching: folder.apps.contains { state.launching.contains($0.path) }
-            ) {
-                openFolderID = openFolderID == folder.id ? nil : folder.id
-            }
-            .dropDestination(for: String.self) { paths, _ in
-                drop(paths) { dragged, items in DockLayout.drop(dragged, into: folder, in: items) }
-            }
+                isLaunching: folder.apps.contains { state.launching.contains($0.path) },
+                position: position
+            ) { toggleCard(item) }
+                .dropDestination(for: String.self) { paths, _ in
+                    drop(paths) { dragged, items in DockLayout.drop(dragged, into: folder, in: items) }
+                }
         case let .widget(module):
-            WidgetTile(module: module, size: size, monitor: monitor) { actions.showPanel(module) }
+            WidgetTile(
+                module: module,
+                size: size,
+                monitor: monitor,
+                position: position,
+                click: { actions.clickWidget(module) },
+                hold: { actions.holdWidget(module) }
+            )
+            .contextMenu {
+                Button(loc("Remove from Dock")) { actions.update { DockLayout.removing(item, from: $0) } }
+            }
+        case let .stack(stack):
+            StackTile(stack: stack, files: state.files[stack.path] ?? [], size: size, position: position) {
+                toggleCard(item)
+            }
+            .contextMenu { StackMenu(stack: stack, actions: actions) }
         }
     }
 }
@@ -182,257 +360,5 @@ private extension DockView {
             }
             return nil
         }.first
-    }
-}
-
-/// Sizes change on every pointer move, and asking the system for an icon each time is too slow.
-@MainActor
-private enum DockIcons {
-    private static var cache: [String: NSImage] = [:]
-
-    static func icon(for path: String) -> NSImage {
-        if let icon = cache[path] {
-            return icon
-        }
-        let icon = NSWorkspace.shared.icon(forFile: path)
-        cache[path] = icon
-        return icon
-    }
-}
-
-struct AppIcon: View {
-    let app: DockApp
-    let size: CGFloat
-
-    var body: some View {
-        Image(nsImage: DockIcons.icon(for: app.path))
-            .resizable()
-            .frame(width: size, height: size)
-    }
-}
-
-/// Jumps until the app is up. Only draws higher, so nothing around the icon moves.
-struct LaunchBounce: ViewModifier {
-    let isActive: Bool
-    let size: CGFloat
-    /// A fixed height from 0 to 1 in place of the motion, for snapshots.
-    var pose: Double?
-    @Environment(\.accessibilityReduceMotion) private var reducesMotion
-
-    func body(content: Content) -> some View {
-        let height = size * DockBarLayout.bounce
-        let isStill = reducesMotion
-        content.keyframeAnimator(initialValue: pose ?? 0, repeating: isActive && pose == nil) { view, lift in
-            view
-                .offset(y: isStill ? 0 : -height * lift)
-                .opacity(isStill ? 1 - lift / 2 : 1)
-        } keyframes: { _ in
-            KeyframeTrack {
-                CubicKeyframe(1, duration: 0.28)
-                CubicKeyframe(0, duration: 0.28)
-                LinearKeyframe(0, duration: 0.08)
-            }
-        }
-    }
-}
-
-struct AppTile: View {
-    let app: DockApp
-    let size: CGFloat
-    let isRunning: Bool
-    var isLaunching = false
-    var pose: Double?
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 3) {
-                AppIcon(app: app, size: size)
-                    .modifier(LaunchBounce(isActive: isLaunching, size: size, pose: pose))
-                Circle().fill(isRunning || isLaunching ? Color.primary : .clear).frame(width: 4, height: 4)
-            }
-        }
-        .buttonStyle(.plain)
-        .help(app.name)
-    }
-}
-
-/// Right-click on an app. Holding ⌥ swaps Hide and Quit for their stronger forms, as in the system Dock.
-struct DockAppMenu: View {
-    let app: DockApp
-    let actions: DockActions
-
-    var body: some View {
-        let commands = actions.commands(app)
-        if commands.contains(.open) {
-            button(loc("Open"), .open)
-        }
-        if commands.contains(.showAllWindows) {
-            button(loc("Show All Windows"), .showAllWindows)
-        }
-        if commands.contains(.hide) {
-            button(loc("Hide"), .hide).modifierKeyAlternate(.option) {
-                button(loc("Hide Others"), .hideOthers)
-            }
-            Divider()
-        }
-        button(loc("Show in Finder"), .showInFinder)
-        if commands.contains(.quit) {
-            Divider()
-            button(loc("Quit"), .quit).modifierKeyAlternate(.option) {
-                button(loc("Force Quit"), .forceQuit)
-            }
-        }
-    }
-
-    private func button(_ title: String, _ command: DockAppCommand) -> some View {
-        Button(title) { actions.perform(command, app) }
-    }
-}
-
-/// Glass square with a 3×3 grid of the folder's first apps.
-struct FolderTile: View {
-    let folder: AppFolder
-    let size: CGFloat
-    let isRunning: Bool
-    var isLaunching = false
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 3) {
-                content
-                    .frame(width: size, height: size)
-                    .background(.white.opacity(0.14), in: .rect(cornerRadius: size / 4.5))
-                    .modifier(LaunchBounce(isActive: isLaunching, size: size))
-                Circle().fill(isRunning || isLaunching ? Color.primary : .clear).frame(width: 4, height: 4)
-            }
-        }
-        .buttonStyle(.plain)
-        .help(folder.name)
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        if let symbol = folder.symbol {
-            Image(systemName: symbol).font(.system(size: size * 0.5))
-        } else {
-            let cell = size * 0.24
-            LazyVGrid(columns: Array(repeating: GridItem(.fixed(cell), spacing: 2), count: 3), spacing: 2) {
-                ForEach(folder.apps.prefix(9)) { AppIcon(app: $0, size: cell) }
-            }
-        }
-    }
-}
-
-/// The opened folder above the Dock.
-struct FolderCard: View {
-    let folder: AppFolder
-    let actions: DockActions
-    let close: () -> Void
-    @State private var name: String
-    @State private var query = ""
-
-    init(folder: AppFolder, actions: DockActions, close: @escaping () -> Void) {
-        self.folder = folder
-        self.actions = actions
-        self.close = close
-        _name = State(initialValue: folder.name)
-    }
-
-    private var apps: [DockApp] {
-        folder.sortedApps.filter { query.isEmpty || $0.name.localizedCaseInsensitiveContains(query) }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                TextField(loc("Folder name"), text: $name)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 15, weight: .semibold))
-                    .onSubmit(rename)
-                Menu {
-                    Button(loc("Ungroup")) {
-                        actions.update { DockLayout.ungroup(folder, in: $0) }
-                        close()
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-                .menuStyle(.borderlessButton)
-                .fixedSize()
-            }
-            if folder.apps.count > 12 {
-                TextField(loc("Search"), text: $query).textFieldStyle(.roundedBorder)
-            }
-            ScrollView {
-                LazyVGrid(columns: Array(repeating: GridItem(.fixed(72), spacing: 8), count: 5), spacing: 12) {
-                    ForEach(apps) { app in
-                        Button {
-                            actions.open(app)
-                            close()
-                        } label: {
-                            VStack(spacing: 4) {
-                                AppIcon(app: app, size: 52)
-                                Text(app.name).font(.system(size: 11)).lineLimit(1)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            DockAppMenu(app: app, actions: actions)
-                            Divider()
-                            Button(loc("Remove from Folder")) {
-                                actions.update { DockLayout.remove(app, from: folder, in: $0) }
-                                close()
-                            }
-                        }
-                    }
-                }
-            }
-            .frame(maxHeight: 300)
-        }
-        .padding(16)
-        .frame(width: 430)
-        .glassEffect(.regular, in: .rect(cornerRadius: 22))
-    }
-
-    private func rename() {
-        actions.update { items in
-            items.map { item in
-                guard item == .folder(folder) else { return item }
-                var renamed = folder
-                renamed.name = name
-                return .folder(renamed)
-            }
-        }
-    }
-}
-
-/// Live mini view of a module. Click opens its card.
-struct WidgetTile: View {
-    let module: ModuleID
-    let size: CGFloat
-    let monitor: SystemMonitor
-    let action: () -> Void
-
-    var body: some View {
-        let content = ItemContent.content(module, monitor: monitor, style: .compact)
-        Button(action: action) {
-            VStack(spacing: 3) {
-                VStack(spacing: 1) {
-                    Image(systemName: module.symbol).font(.system(size: size * 0.28)).foregroundStyle(module.tint)
-                    Text(content.figure)
-                        .font(.system(size: size * 0.2, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                }
-                .frame(width: size, height: size)
-                .background(.black.opacity(0.28), in: .rect(cornerRadius: size / 4.5))
-                Color.clear.frame(width: 4, height: 4)
-            }
-        }
-        .buttonStyle(.plain)
-        .help(module.title)
     }
 }
