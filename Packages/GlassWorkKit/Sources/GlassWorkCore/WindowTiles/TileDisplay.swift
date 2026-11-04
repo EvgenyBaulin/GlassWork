@@ -25,6 +25,22 @@ public struct TileDisplay: Equatable, Sendable {
             )
         )
     }
+
+    /// The same display with a strip `depth` deep along the Dock's edge taken away.
+    public func reserving(_ depth: Double, at position: DockPosition) -> TileDisplay {
+        var visible = visibleFrame
+        switch position {
+        case .bottom:
+            return reservingBottom(depth)
+        case .left:
+            let left = max(visible.minX, frame.minX + depth)
+            visible.size.width = max(visible.maxX - left, 0)
+            visible.origin.x = left
+        case .right:
+            visible.size.width = max(min(visible.maxX, frame.maxX - depth) - visible.minX, 0)
+        }
+        return TileDisplay(frame: frame, visibleFrame: visible)
+    }
 }
 
 /// Accessibility puts the origin at the top left of the primary display, with y growing downward.

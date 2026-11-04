@@ -201,6 +201,214 @@ struct DockBarLayoutTests {
     }
 }
 
+struct DockPositionTests {
+    private let screen = CGRect(x: 0, y: 0, width: 1512, height: 982)
+    private let size = CGSize(width: 71, height: 288)
+
+    private func settings(_ position: DockPosition) -> DockSettings {
+        var settings = DockSettings()
+        settings.iconSize = 48
+        settings.magnifies = true
+        settings.magnifiedSize = 80
+        settings.position = position
+        return settings
+    }
+
+    @Test func aSideDockSwapsTheWindowsAxes() {
+        let bottom = DockBarLayout.windowSize(for: .rest, count: 5, settings: settings(.bottom))
+        let left = DockBarLayout.windowSize(for: .rest, count: 5, settings: settings(.left))
+        #expect(left.width == bottom.height)
+        #expect(left.height == bottom.width)
+    }
+
+    @Test(arguments: [DockPosition.left, .right])
+    func aSideDocksCardStandsBesideTheBar(position: DockPosition) {
+        let rest = DockBarLayout.windowSize(for: .rest, count: 2, settings: settings(position))
+        let card = DockBarLayout.windowSize(for: .folder, count: 2, settings: settings(position))
+        #expect(card.width >= rest.width + DockBarLayout.folderCardWidth)
+        #expect(card.height >= DockBarLayout.folderCardHeight)
+    }
+
+    @Test(arguments: DockPosition.allCases)
+    func everyWindowSizeSharesOneMiddleAlongTheBar(position: DockPosition) {
+        for space in [DockSpace.rest, .magnified, .folder] {
+            let window = DockBarLayout.windowSize(for: space, count: 7, settings: settings(position))
+            let length = position.isVertical ? window.height : window.width
+            #expect(length.truncatingRemainder(dividingBy: 2) == 0)
+        }
+    }
+
+    @Test func standsOnTheBottomEdgeInTheMiddle() {
+        let frame = DockBarLayout.windowFrame(
+            size: CGSize(width: 288, height: 71), position: .bottom, screen: screen, topInset: 33
+        )
+        #expect(frame == CGRect(x: 612, y: 4, width: 288, height: 71))
+    }
+
+    @Test func aSideDockIsCenteredBelowTheMenuBar() {
+        let left = DockBarLayout.windowFrame(size: size, position: .left, screen: screen, topInset: 32)
+        let right = DockBarLayout.windowFrame(size: size, position: .right, screen: screen, topInset: 32)
+        #expect(left == CGRect(x: 4, y: 331, width: 71, height: 288))
+        #expect(right == CGRect(x: 1437, y: 331, width: 71, height: 288))
+    }
+
+    @Test func staysOnItsEdgeOnASecondaryOrigin() {
+        let shifted = CGRect(x: -1000, y: 200, width: 1000, height: 800)
+        let frame = DockBarLayout.windowFrame(size: size, position: .right, screen: shifted, topInset: 0)
+        #expect(frame == CGRect(x: -75, y: 456, width: 71, height: 288))
+    }
+
+    @Test(arguments: DockPosition.allCases)
+    func aHiddenDockIsEntirelyPastItsEdge(position: DockPosition) {
+        let hidden = DockBarLayout.windowFrame(
+            size: size, position: position, screen: screen, topInset: 32, isRevealed: false
+        )
+        #expect(!hidden.intersects(screen))
+        let shown = DockBarLayout.windowFrame(size: size, position: position, screen: screen, topInset: 32)
+        // It slides straight out: along the bar nothing changes.
+        if position.isVertical {
+            #expect(hidden.minY == shown.minY)
+        } else {
+            #expect(hidden.minX == shown.minX)
+        }
+    }
+
+    @Test func aDockThatHidesItselfLeavesTheScreenToWindows() {
+        var dock = settings(.bottom)
+        dock.isEnabled = true
+        #expect(DockBarLayout.reservedDepth(dock) == DockBarLayout.screenGap + DockBarLayout.restHeight(base: 48))
+        dock.autoHides = true
+        #expect(DockBarLayout.reservedDepth(dock) == 0)
+        dock.autoHides = false
+        dock.isEnabled = false
+        #expect(DockBarLayout.reservedDepth(dock) == 0)
+    }
+
+    @Test func windowsKeepClearOfTheEdgeTheDockIsOn() {
+        let visible = CGRect(x: 0, y: 4, width: 1512, height: 946)
+        let display = TileDisplay(frame: screen, visibleFrame: visible)
+        #expect(display.reserving(75, at: .left).visibleFrame == CGRect(x: 75, y: 4, width: 1437, height: 946))
+        #expect(display.reserving(75, at: .right).visibleFrame == CGRect(x: 0, y: 4, width: 1437, height: 946))
+        #expect(display.reserving(75, at: .bottom).visibleFrame.minY == 75)
+        #expect(display.reserving(0, at: .left).visibleFrame == visible)
+    }
+}
+
+struct DockAutoHideTests {
+    private let screen = CGRect(x: 0, y: 0, width: 1512, height: 982)
+    private let bar = CGRect(x: 600, y: 4, width: 300, height: 71)
+    private let side = CGRect(x: 4, y: 300, width: 71, height: 300)
+
+    @Test func thePointerRevealsTheDockOnlyAlongTheBar() {
+        func touches(_ x: Double, _ y: Double) -> Bool {
+            DockAutoHide.touchesEdge(CGPoint(x: x, y: y), barFrame: bar, position: .bottom, screen: screen)
+        }
+        #expect(touches(700, 0))
+        #expect(!touches(700, 3))
+        #expect(!touches(100, 0))
+    }
+
+    @Test func aSideDockRevealsAtItsOwnEdge() {
+        func touches(_ x: Double, _ position: DockPosition) -> Bool {
+            DockAutoHide.touchesEdge(CGPoint(x: x, y: 400), barFrame: side, position: position, screen: screen)
+        }
+        #expect(touches(0, .left))
+        #expect(!touches(1511, .left))
+        #expect(touches(1511, .right))
+        #expect(!touches(0, .right))
+    }
+
+    @Test func theGapUnderTheBarCountsAsTheDock() {
+        #expect(DockAutoHide.isOver(CGPoint(x: 700, y: 1), frame: bar))
+        #expect(!DockAutoHide.isOver(CGPoint(x: 700, y: 120), frame: bar))
+    }
+
+    private func revealed(
+        autoHides: Bool = true,
+        was: Bool = false,
+        over: Bool = false,
+        edge: Bool = false,
+        held: Bool = false
+    ) -> Bool {
+        DockAutoHide.isRevealed(
+            autoHides: autoHides, wasRevealed: was, isOverDock: over, touchesEdge: edge, isHeld: held
+        )
+    }
+
+    @Test func aDockThatStaysIsAlwaysShown() {
+        #expect(revealed(autoHides: false))
+    }
+
+    @Test func staysHiddenUntilThePointerTouchesTheEdge() {
+        #expect(!revealed())
+        #expect(revealed(edge: true))
+    }
+
+    /// The window sits there while hidden, so being over its frame must not count until it has been shown.
+    @Test func overTheHiddenFrameDoesNotReveal() {
+        #expect(!revealed(was: false, over: true))
+    }
+
+    @Test func staysWhileThePointerIsOnIt() {
+        #expect(revealed(was: true, over: true))
+        #expect(!revealed(was: true, over: false))
+    }
+
+    @Test func anOpenCardOrMenuHoldsItOpen() {
+        #expect(revealed(was: true, held: true))
+        #expect(revealed(was: false, held: true))
+    }
+}
+
+struct DockSettingsFileTests {
+    private func decode(_ json: String) throws -> DockSettings {
+        try JSONDecoder().decode(DockSettings.self, from: Data(json.utf8))
+    }
+
+    /// Exactly what the version before this one wrote: a new setting must never make this fail, because a throw
+    /// here loses the whole settings file.
+    @Test func readsAFileFromBeforeANewSetting() throws {
+        let dock = try decode("""
+        {"isEnabled": true, "position": "left", "iconSize": 60, "magnifies": true, "magnifiedSize": 90,
+         "autoHides": true, "showsRecents": false,
+         "items": [{"app": {"_0": {"path": "/Applications/Mail.app", "name": "Mail"}}}]}
+        """)
+        #expect(dock.isEnabled)
+        #expect(dock.position == .left)
+        #expect(dock.iconSize == 60)
+        #expect(dock.autoHides)
+        #expect(dock.items == [.app(DockApp(path: "/Applications/Mail.app", name: "Mail"))])
+    }
+
+    @Test func missingKeysFallBackToDefaults() throws {
+        #expect(try decode("{}") == DockSettings())
+    }
+
+    @Test func anItemItCannotReadDoesNotCostTheRest() throws {
+        let dock = try decode("""
+        {"items": [{"hologram": {"_0": 1}}, {"widget": {"_0": "cpu"}}, {"widget": {"_0": "noSuchModule"}}]}
+        """)
+        #expect(dock.items == [.widget(.cpu)])
+    }
+
+    @Test func aFolderFromBeforeANewFieldStillLoads() throws {
+        let id = UUID()
+        let folder = try JSONDecoder().decode(AppFolder.self, from: Data("""
+        {"id": "\(id.uuidString)", "name": "Work", "apps": []}
+        """.utf8))
+        #expect(folder.id == id)
+        #expect(folder.sort == .manual)
+    }
+
+    @Test func survivesARoundTrip() throws {
+        var dock = DockSettings()
+        dock.position = .right
+        dock.items = [.widget(.battery), .folder(AppFolder(name: "Work", apps: []))]
+        let copy = try JSONDecoder().decode(DockSettings.self, from: JSONEncoder().encode(dock))
+        #expect(copy == dock)
+    }
+}
+
 struct DockLaunchTrackerTests {
     private let path = "/Applications/Mail.app"
     private let start = Date(timeIntervalSince1970: 1_800_000_000)

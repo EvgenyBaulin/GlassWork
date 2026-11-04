@@ -2,6 +2,10 @@ import Foundation
 
 public enum DockPosition: String, Codable, CaseIterable, Sendable {
     case bottom, left, right
+
+    public var isVertical: Bool {
+        self != .bottom
+    }
 }
 
 public enum FolderSort: String, Codable, CaseIterable, Sendable {
@@ -30,6 +34,8 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
     public var apps: [DockApp]
     public var symbol: String?
     public var sort = FolderSort.manual
+    /// Brought by a preset, and goes when another preset comes.
+    public var isFromPreset = false
 
     public init(name: String, apps: [DockApp]) {
         self.name = name
@@ -43,16 +49,37 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
     }
 }
 
+extension AppFolder {
+    private enum CodingKeys: String, CodingKey {
+        case id, name, apps, symbol, sort, isFromPreset
+    }
+
+    /// Missing keys fall back to defaults, so a file from an earlier version keeps loading.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(
+            name: container.decodeIfPresent(String.self, forKey: .name) ?? "",
+            apps: container.decodeIfPresent([DockApp].self, forKey: .apps) ?? []
+        )
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
+        sort = try container.decodeIfPresent(FolderSort.self, forKey: .sort) ?? .manual
+        isFromPreset = try container.decodeIfPresent(Bool.self, forKey: .isFromPreset) ?? false
+    }
+}
+
 public enum DockItem: Codable, Sendable, Equatable, Identifiable {
     case app(DockApp)
     case folder(AppFolder)
     case widget(ModuleID)
+    case stack(DockStack)
 
     public var id: String {
         switch self {
         case let .app(app): "app-\(app.path)"
         case let .folder(folder): "folder-\(folder.id)"
         case let .widget(module): "widget-\(module.rawValue)"
+        case let .stack(stack): "stack-\(stack.id)"
         }
     }
 }
@@ -79,6 +106,12 @@ public struct DockSettings: Codable, Sendable, Equatable {
     public var autoHides = false
     public var showsRecents = false
     public var items: [DockItem] = []
+    /// Turning the Dock on hides the system one, so this is explained once before it happens.
+    public var hasSeenIntro = false
+    /// The preset in use, by id.
+    public var activePreset: String?
+    /// Built-ins the owner has changed, and presets of the owner's own.
+    public var presets: [DockPreset] = []
 
     public init() {}
 
@@ -88,9 +121,53 @@ public struct DockSettings: Codable, Sendable, Equatable {
             switch item {
             case let .app(app): [app]
             case let .folder(folder): folder.apps
-            case .widget: []
+            case .widget, .stack: []
             }
         }
+    }
+}
+
+extension DockSettings {
+    private enum CodingKeys: String, CodingKey {
+        case isEnabled, position, iconSize, magnifies, magnifiedSize, autoHides, showsRecents, items
+        case hasSeenIntro, activePreset, presets
+    }
+
+    /// An item this version cannot read is skipped, so the rest of the Dock survives it.
+    private struct LossyItem: Decodable {
+        let value: DockItem?
+
+        init(from decoder: Decoder) {
+            value = try? DockItem(from: decoder)
+        }
+    }
+
+    /// Missing keys fall back to defaults: a file written before a setting existed must keep loading.
+    public init(from decoder: Decoder) throws {
+        self.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? isEnabled
+        position = try container.decodeIfPresent(DockPosition.self, forKey: .position) ?? position
+        iconSize = try container.decodeIfPresent(Double.self, forKey: .iconSize) ?? iconSize
+        magnifies = try container.decodeIfPresent(Bool.self, forKey: .magnifies) ?? magnifies
+        magnifiedSize = try container.decodeIfPresent(Double.self, forKey: .magnifiedSize) ?? magnifiedSize
+        autoHides = try container.decodeIfPresent(Bool.self, forKey: .autoHides) ?? autoHides
+        showsRecents = try container.decodeIfPresent(Bool.self, forKey: .showsRecents) ?? showsRecents
+        items = try container.decodeIfPresent([LossyItem].self, forKey: .items)?.compactMap(\.value) ?? items
+        hasSeenIntro = try container.decodeIfPresent(Bool.self, forKey: .hasSeenIntro) ?? hasSeenIntro
+        activePreset = try container.decodeIfPresent(String.self, forKey: .activePreset)
+        presets = try container.decodeIfPresent([DockPreset].self, forKey: .presets) ?? presets
+    }
+}
+
+public extension DockSettings {
+    /// Turns the Dock on. A Dock with nothing in it starts from the system's apps, which are read only then.
+    mutating func enable(importing systemApps: () -> [DockApp]) {
+        if items.isEmpty {
+            items = systemApps().map(DockItem.app)
+        }
+        hasSeenIntro = true
+        isEnabled = true
     }
 }
 

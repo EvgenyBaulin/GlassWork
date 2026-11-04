@@ -1,6 +1,20 @@
 import GlassWorkCore
 import SwiftUI
 
+/// Liquid Glass tinted so text stays readable over bright wallpapers.
+public struct PanelGlass: ViewModifier {
+    @Environment(\.colorScheme) private var scheme
+
+    public init() {}
+
+    public func body(content: Content) -> some View {
+        let tint = scheme == .dark
+            ? Color(red: 0.11, green: 0.10, blue: 0.165).opacity(0.55)
+            : Color.white.opacity(0.7)
+        content.glassEffect(.regular.tint(tint), in: .rect(cornerRadius: 16))
+    }
+}
+
 /// What panels can ask the app to do.
 @MainActor
 public struct PanelActions {

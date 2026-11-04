@@ -19,14 +19,27 @@ struct DockSnapshotTests {
         return settings
     }
 
-    private func dock(space: DockSpace, pointer: Double? = nil, running: Set<String> = []) -> some View {
+    private func dock(
+        space: DockSpace,
+        pointer: Double? = nil,
+        running: Set<String> = [],
+        position: DockPosition = .bottom
+    ) -> some View {
+        var settings = settings
+        settings.position = position
         let state = DockLiveState(settings: settings)
         state.running = running
         let size = DockBarLayout.windowSize(for: space, count: apps.count, settings: settings)
         let view = DockView(
             state: state,
             monitor: SystemMonitor(),
-            actions: DockActions(open: { _ in }, showPanel: { _ in }, update: { _ in }, needsSpace: { _ in }),
+            actions: DockActions(
+                open: { _ in },
+                clickWidget: { _ in },
+                holdWidget: { _ in },
+                update: { _ in },
+                needsSpace: { _ in }
+            ),
             pointer: pointer
         )
         return view.frame(width: size.width, height: size.height)
@@ -45,6 +58,48 @@ struct DockSnapshotTests {
     @Test(arguments: [true, false])
     func magnifiedAtTheEdge(dark: Bool) {
         snapshotPanel(dock(space: .magnified, pointer: -180), name: "edge", dark: dark)
+    }
+
+    /// The running dots sit on the side of the screen's edge.
+    @Test(arguments: [true, false])
+    func onTheLeft(dark: Bool) {
+        let running = Set(apps.prefix(2).map(\.path))
+        snapshotPanel(dock(space: .rest, running: running, position: .left), name: "left", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func onTheRight(dark: Bool) {
+        let running = Set(apps.prefix(2).map(\.path))
+        snapshotPanel(dock(space: .rest, running: running, position: .right), name: "right", dark: dark)
+    }
+
+    /// Icons grow away from the screen's edge.
+    @Test(arguments: [true, false])
+    func magnifiedOnTheLeft(dark: Bool) {
+        snapshotPanel(dock(space: .magnified, pointer: 0, position: .left), name: "left-middle", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func magnifiedOnTheRight(dark: Bool) {
+        snapshotPanel(dock(space: .magnified, pointer: 0, position: .right), name: "right-middle", dark: dark)
+    }
+
+    /// A widget keeps its slot's size and leaves the dot's place empty, so it lines up with the apps.
+    @Test(arguments: [true, false])
+    func widgetsBesideApps(dark: Bool) {
+        let monitor = SystemMonitor()
+        let row = HStack(alignment: .bottom, spacing: 8) {
+            AppTile(app: apps[0], size: 48, isRunning: true) {}
+            WidgetTile(module: .cpu, size: 48, monitor: monitor, click: {}, hold: {})
+            WidgetTile(module: .memory, size: 48, monitor: monitor, click: {}, hold: {})
+        }
+        .padding(8)
+        snapshotPanel(row, name: "widgets", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func firstRunExplanation(dark: Bool) {
+        snapshotPanel(DockFirstRunView(proceed: {}, cancel: {}), name: "first-run", dark: dark)
     }
 
     /// Not running, running, and a launch at the top of its jump.
