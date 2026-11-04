@@ -124,6 +124,7 @@ public final class SystemMonitor {
         snapshot.reviews = activity.reviews
         snapshot.runs = activity.runs
         snapshot.contributions = activity.contributions
+        snapshot.place = weather.places.first
         return snapshot
     }
 

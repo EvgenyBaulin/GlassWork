@@ -385,6 +385,16 @@
         }
       }
     },
+    "Add cities in World Clocks": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте города в мировых часах"
+          }
+        }
+      }
+    },
     "Add commands in Settings": {
       "localizations": {
         "ru": {
@@ -761,6 +771,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Буфер обмена"
+          }
+        }
+      }
+    },
+    "Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Часы"
           }
         }
       }
@@ -1231,6 +1251,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "С флагом"
+          }
+        }
+      }
+    },
+    "Flip Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Флип-часы"
           }
         }
       }
@@ -1773,6 +1803,16 @@
         }
       }
     },
+    "Local": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Местное"
+          }
+        }
+      }
+    },
     "Local IP": {
       "localizations": {
         "ru": {
@@ -1929,6 +1969,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Цифры в строке меню"
+          }
+        }
+      }
+    },
+    "Minimal Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Минимальные часы"
           }
         }
       }
@@ -2249,6 +2299,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Числа"
+          }
+        }
+      }
+    },
+    "Numerals Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Часы с цифрами"
           }
         }
       }
@@ -3673,6 +3733,16 @@
         }
       }
     },
+    "Yesterday": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вчера"
+          }
+        }
+      }
+    },
     "Your Day": {
       "localizations": {
         "ru": {
@@ -3749,6 +3819,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "дн. осталось"
+          }
+        }
+      }
+    },
+    "h": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ч"
           }
         }
       }

@@ -45,6 +45,17 @@ struct EvenMoreWidgets: WidgetBundle {
         YearInDotsKindWidget()
         MoonKindWidget()
         DaylightKindWidget()
+        TimeWidgets().body
+    }
+}
+
+/// Clocks, focus tools and daily facts.
+struct TimeWidgets: WidgetBundle {
+    var body: some Widget {
+        ClockKindWidget()
+        NumeralsClockKindWidget()
+        MinimalClockKindWidget()
+        FlipClockKindWidget()
     }
 }
 
@@ -93,7 +104,7 @@ struct KindView: View {
     var body: some View {
         Group {
             if let snapshot = entry.snapshot {
-                WidgetFace(kind: kind, size: size, snapshot: snapshot, now: entry.date)
+                WidgetFace(kind: kind, size: size, snapshot: snapshot, now: entry.date, showsSeconds: false)
             } else {
                 Text(loc("Open GlassWork to start")).foregroundStyle(.secondary)
             }
@@ -264,5 +275,29 @@ struct GithubActionsKindWidget: Widget {
 struct ContributionsKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.contributions)
+    }
+}
+
+struct ClockKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.clock)
+    }
+}
+
+struct NumeralsClockKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.numeralsClock)
+    }
+}
+
+struct MinimalClockKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.minimalClock)
+    }
+}
+
+struct FlipClockKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.flipClock)
     }
 }
