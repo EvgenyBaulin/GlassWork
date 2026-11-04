@@ -12,6 +12,8 @@ struct ModuleOptions: View {
         case .weather: WeatherOptions(store: store)
         case .rates: RatesOptions(store: store)
         case .clipboard: ClipboardOptions(store: store)
+        case _ where ModuleID.developerCollected.contains(module):
+            DeveloperOptionsSection(module: module, store: store)
         default: EmptyView()
         }
     }

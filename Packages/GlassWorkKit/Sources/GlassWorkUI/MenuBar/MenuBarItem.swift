@@ -1,6 +1,15 @@
 import GlassWorkCore
 import SwiftUI
 
+/// A small drawing used instead of a sparkline.
+public enum ItemGlyph: Equatable {
+    case ring(Double)
+    /// One dot per thing, up to five: filled first, then faint.
+    case dots(filled: Int, faint: Int)
+    /// The module has no history to draw, so the graph repeats its symbol.
+    case symbol
+}
+
 /// Keys in `ModuleSettings.options`.
 public enum ModuleOption {
     public static let sensor = "sensor"
@@ -40,6 +49,12 @@ public struct ItemContent {
     public var values: [Double]?
     /// Faded, because the data is old or the module is paused.
     public var isDimmed = false
+    /// Drawn by the graph styles instead of a sparkline.
+    public var glyph: ItemGlyph?
+    /// How much of a variable symbol is drawn, from 0 to 1.
+    public var symbolLevel: Double?
+    /// Extra tooltip line.
+    public var detail: String?
 
     /// Text for a raw metric value, used by tooltips.
     func format(_ value: Double) -> String {
@@ -78,6 +93,7 @@ public struct ItemContent {
                 template: "100%"
             )
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
+        case _ where ModuleID.developerCollected.contains(module): developer(module, monitor.developer)
         case .weather: weather(monitor.weather)
         case .rates: rates(monitor.rates)
         case .clipboard: clipboard(monitor.clipboard)
@@ -313,7 +329,7 @@ public struct MenuBarItemView: View {
     private static let graphWidth: CGFloat = 34
 
     private func symbol(_ content: ItemContent) -> some View {
-        Image(systemName: content.symbol ?? module.symbol)
+        Image(systemName: content.symbol ?? module.symbol, variableValue: content.symbolLevel)
             .font(.system(size: 12, weight: .medium))
             .frame(width: 16)
     }
@@ -338,19 +354,44 @@ public struct MenuBarItemView: View {
 
     @ViewBuilder
     private func graph(_ content: ItemContent) -> some View {
-        if let values = content.graphValues(monitor) {
-            Sparkline(values: values, domain: content.domain, color: content.accent?.color ?? content.alert ?? .primary)
+        switch content.glyph {
+        case let .ring(value):
+            Circle()
+                .trim(from: 0, to: min(max(value, 0), 1))
+                .stroke(style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .frame(width: 12, height: 12)
+        case let .dots(filled, faint):
+            HStack(spacing: 2) {
+                ForEach(0 ..< min(filled + faint, 5), id: \.self) { index in
+                    Circle().opacity(index < filled ? 1 : 0.3).frame(width: 5, height: 5)
+                }
+            }
+        case .symbol:
+            if style == .graphAndFigure {
+                symbol(content)
+            }
+        case nil:
+            if let values = content.graphValues(monitor) {
+                Sparkline(
+                    values: values,
+                    domain: content.domain,
+                    color: content.accent?.color ?? content.alert ?? .primary
+                )
                 .frame(width: Self.graphWidth, height: 16)
+            }
         }
     }
 
     private func label(_ content: ItemContent) -> some View {
-        VStack(spacing: -1.5) {
-            ForEach(Array((content.label ?? module.shortLabel).enumerated()), id: \.offset) { _, letter in
+        let text = content.label ?? module.shortLabel
+        let isLong = text.count > 3
+        return VStack(spacing: isLong ? -1 : -1.5) {
+            ForEach(Array(text.enumerated()), id: \.offset) { _, letter in
                 Text(String(letter))
             }
         }
-        .font(.system(size: 6.5, weight: .bold))
+        .font(.system(size: isLong ? 5 : 6.5, weight: .bold))
         .frame(width: 8)
     }
 }

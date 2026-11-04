@@ -89,13 +89,15 @@ public struct AppSettings: Codable, Sendable, Equatable {
         self.modules = modules
     }
 
-    /// First launch: Overview, CPU and Memory in the menu bar, everything else in the Hub.
+    /// First launch: Overview, CPU and Memory in the menu bar, developer modules off, the rest in the Hub.
     public static var defaultModules: [ModuleSettings] {
-        ModuleID.allCases.map { id in
+        let developerCollected = ModuleID.developerCollected
+        return ModuleID.allCases.map { id in
             switch id {
             case .overview: ModuleSettings(id: id, mode: .menuBar, style: .graphAndFigure)
             case .cpu: ModuleSettings(id: id, mode: .menuBar, style: .graphAndFigure)
             case .memory: ModuleSettings(id: id, mode: .menuBar, style: .labelled)
+            case _ where developerCollected.contains(id): ModuleSettings(id: id, mode: .off, style: .figure)
             default: ModuleSettings(id: id, mode: .hubOnly, style: .figure)
             }
         }

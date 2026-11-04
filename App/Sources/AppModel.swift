@@ -178,6 +178,7 @@ final class AppModel {
         }
         applyInfoModules()
         statusBar.apply(store.settings)
+        monitor.developer.options = DeveloperOptions(settings: store.settings)
         desktopWidgets.apply(store.settings.widgets)
         dock.apply(store.settings.dock)
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
@@ -213,6 +214,7 @@ final class AppModel {
         demand.sensors = everything || isSettingsOpen || modes.contains(.sensors) || modes.contains(.fans)
             || store.settings.alerts.isEnabled
         demand.processes = everything
+        demand.developer = store.settings.developerDemand(panelOpen: everything)
         demand.devices = everything || modes.contains(.deviceBatteries)
         monitor.demand = demand
         monitor.weather.isActive = isWanted(.weather)

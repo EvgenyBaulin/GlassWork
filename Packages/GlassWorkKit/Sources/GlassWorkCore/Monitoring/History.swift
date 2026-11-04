@@ -5,6 +5,11 @@ public struct History<Value: Sendable>: Sendable {
     public struct Point: Sendable {
         public let date: Date
         public let value: Value
+
+        public init(date: Date, value: Value) {
+            self.date = date
+            self.value = value
+        }
     }
 
     public let capacity: Int

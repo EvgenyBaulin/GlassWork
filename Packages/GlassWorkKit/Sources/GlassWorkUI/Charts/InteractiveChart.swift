@@ -9,18 +9,22 @@ public struct ChartSeries: Identifiable {
     public let color: Color
     public let points: [History<Double>.Point]
     public let format: (Double) -> String
+    /// False for a value shown only in the hover readout, such as Ping's loss next to its latency.
+    public let isPlotted: Bool
 
     public init(
         id: String,
         title: String,
         color: Color,
         points: [History<Double>.Point],
+        isPlotted: Bool = true,
         format: @escaping (Double) -> String
     ) {
         self.id = id
         self.title = title
         self.color = color
         self.points = points
+        self.isPlotted = isPlotted
         self.format = format
     }
 
@@ -73,9 +77,13 @@ public struct InteractiveChart: View {
             .animation(.easeOut(duration: 0.15), value: hover == nil)
     }
 
+    private var plottedSeries: [ChartSeries] {
+        series.filter(\.isPlotted)
+    }
+
     private var chart: some View {
         Chart {
-            ForEach(Array(series.enumerated()), id: \.element.id) { index, line in
+            ForEach(Array(plottedSeries.enumerated()), id: \.element.id) { index, line in
                 ForEach(line.points, id: \.date) { point in
                     AreaMark(
                         x: .value("Time", point.date),
@@ -97,7 +105,7 @@ public struct InteractiveChart: View {
                 RuleMark(x: .value("Cursor", hover))
                     .foregroundStyle(.primary.opacity(0.5))
                     .lineStyle(StrokeStyle(lineWidth: 1))
-                ForEach(Array(series.enumerated()), id: \.element.id) { index, line in
+                ForEach(Array(plottedSeries.enumerated()), id: \.element.id) { index, line in
                     if let point = line.nearest(to: hover) {
                         PointMark(
                             x: .value("Time", point.date),
@@ -118,13 +126,13 @@ public struct InteractiveChart: View {
         if let domain {
             return domain
         }
-        return 0 ... max((series.flatMap(\.points).map(\.value).max() ?? 1) * 1.1, 0.000_1)
+        return 0 ... max((plottedSeries.flatMap(\.points).map(\.value).max() ?? 1) * 1.1, 0.000_1)
     }
 
     /// Mirrored series are normalized separately, otherwise the smaller one lies flat on the axis.
     private func plotted(_ value: Double, index: Int) -> Double {
         guard mirrored else { return value }
-        let peak = max(series[index].points.map(\.value).max() ?? 1, 0.000_1)
+        let peak = max(plottedSeries[index].points.map(\.value).max() ?? 1, 0.000_1)
         return value / peak * (index == 0 ? 1 : -1)
     }
 

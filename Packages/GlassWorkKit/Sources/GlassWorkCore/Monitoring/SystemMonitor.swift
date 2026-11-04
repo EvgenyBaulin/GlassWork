@@ -15,6 +15,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var gpu = false
     public var sensors = false
     public var processes = false
+    public var developer: Set<ModuleID> = []
     public var devices = false
 
     public init() {}
@@ -50,6 +51,8 @@ public final class SystemMonitor {
 
     /// Timers, notes and other small modules, ticking along with the monitor.
     public let everyday = EverydayStore()
+    /// Git, Docker, Ping and the other developer modules, each at its own pace.
+    public let developer = DeveloperStore()
     /// Calendar events and reminders.
     public let agenda = AgendaStore()
     /// Screen time, commands, endpoints and GitHub.
@@ -78,6 +81,7 @@ public final class SystemMonitor {
         self.weather = weather
         self.rates = rates
         self.clipboard = clipboard
+        developer.onChange = { [weak self] in self?.onUpdate?() }
     }
 
     public var isRunning: Bool {
@@ -167,6 +171,7 @@ public final class SystemMonitor {
         let reading = await sampler.read(demand, includeSlow: includeSlow)
         apply(reading, at: now)
         everyday.tick(at: now)
+        developer.tick(at: now, demand: demand.developer)
         weather.tick(at: now)
         rates.tick(at: now)
         clipboard.tick(at: now)
