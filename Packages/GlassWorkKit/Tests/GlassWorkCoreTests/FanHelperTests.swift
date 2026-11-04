@@ -566,7 +566,7 @@ struct FanHelperXPCTests {
 
     @Test func shutdownRestoresAuto() {
         let harness = Harness(mode: 1)
-        harness.server.shutdown()
+        _ = harness.server.shutdown()
         #expect(harness.smc.number("F0Md") == 0)
     }
 }

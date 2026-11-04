@@ -40,6 +40,8 @@ private func renderedPNG(lines: [String]) throws -> Data {
     return data as Data
 }
 
+/// Recognition stalled the hosted build machines, so it runs on real Macs only.
+@Suite(.enabled(if: ProcessInfo.processInfo.environment["GW_SKIP_SNAPSHOTS"] == nil))
 struct TextRecognizerTests {
     @Test func coversBothLanguages() throws {
         let request = VNRecognizeTextRequest()
