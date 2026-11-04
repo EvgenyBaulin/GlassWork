@@ -81,6 +81,10 @@ final class AppModel {
         }
     }
 
+    func showPanel(_ module: ModuleID, beside frame: CGRect) {
+        panels.show(module, beside: frame)
+    }
+
     func toggleHub() {
         statusBar.revealHidden()
         panels.toggleHub(from: statusBar.hubButton)
