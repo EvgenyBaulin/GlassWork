@@ -46,7 +46,7 @@ final class StatusBarController: NSObject {
         for (index, setting) in wanted.reversed().enumerated() {
             Self.suggestPosition(for: setting.id, slot: index)
             if let item = items[setting.id] {
-                item.update(style: setting.style, numbers: settings.numberStyle)
+                item.update(style: setting.style, numbers: settings.numberStyle, options: setting.options)
             } else {
                 items[setting.id] = ModuleItem(setting: setting, numbers: settings.numberStyle, model: model)
             }
@@ -153,6 +153,7 @@ final class ModuleItem: NSObject {
     private let item: NSStatusItem
     private var style: DisplayStyle
     private var numbers: NumberStyle
+    private var options: [String: String]
     private let renderer: MenuBarItemRenderer
     private var width: CGFloat = 0
     private var visibility: NSKeyValueObservation?
@@ -161,12 +162,14 @@ final class ModuleItem: NSObject {
         module = setting.id
         style = setting.style
         self.numbers = numbers
+        options = setting.options
         self.model = model
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         renderer = MenuBarItemRenderer(
             module: setting.id,
             style: setting.style,
             numbers: numbers,
+            options: setting.options,
             monitor: model.monitor
         )
         super.init()
@@ -178,12 +181,14 @@ final class ModuleItem: NSObject {
         observeRemoval()
     }
 
-    func update(style: DisplayStyle, numbers: NumberStyle) {
+    func update(style: DisplayStyle, numbers: NumberStyle, options: [String: String]) {
         // A setting can change what the longest text is, such as which pair Rates shows.
         let newWidth = MenuBarItemView.width(module: module, style: style, numbers: numbers, monitor: model.monitor)
-        guard style != self.style || numbers != self.numbers || newWidth != width else { return }
+        let isSame = style == self.style && numbers == self.numbers && options == self.options
+        guard !isSame || newWidth != width else { return }
         self.style = style
         self.numbers = numbers
+        self.options = options
         render()
     }
 
@@ -201,11 +206,18 @@ final class ModuleItem: NSObject {
     }
 
     private func render() {
-        width = MenuBarItemView.width(module: module, style: style, numbers: numbers, monitor: model.monitor)
+        width = MenuBarItemView.width(
+            module: module,
+            style: style,
+            numbers: numbers,
+            options: options,
+            monitor: model.monitor
+        )
         item.length = width
         renderer.style = style
         renderer.numbers = numbers
         renderer.appearance = item.button?.effectiveAppearance
+        renderer.options = options
         let size = CGSize(width: width, height: NSStatusBar.system.thickness)
         item.button?.image = renderer.image(size: size, force: true)
     }

@@ -68,7 +68,6 @@ public final class FanControlModel {
     @ObservationIgnored private let now: () -> TimeInterval
     @ObservationIgnored private var client: FanHelperClient?
     @ObservationIgnored private var loop: Task<Void, Never>?
-    @ObservationIgnored private var lastSample: SensorSample?
 
     public init(
         store: SettingsStore,
@@ -112,7 +111,12 @@ public final class FanControlModel {
     }
 
     public func refreshHelperState() {
+        let wasWaiting = helperState == .needsApproval
         helperState = installer?.state ?? .notInstalled
+        // The user asked for control before approving, so approval finishes that request.
+        if wasWaiting, helperState == .installed {
+            store.update { $0.fans.isControlEnabled = true }
+        }
     }
 
     public func select(_ newMode: FanMode) {
@@ -194,7 +198,7 @@ public final class FanControlModel {
     /// One pass of the engine. Public so tests can drive it without waiting for the timer.
     public func step() async {
         let sample = await readSensors()
-        lastSample = sample
+        seedCustomTarget(from: sample)
         let commands = engine.step(FanEngineInput(
             time: now(),
             sample: sample,
@@ -211,6 +215,14 @@ public final class FanControlModel {
         } else {
             stopLoop()
         }
+    }
+
+    /// A first visit to Custom holds today's speed. Without a target the fans would drop to minimum.
+    private func seedCustomTarget(from sample: SensorSample?) {
+        guard engine.mode == .custom, store.settings.fans.customRPM == 0,
+              let average = sample?.averageFanRPM, average > 0
+        else { return }
+        store.update { $0.fans.customRPM = average.rounded() }
     }
 
     private func deliver(_ commands: [FanCommand]) async {

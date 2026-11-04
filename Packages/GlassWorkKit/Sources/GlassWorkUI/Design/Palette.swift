@@ -31,6 +31,7 @@ public extension ModuleID {
         case .battery: loc("Battery")
         case .gpu: loc("GPU")
         case .sensors: loc("Sensors")
+        case .fans: loc("Fans")
         case .uptime: loc("Uptime")
         case .worldClocks: loc("World Clocks")
         case .timers: loc("Timers")
@@ -64,6 +65,7 @@ public extension ModuleID {
         case .battery: "battery.75percent"
         case .gpu: "cube"
         case .sensors: "thermometer.medium"
+        case .fans: "fan"
         case .uptime: "clock.arrow.circlepath"
         case .worldClocks: "globe"
         case .timers: "timer"
@@ -91,7 +93,7 @@ public extension ModuleID {
         case .overview, .uptime: Palette.gray
         case .cpu: Palette.blue
         case .memory, .battery, .deviceBatteries: Palette.green
-        case .disk: Palette.cyan
+        case .disk, .fans: Palette.cyan
         case .network: Palette.teal
         case .gpu: Palette.purple
         case .sensors, .date, .calendar, .endsIn: Palette.red
@@ -120,6 +122,7 @@ public extension ModuleID {
         case .battery: "BAT"
         case .gpu: "GPU"
         case .sensors: "TMP"
+        case .fans: "FAN"
         case .uptime: "UP"
         case .weather: "WTH"
         case .rates: "FX"
@@ -141,6 +144,7 @@ public extension ModuleID {
         case .colours, .appearance, .eject, .sunMoon, .date: true
         case .calendar, .endsIn, .todos, .deviceBatteries: true
         case .weather, .rates, .clipboard: true
+        case .fans: FanHardware.hasFans
         default: false
         }
     }

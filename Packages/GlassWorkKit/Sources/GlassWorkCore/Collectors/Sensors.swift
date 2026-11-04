@@ -102,7 +102,7 @@ public struct SensorSample: Codable, Sendable, Equatable {
 
 public enum FanHardware {
     /// Macs without fans hide the module altogether.
-    public static let count = Int(SMCClient()?.read("FNum")?.number ?? 0)
+    public static let hasFans = (SMCClient()?.read("FNum")?.number ?? 0) > 0
 }
 
 /// Reads temperature and fan keys. The key list is discovered once because enumeration is slow.

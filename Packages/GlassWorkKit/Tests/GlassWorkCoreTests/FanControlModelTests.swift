@@ -292,6 +292,46 @@ struct FanControlModelTests {
         #expect(!store.settings.fans.isControlEnabled)
     }
 
+    @Test func approvingLaterFinishesTheRequest() {
+        let installer = FakeInstaller()
+        installer.stateAfterInstall = .needsApproval
+        let store = makeStore()
+        let model = makeModel(installer: installer, store: store)
+        model.install()
+        installer.state = .installed
+        model.refreshHelperState()
+        #expect(model.canControl)
+    }
+
+    @Test func anInstalledHelperDoesNotEnableControlByItself() {
+        let store = makeStore()
+        let model = makeModel(installer: installed(), store: store)
+        model.refreshHelperState()
+        #expect(!model.canControl)
+    }
+
+    @Test func aFirstCustomHoldsTheCurrentSpeed() async {
+        let installer = installed()
+        let store = makeStore { $0.fans.isControlEnabled = true }
+        let model = makeModel(installer: installer, store: store)
+        model.select(.custom)
+        await model.step()
+        #expect(store.settings.fans.customRPM == 2000)
+        #expect(installer.client.commands == [FanCommand(fan: 0, action: .target(2000))])
+    }
+
+    @Test func aSavedCustomTargetIsKept() async {
+        let installer = installed()
+        let store = makeStore {
+            $0.fans.isControlEnabled = true
+            $0.fans.customRPM = 3000
+        }
+        let model = makeModel(installer: installer, store: store)
+        model.select(.custom)
+        await model.step()
+        #expect(store.settings.fans.customRPM == 3000)
+    }
+
     @Test func anApprovalErrorIsNotAFailure() {
         let installer = FakeInstaller()
         installer.failure = Failure()
