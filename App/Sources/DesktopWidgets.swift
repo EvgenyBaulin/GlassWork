@@ -14,6 +14,8 @@ final class DesktopWidgetController {
 
     init(model: AppModel) {
         self.model = model
+        let store = model.monitor.nowPlaying
+        state.perform = { store.perform($0) }
     }
 
     func apply(_ settings: WidgetSettings) {
@@ -155,6 +157,7 @@ final class DesktopWidgetController {
 final class DesktopWidgetState {
     var snapshot = WidgetSnapshot(date: .now)
     var now = Date()
+    var perform: @MainActor (NowPlayingCommand) -> Void = { _ in }
 }
 
 struct DesktopWidgetView: View {
@@ -168,6 +171,7 @@ struct DesktopWidgetView: View {
 
     var body: some View {
         WidgetFace(kind: placement.kind, size: placement.size, snapshot: state.snapshot, now: state.now)
+            .environment(\.nowPlayingButton, NowPlayingButtonMaker(perform: state.perform))
             .padding(16)
             .frame(width: placement.size.width, height: placement.size.height)
             .glassEffect(.regular, in: .rect(cornerRadius: 22))

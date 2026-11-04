@@ -17,6 +17,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var processes = false
     public var developer: Set<ModuleID> = []
     public var devices = false
+    public var nowPlaying = false
 
     public init() {}
 }
@@ -63,6 +64,8 @@ public final class SystemMonitor {
     public let weather: WeatherStore
     public let rates: RatesStore
     public let clipboard: ClipboardStore
+    /// The adapter process runs only while `demand.nowPlaying` is set.
+    public let nowPlaying: NowPlayingStore
 
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
@@ -78,12 +81,15 @@ public final class SystemMonitor {
     public init(
         weather: WeatherStore = WeatherStore(),
         rates: RatesStore = RatesStore(),
-        clipboard: ClipboardStore = ClipboardStore()
+        clipboard: ClipboardStore = ClipboardStore(),
+        nowPlaying: NowPlayingStore = NowPlayingStore()
     ) {
         self.weather = weather
         self.rates = rates
         self.clipboard = clipboard
+        self.nowPlaying = nowPlaying
         developer.onChange = { [weak self] in self?.onUpdate?() }
+        nowPlaying.onUpdate = { [weak self] in self?.onUpdate?() }
     }
 
     public var isRunning: Bool {
@@ -105,6 +111,7 @@ public final class SystemMonitor {
     public func stop() {
         loop?.cancel()
         loop = nil
+        nowPlaying.stop()
     }
 
     /// Everything widgets show, read fresh regardless of the current demand.
@@ -142,6 +149,7 @@ public final class SystemMonitor {
         snapshot.contributions = activity.contributions
         snapshot.place = weather.places.first
         snapshot.words = wordOfDay.recent(6, at: date)
+        snapshot.nowPlaying = nowPlaying.widgetData
         return snapshot
     }
 
@@ -179,6 +187,7 @@ public final class SystemMonitor {
         weather.tick(at: now)
         rates.tick(at: now)
         clipboard.tick(at: now)
+        nowPlaying.tick(wanted: demand.nowPlaying, at: now)
         onUpdate?()
     }
 

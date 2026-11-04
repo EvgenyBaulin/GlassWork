@@ -40,6 +40,7 @@ public struct ModulePanel: View {
         case .weather: WeatherPanel(store: monitor.weather)
         case .rates: RatesPanel(store: monitor.rates)
         case .clipboard: ClipboardPanel(store: monitor.clipboard)
+        case .nowPlaying: NowPlayingPanel(store: monitor.nowPlaying)
         default: EmptyView()
         }
     }
