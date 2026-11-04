@@ -156,7 +156,7 @@ public final class DeveloperStore {
     }
 
     private func watchRepositories() {
-        // Protected folders stay unwatched: FSEvents there would also ask for permission.
+        // Only what could be read: FSEvents in a protected folder GlassWork may not open would also ask.
         let paths = git?.repositories.filter { $0.problem == nil }.map(\.path).sorted() ?? []
         gitWatcher.watch(paths) { [weak self] changed in
             Task { @MainActor in self?.repositoriesChanged(changed) }

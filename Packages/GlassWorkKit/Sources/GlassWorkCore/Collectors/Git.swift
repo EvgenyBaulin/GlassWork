@@ -26,7 +26,7 @@ public struct GitStatus: Codable, Sendable, Equatable {
 public enum GitProblem: Codable, Sendable, Equatable {
     /// The folder was moved, deleted, or lost its `.git`.
     case missing
-    /// In a folder macOS protects, so GlassWork leaves it alone.
+    /// In a folder macOS protects: GlassWork was not given access, or does not look there.
     case needsPermission
     case failed
 }
@@ -176,9 +176,21 @@ public enum ProtectedFolders {
         "Pictures",
     ]
 
+    /// The ones a repository can be read from once the user adds it by hand.
+    private static let openedByHand = ["Desktop", "Documents", "Downloads"]
+
     public static func contains(_ path: String, home: String) -> Bool {
         let protected = inHome.map { "\(home)/\($0)" } + ["/Volumes"]
         return protected.contains { path == $0 || path.hasPrefix($0 + "/") }
+    }
+
+    /// Whether GlassWork may read `path`. Looking inside a protected folder can raise a macOS prompt, which is
+    /// acceptable only as the result of the user adding the folder. Automatic discovery never gets there.
+    public static func allowsReading(_ path: String, isManual: Bool, home: String) -> Bool {
+        guard contains(path, home: home) else { return true }
+        guard isManual else { return false }
+        let opened = openedByHand.map { "\(home)/\($0)" } + ["/Volumes"]
+        return opened.contains { path == $0 || path.hasPrefix($0 + "/") }
     }
 }
 
@@ -206,6 +218,16 @@ public enum GitDiscovery {
 
     public static func isRepository(_ path: String) -> Bool {
         FileManager.default.fileExists(atPath: path + "/.git")
+    }
+
+    /// A folder macOS will not open looks the same as a missing one to `isRepository`.
+    static func isDenied(_ path: String) -> Bool {
+        do {
+            _ = try FileManager.default.contentsOfDirectory(atPath: path)
+            return false
+        } catch {
+            return (error as NSError).code == NSFileReadNoPermissionError
+        }
     }
 
     private static func folders(in path: String) -> [String] {
@@ -265,11 +287,12 @@ public struct GitCollector: Sendable {
     }
 
     private func repository(_ path: String, git: String, isManual: Bool) async -> GitRepository {
-        guard !ProtectedFolders.contains(path, home: home) else {
+        guard ProtectedFolders.allowsReading(path, isManual: isManual, home: home) else {
             return GitRepository(path: path, problem: .needsPermission, isManual: isManual)
         }
         guard GitDiscovery.isRepository(path) else {
-            return GitRepository(path: path, problem: .missing, isManual: isManual)
+            let problem: GitProblem = GitDiscovery.isDenied(path) ? .needsPermission : .missing
+            return GitRepository(path: path, problem: problem, isManual: isManual)
         }
         let status = try? await runner.run(
             git,
@@ -277,7 +300,8 @@ public struct GitCollector: Sendable {
             timeout: 10
         )
         guard let status, status.status == 0 else {
-            return GitRepository(path: path, problem: .failed, isManual: isManual)
+            let problem: GitProblem = GitDiscovery.isDenied(path) ? .needsPermission : .failed
+            return GitRepository(path: path, problem: problem, isManual: isManual)
         }
         let log = try? await runner.run(git, arguments: Self.arguments(path, "log", "-1", "--format=%ct"), timeout: 5)
         return GitRepository(
