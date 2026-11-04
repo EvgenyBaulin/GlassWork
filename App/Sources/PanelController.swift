@@ -68,6 +68,17 @@ final class PanelController {
         }
     }
 
+    /// Opens a panel next to a desktop widget, on whichever side has room.
+    func show(_ module: ModuleID, beside frame: CGRect) {
+        closeTransient()
+        show(.module(module), from: nil, view: AnyView(ModulePanel(module: module, monitor: model.monitor)))
+        guard let panel else { return }
+        let visible = NSScreen.main?.visibleFrame ?? .zero
+        let right = frame.maxX + 12
+        let x = right + panel.frame.width <= visible.maxX ? right : frame.minX - panel.frame.width - 12
+        panel.setFrameTopLeftPoint(CGPoint(x: x, y: min(frame.maxY, visible.maxY)))
+    }
+
     func closeTransient() {
         if let outsideClick {
             NSEvent.removeMonitor(outsideClick)

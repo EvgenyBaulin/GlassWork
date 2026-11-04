@@ -1141,6 +1141,16 @@
         }
       }
     },
+    "Lock Position": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрепить"
+          }
+        }
+      }
+    },
     "Low": {
       "localizations": {
         "ru": {
@@ -2227,6 +2237,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Разобрать папку"
+          }
+        }
+      }
+    },
+    "Unlock Position": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открепить"
           }
         }
       }

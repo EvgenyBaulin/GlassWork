@@ -28,6 +28,29 @@ public extension WidgetKind {
     }
 }
 
+public extension WidgetKind {
+    /// The module whose panel a click on this widget opens.
+    var module: ModuleID {
+        switch self {
+        case .activity, .macHealth: .overview
+        case .battery: .battery
+        case .storage: .disk
+        case .temperature: .sensors
+        case .topApps: .cpu
+        case .network: .network
+        case .uptime: .uptime
+        case .digitalClock, .modularClock, .calendarMonth, .yearInDots: .date
+        case .upNext: .calendar
+        case .endsIn: .endsIn
+        case .todo: .todos
+        case .note: .notes
+        case .timer: .timers
+        case .countdown: .countdown
+        case .moon, .daylight: .sunMoon
+        }
+    }
+}
+
 /// One widget face, shared by WidgetKit and GlassWork's own desktop windows.
 public struct WidgetFace: View {
     private let kind: WidgetKind
