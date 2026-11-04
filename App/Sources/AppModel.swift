@@ -107,6 +107,7 @@ final class AppModel {
 
     /// Keep Awake, Stopwatch and Appearance act on the click itself.
     func performClickAction(_ module: ModuleID) {
+        panels.closeTransient()
         let store = monitor.everyday
         switch module {
         case .keepAwake: store.toggleKeepAwake()
@@ -223,6 +224,14 @@ final class AppModel {
 
     func closePanels() {
         panels.closeTransient()
+    }
+
+    func closeQuickPaste() {
+        clipboard.closeQuickPaste()
+    }
+
+    func isStatusItem(_ window: NSWindow) -> Bool {
+        statusBar.owns(window)
     }
 
     /// Screen time counts only after the user turns it on.

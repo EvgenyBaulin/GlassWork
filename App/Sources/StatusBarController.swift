@@ -57,6 +57,11 @@ final class StatusBarController: NSObject {
         items.values.forEach { $0.refresh() }
     }
 
+    func owns(_ window: NSWindow) -> Bool {
+        window === hub.button?.window || window === separator.button?.window
+            || items.values.contains { $0.window === window }
+    }
+
     /// Seeds macOS's saved position for a new item. ⌘-dragged items keep the place the user gave them.
     private static func suggestPosition(for module: ModuleID, slot: Int) {
         let key = "NSStatusItem Preferred Position GlassWork-\(module.rawValue)"
@@ -99,6 +104,7 @@ final class StatusBarController: NSObject {
     }
 
     @objc private func separatorClicked() {
+        model.closePanels()
         setCollapsed(!collapsed)
         if !collapsed {
             scheduleHide()
@@ -157,6 +163,10 @@ final class ModuleItem: NSObject {
     private let renderer: MenuBarItemRenderer
     private var width: CGFloat = 0
     private var visibility: NSKeyValueObservation?
+
+    var window: NSWindow? {
+        item.button?.window
+    }
 
     init(setting: ModuleSettings, numbers: NumberStyle, model: AppModel) {
         module = setting.id
