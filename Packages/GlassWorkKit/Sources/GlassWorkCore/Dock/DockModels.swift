@@ -69,6 +69,17 @@ public struct DockSettings: Codable, Sendable, Equatable {
     public var items: [DockItem] = []
 
     public init() {}
+
+    /// Every app in the Dock, folders included.
+    public var apps: [DockApp] {
+        items.flatMap { item -> [DockApp] in
+            switch item {
+            case let .app(app): [app]
+            case let .folder(folder): folder.apps
+            case .widget: []
+            }
+        }
+    }
 }
 
 /// Edits the Dock's contents. Pure, so every folder rule is testable.

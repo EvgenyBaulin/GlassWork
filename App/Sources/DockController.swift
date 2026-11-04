@@ -12,6 +12,10 @@ final class DockController {
     private let state = DockLiveState()
     private var window: NSPanel?
     private var screens: NSObjectProtocol?
+    private var workspace: [NSObjectProtocol] = []
+    private var tracker = DockLaunchTracker()
+    private var expiry: Task<Void, Never>?
+    private var bundleIDs: [String: String] = [:]
     /// What the view asked for.
     private var requested = DockSpace.rest
     /// What the window is sized for.
@@ -68,6 +72,17 @@ final class DockController {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.place() }
         }
+        observeApps()
+    }
+
+    private func observeApps() {
+        let center = NSWorkspace.shared.notificationCenter
+        let names = [NSWorkspace.didLaunchApplicationNotification, NSWorkspace.didTerminateApplicationNotification]
+        workspace = names.map { name in
+            center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.refreshRunning() }
+            }
+        }
     }
 
     /// Restores even with no window, so a Dock left hidden by a crash comes back once it is turned off.
@@ -77,6 +92,11 @@ final class DockController {
             NotificationCenter.default.removeObserver(screens)
         }
         screens = nil
+        workspace.forEach(NSWorkspace.shared.notificationCenter.removeObserver)
+        workspace = []
+        expiry?.cancel()
+        tracker = DockLaunchTracker()
+        state.launching = []
         window?.close()
         window = nil
         requested = .rest
@@ -86,7 +106,7 @@ final class DockController {
 
     private var actions: DockActions {
         DockActions(
-            open: { NSWorkspace.shared.open(URL(filePath: $0.path)) },
+            open: { [weak self] in self?.launch($0) },
             showPanel: { [weak self] in self?.model.showSettings(module: $0) },
             update: { [weak self] change in
                 self?.model.store.update { $0.dock.items = change($0.dock.items) }
@@ -101,7 +121,8 @@ final class DockController {
     /// Grows at once, so nothing is cut off. Shrinks late, so nothing is cut off on the way down either.
     private func updateSpace() {
         shrink?.cancel()
-        let wanted = requested
+        // A bouncing icon rises above the bar, wherever the pointer has gone.
+        let wanted = max(requested, state.launching.isEmpty ? .rest : .magnified)
         if wanted >= space {
             space = wanted
             place()
@@ -115,9 +136,52 @@ final class DockController {
         }
     }
 
+    /// Bounces from the click until the app is up, and stops at once if it cannot start.
+    private func launch(_ app: DockApp) {
+        let url = URL(filePath: app.path)
+        guard url.pathExtension == "app" else {
+            NSWorkspace.shared.open(url)
+            return
+        }
+        tracker.begin(app.path, isRunning: state.running.contains(app.path), at: Date())
+        showLaunches()
+        NSWorkspace.shared.openApplication(at: url, configuration: .init()) { [weak self] _, error in
+            let failed = error != nil
+            Task { @MainActor in self?.launchReturned(app.path, failed: failed) }
+        }
+    }
+
+    private func launchReturned(_ path: String, failed: Bool) {
+        if failed {
+            tracker.fail(path)
+        }
+        refreshRunning()
+    }
+
+    /// An app that is still starting counts only once it has finished: that is when bouncing stops.
     private func refreshRunning() {
-        state.running = Set(NSWorkspace.shared.runningApplications
-            .compactMap { $0.bundleURL?.path(percentEncoded: false) })
+        let apps = state.settings.apps
+        for app in apps where bundleIDs[app.path] == nil {
+            bundleIDs[app.path] = Bundle(path: app.path)?.bundleIdentifier
+        }
+        let running = NSWorkspace.shared.runningApplications.filter(\.isFinishedLaunching).map {
+            RunningApp(bundleID: $0.bundleIdentifier, path: $0.bundleURL?.path(percentEncoded: false))
+        }
+        state.running = DockRunningApps.match(apps, bundleIDs: bundleIDs, running: running)
+        tracker.update(running: state.running, at: Date())
+        showLaunches()
+    }
+
+    private func showLaunches() {
+        state.launching = tracker.launching
+        updateSpace()
+        expiry?.cancel()
+        guard let deadline = tracker.nextDeadline else { return }
+        expiry = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(deadline.timeIntervalSinceNow))
+            guard let self, !Task.isCancelled else { return }
+            refreshRunning()
+        }
     }
 
     /// Always the screen with the menu bar: the "main" screen follows the keyboard focus and would make

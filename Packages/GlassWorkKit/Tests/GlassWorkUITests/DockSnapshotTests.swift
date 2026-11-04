@@ -46,4 +46,17 @@ struct DockSnapshotTests {
     func magnifiedAtTheEdge(dark: Bool) {
         snapshotPanel(dock(space: .magnified, pointer: -180), name: "edge", dark: dark)
     }
+
+    /// Not running, running, and a launch at the top of its jump.
+    @Test(arguments: [true, false])
+    func appStates(dark: Bool) {
+        let row = HStack(alignment: .bottom, spacing: 8) {
+            AppTile(app: apps[0], size: 48, isRunning: false) {}
+            AppTile(app: apps[1], size: 48, isRunning: true) {}
+            AppTile(app: apps[2], size: 48, isRunning: false, isLaunching: true, pose: 1) {}
+        }
+        .padding(8)
+        .padding(.top, 24)
+        snapshotPanel(row, name: "states", dark: dark)
+    }
 }

@@ -121,6 +121,8 @@ public final class DockLiveState {
     public var settings: DockSettings
     /// Paths of Dock apps that are running, as stored in the settings.
     public var running: Set<String> = []
+    /// Paths of Dock apps that were clicked and have not started yet.
+    public var launching: Set<String> = []
 
     public init(settings: DockSettings = DockSettings()) {
         self.settings = settings

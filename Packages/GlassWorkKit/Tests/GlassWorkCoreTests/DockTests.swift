@@ -201,6 +201,85 @@ struct DockBarLayoutTests {
     }
 }
 
+struct DockLaunchTrackerTests {
+    private let path = "/Applications/Mail.app"
+    private let start = Date(timeIntervalSince1970: 1_800_000_000)
+
+    @Test func aClickStartsTheBounce() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        #expect(tracker.launching == [path])
+        #expect(tracker.nextDeadline == start.addingTimeInterval(DockLaunchTracker.timeout))
+    }
+
+    @Test func aRunningAppDoesNotBounce() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: true, at: start)
+        #expect(tracker.launching.isEmpty)
+    }
+
+    @Test func stopsOnceTheAppRuns() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        tracker.update(running: [path], at: start.addingTimeInterval(1))
+        #expect(tracker.launching.isEmpty)
+        #expect(tracker.nextDeadline == nil)
+    }
+
+    @Test func stopsOnAFailedLaunch() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        tracker.fail(path)
+        #expect(tracker.launching.isEmpty)
+    }
+
+    @Test func stopsAtTheTimeout() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        tracker.update(running: [], at: start.addingTimeInterval(DockLaunchTracker.timeout - 1))
+        #expect(tracker.launching == [path])
+        tracker.update(running: [], at: start.addingTimeInterval(DockLaunchTracker.timeout))
+        #expect(tracker.launching.isEmpty)
+    }
+
+    @Test func otherAppsKeepBouncing() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        tracker.begin("/Applications/Notes.app", isRunning: false, at: start)
+        tracker.update(running: [path], at: start)
+        #expect(tracker.launching == ["/Applications/Notes.app"])
+    }
+}
+
+struct DockRunningAppsTests {
+    private let safari = DockApp(path: "/Applications/Safari.app/", name: "Safari")
+    private let mail = DockApp(path: "/System/Applications/Mail.app/", name: "Mail")
+
+    @Test func matchesAcrossALinkByBundleID() {
+        let running = [RunningApp(
+            bundleID: "com.apple.Safari",
+            path: "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/"
+        )]
+        let bundleIDs = [safari.path: "com.apple.Safari"]
+        #expect(DockRunningApps.match([safari, mail], bundleIDs: bundleIDs, running: running) == [safari.path])
+    }
+
+    @Test func fallsBackToThePathWithoutItsSlash() {
+        let running = [RunningApp(bundleID: nil, path: "/System/Applications/Mail.app")]
+        #expect(DockRunningApps.match([mail], bundleIDs: [:], running: running) == [mail.path])
+    }
+
+    @Test func aQuitAppIsNoLongerMatched() {
+        #expect(DockRunningApps.match([mail], bundleIDs: [mail.path: "com.apple.mail"], running: []).isEmpty)
+    }
+
+    @Test func seesAppsInFolders() {
+        var settings = DockSettings()
+        settings.items = [.app(safari), .folder(AppFolder(name: "Work", apps: [mail])), .widget(.cpu)]
+        #expect(settings.apps == [safari, mail])
+    }
+}
+
 struct SystemDockAppsTests {
     @Test func readsPinnedApps() {
         let apps = SystemDockApps.parse([

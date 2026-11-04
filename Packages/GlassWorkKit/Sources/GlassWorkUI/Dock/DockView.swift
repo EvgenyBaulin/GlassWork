@@ -131,13 +131,23 @@ public struct DockView: View {
     private func tile(_ item: DockItem, size: CGFloat) -> some View {
         switch item {
         case let .app(app):
-            AppTile(app: app, size: size, isRunning: running.contains(app.path)) { actions.open(app) }
+            AppTile(
+                app: app,
+                size: size,
+                isRunning: running.contains(app.path),
+                isLaunching: state.launching.contains(app.path)
+            ) { actions.open(app) }
                 .draggable(app.path)
                 .dropDestination(for: String.self) { paths, _ in
                     drop(paths) { dragged, items in DockLayout.drop(dragged, onto: app, in: items) }
                 }
         case let .folder(folder):
-            FolderTile(folder: folder, size: size, isRunning: folder.apps.contains { running.contains($0.path) }) {
+            FolderTile(
+                folder: folder,
+                size: size,
+                isRunning: folder.apps.contains { running.contains($0.path) },
+                isLaunching: folder.apps.contains { state.launching.contains($0.path) }
+            ) {
                 openFolderID = openFolderID == folder.id ? nil : folder.id
             }
             .dropDestination(for: String.self) { paths, _ in
@@ -193,17 +203,45 @@ struct AppIcon: View {
     }
 }
 
+/// Jumps until the app is up. Only draws higher, so nothing around the icon moves.
+struct LaunchBounce: ViewModifier {
+    let isActive: Bool
+    let size: CGFloat
+    /// A fixed height from 0 to 1 in place of the motion, for snapshots.
+    var pose: Double?
+    @Environment(\.accessibilityReduceMotion) private var reducesMotion
+
+    func body(content: Content) -> some View {
+        let height = size * DockBarLayout.bounce
+        let isStill = reducesMotion
+        content.keyframeAnimator(initialValue: pose ?? 0, repeating: isActive && pose == nil) { view, lift in
+            view
+                .offset(y: isStill ? 0 : -height * lift)
+                .opacity(isStill ? 1 - lift / 2 : 1)
+        } keyframes: { _ in
+            KeyframeTrack {
+                CubicKeyframe(1, duration: 0.28)
+                CubicKeyframe(0, duration: 0.28)
+                LinearKeyframe(0, duration: 0.08)
+            }
+        }
+    }
+}
+
 struct AppTile: View {
     let app: DockApp
     let size: CGFloat
     let isRunning: Bool
+    var isLaunching = false
+    var pose: Double?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 3) {
                 AppIcon(app: app, size: size)
-                Circle().fill(isRunning ? Color.primary : .clear).frame(width: 4, height: 4)
+                    .modifier(LaunchBounce(isActive: isLaunching, size: size, pose: pose))
+                Circle().fill(isRunning || isLaunching ? Color.primary : .clear).frame(width: 4, height: 4)
             }
         }
         .buttonStyle(.plain)
@@ -216,6 +254,7 @@ struct FolderTile: View {
     let folder: AppFolder
     let size: CGFloat
     let isRunning: Bool
+    var isLaunching = false
     let action: () -> Void
 
     var body: some View {
@@ -224,7 +263,8 @@ struct FolderTile: View {
                 content
                     .frame(width: size, height: size)
                     .background(.white.opacity(0.14), in: .rect(cornerRadius: size / 4.5))
-                Circle().fill(isRunning ? Color.primary : .clear).frame(width: 4, height: 4)
+                    .modifier(LaunchBounce(isActive: isLaunching, size: size))
+                Circle().fill(isRunning || isLaunching ? Color.primary : .clear).frame(width: 4, height: 4)
             }
         }
         .buttonStyle(.plain)
