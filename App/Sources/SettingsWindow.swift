@@ -366,6 +366,13 @@ struct GeneralPane: View {
             Section(loc("Notifications")) {
                 Toggle(loc("Notify about low battery and high temperature"), isOn: alertsEnabled)
             }
+            DiagnosticLogSection(
+                isOn: keepsLog,
+                path: (DiagnosticLog.defaultURL.path(percentEncoded: false) as NSString).abbreviatingWithTildeInPath,
+                size: DiagnosticLog.size(of: DiagnosticLog.defaultURL),
+                reveal: { NSWorkspace.shared.activateFileViewerSelecting([DiagnosticLog.defaultURL]) },
+                send: sendLog
+            )
             Section(loc("Settings file")) {
                 LabeledContent("settings.json") {
                     Button(loc("Reveal in Finder")) {
@@ -411,6 +418,20 @@ extension GeneralPane {
               let settings = try? SettingsFile(url: url).load()
         else { return }
         store.replace(with: settings)
+    }
+
+    var keepsLog: Binding<Bool> {
+        Binding(
+            get: { store.settings.keepsDiagnosticLog },
+            set: { value in store.update { $0.keepsDiagnosticLog = value } }
+        )
+    }
+
+    /// Opens a draft and stops there: sending it, and to whom, stays with the user.
+    func sendLog() {
+        guard let service = NSSharingService(named: .composeEmail) else { return }
+        service.subject = loc("GlassWork diagnostic log")
+        service.perform(withItems: [DiagnosticLog.defaultURL])
     }
 
     /// macOS asks for permission the first time this is turned on.

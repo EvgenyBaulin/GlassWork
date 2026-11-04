@@ -13226,6 +13226,110 @@
           }
         }
       }
+    },
+    "Diagnostics": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Диагностика"
+          }
+        }
+      }
+    },
+    "Keep diagnostic log": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вести журнал диагностики"
+          }
+        }
+      }
+    },
+    "Off by default. Local file only; nothing is sent unless you click Send.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По умолчанию выключен. Хранится только на этом Mac, ничего не отправляется, пока вы сами не нажмёте «Отправить»."
+          }
+        }
+      }
+    },
+    "Reveal log": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать журнал"
+          }
+        }
+      }
+    },
+    "Send to developer…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправить разработчику…"
+          }
+        }
+      }
+    },
+    "Turning this off deletes the log.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если выключить, журнал удалится."
+          }
+        }
+      }
+    },
+    "keeps %lld days": {
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "хранится %lld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "хранится %lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "хранится %lld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "хранится %lld дня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "GlassWork diagnostic log": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Журнал диагностики GlassWork"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

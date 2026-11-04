@@ -103,6 +103,8 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var fans = FanSettings()
     public var windowTiles = WindowTilesSettings()
     public var hub = HubSettings()
+    /// Off unless the user turns it on. See `DiagnosticLog`.
+    public var keepsDiagnosticLog = false
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
         self.modules = modules
@@ -141,7 +143,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
         case version, modules, numberStyle, hiding, alerts, widgets, dock, weather, rates, clipboard, welcomeCompleted
-        case fans, windowTiles, hub
+        case fans, windowTiles, hub, keepsDiagnosticLog
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -164,6 +166,7 @@ extension AppSettings {
         windowTiles = (try? container.decodeIfPresent(WindowTilesSettings.self, forKey: .windowTiles))
             ?? WindowTilesSettings()
         hub = (try? container.decodeIfPresent(HubSettings.self, forKey: .hub)) ?? HubSettings()
+        keepsDiagnosticLog = try container.decodeIfPresent(Bool.self, forKey: .keepsDiagnosticLog) ?? false
         normalize()
     }
 

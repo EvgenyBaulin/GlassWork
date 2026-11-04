@@ -10,6 +10,7 @@ import WidgetKit
 @MainActor
 final class AppModel {
     let store = SettingsStore()
+    let diagnostics = DiagnosticLog()
     let monitor = SystemMonitor(nowPlaying: NowPlayingBridge.makeStore())
     private let fanSensors = FanSensorSource()
     private(set) lazy var fans = makeFans()
@@ -37,6 +38,8 @@ final class AppModel {
     private var isQuickQuitOpen = false
     private var timer: Timer?
     private var thresholds = ThresholdTracker()
+    private var isLogging = false
+    private var hasReportedSettingsProblem = false
     /// Widgets in the system's desktop layer, as WidgetKit last reported them.
     private var systemWidgetKinds: Set<WidgetKind> = []
 
@@ -213,6 +216,7 @@ final class AppModel {
     private func applySettings() {
         withObservationTracking {
             _ = store.settings
+            _ = store.lastError
         } onChange: { [weak self] in
             Task { @MainActor in self?.applySettings() }
         }
@@ -224,15 +228,8 @@ final class AppModel {
         windowTiles.apply(store.settings.windowTiles)
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
         applyPolling()
+        applyDiagnostics()
         updateDemand()
-    }
-
-    private func applyPolling() {
-        let options = store.settings.module(.cpu)?.options ?? [:]
-        monitor.interval = TimeInterval(options.number(ItemOption.samplingSeconds, default: 2))
-        monitor.slowsOnBattery = options.flag(ItemOption.slowsOnBattery, default: true)
-        monitor.everyday.letsDisplaySleep = store.settings.module(.keepAwake)?.options
-            .flag(ItemOption.letsDisplaySleep, default: false) ?? false
     }
 
     /// Goes first: the width of a menu bar item depends on these settings.
@@ -531,6 +528,32 @@ extension AppModel {
 }
 
 private extension AppModel {
+    func applyPolling() {
+        let options = store.settings.module(.cpu)?.options ?? [:]
+        monitor.interval = TimeInterval(options.number(ItemOption.samplingSeconds, default: 2))
+        monitor.slowsOnBattery = options.flag(ItemOption.slowsOnBattery, default: true)
+        monitor.everyday.letsDisplaySleep = store.settings.module(.keepAwake)?.options
+            .flag(ItemOption.letsDisplaySleep, default: false) ?? false
+    }
+
+    /// The log hears only about the things below, and nothing at all until the user turns it on.
+    func applyDiagnostics() {
+        let keepsLog = store.settings.keepsDiagnosticLog
+        if keepsLog != isLogging {
+            isLogging = keepsLog
+            let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+            Task { [diagnostics] in
+                await diagnostics.setEnabled(keepsLog)
+                await diagnostics.record(.logStarted(version: version))
+            }
+        }
+        let hasProblem = store.lastError != nil
+        if hasProblem, !hasReportedSettingsProblem {
+            Task { [diagnostics] in await diagnostics.record(.settingsProblem) }
+        }
+        hasReportedSettingsProblem = hasProblem
+    }
+
     func checkAlerts() {
         let settings = store.settings.alerts
         guard settings.isEnabled else { return }
