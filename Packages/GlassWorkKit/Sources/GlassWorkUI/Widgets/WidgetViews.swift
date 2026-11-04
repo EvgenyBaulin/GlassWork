@@ -114,9 +114,22 @@ public extension WidgetKind {
 }
 
 public extension WidgetKind {
-    /// Where a click leads. The widgets that read personal data are switched on in Settings, not in a panel.
+    /// Where a click on a system widget leads: the place that explains the widget or changes what it shows.
     var destination: WidgetDestination {
-        Self.personalKinds.contains(self) ? .widgetSettings : .module(module)
+        switch self {
+        // No panel shows these. Settings is where they are turned on or filled in.
+        case .photoFrame, .onThisDay, .birthdays, .commands, .endpoints,
+             .screenTime, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed, .focusTime:
+            .widgetSettings
+        case .github, .githubReviews: Self.web("https://github.com/pulls/review-requested")
+        case .githubActions, .contributions: Self.web("https://github.com")
+        case .timeMachine: .module(.disk)
+        default: .module(module)
+        }
+    }
+
+    private static func web(_ address: String) -> WidgetDestination {
+        URL(string: address).map(WidgetDestination.web) ?? .module(.overview)
     }
 }
 

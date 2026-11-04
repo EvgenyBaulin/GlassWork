@@ -5,6 +5,8 @@ public enum WidgetDestination: Sendable, Equatable {
     case module(ModuleID)
     /// Where the widgets that need turning on are turned on. It only shows the pane: asking macOS takes a click there.
     case widgetSettings
+    /// A page the system opens by itself. The app never receives this one.
+    case web(URL)
 }
 
 /// The address a system widget opens when clicked.
@@ -18,6 +20,7 @@ public enum WidgetLink {
         switch destination {
         case let .module(module): url(for: module)
         case .widgetSettings: URL(string: "\(scheme)://\(settingsHost)/\(widgetsPath)")
+        case let .web(url): url
         }
     }
 

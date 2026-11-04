@@ -70,6 +70,20 @@ Button(intent:) ──► WidgetActionIntent ──► WidgetCommandInbox (App G
 - `AppModel.perform` trusts nothing in a command and checks it against current state. Without fan control
   `FanControlModel.perform` does nothing, and the widget shows the button as a picture with no action.
 
+A click on a widget goes through `WidgetLink`, which can only name a module's panel or the Widgets pane of Settings.
+Any app can open that scheme, so everything else is ignored.
+
+### Photos and birthdays
+
+Photo Frame, On This Day and Birthdays read personal data, so they follow stricter rules:
+
+- `PersonalWidgetStore` reads in the app only, at most once a day, and only for a widget that is on and placed.
+- Only the buttons in Settings › Widgets can bring up a macOS prompt. Everything else checks the status and stops.
+- Readers are protocols. The real ones for Photos and Contacts live in the app target, so the extension never links
+  those frameworks, and tests use fakes.
+- Downscaled JPEGs go to the shared container as numbered files. Turning a widget off removes them.
+- `PhotoProvider` in the extension moves through the photos on its own timeline, so a new photo costs the app nothing.
+
 ## Modules
 
 `Packages/GlassWorkKit`:

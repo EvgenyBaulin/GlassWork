@@ -165,6 +165,9 @@ final class AppModel {
         case .widgetSettings:
             panels.closeTransient()
             settingsWindow.showWidgets()
+        case .web:
+            // The system opens these itself: a link from outside must not make the app open addresses.
+            break
         }
     }
 

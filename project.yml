@@ -85,6 +85,7 @@ targets:
     platform: macOS
     sources:
       - Widgets/Sources
+      - Widgets/Resources
     dependencies:
       - package: GlassWorkKit
         product: GlassWorkCore
