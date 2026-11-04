@@ -22,6 +22,22 @@ final class GlassPanel: NSPanel {
         level = .statusBar
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         isReleasedWhenClosed = false
+        canHide = false
+    }
+
+    /// Panels grow once data arrives; without this they would grow upwards, under the menu bar.
+    func keepTopEdge() -> NSObjectProtocol {
+        let top = frame.maxY
+        return NotificationCenter.default.addObserver(
+            forName: NSWindow.didResizeNotification,
+            object: self,
+            queue: .main
+        ) { [weak window = self] _ in
+            MainActor.assumeIsolated {
+                guard let window, window.frame.maxY != top else { return }
+                window.setFrameTopLeftPoint(CGPoint(x: window.frame.minX, y: top))
+            }
+        }
     }
 }
 
@@ -108,6 +124,7 @@ final class PanelController {
         window.titlebarAppearsTransparent = true
         window.level = .floating
         window.isReleasedWhenClosed = false
+        window.canHide = false
         window.center()
         window.makeKeyAndOrderFront(nil)
         detached[module] = window
@@ -134,6 +151,7 @@ final class PanelController {
 
     private func show(_ new: Content, from button: NSStatusBarButton?, view: AnyView) {
         model.closeQuickPaste()
+        model.closeQuickQuit()
         let root = view
             .modifier(PanelGlass())
             .environment(\.panelActions, model.actions)
@@ -145,7 +163,7 @@ final class PanelController {
         let size = hosting.fittingSize
         window.setFrame(frame(size: size, under: button), display: false)
         window.makeKeyAndOrderFront(nil)
-        keepTopEdge(of: window)
+        resize = window.keepTopEdge()
         panel = window
         content = new
         model.panelsChanged(hasOpenPanel: true)
@@ -156,21 +174,6 @@ final class PanelController {
         )
         dismissal.start()
         self.dismissal = dismissal
-    }
-
-    /// Panels grow once data arrives; without this they would grow upwards, under the menu bar.
-    private func keepTopEdge(of window: GlassPanel) {
-        let top = window.frame.maxY
-        resize = NotificationCenter.default.addObserver(
-            forName: NSWindow.didResizeNotification,
-            object: window,
-            queue: .main
-        ) { [weak window] _ in
-            MainActor.assumeIsolated {
-                guard let window, window.frame.maxY != top else { return }
-                window.setFrameTopLeftPoint(CGPoint(x: window.frame.minX, y: top))
-            }
-        }
     }
 
     /// Centers the panel under its item and keeps it on screen.

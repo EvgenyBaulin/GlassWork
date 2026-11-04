@@ -8,7 +8,9 @@ public struct PanelActions {
     public var detach: (ModuleID) -> Void
     public var openApp: (String) -> Void
     public var openURL: (URL) -> Void
-    public var quitProcess: (ProcessUsage, Bool) -> Void
+    /// The flag asks for Force Quit. Every Quit button in the app ends up here.
+    public var quit: (QuitTarget, Bool) -> Void
+    public var showInFinder: (String) -> Void
     /// Changes settings from a panel, the same way the Settings window does.
     public var updateSettings: ((inout AppSettings) -> Void) -> Void
     /// Puts an entry back on the pasteboard. The flag asks for plain text.
@@ -22,7 +24,8 @@ public struct PanelActions {
         detach: @escaping (ModuleID) -> Void = { _ in },
         openApp: @escaping (String) -> Void = { _ in },
         openURL: @escaping (URL) -> Void = { _ in },
-        quitProcess: @escaping (ProcessUsage, Bool) -> Void = { _, _ in },
+        quit: @escaping (QuitTarget, Bool) -> Void = { _, _ in },
+        showInFinder: @escaping (String) -> Void = { _ in },
         updateSettings: @escaping ((inout AppSettings) -> Void) -> Void = { _ in },
         useClipboardEntry: @escaping (ClipboardEntry, Bool) -> Void = { _, _ in },
         isPasteAllowed: @escaping () -> Bool = { false },
@@ -32,7 +35,8 @@ public struct PanelActions {
         self.detach = detach
         self.openApp = openApp
         self.openURL = openURL
-        self.quitProcess = quitProcess
+        self.quit = quit
+        self.showInFinder = showInFinder
         self.updateSettings = updateSettings
         self.useClipboardEntry = useClipboardEntry
         self.isPasteAllowed = isPasteAllowed
@@ -180,9 +184,6 @@ struct TopProcesses: View {
         }
     }
 
-    /// Processes macOS needs to keep running, and GlassWork itself.
-    private static let protected: Set<String> = ["kernel_task", "launchd", "WindowServer", "loginwindow", "GlassWork"]
-
     private var top: [ProcessUsage] {
         let sorted = processes.sorted {
             sort == .cpu ? $0.cpu > $1.cpu : $0.memory > $1.memory
@@ -210,7 +211,7 @@ struct TopProcesses: View {
             presenting: pending
         ) { item in
             Button(item.force ? loc("Force Quit") : loc("Quit"), role: item.force ? .destructive : nil) {
-                actions.quitProcess(item.process, item.force)
+                actions.quit(item.process.target, item.force)
             }
             Button(loc("Cancel"), role: .cancel) {}
         }
@@ -235,7 +236,7 @@ struct TopProcesses: View {
 
     @ViewBuilder
     private func menu(_ process: ProcessUsage) -> some View {
-        let isProtected = Self.protected.contains(process.name)
+        let isProtected = QuitPolicy.isProtected(process.target)
         Button(loc("Quit")) { pending = PendingQuit(process: process, force: false) }
             .disabled(isProtected)
         Button(loc("Force Quit")) { pending = PendingQuit(process: process, force: true) }

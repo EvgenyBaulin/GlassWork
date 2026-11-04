@@ -11766,6 +11766,408 @@
           }
         }
       }
+    },
+    "Apps": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения"
+          }
+        }
+      }
+    },
+    "Unlock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разблокировка"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назад"
+          }
+        }
+      }
+    },
+    "Forward": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вперёд"
+          }
+        }
+      }
+    },
+    "This section is not ready yet.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот раздел пока не готов."
+          }
+        }
+      }
+    },
+    "Unlock this Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разблокировка этого Mac"
+          }
+        }
+      }
+    },
+    "Open GlassWork": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть GlassWork"
+          }
+        }
+      }
+    },
+    "Close Window": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть окно"
+          }
+        }
+      }
+    },
+    "Using the most": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Больше всего используют"
+          }
+        }
+      }
+    },
+    "What your apps use": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сколько расходуют приложения"
+          }
+        }
+      }
+    },
+    "Every running app, heaviest first. Helpers count with the app they belong to.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все запущенные приложения, самые тяжёлые сверху. Вспомогательные процессы считаются вместе с приложением."
+          }
+        }
+      }
+    },
+    "Apps running": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущено приложений"
+          }
+        }
+      }
+    },
+    "Reading what apps use…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считаем, сколько расходуют приложения…"
+          }
+        }
+      }
+    },
+    "1 hour": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 час"
+          }
+        }
+      }
+    },
+    "7 days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 дней"
+          }
+        }
+      }
+    },
+    "History builds up while GlassWork runs.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История копится, пока работает GlassWork."
+          }
+        }
+      }
+    },
+    "Hover a chart to read a moment. History stays on this Mac for 7 days.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наведите на график, чтобы увидеть значение. История хранится на этом Mac 7 дней."
+          }
+        }
+      }
+    },
+    "Unsaved work in this app will be lost.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Несохранённая работа в этом приложении пропадёт."
+          }
+        }
+      }
+    },
+    "Not running right now.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас не запущено."
+          }
+        }
+      }
+    },
+    "%@ of memory and %@ of CPU right now": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас %1$@ памяти и %2$@ CPU"
+          }
+        }
+      }
+    },
+    "Peak %@ at %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пик %1$@ в %2$@"
+          }
+        }
+      }
+    },
+    "Show in Finder": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать в Finder"
+          }
+        }
+      }
+    },
+    "The Mac or GlassWork needs this one, so it stays.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это приложение нужно системе или GlassWork, поэтому оно останется."
+          }
+        }
+      }
+    },
+    "with %lld helper processes": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "with %lld helper process"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "with %lld helper processes"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "вместе с %lld вспомогательными процессами"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "вместе с %lld вспомогательными процессами"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "вместе с %lld вспомогательным процессом"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "вместе с %lld вспомогательными процессами"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Running apps": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущенные приложения"
+          }
+        }
+      }
+    },
+    "Hover an app to quit it. ⌥ makes it Force Quit.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наведите на приложение, чтобы завершить его. С ⌥ — завершить принудительно."
+          }
+        }
+      }
+    },
+    "Type an app name": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Название приложения"
+          }
+        }
+      }
+    },
+    "Return quits  ·  ⌥Return force quits  ·  Esc closes": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return — завершить  ·  ⌥Return — принудительно  ·  Esc — закрыть"
+          }
+        }
+      }
+    },
+    "Quit an app": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завершить приложение"
+          }
+        }
+      }
+    },
+    "Show All Windows": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать все окна"
+          }
+        }
+      }
+    },
+    "Hide": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть"
+          }
+        }
+      }
+    },
+    "Hide Others": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть остальные"
+          }
+        }
+      }
+    },
+    "How this will work is not decided yet.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как это будет работать, пока не решено."
+          }
+        }
+      }
+    },
+    "To be designed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё в работе"
+          }
+        }
+      }
+    },
+    "Nothing here stores your password until the method and its risks are agreed.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Здесь ничего не хранит ваш пароль, пока не выбран способ и не оценены риски."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -221,6 +221,7 @@ final class ClipboardController {
 
     private func showQuickPaste() {
         model.closePanels()
+        model.closeQuickQuit()
         let view = QuickPasteView(
             store: store,
             onUse: { [weak self] in self?.use($0, plainText: false) },

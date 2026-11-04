@@ -9,6 +9,11 @@ public enum Format {
         }
     }
 
+    /// A share of one core, so it can pass 100%. Small figures keep a decimal: 0.4% is not nothing.
+    public static func corePercent(_ percent: Double) -> String {
+        percent < 0.95 && percent > 0 ? String(format: "%.1f%%", percent) : "\(Int(percent.rounded()))%"
+    }
+
     public static func bytes(_ value: Double, style: NumberStyle = .compact) -> String {
         let (scaled, unit) = scale(value)
         switch style {
@@ -17,6 +22,12 @@ public enum Format {
         case .precise:
             return String(format: scaled < 10 ? "%.2f %@" : "%.1f %@", scaled, unit)
         }
+    }
+
+    /// For lists of apps: 6.2 GB, 620 MB. A second decimal would only flicker there.
+    public static func size(_ value: Double) -> String {
+        let (scaled, unit) = scale(value)
+        return String(format: scaled < 100 ? "%.1f %@" : "%.0f %@", scaled, unit)
     }
 
     public static func rate(_ bytesPerSecond: Double, style: NumberStyle = .compact) -> String {

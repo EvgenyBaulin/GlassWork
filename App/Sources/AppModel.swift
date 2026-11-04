@@ -16,6 +16,10 @@ final class AppModel {
     private lazy var panels = PanelController(model: self)
     private lazy var statusBar = StatusBarController(model: self)
     private lazy var settingsWindow = SettingsWindowController(model: self)
+    private lazy var mainWindow = MainWindowController(model: self)
+    private lazy var runningApps = RunningAppsObserver(store: monitor.apps)
+    private lazy var quickQuit = QuickQuitController(model: self)
+    private let quitter = QuitService(system: WorkspaceQuitSystem())
     private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private lazy var dock = DockController(model: self)
     private lazy var clipboard = ClipboardController(model: self)
@@ -29,6 +33,8 @@ final class AppModel {
     private let hotKey = HotKey()
     private var hasOpenPanel = false
     private var isSettingsOpen = false
+    private var visibleSection: MainSection?
+    private var isQuickQuitOpen = false
     private var timer: Timer?
     private var thresholds = ThresholdTracker()
     /// Widgets in the system's desktop layer, as WidgetKit last reported them.
@@ -41,6 +47,9 @@ final class AppModel {
         hotKey.register()
         _ = textCapture
         Task { await monitor.clipboard.load() }
+        Task { await monitor.apps.load() }
+        _ = runningApps
+        _ = quickQuit
         applySettings()
         checkSystemWidgets()
         fans.onFailsafe = { celsius in
@@ -87,9 +96,8 @@ final class AppModel {
                 NSWorkspace.shared.openApplication(at: url, configuration: .init())
             },
             openURL: { NSWorkspace.shared.open($0) },
-            quitProcess: { process, force in
-                kill(process.pid, force ? SIGKILL : SIGTERM)
-            },
+            quit: { [weak self] in self?.quit($0, force: $1) },
+            showInFinder: { NSWorkspace.shared.activateFileViewerSelecting([URL(filePath: $0)]) },
             updateSettings: { [weak self] change in self?.store.update(change) },
             useClipboardEntry: { [weak self] entry, plain in self?.clipboard.use(entry, plainText: plain) },
             isPasteAllowed: { Accessibility.isTrusted },
@@ -100,6 +108,7 @@ final class AppModel {
     /// Gives the system Dock back when the app quits.
     func prepareToQuit() {
         dock.restoreSystemDock()
+        monitor.apps.saveNow()
         monitor.nowPlaying.stop()
         nowPlaying.prepareToQuit()
     }
@@ -107,6 +116,18 @@ final class AppModel {
     func showSettings(module: ModuleID? = nil) {
         panels.closeTransient()
         settingsWindow.show(module: module)
+    }
+
+    func showMainWindow() {
+        panels.closeTransient()
+        mainWindow.show()
+    }
+
+    /// The welcome comes first on a new Mac.
+    func showMainWindowAtLaunch() {
+        if store.settings.welcomeCompleted {
+            showMainWindow()
+        }
     }
 
     func showFanCurves() {
@@ -149,6 +170,7 @@ final class AppModel {
         updateDemand()
         if hasOpenPanel {
             monitor.refresh()
+            monitor.apps.refresh()
         }
     }
 
@@ -157,6 +179,31 @@ final class AppModel {
         isSettingsOpen = isOpen
         updateDemand()
         if isOpen {
+            monitor.refresh()
+        }
+    }
+
+    /// What the main window has on screen, or nil while it is closed or covered.
+    func mainWindowChanged(visibleSection: MainSection?) {
+        self.visibleSection = visibleSection
+        updateDemand()
+        if visibleSection == .apps {
+            monitor.refresh()
+            monitor.apps.refresh()
+        }
+    }
+
+    func quickQuitChanged(isOpen: Bool) {
+        isQuickQuitOpen = isOpen
+        updateDemand()
+        if isOpen {
+            monitor.apps.refresh()
+        }
+    }
+
+    /// Every Quit in the app comes through here. The service decides what may be quit, not the buttons.
+    func quit(_ target: QuitTarget, force: Bool) {
+        if quitter.quit(target, force: force) == .sent {
             monitor.refresh()
         }
     }
@@ -200,8 +247,11 @@ final class AppModel {
         var demand = MonitorDemand(widgets: desktopWidgetKinds.union(systemWidgetKinds.filter(\.keepsHistory)))
         let modes = store.settings.modules.filter { $0.mode == .menuBar }.map(\.id)
         let everything = hasOpenPanel
-        demand.cpu = demand.cpu || everything || modes.contains(.cpu) || modes.contains(.overview)
-        demand.memory = demand.memory || everything || modes.contains(.memory) || modes.contains(.overview)
+        let showsApps = visibleSection == .apps
+        demand.liveApps = everything || showsApps || isQuickQuitOpen
+        demand.cpu = demand.cpu || everything || showsApps || modes.contains(.cpu) || modes.contains(.overview)
+        demand.memory = demand.memory || everything || showsApps || modes.contains(.memory)
+            || modes.contains(.overview)
         demand.network = demand.network || everything || modes.contains(.network)
         demand.disk = demand.disk || everything || modes.contains(.disk) || modes.contains(.eject)
         demand.battery = true
@@ -235,6 +285,10 @@ final class AppModel {
 
     func closeQuickPaste() {
         clipboard.closeQuickPaste()
+    }
+
+    func closeQuickQuit() {
+        quickQuit.close()
     }
 
     func copyToPasteboard(_ text: String) {
@@ -397,7 +451,10 @@ final class AppModel {
         snapshot.nowPlaying = nil
         return (try? SnapshotStore().write(snapshot, for: WidgetSnapshot.key)) != nil
     }
+}
 
+/// Actions that widgets ask for.
+extension AppModel {
     /// Commands from WidgetKit arrive through the shared container; a leftover from before launch is dropped.
     private func observeWidgetCommands() {
         _ = WidgetCommandInbox().drain()

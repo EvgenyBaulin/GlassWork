@@ -13,6 +13,8 @@ A Liquid Glass companion for macOS: live menu bar modules, desktop widgets and a
 - **Desktop widgets.** Native WidgetKit widgets in small, medium, large and extra large sizes, and the same
   widgets as live floating desktop windows that update every second.
 - **Dock.** A Dock replacement with live widgets beside your apps (planned).
+- **Main window.** What every app uses right now and over the last week, with helpers counted in. Apps can be
+  quit from there, the Hub, the CPU and Memory panels, the Dock and a palette on ⌃⌥Q.
 - **Window Tiles.** Keyboard shortcuts that send the front window to a half, a third, a quarter or another
   display. Off until you turn it on, and it needs Accessibility.
 

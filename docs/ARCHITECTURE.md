@@ -2,8 +2,9 @@
 
 ## Processes
 
-- **GlassWork.app** is an unsandboxed background app (`LSUIElement`). It owns every data collector: system
-  metrics (Mach, IOKit, SMC), shell tools (`git`, `docker`, `gh`), files of local tools, network checks.
+- **GlassWork.app** is an unsandboxed app with a Dock icon and a main window. Closing the window leaves it
+  running in the menu bar. It owns every data collector: system metrics (Mach, IOKit, SMC), shell tools
+  (`git`, `docker`, `gh`), files of local tools, network checks.
 - **GlassWorkWidgets.appex** is the WidgetKit extension. It is sandboxed, so it never runs tools or reads
   arbitrary files. It reads JSON snapshots that the app writes into the shared App Group container and
   performs small actions through App Intents.
@@ -77,6 +78,18 @@ Button(intent:) ──► WidgetActionIntent ──► WidgetCommandInbox (App G
 - `GlassWorkUI`: shared SwiftUI building blocks (glass cards, rings, dot progress, sparklines).
 
 Collectors are plain types with a pure parsing part (unit tested with fixtures) and a thin reading part.
+
+## App usage and quitting
+
+`AppUsageReader` reads CPU time and memory of every process with `proc_pid_rusage`, so nothing is spawned, and
+groups them by app: the process macOS holds responsible, then the enclosing `.app` bundle, then the parent. Reads
+ride on the monitor's tick: every 60 seconds in the background, which costs about 2 ms each, and every 5 seconds
+while a list of apps is on screen. The last hour keeps a point a minute, and a week keeps a point every ten
+minutes in `AppUsage.jsonl` in Application Support.
+
+Every Quit button goes through `QuitService`. It refuses system processes and GlassWork itself, and checks who
+holds the pid at that moment, because a list can be seconds old. Apps get `NSRunningApplication.terminate()`, so
+they can ask to save. Plain processes get a signal.
 
 ## Settings
 

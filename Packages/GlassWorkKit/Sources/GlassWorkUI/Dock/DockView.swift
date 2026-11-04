@@ -9,17 +9,24 @@ public struct DockActions {
     public var update: (([DockItem]) -> [DockItem]) -> Void
     /// Tells the window what to make room for.
     public var needsSpace: (DockSpace) -> Void
+    /// What the right-click menu offers for an app right now.
+    public var commands: (DockApp) -> [DockAppCommand]
+    public var perform: (DockAppCommand, DockApp) -> Void
 
     public init(
         open: @escaping (DockApp) -> Void,
         showPanel: @escaping (ModuleID) -> Void,
         update: @escaping (([DockItem]) -> [DockItem]) -> Void,
-        needsSpace: @escaping (DockSpace) -> Void
+        needsSpace: @escaping (DockSpace) -> Void,
+        commands: @escaping (DockApp) -> [DockAppCommand] = { _ in [] },
+        perform: @escaping (DockAppCommand, DockApp) -> Void = { _, _ in }
     ) {
         self.open = open
         self.showPanel = showPanel
         self.update = update
         self.needsSpace = needsSpace
+        self.commands = commands
+        self.perform = perform
     }
 }
 
@@ -137,6 +144,7 @@ public struct DockView: View {
                 isRunning: running.contains(app.path),
                 isLaunching: state.launching.contains(app.path)
             ) { actions.open(app) }
+                .contextMenu { DockAppMenu(app: app, actions: actions) }
                 .draggable(app.path)
                 .dropDestination(for: String.self) { paths, _ in
                     drop(paths) { dragged, items in DockLayout.drop(dragged, onto: app, in: items) }
@@ -249,6 +257,39 @@ struct AppTile: View {
     }
 }
 
+/// Right-click on an app. Holding ⌥ swaps Hide and Quit for their stronger forms, as in the system Dock.
+struct DockAppMenu: View {
+    let app: DockApp
+    let actions: DockActions
+
+    var body: some View {
+        let commands = actions.commands(app)
+        if commands.contains(.open) {
+            button(loc("Open"), .open)
+        }
+        if commands.contains(.showAllWindows) {
+            button(loc("Show All Windows"), .showAllWindows)
+        }
+        if commands.contains(.hide) {
+            button(loc("Hide"), .hide).modifierKeyAlternate(.option) {
+                button(loc("Hide Others"), .hideOthers)
+            }
+            Divider()
+        }
+        button(loc("Show in Finder"), .showInFinder)
+        if commands.contains(.quit) {
+            Divider()
+            button(loc("Quit"), .quit).modifierKeyAlternate(.option) {
+                button(loc("Force Quit"), .forceQuit)
+            }
+        }
+    }
+
+    private func button(_ title: String, _ command: DockAppCommand) -> some View {
+        Button(title) { actions.perform(command, app) }
+    }
+}
+
 /// Glass square with a 3×3 grid of the folder's first apps.
 struct FolderTile: View {
     let folder: AppFolder
@@ -338,6 +379,8 @@ struct FolderCard: View {
                         }
                         .buttonStyle(.plain)
                         .contextMenu {
+                            DockAppMenu(app: app, actions: actions)
+                            Divider()
                             Button(loc("Remove from Folder")) {
                                 actions.update { DockLayout.remove(app, from: folder, in: $0) }
                                 close()

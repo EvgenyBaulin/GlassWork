@@ -164,12 +164,18 @@ final class StatusBarController: NSObject {
 
     private func showMenu() {
         let menu = NSMenu()
+        let open = menu.addItem(withTitle: loc("Open GlassWork"), action: #selector(openMainWindow), keyEquivalent: "")
+        open.target = self
         menu.addItem(withTitle: loc("Settings…"), action: #selector(openSettings), keyEquivalent: ",").target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: loc("Quit GlassWork"), action: #selector(quit), keyEquivalent: "q").target = self
         hub.menu = menu
         hub.button?.performClick(nil)
         hub.menu = nil
+    }
+
+    @objc private func openMainWindow() {
+        model.showMainWindow()
     }
 
     @objc private func openSettings() {
