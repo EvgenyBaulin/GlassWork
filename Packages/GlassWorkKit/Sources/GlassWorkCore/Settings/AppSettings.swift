@@ -78,6 +78,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var hiding = HidingSettings()
     public var alerts = AlertSettings()
     public var widgets = WidgetSettings()
+    public var dock = DockSettings()
     public var welcomeCompleted = false
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
@@ -114,7 +115,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
-        case version, modules, numberStyle, hiding, alerts, widgets, welcomeCompleted
+        case version, modules, numberStyle, hiding, alerts, widgets, dock, welcomeCompleted
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -127,6 +128,7 @@ extension AppSettings {
         hiding = try container.decodeIfPresent(HidingSettings.self, forKey: .hiding) ?? HidingSettings()
         alerts = try container.decodeIfPresent(AlertSettings.self, forKey: .alerts) ?? AlertSettings()
         widgets = try container.decodeIfPresent(WidgetSettings.self, forKey: .widgets) ?? WidgetSettings()
+        dock = try container.decodeIfPresent(DockSettings.self, forKey: .dock) ?? DockSettings()
         welcomeCompleted = try container.decodeIfPresent(Bool.self, forKey: .welcomeCompleted) ?? false
         normalize()
     }
