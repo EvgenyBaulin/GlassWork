@@ -154,6 +154,7 @@ struct KindView: View {
         }
         .environment(\.widgetActions, .intents)
         .containerBackground(.fill.tertiary, for: .widget)
+        .widgetURL(WidgetLink.url(for: kind.module))
     }
 }
 

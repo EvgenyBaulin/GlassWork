@@ -62,6 +62,9 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
         LSUIElement: true
+        CFBundleURLTypes:
+          - CFBundleURLName: io.github.evgenybaulin.GlassWork
+            CFBundleURLSchemes: [glasswork]
         CFBundleLocalizations: [en, ru]
         GWAppGroupID: $(APP_GROUP_ID)
         NSCalendarsFullAccessUsageDescription: GlassWork shows your events in the menu bar and in widgets.

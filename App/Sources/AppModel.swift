@@ -130,6 +130,11 @@ final class AppModel {
         panels.show(module, beside: frame)
     }
 
+    /// For a click on a system widget, whose frame the app never learns.
+    func showPanelAtPointer(_ module: ModuleID) {
+        showPanel(module, beside: CGRect(origin: NSEvent.mouseLocation, size: .zero))
+    }
+
     func toggleHub() {
         statusBar.revealHidden()
         panels.toggleHub(from: statusBar.hubButton)
