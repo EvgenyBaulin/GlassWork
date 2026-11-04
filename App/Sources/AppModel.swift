@@ -150,6 +150,7 @@ final class AppModel {
         demand.gpu = everything || modes.contains(.gpu)
         demand.sensors = everything || modes.contains(.sensors) || store.settings.alerts.isEnabled
         demand.processes = everything
+        demand.devices = everything || modes.contains(.deviceBatteries)
         monitor.demand = demand
     }
 

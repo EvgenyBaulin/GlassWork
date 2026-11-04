@@ -286,6 +286,30 @@ struct ColoursPanel: View {
     }
 }
 
+struct DeviceBatteriesPanel: View {
+    let monitor: SystemMonitor
+
+    var body: some View {
+        PanelFrame(module: .deviceBatteries, subtitle: "") {
+            if monitor.deviceBatteries.isEmpty {
+                Text(loc("No devices with a battery connected"))
+                    .foregroundStyle(.secondary)
+                    .font(.system(size: 12))
+            }
+            ForEach(monitor.deviceBatteries) { device in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(device.name).font(.system(size: 13))
+                        Spacer()
+                        Text(Format.percent(device.charge)).monospacedDigit().font(.system(size: 13))
+                    }
+                    ThinBar(value: device.charge, tint: device.charge < 0.2 ? Palette.red : Palette.green)
+                }
+            }
+        }
+    }
+}
+
 struct EjectPanel: View {
     let monitor: SystemMonitor
     @Environment(\.panelActions) private var actions

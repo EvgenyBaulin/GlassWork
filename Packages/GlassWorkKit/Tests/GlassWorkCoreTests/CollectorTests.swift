@@ -207,3 +207,24 @@ struct DiskTests {
         #expect(first.total > 0)
     }
 }
+
+struct DeviceBatteryTests {
+    @Test func readsConnectedDevicesLowestFirst() {
+        let json = #"""
+        {"SPBluetoothDataType": [{"device_connected": [
+            {"AirPods Pro": {"device_batteryLevelMain": "80%", "device_minorType": "Headphones"}},
+            {"Magic Mouse": {"device_batteryLevel": "45%", "device_minorType": "Mouse"}},
+            {"Speaker": {"device_minorType": "Speaker"}}
+        ]}]}
+        """#
+        let devices = DeviceBatteryReader.parseBluetooth(Data(json.utf8))
+
+        #expect(devices.map(\.name) == ["Magic Mouse", "AirPods Pro"])
+        #expect(devices.first?.kind == .mouse)
+        #expect(devices.last?.charge == 0.8)
+    }
+
+    @Test func toleratesEmptyOutput() {
+        #expect(DeviceBatteryReader.parseBluetooth(Data()).isEmpty)
+    }
+}

@@ -15,6 +15,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var gpu = false
     public var sensors = false
     public var processes = false
+    public var devices = false
 
     public init() {}
 }
@@ -34,6 +35,7 @@ public final class SystemMonitor {
     public private(set) var gpus: [GPUSample] = []
     public private(set) var sensors: SensorSample?
     public private(set) var processes: [ProcessUsage] = []
+    public private(set) var deviceBatteries: [DeviceBattery] = []
     public private(set) var histories: [Metric: TieredHistory] = [:]
 
     /// Timers, notes and other small modules, ticking along with the monitor.
@@ -208,6 +210,7 @@ actor Sampler {
         var gpus: [GPUSample]?
         var sensors: SensorSample?
         var processes: [ProcessUsage]?
+        var devices: [DeviceBattery]?
     }
 
     private var ticks: [CPUTicks] = []

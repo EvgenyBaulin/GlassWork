@@ -36,6 +36,11 @@ public struct ItemContent {
         case .uptime: uptime()
         case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon: everyday(module, monitor.everyday)
         case .calendar, .endsIn, .todos: agenda(module, monitor.agenda)
+        case .deviceBatteries:
+            ItemContent(
+                figure: monitor.deviceBatteries.first.map { Format.percent($0.charge) } ?? "—",
+                template: "100%"
+            )
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
         default: ItemContent(figure: "—", template: "—")
         }
