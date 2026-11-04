@@ -52,7 +52,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_: NSApplication, open urls: [URL]) {
-        guard let destination = urls.compactMap(WidgetLink.destination).last else { return }
+        let store = SnapshotStore()
+        let destinations = urls.compactMap { url in
+            WidgetLink.destination(from: url, shownIn: store.read(WidgetSnapshot.self, for: WidgetSnapshot.key))
+        }
+        guard let destination = destinations.last else { return }
         if let model {
             model.open(destination)
         } else {

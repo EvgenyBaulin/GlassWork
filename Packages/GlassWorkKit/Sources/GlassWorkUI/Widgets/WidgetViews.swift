@@ -121,15 +121,11 @@ public extension WidgetKind {
         case .photoFrame, .onThisDay, .birthdays, .commands, .endpoints,
              .screenTime, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed, .focusTime:
             .widgetSettings
-        case .github, .githubReviews: Self.web("https://github.com/pulls/review-requested")
-        case .githubActions, .contributions: Self.web("https://github.com")
+        case .github, .githubReviews: WidgetLink.githubReviews.map(WidgetDestination.web) ?? .module(.overview)
+        case .githubActions, .contributions: WidgetLink.githubHome.map(WidgetDestination.web) ?? .module(.overview)
         case .timeMachine: .module(.disk)
         default: .module(module)
         }
-    }
-
-    private static func web(_ address: String) -> WidgetDestination {
-        URL(string: address).map(WidgetDestination.web) ?? .module(.overview)
     }
 }
 

@@ -71,7 +71,8 @@ Button(intent:) ──► WidgetActionIntent ──► WidgetCommandInbox (App G
   `FanControlModel.perform` does nothing, and the widget shows the button as a picture with no action.
 
 A click on a widget goes through `WidgetLink`, which can only name a module's panel or the Widgets pane of Settings.
-Any app can open that scheme, so everything else is ignored.
+Any app can open that scheme, so everything else is ignored. A web address counts only if the widgets show exactly
+that address: a pull request or a call link in the snapshot, or one of the fixed GitHub pages.
 
 ### Photos and birthdays
 

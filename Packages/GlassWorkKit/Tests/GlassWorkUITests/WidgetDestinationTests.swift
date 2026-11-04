@@ -11,6 +11,7 @@ struct WidgetDestinationTests {
         case let .web(page):
             #expect(page.scheme == "https")
             #expect(WidgetLink.destination(from: url) == nil)
+            #expect(WidgetLink.destination(from: url, shownIn: nil) == .web(page))
         default:
             #expect(WidgetLink.destination(from: url) == kind.destination)
         }
