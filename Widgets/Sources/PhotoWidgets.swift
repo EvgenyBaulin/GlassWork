@@ -22,6 +22,7 @@ struct PhotoProvider: TimelineProvider {
         let base = snapshot()
         let size = size(context)
         let start = Date.now
+        WidgetRefreshLog().record(kind: kind.rawValue, dataDate: base?.date, at: start)
         let entries = (0 ..< Self.entries).map {
             entry(at: start.addingTimeInterval(Double($0) * PhotoRotation.interval), base: base, size: size)
         }
