@@ -24,6 +24,17 @@ public enum FanHelperState: Sendable, Equatable {
     case failed(String)
 }
 
+/// Reads sensors for the fan loop, which must keep running when the monitor pauses for a locked screen.
+public actor FanSensorSource {
+    private lazy var reader = SensorReader()
+
+    public init() {}
+
+    public func sample() -> SensorSample? {
+        reader?.sample()
+    }
+}
+
 /// Installing and removing the helper. Nothing happens unless the user presses a button.
 @MainActor
 public protocol FanHelperInstalling: AnyObject {
@@ -48,8 +59,6 @@ public final class FanControlModel {
 
     /// Called once when the failsafe switches to Max, with the temperature that caused it.
     @ObservationIgnored public var onFailsafe: ((Double) -> Void)?
-    /// Called when the loop starts or stops, because sensor demand depends on it.
-    @ObservationIgnored public var onActivityChange: (() -> Void)?
 
     @ObservationIgnored private var engine = FanEngine()
     @ObservationIgnored private let store: SettingsStore
@@ -83,6 +92,14 @@ public final class FanControlModel {
 
     public var isRunning: Bool {
         loop != nil
+    }
+
+    public var settings: FanSettings {
+        store.settings.fans
+    }
+
+    public func updateSettings(_ change: (inout FanSettings) -> Void) {
+        store.update { change(&$0.fans) }
     }
 
     /// Applies the saved launch mode. Auto, the default, leaves the fans alone.
@@ -133,7 +150,11 @@ public final class FanControlModel {
                 store.update { $0.fans.isControlEnabled = true }
             }
         } catch {
-            helperState = .failed(error.localizedDescription)
+            // macOS reports a registration waiting for approval as an error.
+            refreshHelperState()
+            if helperState != .needsApproval {
+                helperState = .failed(error.localizedDescription)
+            }
         }
     }
 
@@ -241,13 +262,10 @@ public final class FanControlModel {
                 await self?.step()
             }
         }
-        onActivityChange?()
     }
 
     private func stopLoop() {
-        guard loop != nil else { return }
         loop?.cancel()
         loop = nil
-        onActivityChange?()
     }
 }

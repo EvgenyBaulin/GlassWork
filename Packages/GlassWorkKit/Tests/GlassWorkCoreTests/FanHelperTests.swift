@@ -226,6 +226,18 @@ struct FanHelperServiceTests {
     }
 }
 
+struct FanKeyTests {
+    @Test(arguments: ["F0Md", "F1md", "F0Tg", "F9Tg", "Ftst"])
+    func fanControlKeysAreWritable(key: String) {
+        #expect(FanHelperService.isWritable(key))
+    }
+
+    @Test(arguments: ["F0Mn", "F0Mx", "F0Ac", "FNum", "TC0P", "MSLD", "BCLM", "", "F0Md ", "F10Tg", "XF0Md"])
+    func everythingElseIsNot(key: String) {
+        #expect(!FanHelperService.isWritable(key))
+    }
+}
+
 struct FanWatchdogTests {
     @Test func expiresOnlyAfterTenSilentSeconds() {
         var watchdog = FanWatchdog(now: 0)
@@ -283,20 +295,35 @@ struct FanHelperIdentityTests {
 
 /// The real XPC path, over an anonymous in-process listener with a fake SMC.
 struct FanHelperXPCTests {
+    private final class Clock: @unchecked Sendable {
+        // @unchecked: guarded by `lock`.
+        private let lock = NSLock()
+        private var value: TimeInterval = 0
+
+        var time: TimeInterval {
+            get { lock.withLock { value } }
+            set { lock.withLock { value = newValue } }
+        }
+    }
+
     private final class Harness: @unchecked Sendable {
         // @unchecked: everything is set once in init.
         let smc: FakeSMC
         let server: FanHelperServer
         let listener = NSXPCListener.anonymous()
 
+        let clock = Clock()
+        let queue = DispatchQueue(label: "test.helper")
+
         init(requirement: String? = nil, acceptsUnsigned: Bool = true, mode: UInt8 = 3) {
             smc = FakeSMC(mode: mode)
+            let clock = clock
             server = FanHelperServer(
                 service: FanHelperService(smc: smc) { _ in },
-                queue: DispatchQueue(label: "test.helper"),
+                queue: queue,
                 requirement: requirement,
                 acceptsUnsigned: acceptsUnsigned,
-                now: { 0 }
+                now: { clock.time }
             )
             listener.delegate = server
             listener.resume()
@@ -339,6 +366,58 @@ struct FanHelperXPCTests {
 
         await waitUntil { harness.smc.number("F0Md") == 0 }
         #expect(harness.smc.number("F0Md") == 0)
+    }
+
+    @Test func silenceRestoresAutoAfterTenSeconds() async {
+        let harness = Harness()
+        let client = harness.connect()
+        #expect(await client.send(FanCommand(fan: 0, action: .max)))
+
+        harness.clock.time = 10
+        harness.queue.sync { harness.server.checkWatchdog() }
+        #expect(harness.smc.number("F0Md") == 1)
+
+        harness.clock.time = 10.5
+        harness.queue.sync { harness.server.checkWatchdog() }
+        #expect(harness.smc.number("F0Md") == 0)
+        client.disconnect()
+    }
+
+    @Test func aHeartbeatKeepsControl() async {
+        let harness = Harness()
+        let client = harness.connect()
+        #expect(await client.send(FanCommand(fan: 0, action: .max)))
+
+        harness.clock.time = 9
+        #expect(await client.heartbeat())
+        harness.clock.time = 15
+        harness.queue.sync { harness.server.checkWatchdog() }
+
+        #expect(harness.smc.number("F0Md") == 1)
+        client.disconnect()
+    }
+
+    @Test func anIdleHelperLeavesTheSMCAlone() {
+        let harness = Harness()
+        harness.clock.time = 100
+        harness.queue.sync { harness.server.checkWatchdog() }
+        #expect(harness.smc.writes.isEmpty)
+    }
+
+    @Test func aFailedRestoreIsTriedAgain() async {
+        let harness = Harness()
+        let client = harness.connect()
+        #expect(await client.send(FanCommand(fan: 0, action: .max)))
+        harness.smc.refusals["F0Md"] = 1000
+
+        harness.clock.time = 11
+        harness.queue.sync { harness.server.checkWatchdog() }
+        #expect(harness.smc.number("F0Md") == 1)
+
+        harness.smc.refusals["F0Md"] = 0
+        harness.queue.sync { harness.server.checkWatchdog() }
+        #expect(harness.smc.number("F0Md") == 0)
+        client.disconnect()
     }
 
     @Test func aBuildWithoutATeamIsRefused() async {
