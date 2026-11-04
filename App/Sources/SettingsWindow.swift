@@ -30,6 +30,7 @@ final class SettingsWindowController {
                 store: model.store,
                 monitor: model.monitor,
                 fans: model.fans,
+                tiles: model.windowTiles.status,
                 navigation: navigation
             )
             let created = NSWindow(contentViewController: NSHostingController(rootView: view))
@@ -72,7 +73,7 @@ final class SettingsWindowController {
 }
 
 enum SettingsPage: Hashable {
-    case general, menuBar, widgets, dock, fans, shortcuts, permissions, about
+    case general, menuBar, widgets, dock, fans, windowTiles, shortcuts, permissions, about
     case module(ModuleID)
 }
 
@@ -88,6 +89,7 @@ struct SettingsRoot: View {
     let store: SettingsStore
     let monitor: SystemMonitor
     let fans: FanControlModel
+    let tiles: WindowTilesStatus
     @Bindable var navigation: SettingsNavigation
     @State private var query = ""
 
@@ -114,6 +116,7 @@ struct SettingsRoot: View {
                 row(.widgets, loc("Widgets"), "square.grid.2x2", .purple)
                 row(.dock, loc("Dock"), "dock.rectangle", .teal)
                 row(.fans, loc("Fans"), "fan", .cyan)
+                row(.windowTiles, loc("Window Tiles"), "rectangle.split.2x1", .teal)
                 row(.shortcuts, loc("Shortcuts"), "keyboard", .gray)
                 row(.permissions, loc("Permissions"), "checkmark.shield", .green)
                 row(.about, loc("About"), "info.circle", .gray)
@@ -165,6 +168,7 @@ struct SettingsRoot: View {
                 showsCurves: navigation.fanCurveRequests > 0
             )
             .id(navigation.fanCurveRequests)
+        case .windowTiles: WindowTilesPage(store: store, status: tiles)
         case .about: AboutPane()
         default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
         }

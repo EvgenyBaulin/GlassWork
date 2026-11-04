@@ -29,6 +29,8 @@ public struct DockBarLayout: Equatable, Sendable {
     public static let folderCardWidth = 430.0
     public static let folderCardHeight = 450.0
     public static let folderCardGap = 10.0
+    /// How far the Dock stands above the bottom edge of the screen.
+    public static let screenGap = 4.0
 
     /// Width of each icon, in Dock order.
     public let sizes: [Double]

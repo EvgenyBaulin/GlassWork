@@ -5,7 +5,7 @@ import GlassWorkCore
 import GlassWorkUI
 import SwiftUI
 
-/// Accessibility is needed only to press ⌘V in another app.
+/// Accessibility is needed to press ⌘V in another app and to move another app's windows.
 @MainActor
 enum Accessibility {
     /// Only looks. It never shows a macOS dialog, so it is safe to call from a view.
@@ -14,6 +14,7 @@ enum Accessibility {
     }
 
     /// Shows the macOS dialog. Only the "Paste on click" switch calls this, at the moment it is turned on.
+    /// Window Tiles must not: it checks `isTrusted` and points to System Settings with `openSettings()`.
     static func requestAccess() {
         // The literal value of kAXTrustedCheckOptionPrompt, which Swift 6 treats as shared mutable state.
         AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
