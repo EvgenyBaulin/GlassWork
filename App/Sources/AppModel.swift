@@ -536,6 +536,7 @@ private extension AppModel {
         monitor.slowsOnBattery = options.flag(ItemOption.slowsOnBattery, default: true)
         monitor.everyday.letsDisplaySleep = store.settings.module(.keepAwake)?.options
             .flag(ItemOption.letsDisplaySleep, default: false) ?? false
+        monitor.sunPlaceID = store.settings.module(.sunMoon)?.options[ItemOption.sunPlace].flatMap { Int($0) }
     }
 
     func checkAlerts() {

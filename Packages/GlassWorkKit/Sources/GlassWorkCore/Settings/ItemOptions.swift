@@ -66,6 +66,8 @@ public enum ItemOption {
     public static let greenWhenConnected = "greenWhenConnected"
     public static let warnMilliseconds = "warnMilliseconds"
     public static let weakSignal = "weakSignal"
+    public static let sunPlace = "place"
+    public static let sunShows = "shows"
 }
 
 public enum MemoryFigure: String, Sendable, CaseIterable {

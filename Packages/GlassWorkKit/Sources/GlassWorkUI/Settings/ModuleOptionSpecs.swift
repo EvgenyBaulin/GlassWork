@@ -306,6 +306,15 @@ public extension ModuleOptionSpec {
                 .colours, Key.colourLimit, "Remember", "Запоминать",
                 .number(4 ... 50, step: 2, unit: ""), fallback: "12"
             ),
+            option(
+                .sunMoon, Key.sunShows, "Show", "Показывать",
+                .choice([
+                    OptionChoice(SunShows.next.rawValue, "Next sunrise or sunset"),
+                    OptionChoice(SunShows.sunrise.rawValue, "Sunrise"),
+                    OptionChoice(SunShows.sunset.rawValue, "Sunset"),
+                ]),
+                fallback: SunShows.next.rawValue
+            ),
             percent(.deviceBatteries, Key.warnBelow, "Warn below", "Предупреждать ниже", fallback: 20),
             option(
                 .date, Key.dateFigure, "Format", "Формат",

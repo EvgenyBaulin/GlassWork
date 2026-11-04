@@ -289,9 +289,10 @@ struct MoonWidget: View {
 
 struct DaylightWidget: View {
     let now: Date
+    let place: SunPlace
 
     var body: some View {
-        let times = Astronomy.sunTimes(on: now, latitude: 55.75, longitude: 37.62)
+        let times = Astronomy.sunTimes(on: now, latitude: place.latitude, longitude: place.longitude)
         VStack(alignment: .leading, spacing: 6) {
             WidgetHeader(title: loc("Daylight"), symbol: "sunrise", tint: Palette.orange)
             Spacer()

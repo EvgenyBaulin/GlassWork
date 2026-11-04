@@ -1,26 +1,35 @@
 import GlassWorkCore
 import SwiftUI
 
-/// The place the sun-based widgets look at: the first weather place, else Moscow like the Daylight widget.
+/// The place the sun-based widgets look at, from Weather. Without one they say so instead of guessing a city.
 struct SunPlace {
     let name: String
     let latitude: Double
     let longitude: Double
 
-    init(_ snapshot: WidgetSnapshot) {
-        if let place = snapshot.place {
-            name = place.name
-            latitude = place.latitude
-            longitude = place.longitude
-        } else {
-            name = loc("Moscow")
-            latitude = 55.75
-            longitude = 37.62
-        }
+    init?(_ snapshot: WidgetSnapshot) {
+        guard let place = snapshot.place else { return nil }
+        name = place.isCurrentLocation ? loc("Current location") : place.name
+        latitude = place.latitude
+        longitude = place.longitude
     }
 
     func sky(at date: Date) -> SkyState {
         SkyState(date: date, latitude: latitude, longitude: longitude)
+    }
+}
+
+/// What a sun-based widget shows until Weather has a city.
+struct NoCityMessage: View {
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "mappin.slash").font(.system(size: 22)).foregroundStyle(.secondary)
+            Text(loc("Add a city in Weather"))
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -83,10 +92,7 @@ struct SunArc: View {
 /// Sun and moon over a city, on a sky that follows the hour.
 struct SkyClockWidget: View {
     let context: TimeContext
-
-    private var place: SunPlace {
-        SunPlace(context.snapshot)
-    }
+    let place: SunPlace
 
     private var now: Date {
         context.now
@@ -271,10 +277,7 @@ struct DayDial<Content: View>: View {
 /// How the day is split between light and dark, now and across the year.
 struct DayAndNightWidget: View {
     let context: TimeContext
-
-    private var place: SunPlace {
-        SunPlace(context.snapshot)
-    }
+    let place: SunPlace
 
     private var now: Date {
         context.now

@@ -97,8 +97,10 @@ public struct ItemContent {
         case .battery: battery(monitor.battery, style: style, options: options)
         case .sensors, .fans: thermal(module, monitor, options: options)
         case .uptime: uptime(since: SystemClock.bootTime() ?? .now, options: options)
-        case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon:
+        case .timers, .stopwatch, .countdown, .worldClocks, .date:
             everyday(module, monitor.everyday, options: options)
+        case .sunMoon:
+            sunMoon(monitor.sunPlace, zone: monitor.sunZone, options: options)
         case .calendar: calendar(monitor.agenda.events, at: Date(), options: options)
         case .endsIn: endsIn(monitor.agenda.events, at: Date(), options: options)
         case .todos: todos(monitor.agenda, at: Date(), options: options)
@@ -188,14 +190,10 @@ public struct ItemContent {
             return ItemContent(figure: next.map { loc("\($0.daysLeft(from: now)) d") } ?? "—", template: "888 d")
         case .worldClocks:
             return ItemContent(figure: firstCityTime(store), template: "88:88 PM")
-        case .date:
+        default:
             let date = DateItemText(options: options)
             let template = date.showsWeek ? "Wed, 28 Sep · W52" : "Wed, 28 Sep"
             return ItemContent(figure: date.text(for: now), template: template)
-        default:
-            let times = Astronomy.sunTimes(on: now, latitude: 55.75, longitude: 37.62)
-            let next = [times.sunrise, times.sunset].compactMap(\.self).first { $0 > now }
-            return ItemContent(figure: next?.formatted(date: .omitted, time: .shortened) ?? "—", template: "88:88 PM")
         }
     }
 

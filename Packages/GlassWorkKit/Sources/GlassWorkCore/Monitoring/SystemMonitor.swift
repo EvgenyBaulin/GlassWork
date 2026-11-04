@@ -81,6 +81,14 @@ public final class SystemMonitor {
     /// Reads half as often on battery and a quarter as often in Low Power Mode.
     public var slowsOnBattery = true
 
+    /// The Weather place the user picked for the sun, if any.
+    public var sunPlaceID: Int?
+
+    /// Where the Sun and Moon item, its panel and the sun widgets all look.
+    public var sunPlace: WeatherPlace? {
+        SunLocation.place(in: weather.places, chosen: sunPlaceID)
+    }
+
     /// Called after each read. Menu bar items redraw from here, without SwiftUI's update machinery.
     @ObservationIgnored public var onUpdate: (() -> Void)?
 
@@ -168,7 +176,7 @@ public final class SystemMonitor {
         snapshot.reviews = activity.reviews
         snapshot.runs = activity.runs
         snapshot.contributions = activity.contributions
-        snapshot.place = weather.places.first
+        snapshot.place = sunPlace
         if kinds.contains(.wordOfDay) {
             snapshot.words = wordOfDay.recent(6, at: date)
         }

@@ -199,12 +199,43 @@ extension ItemContent {
         )
     }
 
+    /// Dimmed with no place: without a city there is no honest time to show.
+    static func sunMoon(
+        _ place: WeatherPlace?,
+        zone: TimeZone,
+        at now: Date = Date(),
+        options: [String: String]
+    ) -> ItemContent {
+        let template = "↓ 88:88 PM"
+        let shows = options.choice(ItemOption.sunShows, default: SunShows.next)
+        guard let place,
+              let next = Astronomy.nextEvent(shows, after: now, latitude: place.latitude, longitude: place.longitude)
+        else {
+            var item = ItemContent(figure: "—", template: template)
+            item.isDimmed = place == nil
+            return item
+        }
+        var style = Date.FormatStyle(date: .omitted, time: .shortened)
+        style.timeZone = zone
+        let arrow = next.event == .sunrise ? "↑" : "↓"
+        var item = ItemContent(figure: "\(arrow) \(next.date.formatted(style))", template: template)
+        item.detail = place.name
+        return item
+    }
+
     static func todos(_ store: AgendaStore, at now: Date, options: [String: String]) -> ItemContent {
         let count = TodoFilter.all.apply(to: store.todos, now: now).count
         let isGranted = store.remindersAccess == .granted
         var item = ItemContent(figure: isGranted ? "\(count)" : "—", template: "888")
         item.isHidden = isGranted && count == 0 && options.flag(ItemOption.hidesWhenDone, default: true)
         return item
+    }
+}
+
+extension SystemMonitor {
+    /// The place's own time when Weather knows it, so a sunrise in Tokyo reads as it does in Tokyo.
+    var sunZone: TimeZone {
+        sunPlace.flatMap { weather.report(for: $0)?.zone } ?? .current
     }
 }
 

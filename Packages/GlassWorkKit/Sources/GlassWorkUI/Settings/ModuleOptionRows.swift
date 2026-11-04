@@ -54,6 +54,51 @@ private extension ModuleOptionRows {
     }
 }
 
+/// Which of the Weather places the sun is worked out for.
+public struct SunPlaceSection: View {
+    private let store: SettingsStore
+
+    public init(store: SettingsStore) {
+        self.store = store
+    }
+
+    private var choices: [WeatherPlace] {
+        let weather = store.settings.weather
+        let current = WeatherPlace(
+            id: WeatherPlace.currentLocationID,
+            name: loc("Current location"),
+            country: "",
+            latitude: 0,
+            longitude: 0
+        )
+        return (weather.useCurrentLocation ? [current] : []) + weather.places
+    }
+
+    private var selection: Binding<Int> {
+        Binding(
+            get: {
+                let saved = store.settings.module(.sunMoon)?.options[ItemOption.sunPlace].flatMap { Int($0) }
+                return SunLocation.place(in: choices, chosen: saved)?.id ?? WeatherPlace.currentLocationID
+            },
+            set: { id in store.update { $0.update(.sunMoon) { $0.options[ItemOption.sunPlace] = String(id) } } }
+        )
+    }
+
+    public var body: some View {
+        Section(loc("Location")) {
+            if choices.isEmpty {
+                Text(loc("Add a city in Weather to see sunrise and sunset."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                Picker(loc("Location"), selection: selection) {
+                    ForEach(choices) { Text($0.name).tag($0.id) }
+                }
+            }
+        }
+    }
+}
+
 /// The Hub's rows, for the Menu Bar page.
 public struct HubOptionRows: View {
     private let store: SettingsStore

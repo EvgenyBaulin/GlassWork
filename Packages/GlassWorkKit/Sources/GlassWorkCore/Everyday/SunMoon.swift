@@ -27,6 +27,28 @@ public enum MoonPhase: String, CaseIterable, Sendable {
     }
 }
 
+public enum SunEvent: Sendable, Equatable {
+    case sunrise, sunset
+}
+
+/// Which event the Sun and Moon item counts down to.
+public enum SunShows: String, Sendable, CaseIterable {
+    case next, sunrise, sunset
+}
+
+public struct NextSunEvent: Sendable, Equatable {
+    public let event: SunEvent
+    public let date: Date
+}
+
+/// The place the sun is worked out for. Only places the user gave to Weather count: there is no built-in city,
+/// and nothing here asks macOS for the position.
+public enum SunLocation {
+    public static func place(in places: [WeatherPlace], chosen: Int?) -> WeatherPlace? {
+        places.first { $0.id == chosen } ?? places.first
+    }
+}
+
 /// Sun and moon positions computed locally, so this module needs no network.
 public enum Astronomy {
     private static let synodicMonth = 29.530588853
@@ -67,6 +89,27 @@ public enum Astronomy {
         guard abs(hour) <= 1 else { return SunTimes(sunrise: nil, sunset: nil) }
         let offset = acos(hour) / (2 * .pi)
         return SunTimes(sunrise: moment(transit - offset), sunset: moment(transit + offset))
+    }
+
+    /// The next sunrise or sunset. Looks past today, since after sunset the next event is tomorrow's.
+    /// Nil only where the sun neither rises nor sets for days, as in a polar night.
+    public static func nextEvent(
+        _ shows: SunShows,
+        after date: Date,
+        latitude: Double,
+        longitude: Double
+    ) -> NextSunEvent? {
+        for offset in 0 ... 2 {
+            let day = date.addingTimeInterval(Double(offset) * 86400)
+            let times = sunTimes(on: day, latitude: latitude, longitude: longitude)
+            let sunrise = shows == .sunset ? nil : times.sunrise.map { NextSunEvent(event: .sunrise, date: $0) }
+            let sunset = shows == .sunrise ? nil : times.sunset.map { NextSunEvent(event: .sunset, date: $0) }
+            let upcoming = [sunrise, sunset].compactMap(\.self).filter { $0.date > date }
+            if let next = upcoming.min(by: { $0.date < $1.date }) {
+                return next
+            }
+        }
+        return nil
     }
 
     private static func moment(_ julian: Double) -> Date {

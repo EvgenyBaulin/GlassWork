@@ -7,7 +7,7 @@ import SwiftUI
 
 let sampleNow = Date(timeIntervalSince1970: 1_793_773_800)
 
-private struct NoNetwork: HTTPFetching {
+struct NoNetwork: HTTPFetching {
     func data(from _: URL) async throws -> Data {
         throw URLError(.notConnectedToInternet)
     }

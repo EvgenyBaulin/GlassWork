@@ -13610,6 +13610,66 @@
           }
         }
       }
+    },
+    "No city yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Города пока нет"
+          }
+        }
+      }
+    },
+    "Add a city in Weather to see sunrise and sunset.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте город в модуле «Погода», и здесь появятся восход и закат."
+          }
+        }
+      }
+    },
+    "Add a city in Weather": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте город в модуле «Погода»"
+          }
+        }
+      }
+    },
+    "Weather Settings…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки погоды…"
+          }
+        }
+      }
+    },
+    "Location": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Место"
+          }
+        }
+      }
+    },
+    "Next sunrise or sunset": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ближайший восход или закат"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

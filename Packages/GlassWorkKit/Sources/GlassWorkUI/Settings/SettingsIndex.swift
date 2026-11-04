@@ -275,6 +275,14 @@ extension SettingsIndex {
             )
         }
         return [
+            page(
+                "sunMoon.place",
+                "Location",
+                "Место",
+                .module(.sunMoon),
+                ["Menu Bar", "Sun and Moon"],
+                keywords: ["city", "город"]
+            ),
             page("shortcut.hub", "Open the Hub", "Открыть Хаб", .shortcuts, ["Shortcuts"]),
             page("shortcut.quickPaste", "Clipboard history", "История буфера обмена", .shortcuts, ["Shortcuts"]),
             page(

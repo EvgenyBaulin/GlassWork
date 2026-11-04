@@ -32,7 +32,7 @@ public struct ModulePanel: View {
         case .countdown: CountdownPanel(monitor: monitor)
         case .worldClocks: WorldClocksPanel(monitor: monitor)
         case .date: DatePanel()
-        case .sunMoon: SunMoonPanel()
+        case .sunMoon: SunMoonPanel(monitor: monitor)
         case .colours: ColoursPanel(monitor: monitor)
         case .eject: EjectPanel(monitor: monitor)
         case _ where ModuleID.developerCollected.contains(module):

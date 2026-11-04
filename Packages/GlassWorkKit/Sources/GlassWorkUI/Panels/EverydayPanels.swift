@@ -247,18 +247,25 @@ struct MonthGrid: View {
 }
 
 struct SunMoonPanel: View {
-    /// Moscow until the shared city list from Weather is available.
-    private static let latitude = 55.75
-    private static let longitude = 37.62
+    let monitor: SystemMonitor
+    /// Set by tests, which need the same sky on every run.
+    var moment: Date?
+    @Environment(\.panelActions) private var actions
 
     var body: some View {
-        let now = Date()
-        let times = Astronomy.sunTimes(on: now, latitude: Self.latitude, longitude: Self.longitude)
-        PanelFrame(module: .sunMoon, subtitle: "") {
-            InfoRow(title: loc("Sunrise"), value: times.sunrise?.formatted(date: .omitted, time: .shortened) ?? "—")
-            InfoRow(title: loc("Sunset"), value: times.sunset?.formatted(date: .omitted, time: .shortened) ?? "—")
-            if let daylight = times.daylight {
-                InfoRow(title: loc("Daylight"), value: CompactDuration.format(daylight))
+        let now = moment ?? Date()
+        let place = monitor.sunPlace
+        PanelFrame(module: .sunMoon, subtitle: place.map(title) ?? "") {
+            if let place {
+                sun(place, now: now)
+            } else {
+                PanelMessage(
+                    symbol: "mappin.slash",
+                    title: loc("No city yet"),
+                    detail: loc("Add a city in Weather to see sunrise and sunset.")
+                )
+                Button(loc("Weather Settings…")) { actions.openSettings(.weather) }
+                    .frame(maxWidth: .infinity)
             }
             Divider()
             HStack {
@@ -267,6 +274,26 @@ struct SunMoonPanel: View {
                     .font(.system(size: 13))
             }
         }
+    }
+
+    private func title(_ place: WeatherPlace) -> String {
+        place.isCurrentLocation ? loc("Current location") : place.name
+    }
+
+    @ViewBuilder
+    private func sun(_ place: WeatherPlace, now: Date) -> some View {
+        let times = Astronomy.sunTimes(on: now, latitude: place.latitude, longitude: place.longitude)
+        InfoRow(title: loc("Sunrise"), value: text(times.sunrise))
+        InfoRow(title: loc("Sunset"), value: text(times.sunset))
+        if let daylight = times.daylight {
+            InfoRow(title: loc("Daylight"), value: CompactDuration.format(daylight))
+        }
+    }
+
+    private func text(_ date: Date?) -> String {
+        var style = Date.FormatStyle(date: .omitted, time: .shortened)
+        style.timeZone = monitor.sunZone
+        return date?.formatted(style) ?? "—"
     }
 }
 
