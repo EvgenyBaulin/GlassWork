@@ -69,6 +69,17 @@ public struct DockSettings: Codable, Sendable, Equatable {
     public var items: [DockItem] = []
 
     public init() {}
+
+    /// Every app in the Dock, folders included.
+    public var apps: [DockApp] {
+        items.flatMap { item -> [DockApp] in
+            switch item {
+            case let .app(app): [app]
+            case let .folder(folder): folder.apps
+            case .widget: []
+            }
+        }
+    }
 }
 
 /// Edits the Dock's contents. Pure, so every folder rule is testable.
@@ -116,16 +127,6 @@ public enum DockLayout {
 
     private static func index(of app: DockApp, in items: [DockItem]) -> Int? {
         items.firstIndex(of: .app(app))
-    }
-}
-
-/// Icon growth near the pointer.
-public enum DockMagnification {
-    /// Size of an icon whose center is `distance` points from the pointer.
-    public static func size(distance: Double, base: Double, magnified: Double, radius: Double = 120) -> Double {
-        guard abs(distance) < radius else { return base }
-        let closeness = cos(abs(distance) / radius * .pi / 2)
-        return base + (magnified - base) * closeness
     }
 }
 

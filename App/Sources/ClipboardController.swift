@@ -94,7 +94,7 @@ final class ClipboardController {
     private var isWanted = false
     private var isPaused = false
     private var quickPanel: GlassPanel?
-    private var outsideClick: Any?
+    private var dismissal: TransientDismissal?
 
     /// A copy lasts until the next poll, so a fast second copy is only lost below this interval.
     private static let pollInterval: TimeInterval = 0.5
@@ -180,6 +180,14 @@ final class ClipboardController {
         }
     }
 
+    /// Copies text made inside the app. The next poll treats it like any other copy, so the history keeps
+    /// it only if recording is on and the app in front is not excluded.
+    func copy(_ text: String) {
+        let board = NSPasteboard.general
+        board.clearContents()
+        board.setString(text, forType: .string)
+    }
+
     private func write(_ entry: ClipboardEntry, plainText: Bool) {
         let board = NSPasteboard.general
         board.clearContents()
@@ -224,16 +232,14 @@ final class ClipboardController {
         window.setFrame(Self.frame(size: hosting.fittingSize, at: NSEvent.mouseLocation), display: false)
         window.makeKeyAndOrderFront(nil)
         quickPanel = window
-        outsideClick = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            MainActor.assumeIsolated { self?.closeQuickPaste() }
-        }
+        let dismissal = TransientDismissal(panel: window) { [weak self] in self?.closeQuickPaste() }
+        dismissal.start()
+        self.dismissal = dismissal
     }
 
-    private func closeQuickPaste() {
-        if let outsideClick {
-            NSEvent.removeMonitor(outsideClick)
-        }
-        outsideClick = nil
+    func closeQuickPaste() {
+        dismissal?.stop()
+        dismissal = nil
         quickPanel?.close()
         quickPanel = nil
     }

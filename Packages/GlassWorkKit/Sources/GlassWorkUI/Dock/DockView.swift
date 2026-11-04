@@ -7,81 +7,148 @@ public struct DockActions {
     public var open: (DockApp) -> Void
     public var showPanel: (ModuleID) -> Void
     public var update: (([DockItem]) -> [DockItem]) -> Void
+    /// Tells the window what to make room for.
+    public var needsSpace: (DockSpace) -> Void
 
     public init(
         open: @escaping (DockApp) -> Void,
         showPanel: @escaping (ModuleID) -> Void,
-        update: @escaping (([DockItem]) -> [DockItem]) -> Void
+        update: @escaping (([DockItem]) -> [DockItem]) -> Void,
+        needsSpace: @escaping (DockSpace) -> Void
     ) {
         self.open = open
         self.showPanel = showPanel
         self.update = update
+        self.needsSpace = needsSpace
     }
 }
 
 /// The Dock: apps, folders and live widgets on a glass bar.
 public struct DockView: View {
-    private let settings: DockSettings
-    private let running: Set<String>
+    private let state: DockLiveState
     private let monitor: SystemMonitor
     private let actions: DockActions
-    @State private var pointerX: CGFloat?
-    @State private var openFolder: AppFolder?
+    /// Distance from the middle of the Dock, which stays put however wide the bar gets.
+    @State private var pointer: Double?
+    @State private var openFolderID: AppFolder.ID?
 
-    public init(settings: DockSettings, running: Set<String>, monitor: SystemMonitor, actions: DockActions) {
-        self.settings = settings
-        self.running = running
+    private static let canvas = "dock"
+    /// Quick enough to feel attached to the pointer, long enough not to pop.
+    private static let hoverAnimation = Animation.easeOut(duration: 0.14)
+
+    /// - Parameter pointer: Where the pointer starts, measured from the middle of the Dock.
+    public init(state: DockLiveState, monitor: SystemMonitor, actions: DockActions, pointer: Double? = nil) {
+        self.state = state
         self.monitor = monitor
         self.actions = actions
+        _pointer = State(initialValue: pointer)
     }
 
+    private var settings: DockSettings {
+        state.settings
+    }
+
+    private var running: Set<String> {
+        state.running
+    }
+
+    /// Read fresh from settings, so renaming a folder does not leave the card holding the old one.
+    private var openFolder: AppFolder? {
+        settings.items.lazy.compactMap { item -> AppFolder? in
+            if case let .folder(folder) = item, folder.id == openFolderID {
+                return folder
+            }
+            return nil
+        }.first
+    }
+
+    private var space: DockSpace {
+        if openFolder != nil {
+            return .folder
+        }
+        return pointer == nil ? .rest : .magnified
+    }
+
+    /// Everything hangs from the bottom edge, so the window can change size without the bar moving.
     public var body: some View {
-        VStack(spacing: 10) {
-            if let openFolder {
-                FolderCard(folder: openFolder, actions: actions) { self.openFolder = nil }
+        GeometryReader { proxy in
+            ZStack(alignment: .bottom) {
+                if let openFolder {
+                    FolderCard(folder: openFolder, actions: actions) { openFolderID = nil }
+                        .padding(.bottom, cardLift)
+                }
+                bar(middle: proxy.size.width / 2)
             }
-            bar
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottom)
         }
+        .coordinateSpace(.named(Self.canvas))
+        .onChange(of: space) { _, space in actions.needsSpace(space) }
     }
 
-    private var bar: some View {
-        HStack(alignment: .bottom, spacing: 8) {
-            ForEach(Array(settings.items.enumerated()), id: \.element.id) { index, item in
-                tile(item, size: size(at: index))
-            }
-        }
-        .padding(8)
-        .glassEffect(.regular, in: .rect(cornerRadius: 22))
-        .onContinuousHover { phase in
-            switch phase {
-            case let .active(location): pointerX = settings.magnifies ? location.x : nil
-            case .ended: pointerX = nil
-            }
-        }
+    private var cardLift: Double {
+        DockBarLayout.restHeight(base: settings.iconSize) + DockBarLayout.growth(settings) + DockBarLayout.folderCardGap
     }
 
-    private func size(at index: Int) -> CGFloat {
-        guard let pointerX else { return settings.iconSize }
-        let center = 8 + (CGFloat(index) + 0.5) * (settings.iconSize + 8)
-        return DockMagnification.size(
-            distance: pointerX - center,
+    private func bar(middle: Double) -> some View {
+        let layout = DockBarLayout(
+            count: settings.items.count,
             base: settings.iconSize,
-            magnified: settings.magnifiedSize
+            magnified: settings.magnifiedSize,
+            pointer: settings.magnifies ? pointer : nil
         )
+        return HStack(alignment: .bottom, spacing: DockBarLayout.spacing) {
+            ForEach(Array(settings.items.enumerated()), id: \.element.id) { index, item in
+                tile(item, size: layout.sizes[index])
+            }
+        }
+        .padding(DockBarLayout.padding)
+        .background(alignment: .bottom) {
+            // Keeps its height: icons grow up and out of it.
+            Color.clear
+                .frame(height: DockBarLayout.restHeight(base: settings.iconSize))
+                .glassEffect(.regular, in: .rect(cornerRadius: 22))
+        }
+        .onContinuousHover(coordinateSpace: .named(Self.canvas)) { phase in
+            switch phase {
+            case let .active(location): movePointer(to: location.x - middle)
+            case .ended: movePointer(to: nil)
+            }
+        }
+        .offset(x: layout.centerX)
+    }
+
+    /// Entering and leaving animate. Moving does not need to: sizes already change continuously.
+    private func movePointer(to position: Double?) {
+        let target = settings.magnifies ? position : nil
+        if (target == nil) == (pointer == nil) {
+            pointer = target
+        } else {
+            withAnimation(Self.hoverAnimation) { pointer = target }
+        }
     }
 
     @ViewBuilder
     private func tile(_ item: DockItem, size: CGFloat) -> some View {
         switch item {
         case let .app(app):
-            AppTile(app: app, size: size, isRunning: running.contains(app.path)) { actions.open(app) }
+            AppTile(
+                app: app,
+                size: size,
+                isRunning: running.contains(app.path),
+                isLaunching: state.launching.contains(app.path)
+            ) { actions.open(app) }
                 .draggable(app.path)
                 .dropDestination(for: String.self) { paths, _ in
                     drop(paths) { dragged, items in DockLayout.drop(dragged, onto: app, in: items) }
                 }
         case let .folder(folder):
-            FolderTile(folder: folder, size: size, isRunning: folder.apps.contains { running.contains($0.path) }) {
-                openFolder = openFolder?.id == folder.id ? nil : folder
+            FolderTile(
+                folder: folder,
+                size: size,
+                isRunning: folder.apps.contains { running.contains($0.path) },
+                isLaunching: folder.apps.contains { state.launching.contains($0.path) }
+            ) {
+                openFolderID = openFolderID == folder.id ? nil : folder.id
             }
             .dropDestination(for: String.self) { paths, _ in
                 drop(paths) { dragged, items in DockLayout.drop(dragged, into: folder, in: items) }
@@ -110,14 +177,54 @@ private extension DockView {
     }
 }
 
+/// Sizes change on every pointer move, and asking the system for an icon each time is too slow.
+@MainActor
+private enum DockIcons {
+    private static var cache: [String: NSImage] = [:]
+
+    static func icon(for path: String) -> NSImage {
+        if let icon = cache[path] {
+            return icon
+        }
+        let icon = NSWorkspace.shared.icon(forFile: path)
+        cache[path] = icon
+        return icon
+    }
+}
+
 struct AppIcon: View {
     let app: DockApp
     let size: CGFloat
 
     var body: some View {
-        Image(nsImage: NSWorkspace.shared.icon(forFile: app.path))
+        Image(nsImage: DockIcons.icon(for: app.path))
             .resizable()
             .frame(width: size, height: size)
+    }
+}
+
+/// Jumps until the app is up. Only draws higher, so nothing around the icon moves.
+struct LaunchBounce: ViewModifier {
+    let isActive: Bool
+    let size: CGFloat
+    /// A fixed height from 0 to 1 in place of the motion, for snapshots.
+    var pose: Double?
+    @Environment(\.accessibilityReduceMotion) private var reducesMotion
+
+    func body(content: Content) -> some View {
+        let height = size * DockBarLayout.bounce
+        let isStill = reducesMotion
+        content.keyframeAnimator(initialValue: pose ?? 0, repeating: isActive && pose == nil) { view, lift in
+            view
+                .offset(y: isStill ? 0 : -height * lift)
+                .opacity(isStill ? 1 - lift / 2 : 1)
+        } keyframes: { _ in
+            KeyframeTrack {
+                CubicKeyframe(1, duration: 0.28)
+                CubicKeyframe(0, duration: 0.28)
+                LinearKeyframe(0, duration: 0.08)
+            }
+        }
     }
 }
 
@@ -125,13 +232,16 @@ struct AppTile: View {
     let app: DockApp
     let size: CGFloat
     let isRunning: Bool
+    var isLaunching = false
+    var pose: Double?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             VStack(spacing: 3) {
                 AppIcon(app: app, size: size)
-                Circle().fill(isRunning ? Color.primary : .clear).frame(width: 4, height: 4)
+                    .modifier(LaunchBounce(isActive: isLaunching, size: size, pose: pose))
+                Circle().fill(isRunning || isLaunching ? Color.primary : .clear).frame(width: 4, height: 4)
             }
         }
         .buttonStyle(.plain)
@@ -144,6 +254,7 @@ struct FolderTile: View {
     let folder: AppFolder
     let size: CGFloat
     let isRunning: Bool
+    var isLaunching = false
     let action: () -> Void
 
     var body: some View {
@@ -152,7 +263,8 @@ struct FolderTile: View {
                 content
                     .frame(width: size, height: size)
                     .background(.white.opacity(0.14), in: .rect(cornerRadius: size / 4.5))
-                Circle().fill(isRunning ? Color.primary : .clear).frame(width: 4, height: 4)
+                    .modifier(LaunchBounce(isActive: isLaunching, size: size))
+                Circle().fill(isRunning || isLaunching ? Color.primary : .clear).frame(width: 4, height: 4)
             }
         }
         .buttonStyle(.plain)

@@ -70,6 +70,214 @@ struct DockMagnificationTests {
         let halfway = DockMagnification.size(distance: 60, base: 48, magnified: 80)
         #expect(halfway > 48 && halfway < 80)
     }
+
+    @Test func fallsOffLikeTheDesign() {
+        let step = 48.0 + DockBarLayout.spacing
+        func scale(_ tiles: Double) -> Double {
+            DockMagnification.size(distance: tiles * step, base: 48, magnified: 48 * 1.6) / 48
+        }
+        #expect(abs(scale(0) - 1.6) < 0.001)
+        #expect(abs(scale(1) - 1.35) < 0.1)
+        #expect(abs(scale(2) - 1.12) < 0.05)
+        #expect(scale(3) == 1)
+    }
+
+    @Test func reachFollowsTheIconSize() {
+        #expect(DockMagnification.size(distance: 200, base: 96, magnified: 128) > 96)
+    }
+}
+
+struct DockBarLayoutTests {
+    private let base = 48.0
+    private let magnified = 108.0
+
+    /// Every pointer position across the bar and a little past both ends.
+    private func sweep(count: Int) -> [Double] {
+        let half = DockBarLayout.restWidth(count: count, base: base) / 2 + 40
+        return stride(from: -half, through: half, by: 1).map(\.self)
+    }
+
+    private func layout(_ count: Int, _ pointer: Double?) -> DockBarLayout {
+        DockBarLayout(count: count, base: base, magnified: magnified, pointer: pointer)
+    }
+
+    @Test func restsCenteredAtBaseSize() {
+        let rest = layout(5, nil)
+        #expect(rest.sizes == Array(repeating: 48, count: 5))
+        #expect(rest.width == 5 * 48 + 4 * 8 + 16)
+        #expect(rest.centerX == 0)
+    }
+
+    @Test func anEmptyDockIsJustItsPadding() {
+        let empty = layout(0, 10)
+        #expect(empty.sizes.isEmpty)
+        #expect(empty.width == 16)
+    }
+
+    @Test func keepsWidthAndSizesInStep() {
+        for pointer in sweep(count: 9) {
+            let bar = layout(9, pointer)
+            #expect(abs(bar.width - bar.sizes.reduce(0, +) - 8 * 8 - 16) < 0.001)
+        }
+    }
+
+    /// A small move of the pointer must never make anything jump.
+    @Test func movesSmoothly() {
+        let positions = sweep(count: 9)
+        for (previous, next) in zip(positions, positions.dropFirst()) {
+            let before = layout(9, previous)
+            let after = layout(9, next)
+            #expect(abs(before.minX - after.minX) < 3)
+            #expect(abs(before.width - after.width) < 3)
+            for (old, new) in zip(before.sizes, after.sizes) {
+                #expect(abs(old - new) < 3)
+            }
+        }
+    }
+
+    @Test func thePointerStaysOnTheIconItEntered() {
+        let count = 9
+        let step = base + DockBarLayout.spacing
+        let firstCenter = -DockBarLayout.restWidth(count: count, base: base) / 2 + DockBarLayout.padding + base / 2
+        for index in 0 ..< count {
+            let pointer = firstCenter + Double(index) * step
+            let bar = layout(count, pointer)
+            let left = bar.minX + DockBarLayout.padding
+                + bar.sizes.prefix(index).reduce(0) { $0 + $1 + DockBarLayout.spacing }
+            #expect(pointer >= left && pointer <= left + bar.sizes[index])
+            #expect(abs(pointer - (left + bar.sizes[index] / 2)) < 0.001)
+        }
+    }
+
+    @Test func neighboursMakeRoomOnBothSides() {
+        let rest = layout(9, nil)
+        let bar = layout(9, 0)
+        #expect(bar.minX < rest.minX)
+        #expect(bar.minX + bar.width > rest.minX + rest.width)
+        #expect(abs(bar.centerX) < 0.001)
+    }
+
+    @Test(arguments: [1, 2, 5, 24])
+    func theWindowHoldsTheBarWhereverThePointerIs(count: Int) {
+        var settings = DockSettings()
+        settings.iconSize = base
+        settings.magnifiedSize = magnified
+        settings.magnifies = true
+        let window = DockBarLayout.windowSize(for: .magnified, count: count, settings: settings)
+        for pointer in sweep(count: count) {
+            let bar = layout(count, pointer)
+            #expect(bar.minX >= -window.width / 2)
+            #expect(bar.minX + bar.width <= window.width / 2)
+            let top = bar.sizes.max().map { $0 + DockBarLayout.indicator + 2 * DockBarLayout.padding } ?? 0
+            #expect(top <= window.height)
+        }
+    }
+
+    @Test func aRestingWindowIsJustTheBar() {
+        var settings = DockSettings()
+        settings.iconSize = 48
+        let window = DockBarLayout.windowSize(for: .rest, count: 5, settings: settings)
+        #expect(window.width == 288)
+        #expect(window.height == 71)
+    }
+
+    @Test func everyWindowSizeSharesOneMiddle() {
+        var settings = DockSettings()
+        settings.iconSize = 49.03
+        settings.magnifiedSize = 108.6
+        settings.magnifies = true
+        for space in [DockSpace.rest, .magnified, .folder] {
+            let window = DockBarLayout.windowSize(for: space, count: 7, settings: settings)
+            #expect(window.width.truncatingRemainder(dividingBy: 2) == 0)
+        }
+    }
+
+    @Test func aFolderCardFitsAboveASmallBar() {
+        var settings = DockSettings()
+        settings.iconSize = 48
+        let window = DockBarLayout.windowSize(for: .folder, count: 2, settings: settings)
+        #expect(window.width >= DockBarLayout.folderCardWidth)
+        #expect(window.height >= DockBarLayout.folderCardHeight + DockBarLayout.restHeight(base: 48))
+    }
+}
+
+struct DockLaunchTrackerTests {
+    private let path = "/Applications/Mail.app"
+    private let start = Date(timeIntervalSince1970: 1_800_000_000)
+
+    @Test func aClickStartsTheBounce() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        #expect(tracker.launching == [path])
+        #expect(tracker.nextDeadline == start.addingTimeInterval(DockLaunchTracker.timeout))
+    }
+
+    @Test func aRunningAppDoesNotBounce() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: true, at: start)
+        #expect(tracker.launching.isEmpty)
+    }
+
+    @Test func stopsOnceTheAppRuns() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        tracker.update(running: [path], at: start.addingTimeInterval(1))
+        #expect(tracker.launching.isEmpty)
+        #expect(tracker.nextDeadline == nil)
+    }
+
+    @Test func stopsOnAFailedLaunch() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        tracker.fail(path)
+        #expect(tracker.launching.isEmpty)
+    }
+
+    @Test func stopsAtTheTimeout() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        tracker.update(running: [], at: start.addingTimeInterval(DockLaunchTracker.timeout - 1))
+        #expect(tracker.launching == [path])
+        tracker.update(running: [], at: start.addingTimeInterval(DockLaunchTracker.timeout))
+        #expect(tracker.launching.isEmpty)
+    }
+
+    @Test func otherAppsKeepBouncing() {
+        var tracker = DockLaunchTracker()
+        tracker.begin(path, isRunning: false, at: start)
+        tracker.begin("/Applications/Notes.app", isRunning: false, at: start)
+        tracker.update(running: [path], at: start)
+        #expect(tracker.launching == ["/Applications/Notes.app"])
+    }
+}
+
+struct DockRunningAppsTests {
+    private let safari = DockApp(path: "/Applications/Safari.app/", name: "Safari")
+    private let mail = DockApp(path: "/System/Applications/Mail.app/", name: "Mail")
+
+    @Test func matchesAcrossALinkByBundleID() {
+        let running = [RunningApp(
+            bundleID: "com.apple.Safari",
+            path: "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app/"
+        )]
+        let bundleIDs = [safari.path: "com.apple.Safari"]
+        #expect(DockRunningApps.match([safari, mail], bundleIDs: bundleIDs, running: running) == [safari.path])
+    }
+
+    @Test func fallsBackToThePathWithoutItsSlash() {
+        let running = [RunningApp(bundleID: nil, path: "/System/Applications/Mail.app")]
+        #expect(DockRunningApps.match([mail], bundleIDs: [:], running: running) == [mail.path])
+    }
+
+    @Test func aQuitAppIsNoLongerMatched() {
+        #expect(DockRunningApps.match([mail], bundleIDs: [mail.path: "com.apple.mail"], running: []).isEmpty)
+    }
+
+    @Test func seesAppsInFolders() {
+        var settings = DockSettings()
+        settings.items = [.app(safari), .folder(AppFolder(name: "Work", apps: [mail])), .widget(.cpu)]
+        #expect(settings.apps == [safari, mail])
+    }
 }
 
 struct SystemDockAppsTests {

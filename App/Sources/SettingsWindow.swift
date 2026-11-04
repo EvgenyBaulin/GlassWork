@@ -198,14 +198,32 @@ struct ModulesPane: View {
                     Button(loc("Restore defaults")) { store.update { $0.modules = AppSettings.defaultModules } }
                 }
             }
-            Section(loc("Hiding")) {
+            Section {
                 Toggle(loc("Hide items behind a separator"), isOn: hidingEnabled)
                 Stepper(value: autoHide, in: 3 ... 60) {
                     Text(loc("Hide again after \(store.settings.hiding.autoHideSeconds) s"))
                 }
+                LabeledContent(loc("To remove a macOS item for good, turn it off in System Settings.")) {
+                    Button(loc("Menu Bar Settings…"), action: Self.openMenuBarSettings)
+                }
+            } header: {
+                Text(loc("Hiding"))
+            } footer: {
+                Text(loc("""
+                Everything left of ‹ hides, macOS items such as Wi-Fi and Battery too. \
+                Hold ⌘ and drag an item across ‹ to choose. The clock and Control Center always stay.
+                """))
             }
         }
         .formStyle(.grouped)
+    }
+
+    /// Only opens the page: which macOS items are shown stays the user's change to make there.
+    private static func openMenuBarSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension") else {
+            return
+        }
+        NSWorkspace.shared.open(url)
     }
 
     private var hidingEnabled: Binding<Bool> {

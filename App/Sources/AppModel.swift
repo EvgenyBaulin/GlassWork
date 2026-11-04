@@ -19,6 +19,7 @@ final class AppModel {
     private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private lazy var dock = DockController(model: self)
     private lazy var clipboard = ClipboardController(model: self)
+    private lazy var textCapture = TextCaptureController(model: self)
     private lazy var location = LocationProvider(store: monitor.weather)
     private lazy var nowPlaying = NowPlayingBridge(
         store: monitor.nowPlaying,
@@ -37,6 +38,7 @@ final class AppModel {
         observeFrontApp()
         hotKey.onPress = { [weak self] in self?.toggleHub() }
         hotKey.register()
+        _ = textCapture
         Task { await monitor.clipboard.load() }
         applySettings()
         checkSystemWidgets()
@@ -117,6 +119,7 @@ final class AppModel {
 
     /// Keep Awake, Stopwatch and Appearance act on the click itself.
     func performClickAction(_ module: ModuleID) {
+        panels.closeTransient()
         let store = monitor.everyday
         switch module {
         case .keepAwake: store.toggleKeepAwake()
@@ -253,6 +256,18 @@ final class AppModel {
 
     func closePanels() {
         panels.closeTransient()
+    }
+
+    func closeQuickPaste() {
+        clipboard.closeQuickPaste()
+    }
+
+    func copyToPasteboard(_ text: String) {
+        clipboard.copy(text)
+    }
+
+    func isStatusItem(_ window: NSWindow) -> Bool {
+        statusBar.owns(window)
     }
 
     /// Screen time counts only after the user turns it on.

@@ -8627,6 +8627,138 @@
         }
       }
     },
+    "Click to show or hide. Hold ⌘ and drag an item across ‹ to choose.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите, чтобы показать или скрыть. Удерживайте ⌘ и перетащите значок через ‹, чтобы выбрать."
+          }
+        }
+      }
+    },
+    "To remove a macOS item for good, turn it off in System Settings.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы убрать значок macOS совсем, выключите его в Системных настройках."
+          }
+        }
+      }
+    },
+    "Menu Bar Settings…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки строки меню…"
+          }
+        }
+      }
+    },
+    "Everything left of ‹ hides, macOS items such as Wi-Fi and Battery too. Hold ⌘ and drag an item across ‹ to choose. The clock and Control Center always stay.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё, что левее ‹, скрывается, в том числе значки macOS: Wi-Fi, батарея. Чтобы выбрать, удерживайте ⌘ и перетащите значок через ‹. Часы и Пункт управления остаются всегда."
+          }
+        }
+      }
+    },
+    "Copy text from screen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопировать текст с экрана"
+          }
+        }
+      }
+    },
+    "No text found": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст не найден"
+          }
+        }
+      }
+    },
+    "GlassWork needs Screen Recording": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlassWork нужна запись экрана"
+          }
+        }
+      }
+    },
+    "Add GlassWork in System Settings → Privacy & Security → Screen & System Audio Recording, then press ⇧⌘2 again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте GlassWork в Системных настройках: Конфиденциальность и безопасность → Запись экрана и системного аудио. Затем снова нажмите ⇧⌘2."
+          }
+        }
+      }
+    },
+    "%lld characters copied": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld character copied"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld characters copied"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Скопирован %lld символ"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Скопировано %lld символа"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Скопировано %lld символов"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Скопировано %lld символов"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld of %lld supported tools found": {
       "localizations": {
         "en": {

@@ -48,7 +48,7 @@ final class PanelController {
     private unowned let model: AppModel
     private var panel: GlassPanel?
     private var content: Content?
-    private var outsideClick: Any?
+    private var dismissal: TransientDismissal?
     private var detached: [ModuleID: NSWindow] = [:]
     private var resize: NSObjectProtocol?
 
@@ -80,10 +80,8 @@ final class PanelController {
     }
 
     func closeTransient() {
-        if let outsideClick {
-            NSEvent.removeMonitor(outsideClick)
-        }
-        outsideClick = nil
+        dismissal?.stop()
+        dismissal = nil
         if let resize {
             NotificationCenter.default.removeObserver(resize)
         }
@@ -135,6 +133,7 @@ final class PanelController {
     }
 
     private func show(_ new: Content, from button: NSStatusBarButton?, view: AnyView) {
+        model.closeQuickPaste()
         let root = view
             .modifier(PanelGlass())
             .environment(\.panelActions, model.actions)
@@ -150,9 +149,13 @@ final class PanelController {
         panel = window
         content = new
         model.panelsChanged(hasOpenPanel: true)
-        outsideClick = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            MainActor.assumeIsolated { self?.closeTransient() }
-        }
+        let dismissal = TransientDismissal(
+            panel: window,
+            isStatusItem: { [weak self] in self?.model.isStatusItem($0) ?? false },
+            dismiss: { [weak self] in self?.closeTransient() }
+        )
+        dismissal.start()
+        self.dismissal = dismissal
     }
 
     /// Panels grow once data arrives; without this they would grow upwards, under the menu bar.
