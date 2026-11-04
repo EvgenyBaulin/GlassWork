@@ -57,6 +57,18 @@ public enum DockItem: Codable, Sendable, Equatable, Identifiable {
     }
 }
 
+/// What right-clicking an app in the Dock can do.
+public enum DockAppCommand: Sendable, Equatable {
+    case open, showAllWindows, hide, hideOthers, showInFinder, quit, forceQuit
+
+    /// `hideOthers` and `forceQuit` take the place of the item before them while ⌥ is down.
+    public static func offered(isRunning: Bool, canQuit: Bool) -> [DockAppCommand] {
+        guard isRunning else { return [.open, .showInFinder] }
+        let base: [DockAppCommand] = [.showAllWindows, .hide, .hideOthers, .showInFinder]
+        return canQuit ? base + [.quit, .forceQuit] : base
+    }
+}
+
 public struct DockSettings: Codable, Sendable, Equatable {
     /// Off until the owner turns it on: enabling hides the system Dock.
     public var isEnabled = false

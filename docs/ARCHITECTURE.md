@@ -79,6 +79,18 @@ Button(intent:) ──► WidgetActionIntent ──► WidgetCommandInbox (App G
 
 Collectors are plain types with a pure parsing part (unit tested with fixtures) and a thin reading part.
 
+## App usage and quitting
+
+`AppUsageReader` reads CPU time and memory of every process with `proc_pid_rusage`, so nothing is spawned, and
+groups them by app: the process macOS holds responsible, then the enclosing `.app` bundle, then the parent. Reads
+ride on the monitor's tick: every 60 seconds in the background, which costs about 2 ms each, and every 5 seconds
+while a list of apps is on screen. The last hour keeps a point a minute, and a week keeps a point every ten
+minutes in `AppUsage.jsonl` in Application Support.
+
+Every Quit button goes through `QuitService`. It refuses system processes and GlassWork itself, and checks who
+holds the pid at that moment, because a list can be seconds old. Apps get `NSRunningApplication.terminate()`, so
+they can ask to save. Plain processes get a signal.
+
 ## Settings
 
 Settings live in a readable JSON file in Application Support and are edited from the Settings window.

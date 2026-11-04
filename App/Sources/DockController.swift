@@ -116,8 +116,58 @@ final class DockController {
             needsSpace: { [weak self] space in
                 self?.requested = space
                 self?.updateSpace()
-            }
+            },
+            commands: { [weak self] in self?.commands(for: $0) ?? [] },
+            perform: { [weak self] in self?.perform($0, on: $1) }
         )
+    }
+
+    private func runningApp(_ app: DockApp) -> NSRunningApplication? {
+        let apps = NSWorkspace.shared.runningApplications
+        return apps.first { running in
+            let bundleID = bundleIDs[app.path]
+            return (bundleID != nil && running.bundleIdentifier == bundleID)
+                || running.bundleURL?.path(percentEncoded: false) == app.path
+        }
+    }
+
+    private func target(of running: NSRunningApplication) -> QuitTarget {
+        QuitTarget(
+            pid: running.processIdentifier,
+            name: running.localizedName ?? "",
+            bundleID: running.bundleIdentifier,
+            path: running.bundleURL?.path(percentEncoded: false)
+        )
+    }
+
+    private func commands(for app: DockApp) -> [DockAppCommand] {
+        let running = runningApp(app)
+        let canQuit = running.map { !QuitPolicy.isProtected(target(of: $0)) } ?? false
+        return DockAppCommand.offered(isRunning: running != nil, canQuit: canQuit)
+    }
+
+    private func perform(_ command: DockAppCommand, on app: DockApp) {
+        let running = runningApp(app)
+        switch command {
+        case .open: launch(app)
+        case .showInFinder: NSWorkspace.shared.activateFileViewerSelecting([URL(filePath: app.path)])
+        case .showAllWindows: running?.activate(options: .activateAllWindows)
+        case .hide: running?.hide()
+        case .hideOthers: hideOthers(than: running)
+        case .quit, .forceQuit:
+            if let running {
+                model.quit(target(of: running), force: command == .forceQuit)
+            }
+        }
+    }
+
+    private func hideOthers(than kept: NSRunningApplication?) {
+        kept?.activate()
+        let own = NSRunningApplication.current
+        let others = NSWorkspace.shared.runningApplications.filter {
+            $0.activationPolicy == .regular && $0 != kept && $0 != own
+        }
+        others.forEach { $0.hide() }
     }
 
     /// Grows at once, so nothing is cut off. Shrinks late, so nothing is cut off on the way down either.

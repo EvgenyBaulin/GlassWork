@@ -18,6 +18,7 @@ final class AppModel {
     private lazy var settingsWindow = SettingsWindowController(model: self)
     private lazy var mainWindow = MainWindowController(model: self)
     private lazy var runningApps = RunningAppsObserver(store: monitor.apps)
+    private lazy var quickQuit = QuickQuitController(model: self)
     private let quitter = QuitService(system: WorkspaceQuitSystem())
     private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private lazy var dock = DockController(model: self)
@@ -32,6 +33,7 @@ final class AppModel {
     private var hasOpenPanel = false
     private var isSettingsOpen = false
     private var visibleSection: MainSection?
+    private var isQuickQuitOpen = false
     private var timer: Timer?
     private var thresholds = ThresholdTracker()
     /// Widgets in the system's desktop layer, as WidgetKit last reported them.
@@ -46,6 +48,7 @@ final class AppModel {
         Task { await monitor.clipboard.load() }
         Task { await monitor.apps.load() }
         _ = runningApps
+        _ = quickQuit
         applySettings()
         checkSystemWidgets()
         fans.onFailsafe = { celsius in
@@ -189,6 +192,14 @@ final class AppModel {
         }
     }
 
+    func quickQuitChanged(isOpen: Bool) {
+        isQuickQuitOpen = isOpen
+        updateDemand()
+        if isOpen {
+            monitor.apps.refresh()
+        }
+    }
+
     /// Every Quit in the app comes through here. The service decides what may be quit, not the buttons.
     func quit(_ target: QuitTarget, force: Bool) {
         if quitter.quit(target, force: force) == .sent {
@@ -235,7 +246,7 @@ final class AppModel {
         let modes = store.settings.modules.filter { $0.mode == .menuBar }.map(\.id)
         let everything = hasOpenPanel
         let showsApps = visibleSection == .apps
-        demand.liveApps = everything || showsApps
+        demand.liveApps = everything || showsApps || isQuickQuitOpen
         demand.cpu = demand.cpu || everything || showsApps || modes.contains(.cpu) || modes.contains(.overview)
         demand.memory = demand.memory || everything || showsApps || modes.contains(.memory)
             || modes.contains(.overview)
@@ -272,6 +283,10 @@ final class AppModel {
 
     func closeQuickPaste() {
         clipboard.closeQuickPaste()
+    }
+
+    func closeQuickQuit() {
+        quickQuit.close()
     }
 
     func copyToPasteboard(_ text: String) {

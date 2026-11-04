@@ -11492,7 +11492,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Больше всего"
+            "value": "Больше всего используют"
           }
         }
       }
@@ -11502,7 +11502,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сколько берут приложения"
+            "value": "Сколько расходуют приложения"
           }
         }
       }
@@ -11532,7 +11532,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Смотрим, сколько берут приложения…"
+            "value": "Считаем, сколько расходуют приложения…"
           }
         }
       }
@@ -11632,7 +11632,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Оно нужно Mac или GlassWork, поэтому остаётся."
+            "value": "Это приложение нужно системе или GlassWork, поэтому оно останется."
           }
         }
       }
@@ -11663,28 +11663,108 @@
               "few": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "и %lld вспомогательных процесса"
+                  "value": "вместе с %lld вспомогательными процессами"
                 }
               },
               "many": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "и %lld вспомогательных процессов"
+                  "value": "вместе с %lld вспомогательными процессами"
                 }
               },
               "one": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "и %lld вспомогательный процесс"
+                  "value": "вместе с %lld вспомогательным процессом"
                 }
               },
               "other": {
                 "stringUnit": {
                   "state": "translated",
-                  "value": "и %lld вспомогательных процессов"
+                  "value": "вместе с %lld вспомогательными процессами"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Running apps": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущенные приложения"
+          }
+        }
+      }
+    },
+    "Hover an app to quit it. ⌥ makes it Force Quit.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наведите на приложение, чтобы завершить его. С ⌥ — завершить принудительно."
+          }
+        }
+      }
+    },
+    "Type an app name": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Название приложения"
+          }
+        }
+      }
+    },
+    "Return quits  ·  ⌥Return force quits  ·  Esc closes": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return — завершить  ·  ⌥Return — принудительно  ·  Esc — закрыть"
+          }
+        }
+      }
+    },
+    "Quit an app": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завершить приложение"
+          }
+        }
+      }
+    },
+    "Show All Windows": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать все окна"
+          }
+        }
+      }
+    },
+    "Hide": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть"
+          }
+        }
+      }
+    },
+    "Hide Others": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть остальные"
           }
         }
       }

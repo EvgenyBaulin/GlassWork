@@ -66,6 +66,28 @@ struct QuitPolicyTests {
     }
 }
 
+struct DockAppCommandTests {
+    @Test
+    func anAppThatIsNotRunningCanOnlyOpen() {
+        #expect(DockAppCommand.offered(isRunning: false, canQuit: false) == [.open, .showInFinder])
+    }
+
+    @Test
+    func aRunningAppCanQuitAndForceQuit() {
+        let commands = DockAppCommand.offered(isRunning: true, canQuit: true)
+        #expect(commands.contains(.quit))
+        #expect(commands.contains(.forceQuit))
+    }
+
+    @Test
+    func aProtectedAppGetsNeither() {
+        let commands = DockAppCommand.offered(isRunning: true, canQuit: false)
+        #expect(!commands.contains(.quit))
+        #expect(!commands.contains(.forceQuit))
+        #expect(commands.contains(.hide))
+    }
+}
+
 /// Records what would have been sent. No real process is involved.
 private final class FakeQuitSystem: QuitSystem {
     var holders: [Int32: QuitTarget] = [:]

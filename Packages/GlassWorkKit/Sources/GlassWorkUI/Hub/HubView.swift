@@ -69,6 +69,9 @@ public struct HubView: View {
         } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    if query.isEmpty, !isEditing {
+                        RunningAppsBlock(apps: monitor.apps.apps)
+                    }
                     ForEach(ModuleGroup.allCases, id: \.self) { group in
                         section(group, modules: visible.filter { $0.id.group == group })
                     }
