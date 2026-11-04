@@ -42,6 +42,7 @@ public final class MenuBarItemRenderer {
 
     /// A new image, or nil when nothing visible changed since the last one.
     public func image(size: CGSize, force: Bool = false) -> NSImage? {
+        guard size.width > 0 else { return nil }
         let content = ItemContent.content(module, monitor: monitor, style: numbers, options: options)
         if content.spin > 0, style == .symbol || style == .figure || style == .graph {
             spinAngle = (spinAngle + 20 + 40 * content.spin).truncatingRemainder(dividingBy: 360)
@@ -55,7 +56,7 @@ public final class MenuBarItemRenderer {
         (appearance ?? NSAppearance.currentDrawing()).performAsCurrentDrawingAppearance { draw(content) }
         image.unlockFocus()
         // Template images follow the menu bar's light or dark look; alerts and accents keep their color.
-        image.isTemplate = content.alert == nil && content.accent?.color == nil
+        image.isTemplate = content.alert == nil && content.accent?.color == nil && !showsArtwork(content)
         return image
     }
 
@@ -84,6 +85,7 @@ public final class MenuBarItemRenderer {
         parts += [content.prefix ?? "", content.symbol ?? "", content.label ?? "", content.accent?.text ?? ""]
         parts += ["\(content.isDimmed)", "\(content.accent?.color != nil)", appearance?.name.rawValue ?? ""]
         parts.append("\(content.symbolLevel ?? -1)")
+        parts.append("\(content.artwork?.count ?? 0)")
         if style == .graph || style == .graphAndFigure {
             if let glyph = content.glyph {
                 parts.append("\(glyph)")
@@ -103,7 +105,9 @@ public final class MenuBarItemRenderer {
         case .symbol:
             drawSymbol(content, at: &x, color: color)
         case .figure:
-            if content.showsSymbol {
+            if showsArtwork(content) {
+                drawArtwork(content, at: &x)
+            } else if content.showsSymbol {
                 drawSymbol(content, at: &x, color: color)
             }
             drawFigure(content, at: x, color: color)
@@ -122,8 +126,25 @@ public final class MenuBarItemRenderer {
     /// A template image is tinted by the bar, so black means "the bar's color". An image with a colored
     /// accent is drawn as it is and has to use the bar's text color itself.
     private func baseColor(_ content: ItemContent) -> NSColor {
-        let color = content.alert.map(NSColor.init) ?? (content.accent?.color == nil ? .black : .labelColor)
+        let isTemplate = content.accent?.color == nil && !showsArtwork(content)
+        let color = content.alert.map(NSColor.init) ?? (isTemplate ? .black : .labelColor)
         return content.isDimmed ? color.withAlphaComponent(0.5) : color
+    }
+
+    private func showsArtwork(_ content: ItemContent) -> Bool {
+        style == .figure && content.artwork != nil
+    }
+
+    private func drawArtwork(_ content: ItemContent, at x: inout CGFloat) {
+        let side: CGFloat = 16
+        let frame = CGRect(x: x, y: (bounds.height - side) / 2, width: side, height: side)
+        if let data = content.artwork, let image = NSImage(data: data) {
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(roundedRect: frame, xRadius: 3, yRadius: 3).addClip()
+            image.draw(in: frame)
+            NSGraphicsContext.restoreGraphicsState()
+        }
+        x += Self.symbolWidth + Self.padding
     }
 
     private func drawSymbol(_ content: ItemContent, at x: inout CGFloat, color: NSColor) {
@@ -164,6 +185,10 @@ public final class MenuBarItemRenderer {
             let height = first.size().height
             lower.draw(at: CGPoint(x: x, y: bounds.midY - height + 1))
             first.draw(at: CGPoint(x: x, y: bounds.midY - 1))
+        } else if let width = content.figureWidth {
+            let height = first.size().height
+            let frame = CGRect(x: x, y: (bounds.height - height) / 2, width: width, height: height)
+            first.draw(with: frame, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine])
         } else {
             first.draw(at: CGPoint(x: x, y: (bounds.height - first.size().height) / 2))
             drawAccent(content, at: x + first.size().width + Self.padding, attributes: attributes)
@@ -224,6 +249,17 @@ public final class MenuBarItemRenderer {
                 var position = x
                 drawSymbol(content, at: &position, color: color)
             }
+        case let .bars(levels):
+            drawBars(levels, at: x, color: color)
+        }
+    }
+
+    private func drawBars(_ levels: [Double], at x: CGFloat, color: NSColor) {
+        color.setFill()
+        for (index, level) in levels.enumerated() {
+            let height = 3 + 11 * CGFloat(min(max(level, 0), 1))
+            let frame = CGRect(x: x + CGFloat(index) * 5, y: bounds.midY - 7, width: 3, height: height)
+            NSBezierPath(roundedRect: frame, xRadius: 1.5, yRadius: 1.5).fill()
         }
     }
 

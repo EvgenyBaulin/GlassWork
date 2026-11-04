@@ -20,6 +20,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var developer: Set<ModuleID> = []
     public var devices = false
     public var timeMachine = false
+    public var nowPlaying = false
 
     public init() {}
 }
@@ -67,6 +68,8 @@ public final class SystemMonitor {
     public let weather: WeatherStore
     public let rates: RatesStore
     public let clipboard: ClipboardStore
+    /// The adapter process runs only while `demand.nowPlaying` is set.
+    public let nowPlaying: NowPlayingStore
 
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
@@ -89,12 +92,15 @@ public final class SystemMonitor {
     public init(
         weather: WeatherStore = WeatherStore(),
         rates: RatesStore = RatesStore(),
-        clipboard: ClipboardStore = ClipboardStore()
+        clipboard: ClipboardStore = ClipboardStore(),
+        nowPlaying: NowPlayingStore = NowPlayingStore()
     ) {
         self.weather = weather
         self.rates = rates
         self.clipboard = clipboard
+        self.nowPlaying = nowPlaying
         developer.onChange = { [weak self] in self?.onUpdate?() }
+        nowPlaying.onUpdate = { [weak self] in self?.onUpdate?() }
     }
 
     public var isRunning: Bool {
@@ -116,6 +122,7 @@ public final class SystemMonitor {
     public func stop() {
         loop?.cancel()
         loop = nil
+        nowPlaying.stop()
     }
 
     /// One read of what `kinds` want and the regular tick does not cover.
@@ -156,6 +163,9 @@ public final class SystemMonitor {
         snapshot.place = weather.places.first
         if kinds.contains(.wordOfDay) {
             snapshot.words = wordOfDay.recent(6, at: date)
+        }
+        if !kinds.isDisjoint(with: [.nowPlaying, .lyrics]) {
+            snapshot.nowPlaying = nowPlaying.widgetData
         }
         fillDetails(of: &snapshot, for: kinds, at: date)
         return snapshot
@@ -257,6 +267,7 @@ public final class SystemMonitor {
         weather.tick(at: now)
         rates.tick(at: now)
         clipboard.tick(at: now)
+        nowPlaying.tick(wanted: demand.nowPlaying, at: now)
         readOccasional(at: now)
         onUpdate?()
     }

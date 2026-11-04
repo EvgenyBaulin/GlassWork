@@ -58,6 +58,8 @@ public extension WidgetKind {
         case .breaks: loc("Breaks")
         case .appTime: loc("App Time")
         case .mostUsed: loc("Most Used")
+        case .nowPlaying: loc("Now Playing")
+        case .lyrics: loc("Lyrics")
         }
     }
 }
@@ -98,6 +100,7 @@ public extension WidgetKind {
         case .wifiSignal: .wifi
         case .diskActivity: .disk
         case .timeMachine, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed: .overview
+        case .nowPlaying, .lyrics: .nowPlaying
         }
     }
 }
@@ -152,6 +155,10 @@ public struct WidgetFace: View {
             case .temperature: TemperatureWidget(size: size, snapshot: snapshot)
             case .topApps: TopAppsWidget(size: size, snapshot: snapshot)
             case .network: NetworkWidget(snapshot: snapshot)
+            case .nowPlaying:
+                NowPlayingWidget(size: size, data: snapshot.nowPlaying, now: now, isSystemTimed: !showsSeconds)
+            case .lyrics:
+                LyricsWidget(size: size, data: snapshot.nowPlaying, now: now, isSystemTimed: !showsSeconds)
             default:
                 DataWidgetFace(
                     kind: kind,

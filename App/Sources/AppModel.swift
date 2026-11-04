@@ -10,7 +10,7 @@ import WidgetKit
 @MainActor
 final class AppModel {
     let store = SettingsStore()
-    let monitor = SystemMonitor()
+    let monitor = SystemMonitor(nowPlaying: NowPlayingBridge.makeStore())
     private let fanSensors = FanSensorSource()
     private(set) lazy var fans = makeFans()
     private lazy var panels = PanelController(model: self)
@@ -20,6 +20,10 @@ final class AppModel {
     private lazy var dock = DockController(model: self)
     private lazy var clipboard = ClipboardController(model: self)
     private lazy var location = LocationProvider(store: monitor.weather)
+    private lazy var nowPlaying = NowPlayingBridge(
+        store: monitor.nowPlaying,
+        refreshSeconds: store.settings.widgets.refreshSeconds
+    )
     private let hotKey = HotKey()
     private var hasOpenPanel = false
     private var isSettingsOpen = false
@@ -35,6 +39,7 @@ final class AppModel {
         hotKey.register()
         Task { await monitor.clipboard.load() }
         applySettings()
+        checkSystemWidgets()
         fans.onFailsafe = { celsius in
             FanNotifications.failsafe(
                 celsius: celsius,
@@ -92,6 +97,8 @@ final class AppModel {
     /// Gives the system Dock back when the app quits.
     func prepareToQuit() {
         dock.restoreSystemDock()
+        monitor.nowPlaying.stop()
+        nowPlaying.prepareToQuit()
     }
 
     func showSettings(module: ModuleID? = nil) {
@@ -224,6 +231,8 @@ final class AppModel {
         // Only on request: the module is in the Hub by default, and the read may raise a Bluetooth prompt.
         demand.devices = placed.contains(.devices) || modes.contains(.deviceBatteries)
         demand.timeMachine = placed.contains(.timeMachine)
+        demand.nowPlaying = wantsNowPlaying
+        monitor.nowPlaying.wantsLyrics = wantsLyrics
         monitor.demand = demand
         monitor.weather.isActive = isWanted(.weather) || placed.contains(.weather)
         monitor.rates.isActive = isWanted(.rates) || placed.contains(.rates)
@@ -235,6 +244,21 @@ final class AppModel {
 
     private var placedWidgetKinds: Set<WidgetKind> {
         desktopWidgetKinds.union(systemWidgetKinds)
+    }
+
+    /// Only what is on screen counts, so the adapter process does not run for nothing.
+    private var wantsNowPlaying: Bool {
+        let widgets = store.settings.widgets.placements.contains { $0.kind == .nowPlaying || $0.kind == .lyrics }
+        return isWanted(.nowPlaying) || widgets || nowPlaying.hasSystemWidget
+    }
+
+    private var wantsLyrics: Bool {
+        guard store.settings.module(.nowPlaying)?.options[ModuleOption.onlineLyrics] != "false" else { return false }
+        return store.settings.widgets.placements.contains { $0.kind == .lyrics } || nowPlaying.hasSystemLyricsWidget
+    }
+
+    private func checkSystemWidgets() {
+        nowPlaying.checkSystemWidgets { [weak self] in self?.updateDemand() }
     }
 
     func closePanels() {
@@ -333,6 +357,7 @@ final class AppModel {
     }
 
     private func writeHeartbeat() {
+        checkSystemWidgets()
         Task {
             let hasNewWidgets = await refreshSystemWidgetKinds()
             let kinds = placedWidgetKinds
@@ -387,7 +412,10 @@ final class AppModel {
 
     @discardableResult
     private func writeWidgetSnapshot() -> Bool {
-        (try? SnapshotStore().write(makeWidgetSnapshot(), for: WidgetSnapshot.key)) != nil
+        var snapshot = makeWidgetSnapshot()
+        // Has its own file, which changes with the track.
+        snapshot.nowPlaying = nil
+        return (try? SnapshotStore().write(snapshot, for: WidgetSnapshot.key)) != nil
     }
 
     /// Commands from WidgetKit arrive through the shared container; a leftover from before launch is dropped.

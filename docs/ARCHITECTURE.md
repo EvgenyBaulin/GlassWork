@@ -9,6 +9,10 @@
   performs small actions through App Intents.
 - **GlassWorkFanHelper** is an optional LaunchDaemon, the only process that runs as root and the only code
   that writes to the SMC. It is installed with `SMAppService.daemon` when the user presses a button.
+- **now-playing-adapter.pl** is a child of the app, run by the system `/usr/bin/perl` because macOS only
+  answers trusted MediaRemote clients. It runs only while something on screen shows the current track,
+  prints JSON lines and takes transport commands on its input. Closing that input ends it, so it cannot
+  outlive the app. The script sits in the app's resources and needs nothing but what macOS ships.
 
 ```
 collectors ──► app state ──► menu bar items / desktop windows / Dock

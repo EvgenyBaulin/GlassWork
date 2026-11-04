@@ -8,6 +8,8 @@ public enum ItemGlyph: Equatable {
     case dots(filled: Int, faint: Int)
     /// The module has no history to draw, so the graph repeats its symbol.
     case symbol
+    /// Level meter bars, each from 0 to 1.
+    case bars([Double])
 }
 
 /// Keys in `ModuleSettings.options`.
@@ -15,6 +17,10 @@ public enum ModuleOption {
     public static let sensor = "sensor"
     public static let fanFigure = "figure"
     public static let eachFan = "eachFan"
+    public static let maxWidth = "maxWidth"
+    public static let defaultMaxWidth = 180.0
+    public static let hideWhenIdle = "hideWhenIdle"
+    public static let onlineLyrics = "onlineLyrics"
 }
 
 public extension SensorChoice {
@@ -55,6 +61,12 @@ public struct ItemContent {
     public var symbolLevel: Double?
     /// Extra tooltip line.
     public var detail: String?
+    /// Cover drawn in place of the symbol. The image is no longer a template then.
+    public var artwork: Data?
+    /// Long text is cut to this width instead of the item taking the template's width.
+    public var figureWidth: CGFloat?
+    /// Takes no room in the menu bar. The item stays, so it can come back by itself.
+    public var isHidden = false
 
     /// Text for a raw metric value, used by tooltips.
     func format(_ value: Double) -> String {
@@ -97,6 +109,7 @@ public struct ItemContent {
         case .weather: weather(monitor.weather)
         case .rates: rates(monitor.rates)
         case .clipboard: clipboard(monitor.clipboard)
+        case .nowPlaying: nowPlaying(monitor.nowPlaying, options: options)
         default: ItemContent(figure: "—", template: "—")
         }
     }
@@ -315,8 +328,11 @@ public struct MenuBarItemView: View {
     ) -> CGFloat {
         let content = ItemContent.content(module, monitor: monitor, style: numbers, options: options)
         let font = NSFont.monospacedDigitSystemFont(ofSize: content.secondLine == nil ? 12 : 9, weight: .medium)
-        let text = ceil((content.template as NSString).size(withAttributes: [.font: font]).width)
+        let text = content.figureWidth ?? ceil((content.template as NSString).size(withAttributes: [.font: font]).width)
         let padding: CGFloat = 8
+        if content.isHidden {
+            return 0
+        }
         return switch style {
         case .symbol: 16 + padding
         case .figure: (content.showsSymbol ? 16 + 4 : 0) + text + padding
@@ -370,6 +386,12 @@ public struct MenuBarItemView: View {
         case .symbol:
             if style == .graphAndFigure {
                 symbol(content)
+            }
+        case let .bars(levels):
+            HStack(alignment: .bottom, spacing: 2) {
+                ForEach(Array(levels.enumerated()), id: \.offset) { _, level in
+                    Capsule().frame(width: 3, height: 3 + 11 * level)
+                }
             }
         case nil:
             if let values = content.graphValues(monitor) {

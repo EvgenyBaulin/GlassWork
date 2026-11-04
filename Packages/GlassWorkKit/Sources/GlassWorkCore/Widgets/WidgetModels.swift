@@ -33,6 +33,7 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
     case fans, weather, rates, git, devServers, containers, aiUsage
     case devices, wifiSignal, diskActivity, timeMachine
     case screenTimeWeek, categories, breaks, appTime, mostUsed
+    case nowPlaying, lyrics
 
     public var id: String {
         rawValue
@@ -89,6 +90,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var wifiHistory: [History<Double>.Point]?
     public var devices: [DeviceBattery]?
     public var timeMachine: TimeMachineStatus?
+    /// Written to its own file by the app, so it is nil in the shared snapshot itself.
+    public var nowPlaying: NowPlayingWidgetData?
 
     public init(date: Date) {
         self.date = date
