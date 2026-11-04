@@ -78,6 +78,11 @@ struct SettingsIndexTests {
         #expect(titles("горячие клавиши").first == "Shortcuts")
     }
 
+    @Test func settingsThatCameWithTheWidgetsCanBeFound() {
+        #expect(titles("Фоторамка").contains("Photo Frame"))
+        #expect(titles("Birthdays").contains("Birthdays"))
+    }
+
     @Test func anOptionOpensItsModule() throws {
         let hit = try #require(SettingsIndex.search("Sampling").first?.result)
         #expect(hit.destination == .module(.cpu))

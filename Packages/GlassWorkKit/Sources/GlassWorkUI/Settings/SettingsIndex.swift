@@ -275,6 +275,30 @@ extension SettingsIndex {
             )
         }
         return [
+            page("widgets.photoFrame", "Photo Frame", "Фоторамка", .widgets, ["Widgets"], keywords: ["photos", "фото"]),
+            page(
+                "widgets.onThisDay",
+                "On This Day",
+                "В этот день",
+                .widgets,
+                ["Widgets"],
+                keywords: ["photos", "фото"]
+            ),
+            page(
+                "widgets.birthdays",
+                "Birthdays",
+                "Дни рождения",
+                .widgets,
+                ["Widgets"],
+                keywords: ["contacts", "контакты"]
+            ),
+            page(
+                "widgets.askFirst",
+                "Ask before running",
+                "Спрашивать перед запуском",
+                .widgets,
+                ["Widgets", "Commands"]
+            ),
             page(
                 "sunMoon.place",
                 "Location",

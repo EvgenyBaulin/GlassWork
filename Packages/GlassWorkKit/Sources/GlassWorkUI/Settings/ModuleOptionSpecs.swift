@@ -181,8 +181,8 @@ public extension ModuleOptionSpec {
                 .network, Key.networkDirection, "Direction", "Направление",
                 .choice([
                     OptionChoice(NetworkDirection.both.rawValue, "Both"),
-                    OptionChoice(NetworkDirection.download.rawValue, "Down"),
-                    OptionChoice(NetworkDirection.upload.rawValue, "Up"),
+                    OptionChoice(NetworkDirection.download.rawValue, "Down (speed)"),
+                    OptionChoice(NetworkDirection.upload.rawValue, "Up (speed)"),
                 ]),
                 fallback: NetworkDirection.both.rawValue
             ),
@@ -277,7 +277,7 @@ public extension ModuleOptionSpec {
                 .notes, Key.panelSize, "Panel size", "Размер панели",
                 .choice([
                     OptionChoice(PanelSize.small.rawValue, "Small"),
-                    OptionChoice(PanelSize.medium.rawValue, "Medium"),
+                    OptionChoice(PanelSize.medium.rawValue, "Medium (size)"),
                     OptionChoice(PanelSize.large.rawValue, "Large"),
                 ]),
                 fallback: PanelSize.medium.rawValue
@@ -356,7 +356,7 @@ public extension ModuleOptionSpec {
             option(
                 .docker, Key.dockerCount, "Count", "Считать",
                 .choice([
-                    OptionChoice(DockerCount.running.rawValue, "Running"),
+                    OptionChoice(DockerCount.running.rawValue, "Running (containers)"),
                     OptionChoice(DockerCount.all.rawValue, "All"),
                 ]),
                 fallback: DockerCount.running.rawValue
@@ -389,7 +389,7 @@ public extension ModuleOptionSpec {
                 "tileSize", "Tile size", "Размер плиток",
                 .choice([
                     OptionChoice(PanelSize.small.rawValue, "Small"),
-                    OptionChoice(PanelSize.medium.rawValue, "Medium"),
+                    OptionChoice(PanelSize.medium.rawValue, "Medium (size)"),
                     OptionChoice(PanelSize.large.rawValue, "Large"),
                 ]),
                 read: { $0.tileSize.rawValue },

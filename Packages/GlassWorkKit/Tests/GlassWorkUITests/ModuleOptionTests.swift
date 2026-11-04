@@ -39,12 +39,76 @@ struct OptionTableTests {
         }
     }
 
-    @Test func everyChoiceIsInTheCatalog() {
+    /// What each choice must say in Russian. A key can already exist with another meaning: «Down» is a server
+    /// that is down, not a download, so checking that a key exists is not enough.
+    private static let choiceRussian: [String: String] = [
+        "1 MB/s": "1 МБ/с",
+        "1 hour": "1 час",
+        "1 level": "1 уровень",
+        "1 s": "1 с",
+        "10 KB/s": "10 КБ/с",
+        "100 KB/s": "100 КБ/с",
+        "2 levels": "2 уровня",
+        "2 s": "2 с",
+        "24 hours": "24 часа",
+        "3 days": "3 дня",
+        "3d 4h": "3д 4ч",
+        "4 hours": "4 часа",
+        "5 s": "5 с",
+        "8 hours": "8 часов",
+        "All": "Все",
+        "Any time": "Любое время",
+        "Bits/s": "Бит/с",
+        "Both": "Оба",
+        "By category": "По категориям",
+        "Bytes/s": "Байт/с",
+        "Charge": "Заряд",
+        "Compact": "Компактно",
+        "Custom": "Свой",
+        "Day, month": "Число, месяц",
+        "Down (speed)": "Загрузка",
+        "Exact": "Точно",
+        "Free space": "Свободное место",
+        "GB": "ГБ",
+        "Large": "Большой",
+        "Medium (size)": "Средний",
+        "Mono": "Моноширинный",
+        "Never": "Никогда",
+        "Next sunrise or sunset": "Ближайший восход или закат",
+        "None": "Без групп",
+        "Numbers": "Числа",
+        "Pressure": "Давление",
+        "Read / write": "Чтение и запись",
+        "Running (containers)": "Запущенные",
+        "Share": "Доля",
+        "Small": "Маленький",
+        "Sunrise": "Восход",
+        "Sunset": "Закат",
+        "System": "Система",
+        "Time left": "Время работы",
+        "Up (speed)": "Отдача",
+        "Weekday, day, month": "День недели, число, месяц",
+    ]
+
+    @Test func everyChoiceSaysWhatItMeans() {
         for spec in ModuleOptionSpec.all {
             guard case let .choice(choices) = spec.kind else { continue }
             for choice in choices where !["ISO 8601", "HEX", "RGB", "HSL", "76:12"].contains(choice.title) {
-                #expect(russian(choice.title) != nil, "\(spec.id): \(choice.title)")
+                #expect(russian(choice.title) == Self.choiceRussian[choice.title], "\(spec.id): \(choice.title)")
             }
+        }
+    }
+
+    @Test func aReusedLabelShowsPlainEnglish() {
+        #expect(loc("Down (speed)") == "Down")
+        #expect(loc("Up (speed)") == "Up")
+        #expect(loc("Medium (size)") == "Medium")
+        #expect(loc("Running (containers)") == "Running")
+    }
+
+    @Test func everySystemShortcutNameIsTranslated() {
+        for known in SystemShortcut.known where !["Spotlight", "Mission Control"].contains(known.name) {
+            #expect(russian(known.name) != nil, "\(known.name)")
         }
     }
 
