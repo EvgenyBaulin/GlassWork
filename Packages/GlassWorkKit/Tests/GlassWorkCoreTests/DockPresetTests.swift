@@ -191,6 +191,43 @@ struct DockPresetTests {
     }
 }
 
+struct DockFirstRunTests {
+    private let mail = DockApp(path: "/Applications/Mail.app", name: "Mail")
+
+    /// Enabling hides the system Dock, so nothing may turn it on by default.
+    @Test func theDockStartsOffAndUnexplained() {
+        let dock = DockSettings()
+        #expect(!dock.isEnabled)
+        #expect(!dock.hasSeenIntro)
+    }
+
+    @Test func anEmptyDockStartsFromTheSystemsApps() {
+        var dock = DockSettings()
+        dock.enable { [mail] }
+        #expect(dock.isEnabled)
+        #expect(dock.hasSeenIntro)
+        #expect(dock.items == [.app(mail)])
+    }
+
+    @Test func aDockWithItemsKeepsThemAndDoesNotAsk() {
+        var dock = DockSettings()
+        dock.items = [.widget(.cpu)]
+        var asked = false
+        dock.enable {
+            asked = true
+            return [mail]
+        }
+        #expect(!asked)
+        #expect(dock.items == [.widget(.cpu)])
+    }
+
+    @Test func aFileFromBeforeTheIntroStillLoads() throws {
+        let dock = try JSONDecoder().decode(DockSettings.self, from: Data(#"{"isEnabled": true}"#.utf8))
+        #expect(dock.isEnabled)
+        #expect(!dock.hasSeenIntro)
+    }
+}
+
 struct DockFolderMenuTests {
     private let mail = DockApp(path: "/Applications/Mail.app", name: "Mail")
     private let notes = DockApp(path: "/Applications/Notes.app", name: "Notes")

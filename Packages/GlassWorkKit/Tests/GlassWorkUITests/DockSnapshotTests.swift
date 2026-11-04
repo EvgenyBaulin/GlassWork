@@ -97,6 +97,11 @@ struct DockSnapshotTests {
         snapshotPanel(row, name: "widgets", dark: dark)
     }
 
+    @Test(arguments: [true, false])
+    func firstRunExplanation(dark: Bool) {
+        snapshotPanel(DockFirstRunView(proceed: {}, cancel: {}), name: "first-run", dark: dark)
+    }
+
     /// Not running, running, and a launch at the top of its jump.
     @Test(arguments: [true, false])
     func appStates(dark: Bool) {

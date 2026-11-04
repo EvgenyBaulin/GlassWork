@@ -12914,6 +12914,86 @@
           }
         }
       }
+    },
+    "Replace the Dock with GlassWork Dock?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заменить Dock на GlassWork Dock?"
+          }
+        }
+      }
+    },
+    "While GlassWork Dock is on, the macOS Dock is hidden.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока GlassWork Dock включён, Dock macOS скрыт."
+          }
+        }
+      }
+    },
+    "When you quit GlassWork or turn its Dock off, the macOS Dock comes back as it was.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Когда вы закроете GlassWork или выключите его Dock, Dock macOS вернётся таким же, как был."
+          }
+        }
+      }
+    },
+    "If GlassWork ever crashes, the macOS Dock stays hidden until you open GlassWork again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если GlassWork аварийно завершится, Dock macOS будет скрыт, пока вы снова не откроете GlassWork."
+          }
+        }
+      }
+    },
+    "Your current Dock apps are imported.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения из вашего Dock перенесутся сюда."
+          }
+        }
+      }
+    },
+    "Live widgets and app folders keep things tidy.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Живые виджеты и папки с приложениями держат всё в порядке."
+          }
+        }
+      }
+    },
+    "Switch back any time: Settings → Dock.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вернуться можно в любой момент: Настройки → Dock."
+          }
+        }
+      }
+    },
+    "Not now": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не сейчас"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

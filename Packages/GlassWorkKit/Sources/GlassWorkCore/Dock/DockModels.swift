@@ -106,6 +106,8 @@ public struct DockSettings: Codable, Sendable, Equatable {
     public var autoHides = false
     public var showsRecents = false
     public var items: [DockItem] = []
+    /// Turning the Dock on hides the system one, so this is explained once before it happens.
+    public var hasSeenIntro = false
     /// The preset in use, by id.
     public var activePreset: String?
     /// Built-ins the owner has changed, and presets of the owner's own.
@@ -128,7 +130,7 @@ public struct DockSettings: Codable, Sendable, Equatable {
 extension DockSettings {
     private enum CodingKeys: String, CodingKey {
         case isEnabled, position, iconSize, magnifies, magnifiedSize, autoHides, showsRecents, items
-        case activePreset, presets
+        case hasSeenIntro, activePreset, presets
     }
 
     /// An item this version cannot read is skipped, so the rest of the Dock survives it.
@@ -152,8 +154,20 @@ extension DockSettings {
         autoHides = try container.decodeIfPresent(Bool.self, forKey: .autoHides) ?? autoHides
         showsRecents = try container.decodeIfPresent(Bool.self, forKey: .showsRecents) ?? showsRecents
         items = try container.decodeIfPresent([LossyItem].self, forKey: .items)?.compactMap(\.value) ?? items
+        hasSeenIntro = try container.decodeIfPresent(Bool.self, forKey: .hasSeenIntro) ?? hasSeenIntro
         activePreset = try container.decodeIfPresent(String.self, forKey: .activePreset)
         presets = try container.decodeIfPresent([DockPreset].self, forKey: .presets) ?? presets
+    }
+}
+
+public extension DockSettings {
+    /// Turns the Dock on. A Dock with nothing in it starts from the system's apps, which are read only then.
+    mutating func enable(importing systemApps: () -> [DockApp]) {
+        if items.isEmpty {
+            items = systemApps().map(DockItem.app)
+        }
+        hasSeenIntro = true
+        isEnabled = true
     }
 }
 

@@ -93,7 +93,7 @@ struct WidgetsPane: View {
 
 struct DockPane: View {
     let store: SettingsStore
-    @State private var confirming = false
+    @State private var isExplaining = false
 
     private var dock: AppSettingsBinding {
         AppSettingsBinding(store: store)
@@ -105,10 +105,12 @@ struct DockPane: View {
                 Toggle(loc("Use GlassWork Dock"), isOn: Binding(
                     get: { store.settings.dock.isEnabled },
                     set: { value in
-                        if value {
-                            confirming = true
-                        } else {
+                        if !value {
                             store.update { $0.dock.isEnabled = false }
+                        } else if store.settings.dock.hasSeenIntro {
+                            enable()
+                        } else {
+                            isExplaining = true
                         }
                     }
                 ))
@@ -135,16 +137,19 @@ struct DockPane: View {
             presetsSection
         }
         .formStyle(.grouped)
-        .confirmationDialog(loc("Use GlassWork Dock?"), isPresented: $confirming) {
-            Button(loc("Use GlassWork Dock")) {
-                store.update { settings in
-                    if settings.dock.items.isEmpty {
-                        settings.dock.items = SystemDockApps.read().map(DockItem.app)
-                    }
-                    settings.dock.isEnabled = true
-                }
-            }
+        .sheet(isPresented: $isExplaining) {
+            DockFirstRunView(
+                proceed: {
+                    isExplaining = false
+                    enable()
+                },
+                cancel: { isExplaining = false }
+            )
         }
+    }
+
+    private func enable() {
+        store.update { $0.dock.enable(importing: SystemDockApps.read) }
     }
 }
 
