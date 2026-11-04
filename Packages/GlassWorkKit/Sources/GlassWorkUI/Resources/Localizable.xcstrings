@@ -8126,6 +8126,46 @@
           }
         }
       }
+    },
+    "Click to show or hide. Hold ⌘ and drag an item across ‹ to choose.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите, чтобы показать или скрыть. Удерживайте ⌘ и перетащите значок через ‹, чтобы выбрать."
+          }
+        }
+      }
+    },
+    "To remove a macOS item for good, turn it off in System Settings.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы убрать значок macOS совсем, выключите его в Системных настройках."
+          }
+        }
+      }
+    },
+    "Menu Bar Settings…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки строки меню…"
+          }
+        }
+      }
+    },
+    "Everything left of ‹ hides, macOS items such as Wi-Fi and Battery too. Hold ⌘ and drag an item across ‹ to choose. The clock and Control Center always stay.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё, что левее ‹, скрывается, в том числе значки macOS: Wi-Fi, батарея. Чтобы выбрать, удерживайте ⌘ и перетащите значок через ‹. Часы и Пункт управления остаются всегда."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

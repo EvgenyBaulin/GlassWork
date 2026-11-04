@@ -7,8 +7,8 @@ import SwiftUI
 @MainActor
 final class StatusBarController: NSObject {
     private unowned let model: AppModel
-    private let hub = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-    private let separator = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    private let hub = makeItem(hubName, length: NSStatusItem.squareLength, position: hubPosition)
+    private let separator = makeItem(separatorName, length: NSStatusItem.variableLength, position: separatorPosition)
     private var items: [ModuleID: ModuleItem] = [:]
     private var collapsed = false
     private var hideTask: Task<Void, Never>?
@@ -17,6 +17,13 @@ final class StatusBarController: NSObject {
     private static let separatorLength: CGFloat = 16
     /// Wider than any screen, so everything left of the separator moves off-screen.
     private static let collapsedLength: CGFloat = 10000
+    private static let hubName = "GlassWorkHub"
+    private static let separatorName = "GlassWorkSeparator"
+    /// Positions count from the right edge and macOS keeps its own items at about 170 and up, in the same
+    /// units. Starting at the very right puts those items left of the separator, so hiding covers them
+    /// without moving anything of theirs. The clock and Control Center stay to the right of everything.
+    private static let hubPosition: CGFloat = 0
+    private static let separatorPosition: CGFloat = 1
 
     var hubButton: NSStatusBarButton? {
         hub.button
@@ -25,14 +32,17 @@ final class StatusBarController: NSObject {
     init(model: AppModel) {
         self.model = model
         super.init()
-        hub.autosaveName = "GlassWorkHub"
-        separator.autosaveName = "GlassWorkSeparator"
         configureHub()
         configureSeparator()
     }
 
     func apply(_ settings: AppSettings) {
+        let turnedOn = settings.hiding.isEnabled && !hiding.isEnabled
         hiding = settings.hiding
+        if turnedOn {
+            // macOS forgets the position of an item that was not visible.
+            Self.seedPosition(Self.separatorName, Self.separatorPosition)
+        }
         separator.isVisible = settings.hiding.isEnabled
         if !settings.hiding.isEnabled, collapsed {
             setCollapsed(false)
@@ -51,6 +61,9 @@ final class StatusBarController: NSObject {
                 items[setting.id] = ModuleItem(setting: setting, numbers: settings.numberStyle, model: model)
             }
         }
+        if turnedOn {
+            setCollapsed(true)
+        }
     }
 
     func refreshItems() {
@@ -62,11 +75,22 @@ final class StatusBarController: NSObject {
             || items.values.contains { $0.window === window }
     }
 
+    private static func makeItem(_ name: String, length: CGFloat, position: CGFloat) -> NSStatusItem {
+        seedPosition(name, position)
+        let item = NSStatusBar.system.statusItem(withLength: length)
+        item.autosaveName = name
+        return item
+    }
+
     /// Seeds macOS's saved position for a new item. ⌘-dragged items keep the place the user gave them.
-    private static func suggestPosition(for module: ModuleID, slot: Int) {
-        let key = "NSStatusItem Preferred Position GlassWork-\(module.rawValue)"
+    private static func seedPosition(_ name: String, _ position: CGFloat) {
+        let key = "NSStatusItem Preferred Position \(name)"
         guard UserDefaults.standard.object(forKey: key) == nil else { return }
-        UserDefaults.standard.set(firstSlot + CGFloat(slot) * slotWidth, forKey: key)
+        UserDefaults.standard.set(position, forKey: key)
+    }
+
+    private static func suggestPosition(for module: ModuleID, slot: Int) {
+        seedPosition("GlassWork-\(module.rawValue)", firstSlot + CGFloat(slot) * slotWidth)
     }
 
     private static let firstSlot: CGFloat = 400
@@ -91,6 +115,7 @@ final class StatusBarController: NSObject {
         guard let button = separator.button else { return }
         button.target = self
         button.action = #selector(separatorClicked)
+        button.toolTip = loc("Click to show or hide. Hold ⌘ and drag an item across ‹ to choose.")
         separator.length = Self.separatorLength
         updateSeparatorImage()
     }
@@ -127,8 +152,13 @@ final class StatusBarController: NSObject {
         let delay = hiding.autoHideSeconds
         hideTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(delay))
-            guard !Task.isCancelled else { return }
-            self?.setCollapsed(true)
+            guard let self, !Task.isCancelled else { return }
+            // Collapsing now would pull the bar out from under an item being ⌘-dragged.
+            if NSEvent.modifierFlags.contains(.command) {
+                scheduleHide()
+            } else {
+                setCollapsed(true)
+            }
         }
     }
 
