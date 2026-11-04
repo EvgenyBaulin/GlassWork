@@ -185,8 +185,10 @@ public enum DevServerFilter {
         sockets.compactMap { socket in
             let directory = directories[socket.pid]
             let name = socket.command.lowercased()
-            guard let kind = kind(of: name, directory: directory, home: home) else { return nil }
             let details = processes[socket.pid]
+            guard let kind = kind(of: name, directory: directory, home: home),
+                  kind == .service || isChosenPort(socket.port, tool: details?.tool)
+            else { return nil }
             return DevServer(
                 port: socket.port,
                 pid: socket.pid,
@@ -198,6 +200,12 @@ public enum DevServerFilter {
             )
         }
         .sorted { $0.port < $1.port }
+    }
+
+    /// The system hands out ports from 49152 up on request. A server picks its own port, so a
+    /// listener up there is a helper inside some app, unless its command line says otherwise.
+    private static func isChosenPort(_ port: Int, tool: String?) -> Bool {
+        port < 49152 || tool != nil
     }
 
     private static func kind(of name: String, directory: String?, home: String) -> DevServer.Kind? {

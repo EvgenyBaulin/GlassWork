@@ -292,3 +292,38 @@ struct GitStoreTests {
         store.tick(at: start.addingTimeInterval(7), demand: [])
     }
 }
+
+@MainActor
+struct GitWatcherTests {
+    private final class Events: @unchecked Sendable {
+        // Why unchecked: the lock guards `paths`, the only mutable state.
+        private let lock = NSLock()
+        private var paths: [String] = []
+
+        var isEmpty: Bool {
+            lock.withLock { paths.isEmpty }
+        }
+
+        func add(_ new: [String]) {
+            lock.withLock { paths += new }
+        }
+    }
+
+    @Test func reportsAChangeOnDisk() async throws {
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let events = Events()
+        let watcher = GitWatcher()
+        watcher.watch([folder.path]) { events.add($0) }
+        defer { watcher.stop() }
+        try await Task.sleep(for: .milliseconds(300))
+
+        try "x".write(to: folder.appending(path: "file.txt"), atomically: true, encoding: .utf8)
+        for _ in 0 ..< 100 where events.isEmpty {
+            try await Task.sleep(for: .milliseconds(50))
+        }
+
+        #expect(!events.isEmpty)
+    }
+}

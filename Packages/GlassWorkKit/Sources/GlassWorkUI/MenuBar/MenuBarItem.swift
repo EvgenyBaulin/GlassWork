@@ -280,12 +280,13 @@ public struct MenuBarItemView: View {
     }
 
     private var label: some View {
-        VStack(spacing: -1.5) {
+        let isLong = module.shortLabel.count > 3
+        return VStack(spacing: isLong ? -1 : -1.5) {
             ForEach(Array(module.shortLabel.enumerated()), id: \.offset) { _, letter in
                 Text(String(letter))
             }
         }
-        .font(.system(size: 6.5, weight: .bold))
+        .font(.system(size: isLong ? 5 : 6.5, weight: .bold))
         .frame(width: 8)
     }
 }

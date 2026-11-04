@@ -208,12 +208,14 @@ public final class MenuBarItemRenderer {
     }
 
     private func drawLabel(at x: inout CGFloat, color: NSColor) {
+        // Four letters only fit the bar when set smaller.
+        let isLong = module.shortLabel.count > 3
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 6.5, weight: .bold),
+            .font: NSFont.systemFont(ofSize: isLong ? 5 : 6.5, weight: .bold),
             .foregroundColor: color,
         ]
         let letters = module.shortLabel.map { NSAttributedString(string: String($0), attributes: attributes) }
-        let lineHeight: CGFloat = 7
+        let lineHeight: CGFloat = isLong ? 5.5 : 7
         var y = (bounds.height + lineHeight * CGFloat(letters.count)) / 2 - lineHeight - 1
         for letter in letters {
             letter.draw(at: CGPoint(x: x + (Self.labelWidth - letter.size().width) / 2, y: y))

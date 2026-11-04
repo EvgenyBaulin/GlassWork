@@ -173,6 +173,16 @@ struct DevServerParserTests {
         #expect(DevServerParser.elapsed("soon") == nil)
     }
 
+    @Test func aKnownToolOnASystemPortStillCounts() {
+        let servers = DevServerFilter.servers(
+            sockets: [ListeningSocket(pid: 1, command: "node", port: 60000)],
+            directories: [1: "/Users/dev/Developer/app"],
+            processes: [1: ProcessDetails(uptime: nil, tool: "vite")],
+            home: home
+        )
+        #expect(servers.count == 1)
+    }
+
     @Test func aRuntimeInTheRootFolderIsNotADevServer() {
         let servers = DevServerFilter.servers(
             sockets: [ListeningSocket(pid: 1, command: "node", port: 8000)],

@@ -19,3 +19,6 @@ n/opt/homebrew/var/postgresql@16
 p60500
 fcwd
 n/Users/dev/Developer/tools/myserver
+p60600
+fcwd
+n/Users/dev/Developer/pocket-api
