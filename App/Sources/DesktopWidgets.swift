@@ -42,10 +42,8 @@ final class DesktopWidgetController {
     }
 
     private func update() {
-        Task {
-            state.snapshot = await model.monitor.widgetSnapshot()
-            state.now = Date()
-        }
+        state.snapshot = model.makeWidgetSnapshot()
+        state.now = Date()
     }
 
     private func makeWindow(_ placement: WidgetPlacement) -> NSPanel {
@@ -75,7 +73,12 @@ final class DesktopWidgetController {
             toggleLock: { [weak self] in self?.toggleLock(placement) },
             openPanel: { [weak self] in self?.openPanel(placement) }
         )
-        window.contentView = NSHostingView(rootView: view.environment(\.panelActions, model.actions))
+        let root = view
+            .environment(\.panelActions, model.actions)
+            .environment(\.widgetActions, WidgetActionRenderer { [weak self] action, label in
+                AnyView(Button { self?.perform(action) } label: { label }.buttonStyle(.plain))
+            })
+        window.contentView = NSHostingView(rootView: root)
         window.isMovableByWindowBackground = !placement.isLocked
         window.orderFront(nil)
         observeMoves(of: window, placement: placement)
@@ -140,6 +143,12 @@ final class DesktopWidgetController {
             guard let index = settings.widgets.placements.firstIndex(where: { $0.id == placement.id }) else { return }
             settings.widgets.placements[index].isLocked.toggle()
         }
+    }
+
+    /// Shows the outcome at once instead of waiting for the next refresh.
+    private func perform(_ action: WidgetCommand.Action) {
+        model.perform(action)
+        update()
     }
 
     private func openPanel(_ placement: WidgetPlacement) {

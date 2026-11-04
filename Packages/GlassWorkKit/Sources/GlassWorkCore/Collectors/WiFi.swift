@@ -1,7 +1,7 @@
 import CoreWLAN
 import Foundation
 
-public enum WiFiBand: Int, Sendable, Equatable {
+public enum WiFiBand: Int, Codable, Sendable, Equatable {
     case unknown, ghz2, ghz5, ghz6
 
     public var title: String {
@@ -19,7 +19,7 @@ public enum WiFiQuality: Sendable, Equatable {
 }
 
 /// Everything shown about the current link. The network's name is deliberately not here.
-public struct WiFiLink: Sendable, Equatable {
+public struct WiFiLink: Codable, Sendable, Equatable {
     public let rssi: Int
     public let noise: Int
     public let transmitRate: Double
@@ -81,7 +81,7 @@ public struct WiFiLink: Sendable, Equatable {
     }
 }
 
-public enum WiFiReading: Sendable, Equatable {
+public enum WiFiReading: Codable, Sendable, Equatable {
     case noHardware, off, notConnected
     case connected(WiFiLink)
 

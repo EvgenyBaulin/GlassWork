@@ -1,29 +1,6 @@
 import GlassWorkCore
 import SwiftUI
 
-struct ScreenTimeWidget: View {
-    let size: WidgetSize
-    let snapshot: WidgetSnapshot
-    let now: Date
-
-    var body: some View {
-        let today = snapshot.screenTime.today(now)
-        VStack(alignment: .leading, spacing: 6) {
-            WidgetHeader(title: loc("Screen Time"), symbol: "hourglass", tint: Palette.purple)
-            if let today, today.total > 0 {
-                Text(CompactDuration.format(today.total))
-                    .font(.system(size: 30, weight: .semibold, design: .rounded))
-                let limit = size == .small ? 2 : size == .medium ? 3 : 8
-                ForEach(snapshot.screenTime.topApps(in: today, limit: limit), id: \.app) { row in
-                    InfoRow(title: row.app, value: CompactDuration.format(row.seconds))
-                }
-            } else {
-                Text(loc("Not enough data yet")).font(.system(size: 13)).foregroundStyle(.secondary)
-            }
-        }
-    }
-}
-
 struct CommandsWidget: View {
     let size: WidgetSize
     let snapshot: WidgetSnapshot
@@ -41,12 +18,22 @@ struct CommandsWidget: View {
     }
 
     private func row(_ command: UserCommand, result: CommandResult?) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(command.name).font(.system(size: 13, weight: .medium)).lineLimit(1)
-            if let result {
-                Text(loc("Exit \(Int(result.status)) · \(CompactDuration.format(result.duration))"))
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(result.status == 0 ? Palette.green : Palette.red)
+        HStack(spacing: 8) {
+            // Commands that ask first run from their panel, where the question can be shown.
+            if !command.asksFirst {
+                WidgetActionButton(action: .runCommand(command.id)) {
+                    Image(systemName: "play.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Palette.blue)
+                }
+            }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(command.name).font(.system(size: 13, weight: .medium)).lineLimit(1)
+                if let result {
+                    Text(loc("Exit \(Int(result.status)) · \(CompactDuration.format(result.duration))"))
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(result.status == 0 ? Palette.green : Palette.red)
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct GitStatus: Sendable, Equatable {
+public struct GitStatus: Codable, Sendable, Equatable {
     /// Nil on a detached HEAD.
     public var branch: String?
     /// Nil before the first commit.
@@ -23,7 +23,7 @@ public struct GitStatus: Sendable, Equatable {
     }
 }
 
-public enum GitProblem: Sendable, Equatable {
+public enum GitProblem: Codable, Sendable, Equatable {
     /// The folder was moved, deleted, or lost its `.git`.
     case missing
     /// In a folder macOS protects, so GlassWork leaves it alone.
@@ -31,7 +31,7 @@ public enum GitProblem: Sendable, Equatable {
     case failed
 }
 
-public struct GitRepository: Sendable, Equatable, Identifiable {
+public struct GitRepository: Codable, Sendable, Equatable, Identifiable {
     public let path: String
     public var status: GitStatus?
     public var lastCommit: Date?
@@ -61,7 +61,7 @@ public struct GitRepository: Sendable, Equatable, Identifiable {
     }
 }
 
-public enum GitReading: Sendable, Equatable {
+public enum GitReading: Codable, Sendable, Equatable {
     case notInstalled
     case repositories([GitRepository])
 
@@ -82,6 +82,35 @@ public enum GitReading: Sendable, Equatable {
     public func updating(_ fresh: [GitRepository]) -> GitReading {
         let changed = Dictionary(fresh.map { ($0.path, $0) }, uniquingKeysWith: { _, last in last })
         return .repositories(GitRepository.sorted(repositories.map { changed[$0.path] ?? $0 }))
+    }
+}
+
+public extension GitRepository {
+    /// Uncommitted changes, or commits to push or pull.
+    var needsWork: Bool {
+        guard let status else { return false }
+        return !status.isClean || status.ahead > 0 || status.behind > 0
+    }
+
+    /// Changes first, then behind, ahead and clean; repositories that cannot be read last.
+    fileprivate var workRank: Int {
+        guard let status else { return 4 }
+        if !status.isClean {
+            return 0
+        }
+        if status.behind > 0 {
+            return 1
+        }
+        return status.ahead > 0 ? 2 : 3
+    }
+}
+
+public extension GitReading {
+    /// The order the Git widget lists projects in: what needs attention first.
+    var byWork: [GitRepository] {
+        repositories.enumerated()
+            .sorted { ($0.element.workRank, $0.offset) < ($1.element.workRank, $1.offset) }
+            .map(\.element)
     }
 }
 

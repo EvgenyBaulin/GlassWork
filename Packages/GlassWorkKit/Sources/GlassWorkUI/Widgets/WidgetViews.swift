@@ -42,6 +42,22 @@ public extension WidgetKind {
         case .pomodoro: loc("Pomodoro")
         case .focusTime: loc("Focus Time")
         case .wordOfDay: loc("Word of the Day")
+        case .fans: loc("Fans")
+        case .weather: loc("Weather")
+        case .rates: loc("Rates")
+        case .git: loc("Git")
+        case .devServers: loc("Dev Servers")
+        case .containers: loc("Containers")
+        case .aiUsage: ModuleID.aiUsage.title
+        case .devices: loc("Devices")
+        case .wifiSignal: loc("Wi-Fi Signal")
+        case .diskActivity: loc("Disk Activity")
+        case .timeMachine: loc("Time Machine")
+        case .screenTimeWeek: loc("Screen Time Week")
+        case .categories: loc("Categories")
+        case .breaks: loc("Breaks")
+        case .appTime: loc("App Time")
+        case .mostUsed: loc("Most Used")
         case .nowPlaying: loc("Now Playing")
         case .lyrics: loc("Lyrics")
         }
@@ -73,6 +89,17 @@ public extension WidgetKind {
         case .stopwatch, .pomodoro: .timers
         case .focusTime: .overview
         case .wordOfDay: .date
+        case .fans: .fans
+        case .weather: .weather
+        case .rates: .rates
+        case .git: .git
+        case .devServers: .devServers
+        case .containers: .docker
+        case .aiUsage: .aiUsage
+        case .devices: .deviceBatteries
+        case .wifiSignal: .wifi
+        case .diskActivity: .disk
+        case .timeMachine, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed: .overview
         case .nowPlaying, .lyrics: .nowPlaying
         }
     }
@@ -108,7 +135,6 @@ public struct WidgetFace: View {
             case .battery: BatteryWidget(size: size, snapshot: snapshot)
             case .macHealth, .uptime: MacHealthWidget(size: size, snapshot: snapshot, now: now)
             case .digitalClock: DigitalClockWidget(size: size, now: now)
-            case .screenTime: ScreenTimeWidget(size: size, snapshot: snapshot, now: now)
             case .commands: CommandsWidget(size: size, snapshot: snapshot)
             case .endpoints: EndpointsWidget(size: size, snapshot: snapshot)
             case .githubReviews: ReviewsWidget(size: size, snapshot: snapshot)
@@ -134,7 +160,7 @@ public struct WidgetFace: View {
             case .lyrics:
                 LyricsWidget(size: size, data: snapshot.nowPlaying, now: now, isSystemTimed: !showsSeconds)
             default:
-                TimeWidgetFace(
+                DataWidgetFace(
                     kind: kind,
                     context: TimeContext(size: size, snapshot: snapshot, now: now, showsSeconds: showsSeconds)
                 )

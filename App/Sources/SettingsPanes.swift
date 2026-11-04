@@ -29,7 +29,7 @@ struct WidgetsPane: View {
                     }
                 }
                 Picker(loc("Widget"), selection: $kind) {
-                    ForEach(WidgetKind.allCases) { Text($0.title).tag($0) }
+                    ForEach(WidgetKind.gallery) { Text($0.title).tag($0) }
                 }
                 Picker(loc("Size"), selection: $size) {
                     Text("S").tag(WidgetSize.small)

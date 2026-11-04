@@ -54,6 +54,10 @@ public struct History<Value: Sendable>: Sendable {
     }
 }
 
+extension History.Point: Codable where Value: Codable {}
+
+extension History.Point: Equatable where Value: Equatable {}
+
 /// Three resolutions of one metric: 1 minute, 1 hour and 24 hours.
 public struct TieredHistory: Sendable {
     public enum Range: String, CaseIterable, Codable, Sendable {

@@ -26,7 +26,6 @@ struct AccessRequest: View {
 struct AgendaRow: View {
     let event: AgendaEvent
     let detail: String
-    @Environment(\.panelActions) private var actions
 
     var body: some View {
         HStack(spacing: 8) {
@@ -37,7 +36,8 @@ struct AgendaRow: View {
             }
             Spacer()
             if let url = event.callURL {
-                Button(loc("Join")) { actions.openURL(url) }.controlSize(.small)
+                // A link, because a plain button does nothing inside a system widget.
+                Link(loc("Join"), destination: url).buttonStyle(.bordered).controlSize(.small)
             }
         }
     }

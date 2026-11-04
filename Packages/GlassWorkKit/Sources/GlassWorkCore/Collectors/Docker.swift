@@ -1,6 +1,6 @@
 import Foundation
 
-public struct DockerContainer: Sendable, Equatable, Identifiable {
+public struct DockerContainer: Codable, Sendable, Equatable, Identifiable {
     public let id: String
     public let name: String
     public let image: String
@@ -19,7 +19,7 @@ public struct DockerContainer: Sendable, Equatable, Identifiable {
     }
 }
 
-public enum DockerReading: Sendable, Equatable {
+public enum DockerReading: Codable, Sendable, Equatable {
     case notInstalled
     case notRunning
     case permissionDenied

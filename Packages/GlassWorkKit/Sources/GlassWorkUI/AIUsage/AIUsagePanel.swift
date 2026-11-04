@@ -69,7 +69,7 @@ struct AIUsagePanel: View {
     private func toolSection(_ usage: AIToolUsage) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                badge(usage.tool)
+                AIToolBadge(tool: usage.tool)
                 Text(usage.tool.title).font(.system(size: 13, weight: .semibold))
                 Spacer()
                 if let updated = usage.updatedAt {
@@ -89,25 +89,6 @@ struct AIUsagePanel: View {
                     windowRow(window)
                 }
             }
-        }
-    }
-
-    private func badge(_ tool: AITool) -> some View {
-        Text(verbatim: tool.initial)
-            .font(.system(size: 12, weight: .bold))
-            .foregroundStyle(.white)
-            .frame(width: 22, height: 22)
-            .background(tint(of: tool).gradient, in: .rect(cornerRadius: 6))
-    }
-
-    private func tint(of tool: AITool) -> Color {
-        switch tool {
-        case .claudeCode: Palette.orange
-        case .codex: Palette.gray
-        case .geminiCLI: Palette.blue
-        case .openCode: Palette.teal
-        case .copilotCLI: Palette.purple
-        case .droid: Palette.green
         }
     }
 

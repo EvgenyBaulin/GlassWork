@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// Circular progress ring with an optional centered label.
 public struct RingGauge<Label: View>: View {
@@ -22,6 +23,7 @@ public struct RingGauge<Label: View>: View {
                 .trim(from: 0, to: value)
                 .stroke(tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
+                .widgetAccentable()
             label
         }
         .padding(lineWidth / 2)

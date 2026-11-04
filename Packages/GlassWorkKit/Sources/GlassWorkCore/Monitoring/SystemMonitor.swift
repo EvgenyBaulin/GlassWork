@@ -15,8 +15,11 @@ public struct MonitorDemand: Sendable, Equatable {
     public var gpu = false
     public var sensors = false
     public var processes = false
+    /// The process list on the slow pace: `ps` every two seconds is too much for a widget.
+    public var slowProcesses = false
     public var developer: Set<ModuleID> = []
     public var devices = false
+    public var timeMachine = false
     public var nowPlaying = false
 
     public init() {}
@@ -38,6 +41,7 @@ public final class SystemMonitor {
     public private(set) var sensors: SensorSample?
     public private(set) var processes: [ProcessUsage] = []
     public private(set) var deviceBatteries: [DeviceBattery] = []
+    public private(set) var timeMachine: TimeMachineStatus?
     public private(set) var histories: [Metric: TieredHistory] = [:]
     public private(set) var fanHistories: [Int: TieredHistory] = [:]
 
@@ -77,6 +81,13 @@ public final class SystemMonitor {
     @ObservationIgnored private let sampler = Sampler()
     @ObservationIgnored private var loop: Task<Void, Never>?
     @ObservationIgnored private var lastSlow = Date.distantPast
+    @ObservationIgnored private var lastDevices = Date.distantPast
+    @ObservationIgnored private var lastTimeMachine = Date.distantPast
+    /// An empty list before the first answer would read as "no devices".
+    @ObservationIgnored private var hasReadDevices = false
+
+    /// `system_profiler` takes seconds and batteries drain slowly, and backups run hourly at most.
+    private static let occasionalInterval: TimeInterval = 300
 
     public init(
         weather: WeatherStore = WeatherStore(),
@@ -114,19 +125,17 @@ public final class SystemMonitor {
         nowPlaying.stop()
     }
 
-    /// Everything widgets show, read fresh regardless of the current demand.
-    public func widgetSnapshot() async -> WidgetSnapshot {
-        var full = MonitorDemand()
-        full.cpu = true
-        full.memory = true
-        full.network = true
-        full.disk = true
-        full.battery = true
-        full.gpu = true
-        full.sensors = true
-        full.processes = true
-        let date = Date()
-        await apply(sampler.read(full, includeSlow: true), at: date)
+    /// One read of what `kinds` want and the regular tick does not cover.
+    ///
+    /// This serves system widgets, which refresh once a minute: sampling them on every tick would cost far more.
+    public func readForWidgets(_ kinds: Set<WidgetKind>) async {
+        let extra = MonitorDemand(widgets: kinds).subtracting(demand)
+        guard isRunning, extra.readsSamples else { return }
+        await apply(sampler.read(extra, includeSlow: true), at: Date())
+    }
+
+    /// What `kinds` show, from the latest readings. Nothing is read here, so calling it often costs little.
+    public func widgetSnapshot(for kinds: Set<WidgetKind>, at date: Date = Date()) -> WidgetSnapshot {
         var snapshot = WidgetSnapshot(date: date)
         snapshot.cpu = cpu
         snapshot.cpuInfo = cpuInfo
@@ -136,21 +145,92 @@ public final class SystemMonitor {
         snapshot.volumes = volumes
         snapshot.network = network
         snapshot.sensors = sensors
-        snapshot.processes = Array(processes.sorted { $0.cpu > $1.cpu }.prefix(12))
+        if !kinds.isDisjoint(with: [.activity, .topApps]) {
+            snapshot.processes = Array(processes.sorted { $0.cpu > $1.cpu }.prefix(12))
+        }
         snapshot.everyday = everyday.data
         snapshot.events = agenda.events
         snapshot.todos = agenda.todos
         snapshot.bootTime = SystemClock.bootTime()
-        snapshot.screenTime = activity.screenTime
+        if !kinds.isDisjoint(with: WidgetKind.screenTimeKinds) {
+            snapshot.screenTime = activity.screenTime
+        }
         snapshot.commandResults = activity.commandResults
         snapshot.endpointChecks = activity.endpointChecks
         snapshot.reviews = activity.reviews
         snapshot.runs = activity.runs
         snapshot.contributions = activity.contributions
         snapshot.place = weather.places.first
-        snapshot.words = wordOfDay.recent(6, at: date)
-        snapshot.nowPlaying = nowPlaying.widgetData
+        if kinds.contains(.wordOfDay) {
+            snapshot.words = wordOfDay.recent(6, at: date)
+        }
+        if !kinds.isDisjoint(with: [.nowPlaying, .lyrics]) {
+            snapshot.nowPlaying = nowPlaying.widgetData
+        }
+        fillDetails(of: &snapshot, for: kinds, at: date)
         return snapshot
+    }
+
+    private func fillDetails(of snapshot: inout WidgetSnapshot, for kinds: Set<WidgetKind>, at date: Date) {
+        if kinds.contains(.fans) {
+            let since = date.addingTimeInterval(-600)
+            snapshot.fanHistory = fanHistories.mapValues { history in
+                history.points(in: .hour, now: date).filter { $0.date >= since }
+            }
+        }
+        if kinds.contains(.diskActivity) {
+            snapshot.diskActivity = diskActivity
+            snapshot.diskMinute = diskHistory(.minute, seconds: 60, at: date)
+            snapshot.diskLonger = diskHistory(.hour, seconds: 300, at: date)
+        }
+        if kinds.contains(.weather) {
+            snapshot.weather = WidgetWeather(
+                reports: weather.reports,
+                isStale: weather.isStale,
+                hasPlaces: !weather.places.isEmpty
+            )
+        }
+        if kinds.contains(.rates) {
+            snapshot.rates = WidgetRates(
+                quotes: rates.snapshot.quotes,
+                updatedAt: rates.snapshot.updatedAt,
+                isStale: rates.isStale
+            )
+        }
+        fillDeveloper(of: &snapshot, for: kinds, at: date)
+        if kinds.contains(.devices) {
+            snapshot.devices = hasReadDevices ? deviceBatteries : nil
+        }
+        if kinds.contains(.timeMachine) {
+            snapshot.timeMachine = timeMachine
+        }
+    }
+
+    private func fillDeveloper(of snapshot: inout WidgetSnapshot, for kinds: Set<WidgetKind>, at date: Date) {
+        if kinds.contains(.git) {
+            snapshot.git = developer.git
+        }
+        if kinds.contains(.devServers) {
+            snapshot.devServers = developer.devServers
+        }
+        if kinds.contains(.containers) {
+            snapshot.docker = developer.docker
+        }
+        if kinds.contains(.aiUsage) {
+            snapshot.aiUsage = developer.aiUsage
+        }
+        if kinds.contains(.wifiSignal) {
+            snapshot.wifi = developer.wifi
+            snapshot.wifiHistory = developer.wifiSignal.points(since: date.addingTimeInterval(-600))
+        }
+    }
+
+    private func diskHistory(_ range: TieredHistory.Range, seconds: TimeInterval, at date: Date) -> WidgetDiskHistory {
+        let since = date.addingTimeInterval(-seconds)
+        func points(_ metric: Metric) -> [History<Double>.Point] {
+            (histories[metric]?.points(in: range, now: date) ?? []).filter { $0.date >= since }
+        }
+        return WidgetDiskHistory(read: points(.diskRead), write: points(.diskWrite))
     }
 
     /// Reads right away, for example when a panel opens.
@@ -188,7 +268,22 @@ public final class SystemMonitor {
         rates.tick(at: now)
         clipboard.tick(at: now)
         nowPlaying.tick(wanted: demand.nowPlaying, at: now)
+        readOccasional(at: now)
         onUpdate?()
+    }
+
+    private func readOccasional(at date: Date) {
+        if demand.devices, date.timeIntervalSince(lastDevices) >= Self.occasionalInterval {
+            lastDevices = date
+            Task {
+                deviceBatteries = await DeviceBatteryReader.read()
+                hasReadDevices = true
+            }
+        }
+        if demand.timeMachine, date.timeIntervalSince(lastTimeMachine) >= Self.occasionalInterval {
+            lastTimeMachine = date
+            Task { timeMachine = await TimeMachineReader.read() }
+        }
     }
 
     private func apply(_ reading: Sampler.Reading, at date: Date) {
@@ -301,7 +396,7 @@ actor Sampler {
         if demand.sensors {
             reading.sensors = sensorReader?.sample()
         }
-        if demand.processes {
+        if demand.processes || (includeSlow && demand.slowProcesses) {
             reading.processes = await ProcessList.read()
         }
         if includeSlow {

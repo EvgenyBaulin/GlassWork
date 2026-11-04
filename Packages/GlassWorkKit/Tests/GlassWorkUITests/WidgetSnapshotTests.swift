@@ -78,7 +78,8 @@ struct WidgetSnapshotTests {
         return snapshot
     }
 
-    @Test(arguments: WidgetKind.allCases)
+    /// With no data of their own these show their empty states. One widget is tested in its own folder.
+    @Test(arguments: WidgetKind.allCases.filter { $0 != .aiUsage })
     func rendersEverySize(kind: WidgetKind) {
         for size in WidgetSize.allCases {
             let view = WidgetFace(kind: kind, size: size, snapshot: sample, now: Self.now)

@@ -421,4 +421,93 @@ struct FanControlModelTests {
         #expect(model.helperState == .notInstalled)
         #expect(!store.settings.fans.isControlEnabled)
     }
+
+    @Test func widgetCannotStartTheFansWithoutTheService() async {
+        let installer = FakeInstaller()
+        let model = makeModel(installer: installer)
+
+        model.perform(.toggleFanMax)
+        model.perform(.setFanMode(.max))
+        model.perform(.setFanCustom(rpm: 5000))
+        await model.step()
+
+        #expect(model.mode == .auto)
+        #expect(installer.client.commands.isEmpty)
+        #expect(model.settings.customRPM == 0)
+        #expect(model.widgetState.control == .notInstalled)
+        #expect(model.widgetState.canControl == false)
+    }
+
+    @Test func widgetCannotStartTheFansWithControlOff() async {
+        let installer = FakeInstaller()
+        installer.state = .installed
+        let model = makeModel(installer: installer, store: makeStore { $0.fans.isControlEnabled = false })
+
+        model.perform(.toggleFanMax)
+        await model.step()
+
+        #expect(model.mode == .auto)
+        #expect(model.widgetState.control == .off)
+    }
+
+    @Test func widgetMaxGoesThroughTheModel() async {
+        let installer = FakeInstaller()
+        installer.state = .installed
+        let model = makeModel(installer: installer)
+
+        model.perform(.toggleFanMax)
+        await model.step()
+        #expect(model.mode == .max)
+        #expect(model.widgetState.mode == .max)
+        #expect(model.widgetState.canControl)
+
+        model.perform(.toggleFanMax)
+        await model.step()
+        #expect(model.mode == .auto)
+    }
+
+    @Test func widgetCannotPickAPresetThatDoesNotExist() {
+        let installer = FakeInstaller()
+        installer.state = .installed
+        let model = makeModel(installer: installer)
+
+        model.perform(.selectFanPreset("nope"))
+        #expect(model.settings.selectedPresetID == FanPreset.balanced.id)
+
+        model.perform(.selectFanPreset(FanPreset.silent.id))
+        #expect(model.settings.selectedPresetID == FanPreset.silent.id)
+    }
+
+    @Test func widgetTargetSwitchesToCustomForAllFans() {
+        let installer = FakeInstaller()
+        installer.state = .installed
+        let model = makeModel(installer: installer)
+
+        model.perform(.setFanCustom(rpm: 3000))
+
+        #expect(model.mode == .custom)
+        #expect(model.settings.customRPM == 3000)
+        #expect(model.settings.customPerFan == false)
+    }
+
+    @Test(arguments: [0.0, -100, Double.infinity, Double.nan])
+    func widgetIgnoresANonsenseTarget(rpm: Double) {
+        let installer = FakeInstaller()
+        installer.state = .installed
+        let model = makeModel(installer: installer)
+
+        model.perform(.setFanCustom(rpm: rpm))
+
+        #expect(model.mode == .auto)
+    }
+
+    @Test func otherWidgetActionsDoNothingHere() {
+        let installer = FakeInstaller()
+        installer.state = .installed
+        let model = makeModel(installer: installer)
+
+        model.perform(.startTimer(seconds: 60))
+
+        #expect(model.mode == .auto)
+    }
 }

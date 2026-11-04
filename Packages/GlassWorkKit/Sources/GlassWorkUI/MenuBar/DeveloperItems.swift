@@ -11,7 +11,7 @@ extension ItemContent {
         case .docker: docker(store.docker)
         case .ping: ping(store.ping)
         case .vpn: vpn(store.vpn)
-        case .wifi: wifi(store.wifi, signal: store.wifiSignal.points.map(\.value))
+        case .wifi: wifi(store.wifi, signal: store.wifiLastMinute.map(\.value))
         default: ItemContent(figure: "—", template: "—")
         }
     }

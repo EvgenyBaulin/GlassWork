@@ -46,6 +46,29 @@ FanEngine (pure) ──► FanControlModel ──► XPC ──► FanHelperServ
   runs against the `FanSMCAccess` protocol and is tested with a fake.
 - Apple silicon reports fan mode 0 (auto), 1 (manual) or 3 (system). Only 1 counts as manual.
 
+## Widget data and actions
+
+The app is the only place that reads anything. Widgets get a `WidgetSnapshot`:
+
+- `AppModel.makeWidgetSnapshot()` builds it for system widgets and desktop windows alike. It only copies the
+  latest readings, so calling it often costs little, and it carries only what placed widgets show.
+- The kinds placed as desktop windows join the regular 2 s tick. System widgets, which WidgetKit reports through
+  `WidgetCenter`, get one read a minute, except charts that need steady samples. See `MonitorDemand(widgets:)`.
+
+A button in a widget cannot do anything by itself, because the extension is sandboxed:
+
+```
+Button(intent:) ──► WidgetActionIntent ──► WidgetCommandInbox (App Group) ──► Darwin notification
+                                                                                     │
+                       FanControlModel, EventKit, timers, eject ◄── AppModel.perform ┘
+```
+
+- `GlassWorkUI` cannot name an intent, which must live in the extension to be found. Each host supplies a
+  `WidgetActionRenderer`: the extension a button that runs the intent, the app one that calls the model directly.
+- A command is dropped after 10 s, so a Max tapped while the app was closed cannot start the fans later.
+- `AppModel.perform` trusts nothing in a command and checks it against current state. Without fan control
+  `FanControlModel.perform` does nothing, and the widget shows the button as a picture with no action.
+
 ## Modules
 
 `Packages/GlassWorkKit`:

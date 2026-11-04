@@ -30,6 +30,9 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
          daylight
     case clock, numeralsClock, minimalClock, flipClock, skyClock, dayAndNight
     case weekend, progress, stopwatch, pomodoro, focusTime, wordOfDay
+    case fans, weather, rates, git, devServers, containers, aiUsage
+    case devices, wifiSignal, diskActivity, timeMachine
+    case screenTimeWeek, categories, breaks, appTime, mostUsed
     case nowPlaying, lyrics
 
     public var id: String {
@@ -67,6 +70,26 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var place: WeatherPlace?
     /// Today's word first, then the days before.
     public var words: [WordOfDay] = []
+    /// Optional so a snapshot written by an earlier version still decodes until the next refresh.
+    public var fans: WidgetFanState?
+    /// Each fan's speed over the last ten minutes.
+    public var fanHistory: [Int: [History<Double>.Point]]?
+    public var diskActivity: DiskActivity?
+    /// The last minute, sampled finely.
+    public var diskMinute: WidgetDiskHistory?
+    /// The last five minutes, averaged.
+    public var diskLonger: WidgetDiskHistory?
+    public var weather: WidgetWeather?
+    public var rates: WidgetRates?
+    public var git: GitReading?
+    public var devServers: DevServerReading?
+    public var docker: DockerReading?
+    public var aiUsage: AIUsageReading?
+    public var wifi: WiFiReading?
+    /// Signal over the last ten minutes, on `WiFiSignal`'s scale.
+    public var wifiHistory: [History<Double>.Point]?
+    public var devices: [DeviceBattery]?
+    public var timeMachine: TimeMachineStatus?
     /// Written to its own file by the app, so it is nil in the shared snapshot itself.
     public var nowPlaying: NowPlayingWidgetData?
 
