@@ -442,6 +442,14 @@ public struct QuickPasteView: View {
                 .onChange(of: query) { selection = 0 }
                 .onSubmit { _ = use(selection) }
                 .onExitCommand(perform: onCancel)
+                // On the field itself: it has the focus, and would otherwise keep these keys for its text.
+                .onKeyPress(.upArrow) { move(-1) }
+                .onKeyPress(.downArrow) { move(1) }
+                .onKeyPress(characters: .decimalDigits) { press in
+                    // Digits filter once something was typed, so a search for "404" still works.
+                    guard query.isEmpty, let digit = Int(press.characters), digit > 0 else { return .ignored }
+                    return use(digit - 1)
+                }
             if entries.isEmpty {
                 Text(store.history.entries.isEmpty ? loc("Nothing copied yet") : loc("No matches"))
                     .font(.system(size: 12))
@@ -460,13 +468,6 @@ public struct QuickPasteView: View {
         .padding(10)
         .frame(width: 300)
         .onAppear { isFocused = true }
-        .onKeyPress(.upArrow) { move(-1) }
-        .onKeyPress(.downArrow) { move(1) }
-        .onKeyPress(characters: .decimalDigits) { press in
-            // Digits filter once something was typed, so a search for "404" still works.
-            guard query.isEmpty, let digit = Int(press.characters), digit > 0 else { return .ignored }
-            return use(digit - 1)
-        }
     }
 
     private func row(_ entry: ClipboardEntry, index: Int) -> some View {

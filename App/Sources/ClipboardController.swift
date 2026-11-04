@@ -183,13 +183,18 @@ final class ClipboardController {
     private func write(_ entry: ClipboardEntry, plainText: Bool) {
         let board = NSPasteboard.general
         board.clearContents()
+        // Only a link has a richer form to give up. Images and files have no plain text to fall back to,
+        // and the history keeps text without its formatting, so text is plain either way.
         switch entry.kind {
-        case .image where !plainText:
+        case .image:
             if let url = store.imageURL(for: entry), let data = try? Data(contentsOf: url) {
                 board.setData(data, forType: .png)
             }
-        case .file where !plainText:
+        case .file:
             board.writeObjects(entry.paths.map { URL(filePath: $0) as NSURL })
+        case .link where !plainText:
+            board.setString(entry.text, forType: .URL)
+            board.setString(entry.text, forType: .string)
         default:
             board.setString(entry.text, forType: .string)
         }
