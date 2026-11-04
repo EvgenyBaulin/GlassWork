@@ -336,6 +336,16 @@ struct FanEngineTests {
         #expect(settings.curve(forFan: 1, isOnAC: true) == FanPreset.balanced.curve)
     }
 
+    @Test func aFanOnTheSelectedPresetFollowsItsDraft() {
+        var settings = FanSettings()
+        settings.separateCurves = true
+        settings.fanPresetIDs = [FanPreset.balanced.id, FanPreset.silent.id]
+        let edited = FanPreset.balanced.curve.moving(2, to: .init(celsius: 62, percent: 52))
+        settings.applyEdit(edited)
+        #expect(settings.curve(forFan: 0, isOnAC: true) == edited)
+        #expect(settings.curve(forFan: 1, isOnAC: true) == FanPreset.silent.curve)
+    }
+
     @Test func engineUsesTheBatteryCurveOnBattery() {
         var engine = FanEngine()
         var settings = FanSettings()
@@ -454,6 +464,20 @@ struct FanSettingsTests {
         #expect(settings.fanPresetIDs == ["balanced", "silent"])
         #expect(settings.powerRules.adapterPresetID == "balanced")
         #expect(settings.powerRules.batteryPresetID == "balanced")
+    }
+
+    @Test func renamingKeepsTheCurve() {
+        var settings = FanSettings()
+        settings.saveCurve(as: "Mine", id: "mine")
+        settings.renamePreset("mine", to: "Quiet")
+        #expect(settings.preset("mine").name == "Quiet")
+        #expect(settings.preset("mine").curve == FanPreset.balanced.curve)
+    }
+
+    @Test func builtInPresetsCannotBeRenamed() {
+        var settings = FanSettings()
+        settings.renamePreset("balanced", to: "Loud")
+        #expect(settings.preset("balanced").name == "Balanced")
     }
 
     @Test func builtInPresetsCannotBeDeleted() {

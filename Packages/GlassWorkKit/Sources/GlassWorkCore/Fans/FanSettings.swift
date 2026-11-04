@@ -110,7 +110,7 @@ public struct FanSettings: Sendable, Equatable {
         if powerRules.isEnabled {
             return preset(isOnAC ? powerRules.adapterPresetID : powerRules.batteryPresetID).curve
         }
-        if separateCurves, fanPresetIDs.indices.contains(index) {
+        if separateCurves, fanPresetIDs.indices.contains(index), fanPresetIDs[index] != selectedPresetID {
             return preset(fanPresetIDs[index]).curve
         }
         return selectedCurve
@@ -136,6 +136,12 @@ public struct FanSettings: Sendable, Equatable {
         if powerRules.batteryPresetID == id {
             powerRules.batteryPresetID = fallback
         }
+    }
+
+    /// Built-in presets keep their names.
+    public mutating func renamePreset(_ id: String, to name: String) {
+        guard let index = userPresets.firstIndex(where: { $0.id == id }) else { return }
+        userPresets[index].name = name
     }
 
     /// Applies an edit: a user preset changes in place, a built-in one keeps a draft.

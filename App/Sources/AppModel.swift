@@ -10,11 +10,14 @@ import WidgetKit
 final class AppModel {
     let store = SettingsStore()
     let monitor = SystemMonitor()
+    private let fanSensors = FanSensorSource()
+    private(set) lazy var fans = makeFans()
     private lazy var panels = PanelController(model: self)
     private lazy var statusBar = StatusBarController(model: self)
     private lazy var settingsWindow = SettingsWindowController(model: self)
     private let hotKey = HotKey()
     private var hasOpenPanel = false
+    private var isSettingsOpen = false
     private var timer: Timer?
 
     init() {
@@ -22,6 +25,14 @@ final class AppModel {
         hotKey.onPress = { [weak self] in self?.toggleHub() }
         hotKey.register()
         applySettings()
+        fans.onFailsafe = { celsius in
+            FanNotifications.failsafe(
+                celsius: celsius,
+                title: loc("CPU \(Format.temperature(celsius)) — switched to Max"),
+                body: loc("Average CPU went above 95 °C. Max stays on until you pick a mode.")
+            )
+        }
+        fans.applyLaunchMode()
         monitor.onUpdate = { [weak self] in self?.statusBar.refreshItems() }
         monitor.start()
         writeHeartbeat()
@@ -31,6 +42,17 @@ final class AppModel {
         if !store.settings.welcomeCompleted {
             settingsWindow.showWelcome()
         }
+    }
+
+    private func makeFans() -> FanControlModel {
+        let sensors = fanSensors
+        return FanControlModel(
+            store: store,
+            installer: FanHelperInstaller(),
+            readSensors: { await sensors.sample() },
+            // A desktop Mac has no battery, so no reading means mains power.
+            isOnAC: { [weak self] in self?.monitor.battery?.isOnAC ?? true }
+        )
     }
 
     var actions: PanelActions {
@@ -44,13 +66,19 @@ final class AppModel {
             openURL: { NSWorkspace.shared.open($0) },
             quitProcess: { process, force in
                 kill(process.pid, force ? SIGKILL : SIGTERM)
-            }
+            },
+            openFanCurves: { [weak self] in self?.showFanCurves() }
         )
     }
 
     func showSettings(module: ModuleID? = nil) {
         panels.closeTransient()
         settingsWindow.show(module: module)
+    }
+
+    func showFanCurves() {
+        panels.closeTransient()
+        settingsWindow.showFans()
     }
 
     func togglePanel(_ module: ModuleID, from button: NSStatusBarButton) {
@@ -70,6 +98,15 @@ final class AppModel {
         }
     }
 
+    /// The fan and sensor panes show live readings, which no panel may be asking for.
+    func settingsChanged(isOpen: Bool) {
+        isSettingsOpen = isOpen
+        updateDemand()
+        if isOpen {
+            monitor.refresh()
+        }
+    }
+
     /// Runs now and again whenever settings change.
     private func applySettings() {
         withObservationTracking {
@@ -78,6 +115,7 @@ final class AppModel {
             Task { @MainActor in self?.applySettings() }
         }
         statusBar.apply(store.settings)
+        monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
         updateDemand()
     }
 
@@ -91,7 +129,7 @@ final class AppModel {
         demand.disk = everything || modes.contains(.disk)
         demand.battery = true
         demand.gpu = everything || modes.contains(.gpu)
-        demand.sensors = everything || modes.contains(.sensors)
+        demand.sensors = everything || isSettingsOpen || modes.contains(.sensors) || modes.contains(.fans)
         demand.processes = everything
         monitor.demand = demand
     }
@@ -109,6 +147,16 @@ final class AppModel {
             NSWorkspace.screensDidWakeNotification,
             NSWorkspace.sessionDidBecomeActiveNotification,
         ]
+        // The fan loop keeps running through a locked screen, so only real sleep ends it.
+        center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                Task { await self.fans.willSleep() }
+            }
+        }
+        center.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.fans.didWake() }
+        }
         for name in pause {
             center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated { self?.monitor.stop() }

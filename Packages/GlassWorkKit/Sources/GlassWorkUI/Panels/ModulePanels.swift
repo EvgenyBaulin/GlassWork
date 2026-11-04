@@ -21,6 +21,7 @@ public struct ModulePanel: View {
         case .battery: BatteryPanel(monitor: monitor)
         case .gpu: GPUPanel(monitor: monitor)
         case .sensors: SensorsPanel(monitor: monitor)
+        case .fans: FansPanel(monitor: monitor)
         case .uptime: UptimePanel()
         default: EmptyView()
         }

@@ -45,7 +45,7 @@ final class StatusBarController: NSObject {
         // The system adds new items on the left, so creating in reverse keeps the settings order.
         for setting in wanted.reversed() {
             if let item = items[setting.id] {
-                item.update(style: setting.style, numbers: settings.numberStyle)
+                item.update(style: setting.style, numbers: settings.numberStyle, options: setting.options)
             } else {
                 items[setting.id] = ModuleItem(setting: setting, numbers: settings.numberStyle, model: model)
             }
@@ -142,6 +142,7 @@ final class ModuleItem: NSObject {
     private let item: NSStatusItem
     private var style: DisplayStyle
     private var numbers: NumberStyle
+    private var options: [String: String]
     private let renderer: MenuBarItemRenderer
     private var width: CGFloat = 0
     private var visibility: NSKeyValueObservation?
@@ -150,12 +151,14 @@ final class ModuleItem: NSObject {
         module = setting.id
         style = setting.style
         self.numbers = numbers
+        options = setting.options
         self.model = model
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         renderer = MenuBarItemRenderer(
             module: setting.id,
             style: setting.style,
             numbers: numbers,
+            options: setting.options,
             monitor: model.monitor
         )
         super.init()
@@ -167,10 +170,11 @@ final class ModuleItem: NSObject {
         observeRemoval()
     }
 
-    func update(style: DisplayStyle, numbers: NumberStyle) {
-        guard style != self.style || numbers != self.numbers else { return }
+    func update(style: DisplayStyle, numbers: NumberStyle, options: [String: String]) {
+        guard style != self.style || numbers != self.numbers || options != self.options else { return }
         self.style = style
         self.numbers = numbers
+        self.options = options
         render()
     }
 
@@ -187,10 +191,17 @@ final class ModuleItem: NSObject {
     }
 
     private func render() {
-        width = MenuBarItemView.width(module: module, style: style, numbers: numbers, monitor: model.monitor)
+        width = MenuBarItemView.width(
+            module: module,
+            style: style,
+            numbers: numbers,
+            options: options,
+            monitor: model.monitor
+        )
         item.length = width
         renderer.style = style
         renderer.numbers = numbers
+        renderer.options = options
         let size = CGSize(width: width, height: NSStatusBar.system.thickness)
         item.button?.image = renderer.image(size: size, force: true)
     }

@@ -31,6 +31,7 @@ public extension ModuleID {
         case .battery: loc("Battery")
         case .gpu: loc("GPU")
         case .sensors: loc("Sensors")
+        case .fans: loc("Fans")
         case .uptime: loc("Uptime")
         default: rawValue
         }
@@ -46,6 +47,7 @@ public extension ModuleID {
         case .battery: "battery.75percent"
         case .gpu: "cube"
         case .sensors: "thermometer.medium"
+        case .fans: "fan"
         case .uptime: "clock.arrow.circlepath"
         default: "square.dashed"
         }
@@ -56,7 +58,7 @@ public extension ModuleID {
         case .overview, .uptime: Palette.gray
         case .cpu: Palette.blue
         case .memory, .battery: Palette.green
-        case .disk: Palette.cyan
+        case .disk, .fans: Palette.cyan
         case .network: Palette.teal
         case .gpu: Palette.purple
         case .sensors: Palette.red
@@ -75,6 +77,7 @@ public extension ModuleID {
         case .battery: "BAT"
         case .gpu: "GPU"
         case .sensors: "TMP"
+        case .fans: "FAN"
         case .uptime: "UP"
         default: ""
         }
@@ -84,6 +87,7 @@ public extension ModuleID {
     var isAvailable: Bool {
         switch self {
         case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
+        case .fans: FanHardware.hasFans
         default: false
         }
     }

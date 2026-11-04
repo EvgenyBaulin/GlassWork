@@ -182,7 +182,7 @@ struct ChartTooltip: View {
         let color: Color
     }
 
-    let date: Date
+    var date: Date?
     let rows: [Row]
 
     var body: some View {
@@ -195,9 +195,11 @@ struct ChartTooltip: View {
                     Text(row.value).fontWeight(.semibold).monospacedDigit()
                 }
             }
-            Text(date.formatted(date: .omitted, time: .standard))
-                .foregroundStyle(.tertiary)
-                .monospacedDigit()
+            if let date {
+                Text(date.formatted(date: .omitted, time: .standard))
+                    .foregroundStyle(.tertiary)
+                    .monospacedDigit()
+            }
         }
         .font(.system(size: 11))
         .padding(.horizontal, 9)

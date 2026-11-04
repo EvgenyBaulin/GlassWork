@@ -9,19 +9,22 @@ public struct PanelActions {
     public var openApp: (String) -> Void
     public var openURL: (URL) -> Void
     public var quitProcess: (ProcessUsage, Bool) -> Void
+    public var openFanCurves: () -> Void
 
     public init(
         openSettings: @escaping (ModuleID) -> Void = { _ in },
         detach: @escaping (ModuleID) -> Void = { _ in },
         openApp: @escaping (String) -> Void = { _ in },
         openURL: @escaping (URL) -> Void = { _ in },
-        quitProcess: @escaping (ProcessUsage, Bool) -> Void = { _, _ in }
+        quitProcess: @escaping (ProcessUsage, Bool) -> Void = { _, _ in },
+        openFanCurves: @escaping () -> Void = {}
     ) {
         self.openSettings = openSettings
         self.detach = detach
         self.openApp = openApp
         self.openURL = openURL
         self.quitProcess = quitProcess
+        self.openFanCurves = openFanCurves
     }
 }
 
