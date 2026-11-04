@@ -45,13 +45,24 @@ public struct TextCaptureHUD: View {
     }
 
     public var body: some View {
+        NoticeHUD(symbol: notice.symbol, title: notice.title, detail: notice.detail)
+    }
+}
+
+/// A short message low on the screen, with room for instructions when there are any.
+struct NoticeHUD: View {
+    let symbol: String
+    let title: String
+    let detail: String?
+
+    var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: notice.symbol)
+            Image(systemName: symbol)
                 .font(.system(size: 18))
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 2) {
-                Text(notice.title).font(.system(size: 13, weight: .semibold))
-                if let detail = notice.detail {
+                Text(title).font(.system(size: 13, weight: .semibold))
+                if let detail {
                     Text(detail)
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
@@ -61,6 +72,6 @@ public struct TextCaptureHUD: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .frame(width: notice.detail == nil ? nil : 340, alignment: .leading)
+        .frame(width: detail == nil ? nil : 340, alignment: .leading)
     }
 }
