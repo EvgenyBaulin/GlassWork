@@ -1,4 +1,5 @@
 import Carbon.HIToolbox
+import GlassWorkCore
 
 /// A global shortcut, ⌃⌥Space unless told otherwise.
 ///
@@ -19,8 +20,14 @@ final class HotKey {
         self.id = id
     }
 
-    func register() {
-        guard reference == nil else { return }
+    convenience init(shortcut: GlobalShortcut, id: UInt32) {
+        self.init(keyCode: shortcut.key.carbonCode, modifiers: shortcut.modifiers.carbonFlags, id: id)
+    }
+
+    /// False when macOS refuses the shortcut, which means another app already holds it.
+    @discardableResult
+    func register() -> Bool {
+        guard reference == nil else { return true }
         var type = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
         let context = Unmanaged.passUnretained(self).toOpaque()
         InstallEventHandler(GetApplicationEventTarget(), { _, event, context in
@@ -44,7 +51,10 @@ final class HotKey {
             }
         }, 1, &type, context, &handler)
         let identifier = EventHotKeyID(signature: OSType(0x4757_484B), id: id)
-        RegisterEventHotKey(keyCode, modifiers, identifier, GetApplicationEventTarget(), 0, &reference)
+        let status = RegisterEventHotKey(keyCode, modifiers, identifier, GetApplicationEventTarget(), 0, &reference)
+        guard status != noErr else { return true }
+        unregister()
+        return false
     }
 
     func unregister() {
@@ -56,5 +66,48 @@ final class HotKey {
         }
         reference = nil
         handler = nil
+    }
+}
+
+private extension GlobalShortcut.Key {
+    var carbonCode: Int {
+        switch self {
+        case .leftArrow: kVK_LeftArrow
+        case .rightArrow: kVK_RightArrow
+        case .upArrow: kVK_UpArrow
+        case .downArrow: kVK_DownArrow
+        case .returnKey: kVK_Return
+        case .space: kVK_Space
+        case .letterC: kVK_ANSI_C
+        case .letterD: kVK_ANSI_D
+        case .letterG: kVK_ANSI_G
+        case .letterH: kVK_ANSI_H
+        case .letterI: kVK_ANSI_I
+        case .letterJ: kVK_ANSI_J
+        case .letterK: kVK_ANSI_K
+        case .letterQ: kVK_ANSI_Q
+        case .letterU: kVK_ANSI_U
+        case .letterV: kVK_ANSI_V
+        case .digit2: kVK_ANSI_2
+        }
+    }
+}
+
+private extension GlobalShortcut.Modifiers {
+    var carbonFlags: Int {
+        var flags = 0
+        if contains(.control) {
+            flags |= controlKey
+        }
+        if contains(.option) {
+            flags |= optionKey
+        }
+        if contains(.shift) {
+            flags |= shiftKey
+        }
+        if contains(.command) {
+            flags |= cmdKey
+        }
+        return flags
     }
 }

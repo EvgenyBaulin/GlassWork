@@ -192,7 +192,7 @@ final class DockController {
         let size = DockBarLayout.windowSize(for: space, count: state.settings.items.count, settings: state.settings)
         let frame = CGRect(
             x: (screen.frame.midX - size.width / 2).rounded(),
-            y: screen.frame.minY + 4,
+            y: screen.frame.minY + DockBarLayout.screenGap,
             width: size.width,
             height: size.height
         )
