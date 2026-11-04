@@ -11387,22 +11387,392 @@
         }
       }
     },
-    "Apps": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Приложения"
-          }
-        }
-      }
-    },
     "Window Tiles": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Раскладка окон"
+          }
+        }
+      }
+    },
+    "Left half": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Левая половина"
+          }
+        }
+      }
+    },
+    "Right half": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Правая половина"
+          }
+        }
+      }
+    },
+    "Top half": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Верхняя половина"
+          }
+        }
+      }
+    },
+    "Bottom half": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нижняя половина"
+          }
+        }
+      }
+    },
+    "Full screen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Весь экран"
+          }
+        }
+      }
+    },
+    "Center": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По центру"
+          }
+        }
+      }
+    },
+    "First third": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Первая треть"
+          }
+        }
+      }
+    },
+    "Last third": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последняя треть"
+          }
+        }
+      }
+    },
+    "Top left": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вверху слева"
+          }
+        }
+      }
+    },
+    "Top right": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вверху справа"
+          }
+        }
+      }
+    },
+    "Bottom left": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Внизу слева"
+          }
+        }
+      }
+    },
+    "Bottom right": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Внизу справа"
+          }
+        }
+      }
+    },
+    "Left two thirds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Две трети слева"
+          }
+        }
+      }
+    },
+    "Left third": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Треть слева"
+          }
+        }
+      }
+    },
+    "Right two thirds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Две трети справа"
+          }
+        }
+      }
+    },
+    "Right third": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Треть справа"
+          }
+        }
+      }
+    },
+    "Top two thirds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Две трети сверху"
+          }
+        }
+      }
+    },
+    "Top third": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Треть сверху"
+          }
+        }
+      }
+    },
+    "Bottom two thirds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Две трети снизу"
+          }
+        }
+      }
+    },
+    "Bottom third": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Треть снизу"
+          }
+        }
+      }
+    },
+    "Previous display": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предыдущий экран"
+          }
+        }
+      }
+    },
+    "Next display": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующий экран"
+          }
+        }
+      }
+    },
+    "GlassWork needs Accessibility": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlassWork нужен Универсальный доступ"
+          }
+        }
+      }
+    },
+    "Add GlassWork in System Settings → Privacy & Security → Accessibility, then press the shortcut again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте GlassWork в Системных настройках: Конфиденциальность и безопасность → Универсальный доступ, затем нажмите сочетание ещё раз."
+          }
+        }
+      }
+    },
+    "No window to move": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет окна, которое можно подвинуть"
+          }
+        }
+      }
+    },
+    "This window can't be moved": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это окно нельзя подвинуть"
+          }
+        }
+      }
+    },
+    "Leave full screen first": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сначала выйдите из полноэкранного режима"
+          }
+        }
+      }
+    },
+    "There is only one display": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подключён только один экран"
+          }
+        }
+      }
+    },
+    "Move windows from the keyboard": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Двигайте окна с клавиатуры"
+          }
+        }
+      }
+    },
+    "Sends the front window to a place on the screen. Needs Accessibility.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ставит переднее окно в нужное место экрана. Нужен Универсальный доступ."
+          }
+        }
+      }
+    },
+    "Use Window Tiles": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включить раскладку окон"
+          }
+        }
+      }
+    },
+    "Show a short preview": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать, куда встанет окно"
+          }
+        }
+      }
+    },
+    "A short preview shows where the window goes. Turning it off moves the window straight away.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подсветка ненадолго показывает, куда встанет окно. Если её выключить, окно подвинется сразу."
+          }
+        }
+      }
+    },
+    "Turn on GlassWork in Privacy & Security → Accessibility. If it is not in the list, press + and add it from Applications.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите GlassWork в разделе Конфиденциальность и безопасность → Универсальный доступ. Если его нет в списке, нажмите + и добавьте его из папки Программы."
+          }
+        }
+      }
+    },
+    "Some shortcuts are taken": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Часть сочетаний занята"
+          }
+        }
+      }
+    },
+    "Another app already uses %@.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другое приложение уже использует %@."
+          }
+        }
+      }
+    },
+    "Press a half again to move through thirds. %@ and %@ send a window to another display.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите половину ещё раз, и окно займёт две трети, потом треть. %1$@ и %2$@ переносят окно на другой экран."
+          }
+        }
+      }
+    },
+    "Apps": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения"
           }
         }
       }

@@ -24,6 +24,7 @@ final class AppModel {
     private lazy var dock = DockController(model: self)
     private lazy var clipboard = ClipboardController(model: self)
     private lazy var textCapture = TextCaptureController(model: self)
+    private(set) lazy var windowTiles = WindowTilesController(model: self)
     private lazy var location = LocationProvider(store: monitor.weather)
     private lazy var nowPlaying = NowPlayingBridge(
         store: monitor.nowPlaying,
@@ -219,6 +220,7 @@ final class AppModel {
         monitor.developer.options = DeveloperOptions(settings: store.settings)
         desktopWidgets.apply(store.settings.widgets)
         dock.apply(store.settings.dock)
+        windowTiles.apply(store.settings.windowTiles)
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
         updateDemand()
     }
