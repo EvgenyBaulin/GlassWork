@@ -95,6 +95,50 @@ struct DeveloperPanelSnapshotTests {
     @Test func wifiOff() {
         snapshotPanel(WiFiPanel(reading: .off, signal: []), name: "wifi-off")
     }
+
+    @Test(arguments: [true, false])
+    func docker(dark: Bool) {
+        let containers = [
+            DockerContainer(
+                id: "3f2a", name: "postgres-dev", image: "postgres:16", status: "Up 2 hours",
+                isRunning: true, ports: ["5432→5432"]
+            ),
+            DockerContainer(
+                id: "8e41", name: "minio", image: "minio/minio", status: "Up 2 hours",
+                isRunning: true, ports: ["9000-9001"]
+            ),
+            DockerContainer(
+                id: "1b9f", name: "worker", image: "pocket-api-worker", status: "Exited (0) 3 hours ago",
+                isRunning: false, ports: []
+            ),
+        ]
+        snapshotPanel(DockerPanel(reading: .containers(containers, context: "orbstack")), name: "docker", dark: dark)
+    }
+
+    @Test func dockerNotRunning() {
+        snapshotPanel(DockerPanel(reading: .notRunning), name: "docker-off")
+    }
+
+    @Test(arguments: [true, false])
+    func devServers(dark: Bool) {
+        let servers = [
+            DevServer(
+                port: 3000, pid: 1, process: "node", tool: "next dev", project: "pocket-api", kind: .web, uptime: 7200
+            ),
+            DevServer(
+                port: 8080, pid: 2, process: "python3", tool: "http.server", project: "~/Downloads", kind: .web,
+                uptime: 240
+            ),
+            DevServer(
+                port: 5432, pid: 3, process: "postgres", project: "postgresql@16", kind: .service, uptime: 259_200
+            ),
+        ]
+        snapshotPanel(DevServersPanel(reading: .servers(servers)), name: "dev-servers", dark: dark)
+    }
+
+    @Test func devServersEmpty() {
+        snapshotPanel(DevServersPanel(reading: .servers([])), name: "dev-servers-empty")
+    }
 }
 
 @MainActor
@@ -149,6 +193,28 @@ struct DeveloperItemTests {
 
     @Test func wifiOffIsSlashed() {
         #expect(ItemContent.wifi(.off, signal: []).symbol == "wifi.slash")
+    }
+
+    @Test func dockerDotsShowRunningAndStopped() {
+        let containers = [true, true, false].enumerated().map { index, isRunning in
+            DockerContainer(id: "\(index)", name: "c", image: "i", status: "s", isRunning: isRunning, ports: [])
+        }
+        let item = ItemContent.docker(.containers(containers, context: nil))
+
+        #expect(item.figure == "2")
+        #expect(item.glyph == .dots(filled: 2, faint: 1))
+    }
+
+    @Test func stoppedEngineIsFaint() {
+        let item = ItemContent.docker(.notRunning)
+
+        #expect(item.figure == "—")
+        #expect(item.isFaint)
+    }
+
+    @Test func devServersCount() {
+        let server = DevServer(port: 3000, pid: 1, process: "node", project: "x", kind: .web)
+        #expect(ItemContent.devServers(.servers([server])).figure == "1")
     }
 
     @Test func pingGraphShowsTheWholeLogNotTheLastMinute() {

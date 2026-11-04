@@ -5,11 +5,38 @@ import SwiftUI
 extension ItemContent {
     static func developer(_ module: ModuleID, _ store: DeveloperStore) -> ItemContent {
         switch module {
+        case .devServers: devServers(store.devServers)
+        case .docker: docker(store.docker)
         case .ping: ping(store.ping)
         case .vpn: vpn(store.vpn)
         case .wifi: wifi(store.wifi, signal: store.wifiSignal.points.map(\.value))
         default: ItemContent(figure: "—", template: "—")
         }
+    }
+
+    static func devServers(_ reading: DevServerReading?) -> ItemContent {
+        guard case let .servers(servers) = reading else {
+            var item = ItemContent(figure: "—", template: "99")
+            item.isFaint = true
+            return item
+        }
+        var item = ItemContent(figure: "\(servers.count)", template: "99")
+        item.glyph = .dots(filled: servers.count, faint: 0)
+        item.detail = servers.prefix(5).map { ":\($0.port) \($0.process)" }.joined(separator: " · ")
+        return item
+    }
+
+    static func docker(_ reading: DockerReading?) -> ItemContent {
+        guard case let .containers(containers, _) = reading else {
+            var item = ItemContent(figure: "—", template: "99")
+            item.isFaint = true
+            item.detail = reading == .notRunning ? loc("Docker is not running") : nil
+            return item
+        }
+        let running = containers.count(where: \.isRunning)
+        var item = ItemContent(figure: "\(running)", template: "99")
+        item.glyph = .dots(filled: running, faint: containers.count - running)
+        return item
     }
 
     static func ping(_ log: PingLog) -> ItemContent {

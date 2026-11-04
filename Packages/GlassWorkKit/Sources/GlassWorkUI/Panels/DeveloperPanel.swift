@@ -8,6 +8,8 @@ struct DeveloperPanel: View {
 
     var body: some View {
         switch module {
+        case .devServers: DevServersPanel(reading: store.devServers)
+        case .docker: DockerPanel(reading: store.docker)
         case .ping: PingPanel(log: store.ping, host: store.options.pingHost)
         case .vpn: VPNPanel(reading: store.vpn, since: store.vpnSince)
         case .wifi: WiFiPanel(reading: store.wifi, signal: store.wifiSignal.points)

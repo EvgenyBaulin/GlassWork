@@ -8,6 +8,8 @@ import Observation
 @MainActor
 @Observable
 public final class DeveloperStore {
+    public private(set) var devServers: DevServerReading?
+    public private(set) var docker: DockerReading?
     public private(set) var ping = PingLog()
     public private(set) var vpn: VPNReading?
     /// When the connection was first seen, which is close enough to when it started.
@@ -59,10 +61,30 @@ public final class DeveloperStore {
 
     private func read(_ module: ModuleID, at date: Date) {
         switch module {
+        case .devServers: readDevServers()
+        case .docker: readDocker()
         case .ping: readPing(at: date)
         case .vpn: readVPN(at: date)
         case .wifi: readWiFi(at: date)
         default: break
+        }
+    }
+
+    private func readDevServers() {
+        let collector = DevServerCollector(runner: runner)
+        load(.devServers) {
+            await collector.read()
+        } apply: { store, value in
+            store.devServers = value
+        }
+    }
+
+    private func readDocker() {
+        let collector = DockerCollector(runner: runner)
+        load(.docker) {
+            await collector.read()
+        } apply: { store, value in
+            store.docker = value
         }
     }
 
