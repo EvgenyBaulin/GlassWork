@@ -9,6 +9,8 @@ struct DeveloperPanel: View {
     var body: some View {
         switch module {
         case .ping: PingPanel(log: store.ping, host: store.options.pingHost)
+        case .vpn: VPNPanel(reading: store.vpn, since: store.vpnSince)
+        case .wifi: WiFiPanel(reading: store.wifi, signal: store.wifiSignal.points)
         default: EmptyView()
         }
     }

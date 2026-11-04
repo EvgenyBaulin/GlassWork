@@ -63,6 +63,38 @@ struct DeveloperPanelSnapshotTests {
     @Test func pingHostDown() {
         snapshotPanel(PingPanel(log: pingLog([14, 15, nil, nil, nil]), host: "10.0.0.9"), name: "ping-down")
     }
+
+    @Test(arguments: [true, false])
+    func vpn(dark: Bool) {
+        let reading = VPNReading(
+            services: [
+                VPNService(id: "1", name: "Work VPN", kind: "VPN", status: .connected),
+                VPNService(id: "2", name: "Personal", kind: "IPSec", status: .disconnected),
+            ],
+            tunnels: [TunnelInterface(name: "utun4", address: "10.8.0.6")]
+        )
+        let panel = VPNPanel(reading: reading, since: start, now: start.addingTimeInterval(5040))
+        snapshotPanel(panel, name: "vpn", dark: dark)
+    }
+
+    @Test func vpnNotConfigured() {
+        snapshotPanel(VPNPanel(reading: VPNReading(services: [], tunnels: []), since: nil), name: "vpn-none")
+    }
+
+    @Test(arguments: [true, false])
+    func wifi(dark: Bool) {
+        let link = WiFiLink(
+            rssi: -58, noise: -92, transmitRate: 866, channel: 44, bandCode: 2, widthCode: 3, phyCode: 6
+        )
+        let signal = [-62, -60, -58, -58, -55, -58, -60, -57, -58, -70, -62, -58, -58].enumerated().map { index, rssi in
+            History<Double>.Point(date: start.addingTimeInterval(Double(index) * 5), value: WiFiSignal.plotted(rssi))
+        }
+        snapshotPanel(WiFiPanel(reading: .connected(link), signal: signal), name: "wifi", dark: dark)
+    }
+
+    @Test func wifiOff() {
+        snapshotPanel(WiFiPanel(reading: .off, signal: []), name: "wifi-off")
+    }
 }
 
 @MainActor
@@ -88,6 +120,35 @@ struct DeveloperItemTests {
 
         #expect(item.alert == nil)
         #expect(item.isFaint)
+    }
+
+    @Test func connectedVPNIsAGreenFilledShield() {
+        let connected = VPNReading(services: [], tunnels: [TunnelInterface(name: "utun4", address: "10.8.0.6")])
+        let item = ItemContent.vpn(connected)
+
+        #expect(item.symbol == "shield.fill")
+        #expect(item.alert == Palette.green)
+        #expect(item.figure == "On")
+    }
+
+    @Test func noVPNIsAFaintOutline() {
+        let item = ItemContent.vpn(VPNReading(services: [], tunnels: []))
+
+        #expect(item.symbol == "shield")
+        #expect(item.alert == nil)
+        #expect(item.isFaint)
+    }
+
+    @Test func wifiShowsBarsAndDecibels() {
+        let link = WiFiLink(rssi: -65, noise: -90, transmitRate: 1, channel: 1, bandCode: 2, widthCode: 3, phyCode: 6)
+        let item = ItemContent.wifi(.connected(link), signal: [35])
+
+        #expect(item.figure == "−65 dBm")
+        #expect(item.symbolLevel == 2.0 / 3)
+    }
+
+    @Test func wifiOffIsSlashed() {
+        #expect(ItemContent.wifi(.off, signal: []).symbol == "wifi.slash")
     }
 
     @Test func pingGraphShowsTheWholeLogNotTheLastMinute() {

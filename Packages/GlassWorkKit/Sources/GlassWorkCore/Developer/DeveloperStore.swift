@@ -9,6 +9,12 @@ import Observation
 @Observable
 public final class DeveloperStore {
     public private(set) var ping = PingLog()
+    public private(set) var vpn: VPNReading?
+    /// When the connection was first seen, which is close enough to when it started.
+    public private(set) var vpnSince: Date?
+    public private(set) var wifi: WiFiReading?
+    /// The last minute of signal, on `WiFiSignal`'s scale.
+    public private(set) var wifiSignal = History<Double>(capacity: 13)
 
     public var options = DeveloperOptions() {
         didSet {
@@ -45,6 +51,8 @@ public final class DeveloperStore {
 
     private func interval(of module: ModuleID) -> TimeInterval {
         switch module {
+        case .wifi: 5
+        case .vpn: 10
         default: 30
         }
     }
@@ -52,6 +60,8 @@ public final class DeveloperStore {
     private func read(_ module: ModuleID, at date: Date) {
         switch module {
         case .ping: readPing(at: date)
+        case .vpn: readVPN(at: date)
+        case .wifi: readWiFi(at: date)
         default: break
         }
     }
@@ -65,6 +75,26 @@ public final class DeveloperStore {
             // A host changed mid-read would otherwise put the old host's reply on the new chart.
             if store.options.pingHost == host {
                 store.ping.append(outcome, at: date)
+            }
+        }
+    }
+
+    private func readVPN(at date: Date) {
+        load(.vpn) {
+            VPNReader.read()
+        } apply: { store, value in
+            store.vpn = value
+            store.vpnSince = value.isConnected ? store.vpnSince ?? date : nil
+        }
+    }
+
+    private func readWiFi(at date: Date) {
+        load(.wifi) {
+            WiFiReader.read()
+        } apply: { store, value in
+            store.wifi = value
+            if let link = value.link {
+                store.wifiSignal.append(WiFiSignal.plotted(link.rssi), at: date)
             }
         }
     }
