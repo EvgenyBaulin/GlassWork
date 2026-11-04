@@ -29,6 +29,11 @@ targets:
     sources:
       - App/Sources
       - App/Resources
+      - path: App/LaunchDaemons/io.github.evgenybaulin.GlassWork.FanHelper.plist
+        buildPhase:
+          copyFiles:
+            destination: wrapper
+            subpath: Contents/Library/LaunchDaemons
     dependencies:
       - package: GlassWorkKit
         product: GlassWorkCore
@@ -37,6 +42,11 @@ targets:
       - target: GlassWorkWidgets
         embed: true
         codeSign: true
+      - target: GlassWorkFanHelper
+        embed: true
+        codeSign: true
+        copy:
+          destination: executables
     entitlements:
       path: App/GlassWork.entitlements
       properties:
@@ -97,6 +107,21 @@ targets:
         PRODUCT_NAME: GlassWorkWidgets
         SKIP_INSTALL: YES
         LD_RUNPATH_SEARCH_PATHS: $(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks
+  GlassWorkFanHelper:
+    type: tool
+    platform: macOS
+    sources:
+      - Helper/Sources
+    dependencies:
+      - package: GlassWorkKit
+        product: GlassWorkCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_ID_PREFIX).GlassWork.FanHelper
+        PRODUCT_NAME: GlassWorkFanHelper
+        SKIP_INSTALL: YES
+        # A tool has no bundle to take its signing identifier from, and the app checks it by name.
+        OTHER_CODE_SIGN_FLAGS: --identifier $(PRODUCT_BUNDLE_IDENTIFIER)
 schemes:
   GlassWork:
     build:

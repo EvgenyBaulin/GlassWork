@@ -31,6 +31,7 @@ public extension ModuleID {
         case .battery: loc("Battery")
         case .gpu: loc("GPU")
         case .sensors: loc("Sensors")
+        case .fans: loc("Fans")
         case .uptime: loc("Uptime")
         case .aiUsage: loc("AI Usage")
         case .git: loc("Git")
@@ -71,6 +72,7 @@ public extension ModuleID {
         case .battery: "battery.75percent"
         case .gpu: "cube"
         case .sensors: "thermometer.medium"
+        case .fans: "fan"
         case .uptime: "clock.arrow.circlepath"
         case .aiUsage: "sparkle"
         case .git: "arrow.triangle.branch"
@@ -106,7 +108,7 @@ public extension ModuleID {
         case .cpu, .docker, .vpn, .wifi: Palette.blue
         case .aiUsage, .git: Palette.orange
         case .memory, .battery, .deviceBatteries, .devServers: Palette.green
-        case .disk: Palette.cyan
+        case .disk, .fans: Palette.cyan
         case .network, .ping: Palette.teal
         case .gpu: Palette.purple
         case .sensors, .date, .calendar, .endsIn: Palette.red
@@ -135,6 +137,7 @@ public extension ModuleID {
         case .battery: "BAT"
         case .gpu: "GPU"
         case .sensors: "TMP"
+        case .fans: "FAN"
         case .uptime: "UP"
         case .aiUsage: "AI"
         case .git: "GIT"
@@ -164,6 +167,7 @@ public extension ModuleID {
         case .aiUsage, .git, .devServers, .docker, .ping, .vpn, .wifi: true
         case .calendar, .endsIn, .todos, .deviceBatteries: true
         case .weather, .rates, .clipboard: true
+        case .fans: FanHardware.hasFans
         default: false
         }
     }

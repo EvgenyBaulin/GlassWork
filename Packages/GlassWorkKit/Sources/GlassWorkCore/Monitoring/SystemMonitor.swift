@@ -38,6 +38,16 @@ public final class SystemMonitor {
     public private(set) var processes: [ProcessUsage] = []
     public private(set) var deviceBatteries: [DeviceBattery] = []
     public private(set) var histories: [Metric: TieredHistory] = [:]
+    public private(set) var fanHistories: [Int: TieredHistory] = [:]
+
+    /// What the temperature graph records. Changing it starts the graph afresh.
+    public var temperatureSource = SensorChoice.averageCPU {
+        didSet {
+            if temperatureSource != oldValue {
+                histories[.temperature] = nil
+            }
+        }
+    }
 
     /// Timers, notes and other small modules, ticking along with the monitor.
     public let everyday = EverydayStore()
@@ -140,6 +150,10 @@ public final class SystemMonitor {
         histories[metric]?.points(in: range) ?? []
     }
 
+    public func fanPoints(_ fan: Int, in range: TieredHistory.Range) -> [History<Double>.Point] {
+        fanHistories[fan]?.points(in: range) ?? []
+    }
+
     /// Battery power halves the polling rate and Low Power Mode quarters it.
     private var effectiveInterval: TimeInterval {
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
@@ -195,11 +209,14 @@ public final class SystemMonitor {
         }
         if let value = reading.sensors {
             sensors = value
-            if let celsius = value.averageCPU {
+            if let celsius = value.celsius(for: temperatureSource) {
                 record(.temperature, celsius, date)
             }
             if let rpm = value.averageFanRPM {
                 record(.fan, rpm, date)
+            }
+            for fan in value.fans {
+                fanHistories[fan.id, default: TieredHistory()].append(fan.rpm, at: date)
             }
         }
     }

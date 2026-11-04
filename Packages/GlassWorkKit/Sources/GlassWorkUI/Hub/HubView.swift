@@ -137,7 +137,7 @@ struct HubTile: View {
     let action: () -> Void
 
     var body: some View {
-        let content = ItemContent.content(setting.id, monitor: monitor, style: .compact)
+        let content = ItemContent.content(setting.id, monitor: monitor, style: .compact, options: setting.options)
         Button(action: action) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 6) {

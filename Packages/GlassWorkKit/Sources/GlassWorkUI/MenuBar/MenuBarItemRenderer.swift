@@ -14,24 +14,38 @@ public final class MenuBarItemRenderer {
     public var numbers: NumberStyle
     /// The look of the bar, needed by items that are not template images.
     public var appearance: NSAppearance?
+    public var options: [String: String]
     private var bounds = CGRect.zero
     private var lastSignature: String?
+    /// The fan glyph turns one step per refresh. A real animation would cost far more than it shows.
+    /// The symbol looks the same every 90°, so steps stay well below that.
+    private var spinAngle: CGFloat = 0
 
     private static let padding: CGFloat = 4
     private static let symbolWidth: CGFloat = 16
     private static let graphWidth: CGFloat = 34
     private static let labelWidth: CGFloat = 8
 
-    public init(module: ModuleID, style: DisplayStyle, numbers: NumberStyle, monitor: SystemMonitor) {
+    public init(
+        module: ModuleID,
+        style: DisplayStyle,
+        numbers: NumberStyle,
+        options: [String: String] = [:],
+        monitor: SystemMonitor
+    ) {
         self.module = module
         self.style = style
         self.numbers = numbers
+        self.options = options
         self.monitor = monitor
     }
 
     /// A new image, or nil when nothing visible changed since the last one.
     public func image(size: CGSize, force: Bool = false) -> NSImage? {
-        let content = ItemContent.content(module, monitor: monitor, style: numbers)
+        let content = ItemContent.content(module, monitor: monitor, style: numbers, options: options)
+        if content.spin > 0, style == .symbol || style == .figure || style == .graph {
+            spinAngle = (spinAngle + 20 + 40 * content.spin).truncatingRemainder(dividingBy: 360)
+        }
         let current = signature(content, size: size)
         guard force || current != lastSignature else { return nil }
         lastSignature = current
@@ -66,6 +80,7 @@ public final class MenuBarItemRenderer {
 
     private func signature(_ content: ItemContent, size: CGSize) -> String {
         var parts = [content.figure, content.secondLine ?? "", "\(style)", "\(size.width)", "\(content.alert != nil)"]
+        parts.append("\(spinAngle)")
         parts += [content.prefix ?? "", content.symbol ?? "", content.label ?? "", content.accent?.text ?? ""]
         parts += ["\(content.isDimmed)", "\(content.accent?.color != nil)", appearance?.name.rawValue ?? ""]
         parts.append("\(content.symbolLevel ?? -1)")
@@ -124,7 +139,15 @@ public final class MenuBarItemRenderer {
                 x: x + (Self.symbolWidth - size.width) / 2,
                 y: (bounds.height - size.height) / 2
             )
-            image.draw(in: CGRect(origin: origin, size: size))
+            let frame = CGRect(origin: origin, size: size)
+            NSGraphicsContext.saveGraphicsState()
+            let turn = NSAffineTransform()
+            turn.translateX(by: frame.midX, yBy: frame.midY)
+            turn.rotate(byDegrees: -spinAngle)
+            turn.translateX(by: -frame.midX, yBy: -frame.midY)
+            turn.concat()
+            image.draw(in: frame)
+            NSGraphicsContext.restoreGraphicsState()
         }
         x += Self.symbolWidth + Self.padding
     }
