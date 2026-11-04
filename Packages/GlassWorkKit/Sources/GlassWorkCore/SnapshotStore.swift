@@ -26,6 +26,20 @@ public struct SnapshotStore: Sendable {
         return try? decoder.decode(Value.self, from: data)
     }
 
+    /// Raw bytes such as images, which JSON would make a third larger.
+    public func writeData(_ data: Data, for key: String) throws {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try data.write(to: dataURL(for: key), options: .atomic)
+    }
+
+    public func readData(for key: String) -> Data? {
+        try? Data(contentsOf: dataURL(for: key))
+    }
+
+    private func dataURL(for key: String) -> URL {
+        directory.appending(path: "\(key).data", directoryHint: .notDirectory)
+    }
+
     private func url(for key: String) -> URL {
         directory.appending(path: "\(key).json", directoryHint: .notDirectory)
     }

@@ -30,6 +30,7 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
          daylight
     case clock, numeralsClock, minimalClock, flipClock, skyClock, dayAndNight
     case weekend, progress, stopwatch, pomodoro, focusTime, wordOfDay
+    case nowPlaying, lyrics
 
     public var id: String {
         rawValue
@@ -66,6 +67,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var place: WeatherPlace?
     /// Today's word first, then the days before.
     public var words: [WordOfDay] = []
+    /// Written to its own file by the app, so it is nil in the shared snapshot itself.
+    public var nowPlaying: NowPlayingWidgetData?
 
     public init(date: Date) {
         self.date = date

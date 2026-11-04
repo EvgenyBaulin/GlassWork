@@ -11,6 +11,8 @@ struct GlassWorkWidgets: WidgetBundle {
         MacHealthKindWidget()
         UptimeKindWidget()
         DigitalClockKindWidget()
+        NowPlayingKindWidget()
+        LyricsKindWidget()
         MoreWidgets().body
     }
 }

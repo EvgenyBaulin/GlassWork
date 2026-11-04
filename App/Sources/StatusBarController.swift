@@ -238,6 +238,11 @@ final class ModuleItem: NSObject {
     }
 
     func refresh() {
+        // The only item whose width follows its content: it changes with the track.
+        if module == .nowPlaying, width != currentWidth {
+            render()
+            return
+        }
         renderer.appearance = item.button?.effectiveAppearance
         let size = CGSize(width: width, height: NSStatusBar.system.thickness)
         if let image = renderer.image(size: size) {
@@ -245,14 +250,12 @@ final class ModuleItem: NSObject {
         }
     }
 
+    private var currentWidth: CGFloat {
+        MenuBarItemView.width(module: module, style: style, numbers: numbers, options: options, monitor: model.monitor)
+    }
+
     private func render() {
-        width = MenuBarItemView.width(
-            module: module,
-            style: style,
-            numbers: numbers,
-            options: options,
-            monitor: model.monitor
-        )
+        width = currentWidth
         item.length = width
         renderer.style = style
         renderer.numbers = numbers

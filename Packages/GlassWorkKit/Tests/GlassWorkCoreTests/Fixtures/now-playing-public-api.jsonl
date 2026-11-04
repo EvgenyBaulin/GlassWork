@@ -1,0 +1,3 @@
+{"album":"Album \"Q\"","appName":null,"artist":"Тест Артист","artworkID":"7edc938ebe1aeaba","bundleID":"player","canGoNext":true,"canGoPrevious":true,"canSeek":true,"duration":200,"elapsed":0,"elapsedAt":815467579.219477,"event":"state","isActive":true,"isPlaying":true,"lyrics":null,"parentBundleID":null,"queue":[],"title":"Harness Song 0"}
+{"data":"/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAAB","event":"artwork","id":"7edc938ebe1aeaba"}
+{"event":"state","isActive":false}

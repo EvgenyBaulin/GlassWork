@@ -29,6 +29,45 @@ extension ItemContent {
         values ?? metric.map { monitor.points($0, in: .minute).suffix(30).map(\.value) }
     }
 
+    /// Title and artist next to the cover while something plays, then only a note, or nothing if the user prefers.
+    static func nowPlaying(_ store: NowPlayingStore, options: [String: String], at date: Date = Date()) -> ItemContent {
+        guard let session = store.session else {
+            var idle = ItemContent(figure: "—", template: "—")
+            idle.isDimmed = true
+            idle.glyph = .bars(equalizer(phase: nil))
+            idle.isHidden = options[ModuleOption.hideWhenIdle] != "false"
+            return idle
+        }
+        let text = [session.track.title, session.track.artist].compactMap(\.self).joined(separator: " — ")
+        var content = ItemContent(figure: text, template: text)
+        content.figureWidth = figureWidth(text, options: options)
+        content.detail = session.sourceName
+        content.glyph = .bars(equalizer(phase: session.isPlaying ? Int(date.timeIntervalSince1970 / 2) : nil))
+        if session.isPlaying {
+            content.artwork = store.artwork
+        } else {
+            content.symbol = "pause.fill"
+            content.isDimmed = true
+        }
+        return content
+    }
+
+    /// As wide as the text and no wider than the setting, so it changes with the track and not while it plays.
+    private static func figureWidth(_ text: String, options: [String: String]) -> CGFloat {
+        let limit = CGFloat(options[ModuleOption.maxWidth].flatMap(Double.init) ?? ModuleOption.defaultMaxWidth)
+        let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .medium)
+        return min(ceil((text as NSString).size(withAttributes: [.font: font]).width), limit)
+    }
+
+    /// Bars for the graph styles. They change with each menu bar refresh: a real meter would need audio access.
+    static func equalizer(phase: Int?) -> [Double] {
+        guard let phase else { return [0.15, 0.15, 0.15, 0.15, 0.15] }
+        return (0 ..< 5).map { bar in
+            let value = (phase &* 7 &+ bar &* 13) % 10
+            return Double(abs(value)) / 10 * 0.8 + 0.2
+        }
+    }
+
     static func weather(_ store: WeatherStore) -> ItemContent {
         guard let report = store.primaryReport else {
             var empty = ItemContent(figure: "—", template: "-88°")
