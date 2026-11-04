@@ -279,6 +279,17 @@ struct NowPlayingSnapshotsTests {
         #expect(snapshots.read()?.artwork == nil)
     }
 
+    @Test func aNewTrackNeverShowsTheOldCover() throws {
+        let snapshots = NowPlayingSnapshots(store: store())
+        try snapshots.write(NowPlayingWidgetData(session: session, artwork: Data([1])))
+        var next = session
+        next.artworkID = "b"
+        try snapshots.write(NowPlayingWidgetData(session: next))
+        #expect(snapshots.read()?.artwork == nil)
+        try snapshots.write(NowPlayingWidgetData(session: next, artwork: Data([2])))
+        #expect(snapshots.read()?.artwork == Data([2]))
+    }
+
     @Test func idleClearsTheRecord() throws {
         let snapshots = NowPlayingSnapshots(store: store())
         try snapshots.write(NowPlayingWidgetData(session: session))
@@ -473,6 +484,18 @@ struct NowPlayingStoreTests {
         await waitUntil { !store.isRunning }
         store.tick(wanted: true, at: Date().addingTimeInterval(6))
         #expect(fake.starts == 2)
+    }
+
+    @Test func stoppingForgetsWhatMayNoLongerBeTrue() {
+        let store = makeStore()
+        var changes = 0
+        store.tick(wanted: true, at: date)
+        store.apply(.session(session()))
+        store.onChange = { changes += 1 }
+        store.stop()
+        #expect(store.session == nil)
+        #expect(!store.hasLoaded)
+        #expect(changes == 0)
     }
 
     @Test func linesFromAStoppedAdapterAreDropped() async throws {

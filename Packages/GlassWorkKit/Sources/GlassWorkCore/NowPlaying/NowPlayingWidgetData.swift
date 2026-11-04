@@ -49,6 +49,8 @@ public struct NowPlayingSnapshots: Sendable {
     private struct Record: Codable {
         var session: NowPlayingSession?
         var outputDevice: String?
+        /// The track the saved image belongs to. The image of a new track arrives after its title.
+        var savedArtworkID: String?
     }
 
     private let store: SnapshotStore
@@ -59,17 +61,21 @@ public struct NowPlayingSnapshots: Sendable {
 
     /// Writes what changed. An idle session clears the record, so widgets go back to their empty look.
     public func write(_ data: NowPlayingWidgetData?) throws {
-        try store.write(Record(session: data?.session, outputDevice: data?.outputDevice), for: Self.sessionKey)
-        if let artwork = data?.artwork, artwork != store.readData(for: Self.artworkKey) {
+        var saved = store.read(Record.self, for: Self.sessionKey)?.savedArtworkID
+        if let artwork = data?.artwork, saved != data?.session.artworkID {
             try store.writeData(artwork, for: Self.artworkKey)
+            saved = data?.session.artworkID
         }
+        let record = Record(session: data?.session, outputDevice: data?.outputDevice, savedArtworkID: saved)
+        try store.write(record, for: Self.sessionKey)
     }
 
     public func read() -> NowPlayingWidgetData? {
         guard let record = store.read(Record.self, for: Self.sessionKey), let session = record.session else {
             return nil
         }
-        let artwork = session.artworkID == nil ? nil : store.readData(for: Self.artworkKey)
+        let hasArtwork = session.artworkID != nil && session.artworkID == record.savedArtworkID
+        let artwork = hasArtwork ? store.readData(for: Self.artworkKey) : nil
         return NowPlayingWidgetData(session: session, artwork: artwork, outputDevice: record.outputDevice)
     }
 }
@@ -91,7 +97,7 @@ public struct NowPlayingRequest: Codable, Sendable, Equatable {
     private static let lifetime: TimeInterval = 10
 
     public static var notificationName: String {
-        "\(AppGroup.identifier ?? "io.github.evgenybaulin.glasswork").nowPlayingRequest"
+        [AppGroup.identifier, "nowPlayingRequest"].compactMap(\.self).joined(separator: ".")
     }
 
     /// A request left over from before the app started is not acted on.

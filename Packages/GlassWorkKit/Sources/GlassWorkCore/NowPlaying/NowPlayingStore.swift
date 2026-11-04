@@ -55,11 +55,17 @@ public final class NowPlayingStore {
     }
 
     /// Ends the adapter. It starts again on the next tick if it is still needed.
+    ///
+    /// What it last said may no longer be true by then, so that goes too. The widgets' file stays:
+    /// a Mac going to sleep is no reason to redraw them.
     public func stop() {
         guard let running = source else { return }
         generation += 1
         source = nil
         running.stop()
+        session = nil
+        artwork = nil
+        hasLoaded = false
     }
 
     public func perform(_ command: NowPlayingCommand, at date: Date = Date()) {
