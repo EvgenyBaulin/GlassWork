@@ -24,6 +24,7 @@ struct TimeWidgetSnapshotTests {
         .stopwatch,
         .pomodoro,
         .focusTime,
+        .wordOfDay,
     ]
 
     private var sample: WidgetSnapshot {
@@ -57,6 +58,26 @@ struct TimeWidgetSnapshotTests {
             }
         }
         snapshot.screenTime = log
+        snapshot.words = [
+            WordOfDay(day: "2026-11-04", word: "gleam", entry: DictionaryEntry(
+                pronunciation: "ɡliːm",
+                partOfSpeech: "noun",
+                definition: "a faint or brief light, often one reflected from something"
+            )),
+            WordOfDay(day: "2026-11-03", word: "lantern", entry: DictionaryEntry(
+                partOfSpeech: "noun",
+                definition: "a lamp with a transparent case protecting the flame or electric bulb"
+            )),
+            WordOfDay(day: "2026-11-02", word: "glow", entry: DictionaryEntry(
+                partOfSpeech: "noun",
+                synonyms: ["radiance", "gleam", "shine"]
+            )),
+            WordOfDay(
+                day: "2026-11-01",
+                word: "ember",
+                entry: DictionaryEntry(definition: "a small piece of burning coal")
+            ),
+        ]
         snapshot.place = WeatherPlace(id: 1, name: "Moscow", country: "Russia", latitude: 55.75, longitude: 37.62)
         return snapshot
     }

@@ -1165,6 +1165,16 @@
         }
       }
     },
+    "Earlier": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раньше"
+          }
+        }
+      }
+    },
     "Edit": {
       "localizations": {
         "ru": {
@@ -2553,6 +2563,16 @@
         }
       }
     },
+    "Open GlassWork to look up today's word": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте GlassWork, чтобы найти слово дня"
+          }
+        }
+      }
+    },
     "Open GlassWork to start": {
       "localizations": {
         "ru": {
@@ -3289,6 +3309,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Данные от %@"
+          }
+        }
+      }
+    },
+    "Similar: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Похожие: %@"
           }
         }
       }
@@ -4119,6 +4149,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Зарезервированная"
+          }
+        }
+      }
+    },
+    "Word of the Day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слово дня"
           }
         }
       }

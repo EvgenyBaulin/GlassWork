@@ -41,6 +41,7 @@ public extension WidgetKind {
         case .stopwatch: loc("Stopwatch")
         case .pomodoro: loc("Pomodoro")
         case .focusTime: loc("Focus Time")
+        case .wordOfDay: loc("Word of the Day")
         }
     }
 }
@@ -69,6 +70,7 @@ public extension WidgetKind {
         case .weekend, .progress: .date
         case .stopwatch, .pomodoro: .timers
         case .focusTime: .overview
+        case .wordOfDay: .date
         }
     }
 }

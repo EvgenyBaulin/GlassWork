@@ -63,6 +63,7 @@ struct TimeWidgets: WidgetBundle {
         StopwatchKindWidget()
         PomodoroKindWidget()
         FocusTimeKindWidget()
+        WordOfDayKindWidget()
     }
 }
 
@@ -348,5 +349,11 @@ struct PomodoroKindWidget: Widget {
 struct FocusTimeKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.focusTime)
+    }
+}
+
+struct WordOfDayKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.wordOfDay)
     }
 }

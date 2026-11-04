@@ -19,6 +19,7 @@ struct TimeWidgetFace: View {
         case .stopwatch: StopwatchWidget(context: context)
         case .pomodoro: PomodoroWidget(context: context)
         case .focusTime: FocusTimeWidget(context: context)
+        case .wordOfDay: WordOfDayWidget(context: context)
         default: EmptyView()
         }
     }
