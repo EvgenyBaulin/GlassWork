@@ -84,6 +84,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var clipboard = ClipboardSettings()
     public var welcomeCompleted = false
     public var fans = FanSettings()
+    public var windowTiles = WindowTilesSettings()
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
         self.modules = modules
@@ -122,7 +123,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
         case version, modules, numberStyle, hiding, alerts, widgets, dock, weather, rates, clipboard, welcomeCompleted
-        case fans
+        case fans, windowTiles
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -142,6 +143,8 @@ extension AppSettings {
         welcomeCompleted = try container.decodeIfPresent(Bool.self, forKey: .welcomeCompleted) ?? false
         // A broken hand edit of the fan section must not cost the rest of the file.
         fans = (try? container.decodeIfPresent(FanSettings.self, forKey: .fans)) ?? FanSettings()
+        windowTiles = (try? container.decodeIfPresent(WindowTilesSettings.self, forKey: .windowTiles))
+            ?? WindowTilesSettings()
         normalize()
     }
 

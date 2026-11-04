@@ -168,6 +168,11 @@ struct ShortcutsPane: View {
                 LabeledContent(loc("Open Settings"), value: "⌘,")
                 LabeledContent(loc("Undo a change in Settings"), value: "⌘Z")
             }
+            Section(loc("Window Tiles")) {
+                ForEach(TileCommand.all, id: \.self) { command in
+                    LabeledContent(command.title, value: command.shortcut.label)
+                }
+            }
         }
         .formStyle(.grouped)
     }
