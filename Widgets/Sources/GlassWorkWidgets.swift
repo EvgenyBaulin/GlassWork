@@ -32,6 +32,12 @@ struct MoreWidgets: WidgetBundle {
 
 struct EvenMoreWidgets: WidgetBundle {
     var body: some Widget {
+        ScreenTimeKindWidget()
+        CommandsKindWidget()
+        EndpointsKindWidget()
+        GithubReviewsKindWidget()
+        GithubActionsKindWidget()
+        ContributionsKindWidget()
         TodoKindWidget()
         NoteKindWidget()
         TimerKindWidget()
@@ -222,5 +228,41 @@ struct MoonKindWidget: Widget {
 struct DaylightKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.daylight)
+    }
+}
+
+struct ScreenTimeKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.screenTime)
+    }
+}
+
+struct CommandsKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.commands)
+    }
+}
+
+struct EndpointsKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.endpoints)
+    }
+}
+
+struct GithubReviewsKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.githubReviews)
+    }
+}
+
+struct GithubActionsKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.githubActions)
+    }
+}
+
+struct ContributionsKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.contributions)
     }
 }

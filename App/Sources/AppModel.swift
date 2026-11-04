@@ -23,6 +23,7 @@ final class AppModel {
 
     init() {
         observeSleep()
+        observeFrontApp()
         hotKey.onPress = { [weak self] in self?.toggleHub() }
         hotKey.register()
         applySettings()
@@ -154,6 +155,22 @@ final class AppModel {
         monitor.demand = demand
     }
 
+    /// Screen time counts only after the user turns it on.
+    private func observeFrontApp() {
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            let name = app?.localizedName
+            MainActor.assumeIsolated {
+                guard let self, self.store.settings.widgets.tracksScreenTime else { return }
+                self.monitor.activity.appBecameActive(name)
+            }
+        }
+    }
+
     /// Nothing is read while the Mac sleeps, the screen is off or locked, or another user is active.
     private func observeSleep() {
         let center = NSWorkspace.shared.notificationCenter
@@ -181,7 +198,11 @@ final class AppModel {
 
     private func writeHeartbeat() {
         Task {
-            let snapshot = await monitor.widgetSnapshot()
+            await monitor.activity.check(store.settings.widgets.endpoints)
+            await monitor.activity.refreshGitHub()
+            var snapshot = await monitor.widgetSnapshot()
+            snapshot.commands = store.settings.widgets.commands
+            snapshot.endpoints = store.settings.widgets.endpoints
             guard (try? SnapshotStore().write(snapshot, for: WidgetSnapshot.key)) != nil else { return }
             WidgetCenter.shared.reloadAllTimelines()
         }
