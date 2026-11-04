@@ -4,6 +4,8 @@ import GlassWorkCore
 import Testing
 
 /// A key missing from the catalog comes back as the key itself, which would put "Folder Utilities" in the Dock.
+/// These read the compiled catalog, which hosted test runs do not resolve.
+@Suite(.enabled(if: ProcessInfo.processInfo.environment["GW_SKIP_SNAPSHOTS"] == nil))
 struct DockStringsTests {
     @Test(arguments: [
         ("Utilities", "Utilities"),
