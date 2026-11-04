@@ -399,7 +399,7 @@ final class AppModel {
                 await monitor.activity.check(store.settings.widgets.endpoints)
             }
             if !kinds.isDisjoint(with: WidgetKind.githubKinds) {
-                await monitor.activity.refreshGitHub()
+                await monitor.activity.refreshGitHub(includesDigest: kinds.contains(.github))
             }
             if store.settings.widgets.tracksScreenTime, !kinds.isDisjoint(with: WidgetKind.screenTimeKinds) {
                 monitor.activity.flushScreenTime()

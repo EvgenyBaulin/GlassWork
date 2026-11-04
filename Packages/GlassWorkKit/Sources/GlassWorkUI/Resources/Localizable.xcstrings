@@ -12530,6 +12530,206 @@
           }
         }
       }
+    },
+    "GitHub": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub"
+          }
+        }
+      }
+    },
+    "Today at a Glance": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня одним взглядом"
+          }
+        }
+      }
+    },
+    "The gh tool is not installed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Инструмент gh не установлен"
+          }
+        }
+      }
+    },
+    "Not signed in to gh": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вход в gh не выполнен"
+          }
+        }
+      }
+    },
+    "Review requested": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждут вашего ревью"
+          }
+        }
+      }
+    },
+    "Your pull requests": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши запросы на слияние"
+          }
+        }
+      }
+    },
+    "Your checks": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши проверки"
+          }
+        }
+      }
+    },
+    "Click a pull request to open it on GitHub": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите на запрос, чтобы открыть его на GitHub"
+          }
+        }
+      }
+    },
+    "Requested of you or your teams": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрошено у вас или ваших команд"
+          }
+        }
+      }
+    },
+    "Nothing to review": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нечего проверять"
+          }
+        }
+      }
+    },
+    "Checks %lld of %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверки: %1$lld из %2$lld"
+          }
+        }
+      }
+    },
+    "%lld failing": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "сбоев: %lld"
+          }
+        }
+      }
+    },
+    "Changes requested": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Просят правки"
+          }
+        }
+      }
+    },
+    "Approved": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Одобрено"
+          }
+        }
+      }
+    },
+    "Checks passed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверки пройдены"
+          }
+        }
+      }
+    },
+    "in %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "через %@"
+          }
+        }
+      }
+    },
+    "No more events today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня событий больше нет"
+          }
+        }
+      }
+    },
+    "No events tomorrow": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завтра событий нет"
+          }
+        }
+      }
+    },
+    "Day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День"
+          }
+        }
+      }
+    },
+    "Later today": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Позже сегодня"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

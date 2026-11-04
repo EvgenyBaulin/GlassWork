@@ -25,6 +25,8 @@ struct DataWidgetFace: View {
         case .breaks: BreaksWidget(context: context)
         case .appTime: AppTimeWidget(context: context)
         case .mostUsed: MostUsedWidget(context: context)
+        case .github: GitHubWidget(context: context)
+        case .todayAtAGlance: TodayWidget(context: context)
         default: TimeWidgetFace(kind: kind, context: context)
         }
     }

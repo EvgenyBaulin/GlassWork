@@ -169,6 +169,9 @@ public final class SystemMonitor {
         snapshot.reviews = activity.reviews
         snapshot.runs = activity.runs
         snapshot.contributions = activity.contributions
+        if kinds.contains(.github) {
+            snapshot.github = activity.github
+        }
         snapshot.place = weather.places.first
         if kinds.contains(.wordOfDay) {
             snapshot.words = wordOfDay.recent(6, at: date)

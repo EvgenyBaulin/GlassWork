@@ -93,3 +93,74 @@ struct GitHubParserTests {
         #expect(GitHubParser.currentStreak(days) == 2)
     }
 }
+
+struct PullRequestDigestTests {
+    private let answer = """
+    {"data":{"requested":{"nodes":[
+      {"title":"Glass cards","number":142,"url":"https://github.com/o/r/pull/142",
+       "updatedAt":"2026-11-02T10:00:00Z","additions":412,"deletions":88,"reviewDecision":"REVIEW_REQUIRED",
+       "repository":{"nameWithOwner":"o/r"},"commits":{"nodes":[{"commit":{"statusCheckRollup":null}}]}},
+      {}
+    ]},"viewer":{"pullRequests":{"nodes":[
+      {"title":"Feed","number":145,"url":"https://github.com/o/r/pull/145","updatedAt":"2026-11-02T11:00:00Z",
+       "additions":1,"deletions":2,"reviewDecision":"APPROVED","repository":{"nameWithOwner":"o/r"},
+       "commits":{"nodes":[{"commit":{"statusCheckRollup":{"contexts":{"nodes":[
+         {"__typename":"CheckRun","status":"COMPLETED","conclusion":"SUCCESS"},
+         {"__typename":"CheckRun","status":"COMPLETED","conclusion":"FAILURE"},
+         {"__typename":"CheckRun","status":"IN_PROGRESS","conclusion":null},
+         {"__typename":"CheckRun","status":"COMPLETED","conclusion":"SKIPPED"},
+         {"__typename":"StatusContext","state":"SUCCESS"},
+         {"__typename":"StatusContext","state":"PENDING"}
+       ]}}}}]}}
+    ]}}}}
+    """
+
+    @Test func readsBothLists() throws {
+        let digest = try #require(GitHubParser.digest(Data(answer.utf8)))
+        #expect(digest.requested.map(\.number) == [142])
+        #expect(digest.requested[0].additions == 412)
+        #expect(digest.requested[0].review == .none)
+        #expect(digest.requested[0].checks == .none)
+        #expect(digest.mine[0].review == .approved)
+    }
+
+    @Test func countsChecksOfBothKinds() throws {
+        let pull = try #require(GitHubParser.digest(Data(answer.utf8))?.mine.first)
+        #expect(pull.checksPassed == 2)
+        #expect(pull.checksFailed == 1)
+        #expect(pull.checksRunning == 2)
+        #expect(pull.checksTotal == 5)
+    }
+
+    @Test func aFailureOutweighsARun() {
+        let date = Date()
+        let pull = PullRequestSummary(
+            title: "", repository: "", number: 1, url: "", updatedAt: date, checksFailed: 1, checksRunning: 3
+        )
+        #expect(pull.checks == .failing)
+    }
+
+    @Test(arguments: ["", "not json", "{\"errors\":[{\"message\":\"nope\"}]}"])
+    func anythingElseIsNil(text: String) {
+        #expect(GitHubParser.digest(Data(text.utf8)) == nil)
+    }
+
+    @Test func theQueryStaysOnOneLine() {
+        #expect(!GitHubParser.digestQuery.contains("\n"))
+        #expect(GitHubParser.digestQuery.contains("review-requested:@me"))
+    }
+}
+
+struct SystemOnlyWidgetTests {
+    @Test func newWidgetsStayOutOfTheAppsOwnWindows() {
+        #expect(WidgetKind.gallery.allSatisfy { !WidgetKind.systemOnlyKinds.contains($0) })
+    }
+
+    @Test func todayAskForTheBattery() {
+        #expect(MonitorDemand(widgets: [.todayAtAGlance]).battery)
+    }
+
+    @Test func theGitHubWidgetRunsTheTool() {
+        #expect(WidgetKind.githubKinds.contains(.github))
+    }
+}

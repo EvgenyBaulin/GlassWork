@@ -34,6 +34,7 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
     case devices, wifiSignal, diskActivity, timeMachine
     case screenTimeWeek, categories, breaks, appTime, mostUsed
     case nowPlaying, lyrics
+    case github, todayAtAGlance
 
     public var id: String {
         rawValue
@@ -68,6 +69,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var reviews: [PullRequest] = []
     public var runs: [WorkflowRun] = []
     public var contributions: [ContributionDay] = []
+    /// Your pull requests and the ones waiting for you. Nil until `gh` has answered.
+    public var github: WidgetGitHub?
     /// The first weather place, used by the sun-based clocks; nil until one is saved.
     public var place: WeatherPlace?
     /// Today's word first, then the days before.

@@ -13,7 +13,7 @@ import WidgetKit
 struct DataWidgetSnapshotTests {
     nonisolated static let kinds: [WidgetKind] = [
         .fans, .weather, .rates, .git, .devServers, .containers, .devices, .wifiSignal, .diskActivity, .timeMachine,
-        .screenTime, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed,
+        .screenTime, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed, .github, .todayAtAGlance,
     ]
 
     private func sample(_ kind: WidgetKind) -> WidgetSnapshot {
@@ -28,6 +28,8 @@ struct DataWidgetSnapshotTests {
         case .wifiSignal: DataSamples.wifi
         case .diskActivity: DataSamples.disk
         case .timeMachine: DataSamples.timeMachine(DataSamples.backedUp)
+        case .github: DataSamples.github
+        case .todayAtAGlance: DataSamples.today
         default: DataSamples.screenTime
         }
     }
@@ -167,10 +169,29 @@ struct DataWidgetSnapshotTests {
 
     /// A new widget has no data for up to a minute, and must not claim that nothing exists.
     @Test(arguments: [
-        WidgetKind.fans, .weather, .git, .devServers, .containers, .devices, .wifiSignal,
+        WidgetKind.fans, .weather, .git, .devServers, .containers, .devices, .wifiSignal, .github,
     ])
     func waitsForItsFirstData(kind: WidgetKind) {
         state(kind, WidgetSnapshot(date: sampleNow), "waiting", sizes: [.small])
+    }
+
+    @Test func githubStates() {
+        var signedOut = WidgetSnapshot(date: sampleNow)
+        signedOut.github = WidgetGitHub(access: .notSignedIn)
+        state(.github, signedOut, "signed-out", sizes: [.medium])
+        var noTool = WidgetSnapshot(date: sampleNow)
+        noTool.github = WidgetGitHub(access: .notInstalled)
+        state(.github, noTool, "no-tool", sizes: [.small])
+        var clear = DataSamples.github
+        clear.github?.requested = []
+        state(.github, clear, "nothing-to-review", sizes: [.small])
+    }
+
+    @Test func todayWithAnEmptyCalendar() {
+        var snapshot = DataSamples.today
+        snapshot.events = []
+        snapshot.battery = nil
+        state(.todayAtAGlance, snapshot, "empty", sizes: WidgetSize.allCases)
     }
 
     @Test func gitWithNoRepositories() {

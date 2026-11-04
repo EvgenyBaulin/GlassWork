@@ -60,6 +60,8 @@ public extension WidgetKind {
         case .mostUsed: loc("Most Used")
         case .nowPlaying: loc("Now Playing")
         case .lyrics: loc("Lyrics")
+        case .github: loc("GitHub")
+        case .todayAtAGlance: loc("Today at a Glance")
         }
     }
 }
@@ -101,6 +103,8 @@ public extension WidgetKind {
         case .diskActivity: .disk
         case .timeMachine, .screenTimeWeek, .categories, .breaks, .appTime, .mostUsed: .overview
         case .nowPlaying, .lyrics: .nowPlaying
+        case .github: .overview
+        case .todayAtAGlance: .calendar
         }
     }
 }

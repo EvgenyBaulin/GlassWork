@@ -81,6 +81,8 @@ struct DataWidgets: WidgetBundle {
         DevServersKindWidget()
         ContainersKindWidget()
         AIUsageKindWidget()
+        GitHubKindWidget()
+        TodayKindWidget()
     }
 }
 
@@ -482,6 +484,18 @@ struct BreaksKindWidget: Widget {
 struct AppTimeKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.appTime)
+    }
+}
+
+struct GitHubKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.github)
+    }
+}
+
+struct TodayKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.todayAtAGlance)
     }
 }
 
