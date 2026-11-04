@@ -319,7 +319,7 @@ public final class SystemMonitor {
         }
         let reading = await sampler.read(demand, includeSlow: includeSlow, temperature: temperatureSource)
         apply(reading, at: now)
-        everyday.tick(at: now)
+        everyday.tick(at: now, battery: battery)
         developer.tick(at: now, demand: demand.developer)
         apps.tick(at: now, isLive: demand.liveApps)
         weather.tick(at: now)

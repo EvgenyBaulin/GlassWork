@@ -171,6 +171,10 @@ struct TodosPanel: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(items) { row($0, agenda: agenda) }
+                        // Ticked items stay on the list for a while, so a slip can be undone.
+                        if filter == .all {
+                            ForEach(agenda.todos.filter(\.isCompleted)) { row($0, agenda: agenda) }
+                        }
                     }
                 }
                 .frame(maxHeight: 280)
@@ -190,16 +194,29 @@ struct TodosPanel: View {
     }
 
     private func row(_ item: TodoItem, agenda: AgendaStore) -> some View {
+        TodoRow(item: item) { agenda.setCompleted(item, !item.isCompleted) }
+    }
+}
+
+/// One reminder. Clicking the circle ticks it, or takes the tick back.
+struct TodoRow: View {
+    let item: TodoItem
+    let toggle: () -> Void
+
+    var body: some View {
         HStack(spacing: 8) {
-            Button {
-                agenda.setCompleted(item, true)
-            } label: {
-                Image(systemName: "circle").foregroundStyle(Color(hex: item.listColor))
+            Button(action: toggle) {
+                Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(Color(hex: item.listColor))
             }
             .buttonStyle(.plain)
             VStack(alignment: .leading, spacing: 1) {
-                Text(item.title).font(.system(size: 13)).lineLimit(2)
-                if let due = item.due {
+                Text(item.title)
+                    .font(.system(size: 13))
+                    .lineLimit(2)
+                    .strikethrough(item.isCompleted)
+                    .foregroundStyle(item.isCompleted ? .secondary : .primary)
+                if let due = item.due, !item.isCompleted {
                     Text(due.formatted(date: .abbreviated, time: .omitted))
                         .font(.system(size: 11))
                         .foregroundStyle(due < Date() ? Palette.red : .secondary)

@@ -46,6 +46,26 @@ struct OptionTableTests {
         "1 MB/s": "1 МБ/с",
         "1 hour": "1 час",
         "1 min": "1 мин",
+        "10%": "10%",
+        "15 min": "15 мин",
+        "2 hours": "2 часа",
+        "20%": "20%",
+        "30%": "30%",
+        "5 hours": "5 часов",
+        "Completed items": "Выполненные",
+        "Due date": "По сроку",
+        "Glass": "Стекло",
+        "Hero": "Герой",
+        "Hide after 1 day": "Скрывать через день",
+        "Hide after 1 week": "Скрывать через неделю",
+        "Hide at once": "Скрывать сразу",
+        "Manual": "Вручную",
+        "No sound": "Без звука",
+        "Ping (sound)": "Звон",
+        "Purr": "Мурлыканье",
+        "Submarine": "Субмарина",
+        "Title": "По названию",
+        "Until turned off": "Пока не выключу",
         "10 s": "10 с",
         "30 s": "30 с",
         "°C": "°C",
@@ -341,6 +361,32 @@ struct ModuleOptionSnapshotTests {
     @Test(arguments: [true, false])
     func date(dark: Bool) {
         snapshot(.date, height: 300, name: "date", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func timers(dark: Bool) {
+        snapshot(.timers, height: 260, name: "timers", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func keepAwake(dark: Bool) {
+        snapshot(.keepAwake, height: 220, name: "keep-awake", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func todos(dark: Bool) {
+        snapshot(.todos, height: 220, name: "todos", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func aTickedTodoStaysOnTheList(dark: Bool) {
+        let rows = VStack(alignment: .leading, spacing: 8) {
+            TodoRow(item: TodoItem(id: "1", title: "Call the bank", listName: "Home")) {}
+            TodoRow(item: TodoItem(id: "2", title: "Pay rent", listName: "Home", isCompleted: true)) {}
+        }
+        .padding(12)
+        .frame(width: 300)
+        snapshotPanel(rows, name: "todo-rows", dark: dark)
     }
 
     @Test(arguments: [true, false])

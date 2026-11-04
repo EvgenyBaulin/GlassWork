@@ -485,6 +485,9 @@ private extension AppModel {
         monitor.everyday.letsDisplaySleep = store.settings.module(.keepAwake)?.options
             .flag(ItemOption.letsDisplaySleep, default: false) ?? false
         monitor.sunPlaceID = store.settings.module(.sunMoon)?.options[ItemOption.sunPlace].flatMap { Int($0) }
+        monitor.everyday.keepAwakeRule = KeepAwakeRule(options: store.settings.module(.keepAwake)?.options ?? [:])
+        monitor.everyday.onTimerFinished = { [weak self] in self?.timerFinished($0) }
+        monitor.agenda.todoOptions = TodoOptions(options: store.settings.module(.todos)?.options ?? [:])
         applyHardwareChoices()
     }
 
