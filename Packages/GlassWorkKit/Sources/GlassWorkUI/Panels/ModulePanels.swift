@@ -89,8 +89,8 @@ struct CPUPanel: View {
                 CoreBars(cores: monitor.cpu?.cores ?? [], info: monitor.cpuInfo)
             }
             Divider()
-            PanelSection(title: loc("Top processes"), caption: loc("% CPU")) {
-                TopProcesses(processes: monitor.processes, sort: .cpu, tint: Palette.blue)
+            PanelSection(title: loc("Using the most")) {
+                TopApps(apps: monitor.apps.apps, sort: .cpu, limit: 4)
             }
             if monitor.loadAverage.count == 3 {
                 Text(
@@ -185,8 +185,8 @@ struct MemoryPanel: View {
                 breakdown(memory)
             }
             Divider()
-            PanelSection(title: loc("Top processes"), caption: loc("Memory")) {
-                TopProcesses(processes: monitor.processes, sort: .memory, tint: Palette.green, limit: 4)
+            PanelSection(title: loc("Using the most")) {
+                TopApps(apps: monitor.apps.apps, sort: .memory, limit: 4)
             }
         }
     }

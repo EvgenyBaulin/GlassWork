@@ -17,6 +17,8 @@ public struct MonitorDemand: Sendable, Equatable {
     public var processes = false
     /// The process list on the slow pace: `ps` every two seconds is too much for a widget.
     public var slowProcesses = false
+    /// A list of apps is on screen. Without it apps are still read, slowly, for their history.
+    public var liveApps = false
     public var developer: Set<ModuleID> = []
     public var devices = false
     public var timeMachine = false
@@ -62,6 +64,8 @@ public final class SystemMonitor {
     public let agenda = AgendaStore()
     /// Screen time, commands, endpoints and GitHub.
     public let activity = ActivityStore()
+    /// What each app uses, and its history.
+    public let apps: AppUsageStore
     /// Looks words up in the system dictionary for the Word of the Day widget.
     public let wordOfDay = WordOfDayProvider()
     /// These only reach the network or the disk once the app asks them to.
@@ -93,8 +97,10 @@ public final class SystemMonitor {
         weather: WeatherStore = WeatherStore(),
         rates: RatesStore = RatesStore(),
         clipboard: ClipboardStore = ClipboardStore(),
-        nowPlaying: NowPlayingStore = NowPlayingStore()
+        nowPlaying: NowPlayingStore = NowPlayingStore(),
+        apps: AppUsageStore = AppUsageStore()
     ) {
+        self.apps = apps
         self.weather = weather
         self.rates = rates
         self.clipboard = clipboard
@@ -264,6 +270,7 @@ public final class SystemMonitor {
         apply(reading, at: now)
         everyday.tick(at: now)
         developer.tick(at: now, demand: demand.developer)
+        apps.tick(at: now, isLive: demand.liveApps)
         weather.tick(at: now)
         rates.tick(at: now)
         clipboard.tick(at: now)

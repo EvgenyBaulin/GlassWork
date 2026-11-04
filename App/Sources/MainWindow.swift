@@ -67,6 +67,7 @@ private struct MainWindowContent: View {
 
     var body: some View {
         switch route.section {
+        case .apps: apps
         case .clipboard:
             ScrollView {
                 ModulePanel(module: .clipboard, monitor: model.monitor).frame(maxWidth: .infinity)
@@ -75,8 +76,19 @@ private struct MainWindowContent: View {
         case .dock: DockPane(store: model.store)
         case .unlock:
             SectionPlaceholder(.unlock, heading: loc("Unlock this Mac"))
-        case .overview, .apps, .windowTiles, .settings:
+        case .overview, .windowTiles, .settings:
             SectionPlaceholder(route.section)
+        }
+    }
+
+    @ViewBuilder
+    private var apps: some View {
+        if let item = route.item {
+            AppDetail(id: item.id, name: item.title, monitor: model.monitor).id(item.id)
+        } else {
+            AppsSection(monitor: model.monitor) { app in
+                navigation.go(to: MainRoute(section: .apps, item: .init(id: app.id, title: app.name)))
+            }
         }
     }
 }

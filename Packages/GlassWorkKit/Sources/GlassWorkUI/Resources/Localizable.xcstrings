@@ -11486,6 +11486,208 @@
           }
         }
       }
+    },
+    "Using the most": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Больше всего"
+          }
+        }
+      }
+    },
+    "What your apps use": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сколько берут приложения"
+          }
+        }
+      }
+    },
+    "Every running app, heaviest first. Helpers count with the app they belong to.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все запущенные приложения, самые тяжёлые сверху. Вспомогательные процессы считаются вместе с приложением."
+          }
+        }
+      }
+    },
+    "Apps running": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущено приложений"
+          }
+        }
+      }
+    },
+    "Reading what apps use…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Смотрим, сколько берут приложения…"
+          }
+        }
+      }
+    },
+    "1 hour": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 час"
+          }
+        }
+      }
+    },
+    "7 days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 дней"
+          }
+        }
+      }
+    },
+    "History builds up while GlassWork runs.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История копится, пока работает GlassWork."
+          }
+        }
+      }
+    },
+    "Hover a chart to read a moment. History stays on this Mac for 7 days.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наведите на график, чтобы увидеть значение. История хранится на этом Mac 7 дней."
+          }
+        }
+      }
+    },
+    "Unsaved work in this app will be lost.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Несохранённая работа в этом приложении пропадёт."
+          }
+        }
+      }
+    },
+    "Not running right now.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас не запущено."
+          }
+        }
+      }
+    },
+    "%@ of memory and %@ of CPU right now": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас %1$@ памяти и %2$@ CPU"
+          }
+        }
+      }
+    },
+    "Peak %@ at %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пик %1$@ в %2$@"
+          }
+        }
+      }
+    },
+    "Show in Finder": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать в Finder"
+          }
+        }
+      }
+    },
+    "The Mac or GlassWork needs this one, so it stays.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оно нужно Mac или GlassWork, поэтому остаётся."
+          }
+        }
+      }
+    },
+    "with %lld helper processes": {
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "with %lld helper process"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "with %lld helper processes"
+                }
+              }
+            }
+          }
+        },
+        "ru": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "и %lld вспомогательных процесса"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "и %lld вспомогательных процессов"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "и %lld вспомогательный процесс"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "и %lld вспомогательных процессов"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "version": "1.0"
