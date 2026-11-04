@@ -36,6 +36,9 @@ public extension WidgetKind {
         case .flipClock: loc("Flip Clock")
         case .skyClock: loc("Sky Clock")
         case .dayAndNight: loc("Day and Night")
+        case .weekend: loc("Weekend")
+        case .progress: loc("Progress")
+        case .stopwatch: loc("Stopwatch")
         }
     }
 }
@@ -61,6 +64,8 @@ public extension WidgetKind {
         case .timer: .timers
         case .countdown: .countdown
         case .moon, .daylight, .skyClock, .dayAndNight: .sunMoon
+        case .weekend, .progress: .date
+        case .stopwatch: .timers
         }
     }
 }

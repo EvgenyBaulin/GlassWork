@@ -19,6 +19,9 @@ struct TimeWidgetSnapshotTests {
         .flipClock,
         .skyClock,
         .dayAndNight,
+        .weekend,
+        .progress,
+        .stopwatch,
     ]
 
     private var sample: WidgetSnapshot {
@@ -31,6 +34,9 @@ struct TimeWidgetSnapshotTests {
             WorldCity(name: "Dubai", timeZone: "Asia/Dubai"),
             WorldCity(name: "Lima", timeZone: "America/Lima"),
         ]
+        var stopwatch = Stopwatch()
+        stopwatch.accumulated = 754
+        snapshot.everyday.stopwatch = stopwatch
         snapshot.place = WeatherPlace(id: 1, name: "Moscow", country: "Russia", latitude: 55.75, longitude: 37.62)
         return snapshot
     }

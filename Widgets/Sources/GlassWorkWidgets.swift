@@ -58,6 +58,9 @@ struct TimeWidgets: WidgetBundle {
         FlipClockKindWidget()
         SkyClockKindWidget()
         DayAndNightKindWidget()
+        WeekendKindWidget()
+        ProgressKindWidget()
+        StopwatchKindWidget()
     }
 }
 
@@ -313,5 +316,23 @@ struct SkyClockKindWidget: Widget {
 struct DayAndNightKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.dayAndNight)
+    }
+}
+
+struct WeekendKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.weekend)
+    }
+}
+
+struct ProgressKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.progress)
+    }
+}
+
+struct StopwatchKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.stopwatch)
     }
 }

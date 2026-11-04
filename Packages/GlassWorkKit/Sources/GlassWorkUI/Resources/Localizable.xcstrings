@@ -141,6 +141,16 @@
         }
       }
     },
+    "%lld days left": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Осталось дней: %lld"
+          }
+        }
+      }
+    },
     "%lld down": {
       "localizations": {
         "ru": {
@@ -401,6 +411,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавьте команды в настройках"
+          }
+        }
+      }
+    },
+    "After that": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующие"
           }
         }
       }
@@ -1135,6 +1155,16 @@
         }
       }
     },
+    "Elapsed": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прошло"
+          }
+        }
+      }
+    },
     "Endpoints": {
       "localizations": {
         "ru": {
@@ -1763,6 +1793,16 @@
         }
       }
     },
+    "Last day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последний день"
+          }
+        }
+      }
+    },
     "Launch at login": {
       "localizations": {
         "ru": {
@@ -2129,6 +2169,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ближайшие 14 дней"
+          }
+        }
+      }
+    },
+    "Next weekend": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ближайшие выходные"
           }
         }
       }
@@ -2573,6 +2623,16 @@
         }
       }
     },
+    "Paused": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пауза"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "ru": {
@@ -2673,6 +2733,16 @@
         }
       }
     },
+    "Progress": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогресс"
+          }
+        }
+      }
+    },
     "Public IP": {
       "localizations": {
         "ru": {
@@ -2759,6 +2829,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Чтение · запись"
+          }
+        }
+      }
+    },
+    "Ready": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готов"
           }
         }
       }
@@ -2869,6 +2949,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Правый клик по рабочему столу → «Изменить виджеты», чтобы добавить системные виджеты."
+          }
+        }
+      }
+    },
+    "Running": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Идёт"
           }
         }
       }
@@ -3153,6 +3243,26 @@
         }
       }
     },
+    "Started %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущен в %@"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Состояние"
+          }
+        }
+      }
+    },
     "Stopwatch": {
       "localizations": {
         "ru": {
@@ -3349,6 +3459,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "У этого Mac нет батареи"
+          }
+        }
+      }
+    },
+    "This month": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот месяц"
+          }
+        }
+      }
+    },
+    "This quarter": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот квартал"
           }
         }
       }
@@ -3713,6 +3843,26 @@
         }
       }
     },
+    "Weekend": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выходные"
+          }
+        }
+      }
+    },
+    "Weekend!": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выходные!"
+          }
+        }
+      }
+    },
     "Welcome to GlassWork": {
       "localizations": {
         "ru": {
@@ -3889,6 +4039,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "средняя SoC"
+          }
+        }
+      }
+    },
+    "day to go": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "день до выходных"
           }
         }
       }

@@ -14,6 +14,9 @@ struct TimeWidgetFace: View {
         case .flipClock: FlipClockWidget(context: context)
         case .skyClock: SkyClockWidget(context: context)
         case .dayAndNight: DayAndNightWidget(context: context)
+        case .weekend: WeekendWidget(context: context)
+        case .progress: ProgressWidget(context: context)
+        case .stopwatch: StopwatchWidget(context: context)
         default: EmptyView()
         }
     }
