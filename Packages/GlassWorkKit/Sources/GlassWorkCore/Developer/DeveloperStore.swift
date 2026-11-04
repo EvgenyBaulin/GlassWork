@@ -130,8 +130,9 @@ public final class DeveloperStore {
     private func readGit() {
         let collector = GitCollector(runner: runner, home: home, locate: locateGit)
         let manual = options.gitRepositories
+        let depth = options.gitAutoDiscover ? options.gitSearchDepth : 0
         load(.git) {
-            await collector.read(manual: manual)
+            await collector.read(manual: manual, discoveryDepth: depth)
         } apply: { store, value in
             store.git = value
             store.watchRepositories()
@@ -233,7 +234,10 @@ public final class DeveloperStore {
             ping = PingLog()
             lastRead[.ping] = nil
         }
-        if options.gitRepositories != old.gitRepositories {
+        if options.gitRepositories != old.gitRepositories
+            || options.gitAutoDiscover != old.gitAutoDiscover
+            || options.gitSearchDepth != old.gitSearchDepth
+        {
             lastRead[.git] = nil
         }
     }

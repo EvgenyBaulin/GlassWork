@@ -18,6 +18,8 @@ public struct PanelActions {
     /// Only checks. Asking macOS for access is left to the switch in Settings.
     public var isPasteAllowed: () -> Bool
     public var openFanCurves: () -> Void
+    /// The options a module has in Settings, for the panels that follow them.
+    public var moduleOptions: (ModuleID) -> [String: String]
 
     public init(
         openSettings: @escaping (ModuleID) -> Void = { _ in },
@@ -29,7 +31,8 @@ public struct PanelActions {
         updateSettings: @escaping ((inout AppSettings) -> Void) -> Void = { _ in },
         useClipboardEntry: @escaping (ClipboardEntry, Bool) -> Void = { _, _ in },
         isPasteAllowed: @escaping () -> Bool = { false },
-        openFanCurves: @escaping () -> Void = {}
+        openFanCurves: @escaping () -> Void = {},
+        moduleOptions: @escaping (ModuleID) -> [String: String] = { _ in [:] }
     ) {
         self.openSettings = openSettings
         self.detach = detach
@@ -41,6 +44,7 @@ public struct PanelActions {
         self.useClipboardEntry = useClipboardEntry
         self.isPasteAllowed = isPasteAllowed
         self.openFanCurves = openFanCurves
+        self.moduleOptions = moduleOptions
     }
 }
 

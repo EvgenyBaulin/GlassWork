@@ -42,7 +42,19 @@ public struct HubView: View {
     }
 
     private var modules: [ModuleSettings] {
-        available.filter { $0.mode != .off && matches($0.id) }
+        let showsBar = store.settings.hub.showsMenuBarModules
+        return available.filter { setting in
+            setting.mode != .off && (showsBar || setting.mode != .menuBar) && matches(setting.id)
+        }
+    }
+
+    private var columns: [GridItem] {
+        let count = switch store.settings.hub.tileSize {
+        case .small: 5
+        case .medium: 4
+        case .large: 3
+        }
+        return Array(repeating: GridItem(.flexible(), spacing: 10), count: count)
     }
 
     private var offModules: [ModuleSettings] {
@@ -108,8 +120,12 @@ public struct HubView: View {
                     if isEditing, isAddingModules {
                         addModules
                     }
-                    ForEach(ModuleGroup.allCases, id: \.self) { group in
-                        section(group, modules: visible.filter { $0.id.group == group })
+                    if store.settings.hub.isGrouped {
+                        ForEach(ModuleGroup.allCases, id: \.self) { group in
+                            section(group, modules: visible.filter { $0.id.group == group })
+                        }
+                    } else {
+                        tiles(visible)
                     }
                 }
                 .padding(16)
@@ -128,11 +144,15 @@ public struct HubView: View {
                 }
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.secondary)
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
-                    ForEach(Array(modules.enumerated()), id: \.element.id) { index, setting in
-                        tile(setting, index: index)
-                    }
-                }
+                tiles(modules)
+            }
+        }
+    }
+
+    private func tiles(_ modules: [ModuleSettings]) -> some View {
+        LazyVGrid(columns: columns, spacing: 10) {
+            ForEach(Array(modules.enumerated()), id: \.element.id) { index, setting in
+                tile(setting, index: index)
             }
         }
     }

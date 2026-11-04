@@ -38,10 +38,10 @@ public struct AgendaEvent: Codable, Sendable, Equatable, Identifiable {
 public enum EndsInUrgency: Sendable, Equatable {
     case normal, soon, lastMinute
 
-    public init(remaining: TimeInterval) {
+    public init(remaining: TimeInterval, warnAt: TimeInterval = 300) {
         switch remaining {
         case ...60: self = .lastMinute
-        case ...300: self = .soon
+        case ...warnAt: self = .soon
         default: self = .normal
         }
     }

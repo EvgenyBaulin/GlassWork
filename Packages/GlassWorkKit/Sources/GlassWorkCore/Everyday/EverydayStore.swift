@@ -8,6 +8,8 @@ import Observation
 public final class EverydayStore {
     public private(set) var data: EverydayData
     public private(set) var isKeepingAwake = false
+    /// Keeps the Mac running with the screen off. Applies from the next time Keep Awake is turned on.
+    @ObservationIgnored public var letsDisplaySleep = false
     /// Called when a timer reaches zero.
     @ObservationIgnored public var onTimerFinished: ((CountdownTimer) -> Void)?
 
@@ -54,8 +56,11 @@ public final class EverydayStore {
             IOPMAssertionRelease(assertion)
             isKeepingAwake = false
         } else {
+            let type = letsDisplaySleep
+                ? kIOPMAssertionTypePreventUserIdleSystemSleep
+                : kIOPMAssertionTypePreventUserIdleDisplaySleep
             let status = IOPMAssertionCreateWithName(
-                kIOPMAssertionTypePreventUserIdleDisplaySleep as CFString,
+                type as CFString,
                 IOPMAssertionLevel(kIOPMAssertionLevelOn),
                 "GlassWork Keep Awake" as CFString,
                 &assertion

@@ -195,6 +195,7 @@ struct ModulesPane: View {
                     Button(loc("Restore defaults")) { store.update { $0.modules = AppSettings.defaultModules } }
                 }
             }
+            HubOptionRows(store: store)
             Section(loc("Hiding")) {
                 Toggle(loc("Hide items behind a separator"), isOn: hidingEnabled)
                 Stepper(value: autoHide, in: 3 ... 60) {
@@ -282,6 +283,7 @@ struct ModulePane: View {
                 }
             }
             ModuleOptions(module: module, store: store)
+            ModuleOptionRows(module: module, store: store)
             if module == .sensors {
                 SensorsMenuBarSection(selection: sensor, sample: monitor.sensors)
             }

@@ -4,7 +4,11 @@ import SwiftUI
 struct TimersPanel: View {
     let monitor: SystemMonitor
     @State private var minutes = 10.0
-    private static let presets: [Double] = [1, 3, 5, 10, 15, 25, 30, 60]
+    @Environment(\.panelActions) private var actions
+
+    private var presets: [Int] {
+        TimerPresets.parse(actions.moduleOptions(.timers)[ItemOption.timerPresets])
+    }
 
     var body: some View {
         let store = monitor.everyday
@@ -18,9 +22,9 @@ struct TimersPanel: View {
             Divider()
             PanelSection(title: loc("Start a timer")) {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 6) {
-                    ForEach(Self.presets, id: \.self) { value in
-                        Button(loc("\(Int(value)) min")) {
-                            store.startTimer(title: loc("\(Int(value)) min"), duration: value * 60)
+                    ForEach(presets, id: \.self) { value in
+                        Button(loc("\(value) min")) {
+                            store.startTimer(title: loc("\(value) min"), duration: TimeInterval(value * 60))
                         }
                         .controlSize(.small)
                     }
@@ -82,17 +86,20 @@ struct TimersPanel: View {
 
 struct NotesPanel: View {
     let monitor: SystemMonitor
+    @Environment(\.panelActions) private var actions
 
     var body: some View {
         let store = monitor.everyday
+        let options = actions.moduleOptions(.notes)
+        let isMono = options.choice(ItemOption.notesFont, default: NotesFont.system) == .mono
         PanelFrame(module: .notes, subtitle: "") {
             TextEditor(text: Binding(
                 get: { store.data.note },
                 set: { value in store.update { $0.note = value } }
             ))
-            .font(.system(size: 13))
+            .font(.system(size: 13, design: isMono ? .monospaced : .default))
             .scrollContentBackground(.hidden)
-            .frame(height: 200)
+            .frame(height: options.choice(ItemOption.panelSize, default: PanelSize.medium).noteHeight)
         }
     }
 }
@@ -196,12 +203,13 @@ struct WorldClocksPanel: View {
 }
 
 struct DatePanel: View {
+    @Environment(\.panelActions) private var actions
+
     var body: some View {
         let now = Date()
-        let calendar = Calendar.current
         PanelFrame(
             module: .date,
-            subtitle: loc("Week \(calendar.component(.weekOfYear, from: now))")
+            subtitle: loc("Week \(DateItemText(options: actions.moduleOptions(.date)).week(of: now))")
         ) {
             Text(now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                 .font(.system(size: 18, weight: .semibold))
@@ -264,6 +272,11 @@ struct SunMoonPanel: View {
 
 struct ColoursPanel: View {
     let monitor: SystemMonitor
+    @Environment(\.panelActions) private var actions
+
+    private var options: [String: String] {
+        actions.moduleOptions(.colours)
+    }
 
     var body: some View {
         let store = monitor.everyday
@@ -290,7 +303,8 @@ struct ColoursPanel: View {
         NSColorSampler().show { color in
             guard let hex = color?.hexString else { return }
             MainActor.assumeIsolated {
-                store.update { $0.addColor(hex) }
+                let limit = options.number(ItemOption.colourLimit, default: EverydayData.colorLimit)
+                store.update { $0.addColor(hex, limit: limit) }
                 copy(hex)
             }
         }
@@ -298,7 +312,12 @@ struct ColoursPanel: View {
 
     private func copy(_ hex: String) {
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(hex, forType: .string)
+        let text = options.choice(ItemOption.colourFormat, default: ColourFormat.hex).text(
+            hex: hex,
+            isUppercase: options.flag(ItemOption.colourUppercase, default: true),
+            hasHash: options.flag(ItemOption.colourHash, default: true)
+        )
+        NSPasteboard.general.setString(text, forType: .string)
     }
 }
 

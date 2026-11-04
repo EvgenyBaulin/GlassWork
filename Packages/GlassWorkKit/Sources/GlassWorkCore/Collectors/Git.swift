@@ -185,13 +185,13 @@ public enum ProtectedFolders {
 public enum GitDiscovery {
     private static let skipped: Set<String> = ["build", "DerivedData", "dist", "node_modules", "target", "vendor"]
 
-    /// Repositories one or two levels below `root`.
-    public static func repositories(in root: String, limit: Int = 60) -> [String] {
+    /// Repositories up to `depth` levels below `root`, which is one or two.
+    public static func repositories(in root: String, depth: Int = 2, limit: Int = 60) -> [String] {
         var found: [String] = []
         for child in folders(in: root) {
             if isRepository(child) {
                 found.append(child)
-            } else {
+            } else if depth > 1 {
                 found += folders(in: child).filter(isRepository)
             }
         }
@@ -239,9 +239,12 @@ public struct GitCollector: Sendable {
         self.locate = locate
     }
 
-    public func read(manual: [String]) async -> GitReading {
+    /// A depth of zero looks nowhere, which leaves the repositories added by hand.
+    public func read(manual: [String], discoveryDepth: Int = 2) async -> GitReading {
         guard let git = locate() else { return .notInstalled }
-        let discovered = GitDiscovery.repositories(in: "\(home)/Developer")
+        let discovered = discoveryDepth > 0
+            ? GitDiscovery.repositories(in: "\(home)/Developer", depth: discoveryDepth)
+            : []
         var result: [GitRepository] = []
         for path in discovered where !manual.contains(path) {
             await result.append(repository(path, git: git, isManual: false))

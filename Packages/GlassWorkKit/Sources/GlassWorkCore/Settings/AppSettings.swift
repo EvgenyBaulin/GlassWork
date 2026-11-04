@@ -62,6 +62,23 @@ public struct HidingSettings: Codable, Sendable, Equatable {
     public init() {}
 }
 
+/// How the Hub lays out its tiles.
+public struct HubSettings: Codable, Sendable, Equatable {
+    public var isGrouped = true
+    public var tileSize = PanelSize.medium
+    public var showsMenuBarModules = true
+
+    public init() {}
+
+    /// Missing keys keep their defaults, so a hand edit of one key does not reset the others.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        isGrouped = try container.decodeIfPresent(Bool.self, forKey: .isGrouped) ?? true
+        tileSize = try container.decodeIfPresent(PanelSize.self, forKey: .tileSize) ?? .medium
+        showsMenuBarModules = try container.decodeIfPresent(Bool.self, forKey: .showsMenuBarModules) ?? true
+    }
+}
+
 /// Threshold notifications. macOS asks for permission when these are first turned on.
 public struct AlertSettings: Codable, Sendable, Equatable {
     public var isEnabled = false
@@ -85,6 +102,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var welcomeCompleted = false
     public var fans = FanSettings()
     public var windowTiles = WindowTilesSettings()
+    public var hub = HubSettings()
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
         self.modules = modules
@@ -123,7 +141,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
         case version, modules, numberStyle, hiding, alerts, widgets, dock, weather, rates, clipboard, welcomeCompleted
-        case fans, windowTiles
+        case fans, windowTiles, hub
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -145,6 +163,7 @@ extension AppSettings {
         fans = (try? container.decodeIfPresent(FanSettings.self, forKey: .fans)) ?? FanSettings()
         windowTiles = (try? container.decodeIfPresent(WindowTilesSettings.self, forKey: .windowTiles))
             ?? WindowTilesSettings()
+        hub = (try? container.decodeIfPresent(HubSettings.self, forKey: .hub)) ?? HubSettings()
         normalize()
     }
 

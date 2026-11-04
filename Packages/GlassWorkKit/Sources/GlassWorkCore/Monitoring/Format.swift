@@ -40,6 +40,18 @@ public enum Format {
         }
     }
 
+    /// The same speed in bits, the way network providers quote it.
+    public static func bitRate(_ bytesPerSecond: Double, style: NumberStyle = .compact) -> String {
+        let (scaled, unit) = scale(bytesPerSecond * 8)
+        let prefix = unit.dropLast()
+        switch style {
+        case .compact:
+            return "\(number(scaled))\(prefix)b/s"
+        case .precise:
+            return String(format: "%.1f %@bit/s", scaled, String(prefix))
+        }
+    }
+
     public static func temperature(_ celsius: Double) -> String {
         let measurement = Measurement(value: celsius, unit: UnitTemperature.celsius)
         return measurement.formatted(

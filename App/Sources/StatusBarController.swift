@@ -248,7 +248,13 @@ final class ModuleItem: NSObject {
 
     func update(style: DisplayStyle, numbers: NumberStyle, options: [String: String]) {
         // A setting can change what the longest text is, such as which pair Rates shows.
-        let newWidth = MenuBarItemView.width(module: module, style: style, numbers: numbers, monitor: model.monitor)
+        let newWidth = MenuBarItemView.width(
+            module: module,
+            style: style,
+            numbers: numbers,
+            options: options,
+            monitor: model.monitor
+        )
         let isSame = style == self.style && numbers == self.numbers && options == self.options
         guard !isSame || newWidth != width else { return }
         self.style = style
@@ -263,8 +269,8 @@ final class ModuleItem: NSObject {
     }
 
     func refresh() {
-        // The only item whose width follows its content: it changes with the track.
-        if module == .nowPlaying, width != currentWidth {
+        // These follow their content: Now Playing changes with the track, the others can hide themselves.
+        if module.canHideItself, width != currentWidth {
             render()
             return
         }

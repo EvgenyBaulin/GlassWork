@@ -101,7 +101,8 @@ final class AppModel {
             updateSettings: { [weak self] change in self?.store.update(change) },
             useClipboardEntry: { [weak self] entry, plain in self?.clipboard.use(entry, plainText: plain) },
             isPasteAllowed: { Accessibility.isTrusted },
-            openFanCurves: { [weak self] in self?.showFanCurves() }
+            openFanCurves: { [weak self] in self?.showFanCurves() },
+            moduleOptions: { [weak self] in self?.store.settings.module($0)?.options ?? [:] }
         )
     }
 
@@ -222,7 +223,16 @@ final class AppModel {
         dock.apply(store.settings.dock)
         windowTiles.apply(store.settings.windowTiles)
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
+        applyPolling()
         updateDemand()
+    }
+
+    private func applyPolling() {
+        let options = store.settings.module(.cpu)?.options ?? [:]
+        monitor.interval = TimeInterval(options.number(ItemOption.samplingSeconds, default: 2))
+        monitor.slowsOnBattery = options.flag(ItemOption.slowsOnBattery, default: true)
+        monitor.everyday.letsDisplaySleep = store.settings.module(.keepAwake)?.options
+            .flag(ItemOption.letsDisplaySleep, default: false) ?? false
     }
 
     /// Goes first: the width of a menu bar item depends on these settings.
@@ -253,7 +263,9 @@ final class AppModel {
         demand.memory = demand.memory || everything || showsApps || modes.contains(.memory)
             || modes.contains(.overview)
         demand.network = demand.network || everything || modes.contains(.network)
-        demand.disk = demand.disk || everything || modes.contains(.disk) || modes.contains(.eject)
+        let overviewShowsDisk = modes.contains(.overview)
+            && store.settings.module(.overview)?.options.flag(ItemOption.showsDisk, default: false) == true
+        demand.disk = demand.disk || everything || modes.contains(.disk) || modes.contains(.eject) || overviewShowsDisk
         demand.battery = true
         demand.gpu = demand.gpu || everything || modes.contains(.gpu)
         demand.sensors = demand.sensors || everything || isSettingsOpen || modes.contains(.sensors)

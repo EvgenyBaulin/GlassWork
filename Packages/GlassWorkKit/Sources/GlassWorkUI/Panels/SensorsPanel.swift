@@ -22,6 +22,12 @@ struct SensorsPanel: View {
     let monitor: SystemMonitor
     @State private var query = ""
     @State private var extremes: [String: ClosedRange<Double>] = [:]
+    @Environment(\.panelActions) private var actions
+
+    private var groups: [SensorGroup] {
+        let showsUnknown = actions.moduleOptions(.sensors).flag(ItemOption.showsUnknownSensors, default: true)
+        return SensorGroup.allCases.filter { showsUnknown || $0 != .other }
+    }
 
     var body: some View {
         let sample = monitor.sensors
@@ -31,7 +37,7 @@ struct SensorsPanel: View {
                 TextField(loc("Search sensors"), text: $query).textFieldStyle(.roundedBorder)
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 10) {
-                        ForEach(SensorGroup.allCases, id: \.self) { group in
+                        ForEach(groups, id: \.self) { group in
                             section(group, readings: filtered(sample, group))
                         }
                     }

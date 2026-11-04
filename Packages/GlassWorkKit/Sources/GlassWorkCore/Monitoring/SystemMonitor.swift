@@ -78,6 +78,8 @@ public final class SystemMonitor {
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
     public var slowInterval: TimeInterval = 30
+    /// Reads half as often on battery and a quarter as often in Low Power Mode.
+    public var slowsOnBattery = true
 
     /// Called after each read. Menu bar items redraw from here, without SwiftUI's update machinery.
     @ObservationIgnored public var onUpdate: (() -> Void)?
@@ -254,6 +256,7 @@ public final class SystemMonitor {
 
     /// Battery power halves the polling rate and Low Power Mode quarters it.
     private var effectiveInterval: TimeInterval {
+        guard slowsOnBattery else { return interval }
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
             return interval * 4
         }

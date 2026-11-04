@@ -88,24 +88,24 @@ public struct ItemContent {
         options: [String: String] = [:]
     ) -> ItemContent {
         switch module {
-        case .overview: overview(monitor)
-        case .cpu: percent(monitor.cpu?.total, metric: .cpu, style: style)
-        case .memory: percent(monitor.memory?.usedShare, metric: .memory, style: style)
+        case .overview: overview(monitor, options: options)
+        case .cpu: cpu(monitor, style: style, options: options)
+        case .memory: memory(monitor.memory, style: style, options: options)
         case .gpu: percent(monitor.gpus.first?.device, metric: .gpu, style: style)
-        case .disk: disk(monitor, style: style)
-        case .network: network(monitor, style: style)
-        case .battery: battery(monitor, style: style)
+        case .disk: disk(monitor, style: style, options: options)
+        case .network: network(monitor.network, style: style, options: options)
+        case .battery: battery(monitor.battery, style: style, options: options)
         case .sensors, .fans: thermal(module, monitor, options: options)
-        case .uptime: uptime()
-        case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon: everyday(module, monitor.everyday)
-        case .calendar, .endsIn, .todos: agenda(module, monitor.agenda)
-        case .deviceBatteries:
-            ItemContent(
-                figure: monitor.deviceBatteries.first.map { Format.percent($0.charge) } ?? "—",
-                template: "100%"
-            )
+        case .uptime: uptime(since: SystemClock.bootTime() ?? .now, options: options)
+        case .timers, .stopwatch, .countdown, .worldClocks, .date, .sunMoon:
+            everyday(module, monitor.everyday, options: options)
+        case .calendar: calendar(monitor.agenda.events, at: Date(), options: options)
+        case .endsIn: endsIn(monitor.agenda.events, at: Date(), options: options)
+        case .todos: todos(monitor.agenda, at: Date(), options: options)
+        case .deviceBatteries: deviceBatteries(monitor.deviceBatteries, options: options)
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
-        case _ where ModuleID.developerCollected.contains(module): developer(module, monitor.developer)
+        case _ where ModuleID.developerCollected.contains(module):
+            developer(module, monitor.developer, options: options)
         case .weather: weather(monitor.weather)
         case .rates: rates(monitor.rates)
         case .clipboard: clipboard(monitor.clipboard)
@@ -130,51 +130,6 @@ public struct ItemContent {
         self.template = template
     }
 
-    private static func percent(_ value: Double?, metric: Metric, style: NumberStyle) -> ItemContent {
-        ItemContent(
-            figure: value.map { Format.percent($0, style: style) } ?? "—",
-            metric: metric,
-            domain: 0 ... 1,
-            template: style == .compact ? "100%" : "100.0%"
-        )
-    }
-
-    private static func overview(_ monitor: SystemMonitor) -> ItemContent {
-        let cpu = Format.percent(monitor.cpu?.total ?? 0)
-        let memory = Format.percent(monitor.memory?.usedShare ?? 0)
-        return ItemContent(figure: "\(cpu) \(memory)", metric: .cpu, domain: 0 ... 1, template: "100% 100%")
-    }
-
-    private static func disk(_ monitor: SystemMonitor, style: NumberStyle) -> ItemContent {
-        let volume = monitor.volumes.first
-        let isLow = (volume?.freeShare ?? 1) < 0.1
-        return ItemContent(
-            figure: volume.map { Format.bytes(Double($0.free), style: style) } ?? "—",
-            metric: .diskRead,
-            alert: isLow ? Palette.orange : nil,
-            template: style == .compact ? "999G" : "999.9 GB"
-        )
-    }
-
-    private static func network(_ monitor: SystemMonitor, style: NumberStyle) -> ItemContent {
-        ItemContent(
-            figure: "↓ \(Format.rate(monitor.network?.download ?? 0, style: style))",
-            secondLine: "↑ \(Format.rate(monitor.network?.upload ?? 0, style: style))",
-            metric: .download,
-            template: style == .compact ? "↓ 999M/s" : "↓ 999.9 MB/s"
-        )
-    }
-
-    private static func battery(_ monitor: SystemMonitor, style: NumberStyle) -> ItemContent {
-        let battery = monitor.battery
-        let isLow = (battery?.charge ?? 1) <= 0.1 && battery?.isCharging == false
-        return ItemContent(
-            figure: battery.map { Format.percent($0.charge, style: style) } ?? "—",
-            alert: isLow ? Palette.red : nil,
-            template: "100%"
-        )
-    }
-
     private static func thermal(
         _ module: ModuleID,
         _ monitor: SystemMonitor,
@@ -190,7 +145,8 @@ public struct ItemContent {
             figure: "\(choice.menuPrefix) \(celsius.map(Format.temperature) ?? "—")",
             metric: .temperature,
             domain: 20 ... 110,
-            alert: (celsius ?? 0) >= 95 ? Palette.orange : nil,
+            alert: (celsius ?? 0) >= Double(options.number(ItemOption.warnAbove, default: 95))
+                ? Palette.orange : nil,
             template: "\(choice.menuPrefix) 100°"
         )
     }
@@ -216,12 +172,15 @@ public struct ItemContent {
         return content
     }
 
-    private static func everyday(_ module: ModuleID, _ store: EverydayStore) -> ItemContent {
+    private static func everyday(
+        _ module: ModuleID,
+        _ store: EverydayStore,
+        options: [String: String]
+    ) -> ItemContent {
         let now = Date()
         switch module {
         case .timers:
-            let next = store.data.timers.map { $0.remaining(at: now) }.min()
-            return ItemContent(figure: next?.clockText ?? "—", template: "88:88")
+            return timers(store.data.timers.map { $0.remaining(at: now) }.min(), options: options)
         case .stopwatch:
             return ItemContent(figure: store.data.stopwatch.elapsed(at: now).clockText, template: "88:88:88")
         case .countdown:
@@ -230,33 +189,13 @@ public struct ItemContent {
         case .worldClocks:
             return ItemContent(figure: firstCityTime(store), template: "88:88 PM")
         case .date:
-            return ItemContent(figure: now.formatted(.dateTime.weekday().day().month()), template: "Wed, 28 Sep")
+            let date = DateItemText(options: options)
+            let template = date.showsWeek ? "Wed, 28 Sep · W52" : "Wed, 28 Sep"
+            return ItemContent(figure: date.text(for: now), template: template)
         default:
             let times = Astronomy.sunTimes(on: now, latitude: 55.75, longitude: 37.62)
             let next = [times.sunrise, times.sunset].compactMap(\.self).first { $0 > now }
             return ItemContent(figure: next?.formatted(date: .omitted, time: .shortened) ?? "—", template: "88:88 PM")
-        }
-    }
-
-    private static func agenda(_ module: ModuleID, _ store: AgendaStore) -> ItemContent {
-        let now = Date()
-        switch module {
-        case .todos:
-            let count = TodoFilter.all.apply(to: store.todos, now: now).count
-            return ItemContent(figure: store.remindersAccess == .granted ? "\(count)" : "—", template: "888")
-        case .endsIn:
-            let state = EndsInState(events: store.events, at: now)
-            let remaining = state.current.first?.end.timeIntervalSince(now)
-            let urgency = remaining.map(EndsInUrgency.init(remaining:))
-            return ItemContent(
-                figure: remaining?.clockText ?? "—",
-                alert: urgency == .lastMinute ? Palette.red : urgency == .soon ? Palette.orange : nil,
-                template: "8:88:88"
-            )
-        default:
-            let next = EndsInState(events: store.events, at: now).next
-            let text = next.map { $0.title.count > 16 ? "\($0.title.prefix(15))…" : $0.title }
-            return ItemContent(figure: text ?? "—", template: "MMMMMMMMMMMM")
         }
     }
 
@@ -265,11 +204,6 @@ public struct ItemContent {
         var style = Date.FormatStyle(date: .omitted, time: .shortened)
         style.timeZone = TimeZone(identifier: city.timeZone) ?? .current
         return Date().formatted(style)
-    }
-
-    private static func uptime() -> ItemContent {
-        let boot = SystemClock.bootTime() ?? .now
-        return ItemContent(figure: CompactDuration.format(Date().timeIntervalSince(boot)), template: "99d 23h")
     }
 }
 
