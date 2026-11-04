@@ -77,7 +77,8 @@ private struct MainWindowContent: View {
             ScrollView {
                 ModulePanel(module: .clipboard, monitor: model.monitor).frame(maxWidth: .infinity)
             }
-        case .widgets: WidgetsPane(store: model.store, personal: model.monitor.personal)
+        case .widgets:
+            WidgetsPane(store: model.store, personal: model.monitor.personal, activity: model.monitor.activity)
         case .dock: DockPane(store: model.store)
         case .unlock:
             SectionPlaceholder(
@@ -87,7 +88,7 @@ private struct MainWindowContent: View {
                 title: loc("To be designed"),
                 detail: loc("Nothing here stores your password until the method and its risks are agreed.")
             )
-        case .windowTiles: WindowTilesPage(store: model.store, status: model.windowTiles.status)
+        case .windowTiles: WindowTilesPage(store: model.store, shortcuts: model.shortcuts)
         case .overview, .settings:
             SectionPlaceholder(route.section)
         }

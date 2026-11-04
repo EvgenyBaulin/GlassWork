@@ -88,10 +88,7 @@ struct DayDial<Content: View>: View {
 /// How the day is split between light and dark, now and across the year.
 struct DayAndNightWidget: View {
     let context: TimeContext
-
-    private var place: SunPlace {
-        SunPlace(context.snapshot)
-    }
+    let place: SunPlace
 
     private var now: Date {
         context.now

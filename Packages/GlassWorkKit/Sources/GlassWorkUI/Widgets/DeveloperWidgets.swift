@@ -19,7 +19,7 @@ struct CommandsWidget: View {
 
     private func row(_ command: UserCommand, result: CommandResult?) -> some View {
         HStack(spacing: 8) {
-            // Commands that ask first run from their panel, where the question can be shown.
+            // Commands that ask first run from Settings, where the question can be shown.
             if !command.asksFirst {
                 WidgetActionButton(action: .runCommand(command.id)) {
                     Image(systemName: "play.circle.fill")
@@ -91,12 +91,18 @@ struct ActionsWidget: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             WidgetHeader(title: loc("GitHub Actions"), symbol: "play.circle", tint: Palette.blue)
+            if snapshot.runs.isEmpty {
+                Text(loc("No recent runs")).font(.system(size: 13)).foregroundStyle(.secondary)
+            }
             ForEach(snapshot.runs.prefix(size == .small ? 2 : 6)) { run in
                 HStack(spacing: 6) {
                     Image(systemName: symbol(run.state)).foregroundStyle(tint(run.state))
                     VStack(alignment: .leading, spacing: 0) {
                         Text(run.name).font(.system(size: 13, weight: .medium)).lineLimit(1)
-                        Text(run.branch).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                        Text(verbatim: [run.repositoryName, run.branch].compactMap(\.self).joined(separator: " · "))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     }
                 }
             }

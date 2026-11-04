@@ -10,6 +10,7 @@ import WidgetKit
 @MainActor
 final class AppModel {
     let store = SettingsStore()
+    private let diagnostics = DiagnosticsReporter()
     let monitor = SystemMonitor(
         nowPlaying: NowPlayingBridge.makeStore(),
         personal: PersonalWidgetStore(library: SystemPhotoLibrary(), contacts: SystemBirthdays())
@@ -25,7 +26,7 @@ final class AppModel {
     private let quitter = QuitService(system: WorkspaceQuitSystem())
     private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private lazy var dock = DockController(model: self)
-    private lazy var clipboard = ClipboardController(model: self)
+    private(set) lazy var clipboard = ClipboardController(model: self)
     private lazy var textCapture = TextCaptureController(model: self)
     private(set) lazy var windowTiles = WindowTilesController(model: self)
     private lazy var location = LocationProvider(store: monitor.weather)
@@ -33,7 +34,7 @@ final class AppModel {
         store: monitor.nowPlaying,
         refreshSeconds: store.settings.widgets.refreshSeconds
     )
-    private let hotKey = HotKey()
+    let shortcuts = ShortcutCenter()
     private var hasOpenPanel = false
     private var isSettingsOpen = false
     private var visibleSection: MainSection?
@@ -46,8 +47,12 @@ final class AppModel {
     init() {
         observeSleep()
         observeFrontApp()
-        hotKey.onPress = { [weak self] in self?.toggleHub() }
-        hotKey.register()
+        // First, so nothing takes the default keys of a shortcut the user changed.
+        shortcuts.apply(store.settings.shortcuts)
+        shortcuts.onRefused = { [diagnostics] in diagnostics.record(.shortcutRefused(action: $0.id)) }
+        monitor.activity.onGitHubFailed = { [diagnostics] in diagnostics.record(.gitHubFailed(status: $0)) }
+        shortcuts.bind(.hub) { [weak self] in self?.toggleHub() }
+        shortcuts.setActive(.hub, true)
         _ = textCapture
         Task { await monitor.clipboard.load() }
         Task { await monitor.apps.load() }
@@ -104,7 +109,8 @@ final class AppModel {
             updateSettings: { [weak self] change in self?.store.update(change) },
             useClipboardEntry: { [weak self] entry, plain in self?.clipboard.use(entry, plainText: plain) },
             isPasteAllowed: { Accessibility.isTrusted },
-            openFanCurves: { [weak self] in self?.showFanCurves() }
+            openFanCurves: { [weak self] in self?.showFanCurves() },
+            moduleOptions: { [weak self] in self?.store.settings.module($0)?.options ?? [:] }
         )
     }
 
@@ -221,9 +227,11 @@ final class AppModel {
     private func applySettings() {
         withObservationTracking {
             _ = store.settings
+            _ = store.lastError
         } onChange: { [weak self] in
             Task { @MainActor in self?.applySettings() }
         }
+        shortcuts.apply(store.settings.shortcuts)
         applyInfoModules()
         statusBar.apply(store.settings)
         monitor.developer.options = DeveloperOptions(settings: store.settings)
@@ -231,6 +239,8 @@ final class AppModel {
         dock.apply(store.settings.dock)
         windowTiles.apply(store.settings.windowTiles)
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
+        applyPolling()
+        diagnostics.apply(keepsLog: store.settings.keepsDiagnosticLog, hasSettingsProblem: store.lastError != nil)
         updateDemand()
     }
 
@@ -264,7 +274,9 @@ final class AppModel {
         demand.memory = demand.memory || everything || showsApps || modes.contains(.memory)
             || modes.contains(.overview)
         demand.network = demand.network || everything || modes.contains(.network)
-        demand.disk = demand.disk || everything || modes.contains(.disk) || modes.contains(.eject)
+        let overviewShowsDisk = modes.contains(.overview)
+            && store.settings.module(.overview)?.options.flag(ItemOption.showsDisk, default: false) == true
+        demand.disk = demand.disk || everything || modes.contains(.disk) || modes.contains(.eject) || overviewShowsDisk
         demand.battery = true
         demand.gpu = demand.gpu || everything || modes.contains(.gpu)
         demand.sensors = demand.sensors || everything || isSettingsOpen || modes.contains(.sensors)
@@ -311,97 +323,6 @@ final class AppModel {
         statusBar.owns(window)
     }
 
-    /// Screen time counts only after the user turns it on.
-    private func observeFrontApp() {
-        NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didActivateApplicationNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] note in
-            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
-            let name = app?.localizedName
-            let bundle = app?.bundleURL
-            MainActor.assumeIsolated {
-                guard let self, self.store.settings.widgets.tracksScreenTime else { return }
-                self.monitor.activity.appBecameActive(name, category: Self.category(of: bundle))
-            }
-        }
-        observeLock()
-    }
-
-    /// An app run from Downloads or Documents stays uncategorized: opening its bundle would ask for permission.
-    private static func category(of bundle: URL?) -> AppCategory {
-        guard let bundle, !ProtectedFolders.contains(bundle.path(percentEncoded: false), home: NSHomeDirectory())
-        else { return .other }
-        let declared = Bundle(url: bundle)?.object(forInfoDictionaryKey: "LSApplicationCategoryType") as? String
-        return AppCategory(appStoreCategory: declared)
-    }
-
-    /// Locking keeps the display on for a while, so sleep alone would miss most breaks.
-    private func observeLock() {
-        let center = DistributedNotificationCenter.default()
-        let locked = Notification.Name("com.apple.screenIsLocked")
-        let unlocked = Notification.Name("com.apple.screenIsUnlocked")
-        center.addObserver(forName: locked, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.screenAway(true) }
-        }
-        center.addObserver(forName: unlocked, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.screenAway(false) }
-        }
-    }
-
-    private func screenAway(_ isAway: Bool) {
-        guard store.settings.widgets.tracksScreenTime else { return }
-        if isAway {
-            monitor.activity.screenWentAway()
-        } else {
-            monitor.activity.screenCameBack()
-        }
-    }
-
-    /// Nothing is read while the Mac sleeps, the screen is off or locked, or another user is active.
-    private func observeSleep() {
-        let center = NSWorkspace.shared.notificationCenter
-        let pause: [Notification.Name] = [
-            NSWorkspace.willSleepNotification,
-            NSWorkspace.screensDidSleepNotification,
-            NSWorkspace.sessionDidResignActiveNotification,
-        ]
-        let resume: [Notification.Name] = [
-            NSWorkspace.didWakeNotification,
-            NSWorkspace.screensDidWakeNotification,
-            NSWorkspace.sessionDidBecomeActiveNotification,
-        ]
-        // The fan loop keeps running through a locked screen, so only real sleep ends it.
-        center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated {
-                guard let self else { return }
-                Task { await self.fans.willSleep() }
-            }
-        }
-        center.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.fans.didWake() }
-        }
-        for name in pause {
-            center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated {
-                    self?.monitor.stop()
-                    self?.clipboard.setPaused(true)
-                    self?.screenAway(true)
-                }
-            }
-        }
-        for name in resume {
-            center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated {
-                    self?.monitor.start()
-                    self?.clipboard.setPaused(false)
-                    self?.screenAway(false)
-                }
-            }
-        }
-    }
-
     private func writeHeartbeat() {
         checkSystemWidgets()
         Task {
@@ -411,7 +332,10 @@ final class AppModel {
                 await monitor.activity.check(store.settings.widgets.endpoints)
             }
             if !kinds.isDisjoint(with: WidgetKind.githubKinds) {
-                await monitor.activity.refreshGitHub(includesDigest: kinds.contains(.github))
+                await monitor.activity.refreshGitHub(
+                    includesDigest: kinds.contains(.github),
+                    includesRuns: kinds.contains(.githubActions)
+                )
             }
             await monitor.personal.refresh(store.settings.personalWidgets, for: kinds)
             if store.settings.widgets.tracksScreenTime, !kinds.isDisjoint(with: WidgetKind.screenTimeKinds) {
@@ -554,6 +478,15 @@ extension AppModel {
 }
 
 private extension AppModel {
+    func applyPolling() {
+        let options = store.settings.module(.cpu)?.options ?? [:]
+        monitor.interval = TimeInterval(options.number(ItemOption.samplingSeconds, default: 2))
+        monitor.slowsOnBattery = options.flag(ItemOption.slowsOnBattery, default: true)
+        monitor.everyday.letsDisplaySleep = store.settings.module(.keepAwake)?.options
+            .flag(ItemOption.letsDisplaySleep, default: false) ?? false
+        monitor.sunPlaceID = store.settings.module(.sunMoon)?.options[ItemOption.sunPlace].flatMap { Int($0) }
+    }
+
     func checkAlerts() {
         let settings = store.settings.alerts
         guard settings.isEnabled else { return }

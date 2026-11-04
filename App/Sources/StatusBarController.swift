@@ -10,6 +10,7 @@ final class StatusBarController: NSObject {
     private let hub = makeItem(hubName, length: NSStatusItem.squareLength, position: hubPosition)
     private let separator = makeItem(separatorName, length: NSStatusItem.variableLength, position: separatorPosition)
     private var items: [ModuleID: ModuleItem] = [:]
+    private var barOrder: [ModuleID] = []
     private var collapsed = false
     private var hideTask: Task<Void, Never>?
     private var hiding = HidingSettings()
@@ -52,9 +53,21 @@ final class StatusBarController: NSObject {
         for id in items.keys where !wanted.contains(where: { $0.id == id }) {
             items.removeValue(forKey: id)?.remove()
         }
+        let order = wanted.map(\.id)
+        let isReordered = AppSettings.isReordered(from: barOrder, to: order)
+        barOrder = order
+        if isReordered {
+            // macOS reads a saved position only when an item is created.
+            items.values.forEach { $0.remove() }
+            items = [:]
+        }
         // Position is measured from the right edge, so the last module in settings goes closest to it.
         for (index, setting) in wanted.reversed().enumerated() {
-            Self.suggestPosition(for: setting.id, slot: index)
+            if isReordered {
+                Self.setPosition(for: setting.id, slot: index)
+            } else {
+                Self.suggestPosition(for: setting.id, slot: index)
+            }
             if let item = items[setting.id] {
                 item.update(style: setting.style, numbers: settings.numberStyle, options: setting.options)
             } else {
@@ -91,6 +104,12 @@ final class StatusBarController: NSObject {
 
     private static func suggestPosition(for module: ModuleID, slot: Int) {
         seedPosition("GlassWork-\(module.rawValue)", firstSlot + CGFloat(slot) * slotWidth)
+    }
+
+    /// A new order from Settings wins over where the item was ⌘-dragged to.
+    private static func setPosition(for module: ModuleID, slot: Int) {
+        let key = "NSStatusItem Preferred Position GlassWork-\(module.rawValue)"
+        UserDefaults.standard.set(firstSlot + CGFloat(slot) * slotWidth, forKey: key)
     }
 
     private static let firstSlot: CGFloat = 400
@@ -229,7 +248,13 @@ final class ModuleItem: NSObject {
 
     func update(style: DisplayStyle, numbers: NumberStyle, options: [String: String]) {
         // A setting can change what the longest text is, such as which pair Rates shows.
-        let newWidth = MenuBarItemView.width(module: module, style: style, numbers: numbers, monitor: model.monitor)
+        let newWidth = MenuBarItemView.width(
+            module: module,
+            style: style,
+            numbers: numbers,
+            options: options,
+            monitor: model.monitor
+        )
         let isSame = style == self.style && numbers == self.numbers && options == self.options
         guard !isSame || newWidth != width else { return }
         self.style = style
@@ -244,8 +269,8 @@ final class ModuleItem: NSObject {
     }
 
     func refresh() {
-        // The only item whose width follows its content: it changes with the track.
-        if module == .nowPlaying, width != currentWidth {
+        // These follow their content: Now Playing changes with the track, the others can hide themselves.
+        if module.canHideItself, width != currentWidth {
             render()
             return
         }

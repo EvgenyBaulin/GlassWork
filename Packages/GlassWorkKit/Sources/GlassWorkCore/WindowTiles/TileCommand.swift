@@ -10,7 +10,8 @@ public enum TileCommand: Hashable, Sendable {
         TileLayout.allCases.map(TileCommand.place) + [.previousDisplay, .nextDisplay]
     }
 
-    public var shortcut: GlobalShortcut {
+    /// Before the user changes it. `ShortcutSettings` knows the one in use.
+    public var defaultShortcut: GlobalShortcut {
         switch self {
         case let .place(layout): GlobalShortcut([.control, .option], layout.key)
         case .previousDisplay: GlobalShortcut([.control, .option, .command], .leftArrow)

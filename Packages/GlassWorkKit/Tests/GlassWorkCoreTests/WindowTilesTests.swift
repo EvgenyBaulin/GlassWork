@@ -508,7 +508,7 @@ struct TileSettlingTests {
 
 struct GlobalShortcutTests {
     @Test func labelsMatchTheDesign() {
-        let labels = TileCommand.all.map(\.shortcut.label)
+        let labels = TileCommand.all.map(\.defaultShortcut.label)
         #expect(labels == [
             "⌃⌥←", "⌃⌥→", "⌃⌥↑", "⌃⌥↓",
             "⌃⌥↩", "⌃⌥C", "⌃⌥D", "⌃⌥G",
@@ -522,13 +522,13 @@ struct GlobalShortcutTests {
     }
 
     @Test func everyTileShortcutIsDifferent() {
-        let shortcuts = TileCommand.all.map(\.shortcut)
+        let shortcuts = TileCommand.all.map(\.defaultShortcut)
         #expect(Set(shortcuts).count == shortcuts.count)
     }
 
     @Test func noTileShortcutTakesOneFromAnotherFeature() {
         let taken = Set(GlobalShortcut.reserved)
-        #expect(taken.isDisjoint(with: TileCommand.all.map(\.shortcut)))
+        #expect(taken.isDisjoint(with: TileCommand.all.map(\.defaultShortcut)))
     }
 
     @Test func reservedShortcutsAreDifferentToo() {

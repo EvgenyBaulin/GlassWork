@@ -1,6 +1,7 @@
+import GlassWorkCore
 import SwiftUI
 
-/// What ⇧⌘2 has to say when it is done.
+/// What text capture has to say when it is done.
 public enum TextCaptureNotice: Equatable, Sendable {
     case copied(characters: Int)
     case noText
@@ -27,11 +28,17 @@ public enum TextCaptureNotice: Equatable, Sendable {
         }
     }
 
-    var detail: String? {
+    func detail(shortcut: String?) -> String? {
         guard self == .needsScreenRecording else { return nil }
+        guard let shortcut else {
+            return loc("""
+            Add GlassWork in System Settings → Privacy & Security → Screen & System Audio Recording, \
+            then try again.
+            """)
+        }
         return loc("""
         Add GlassWork in System Settings → Privacy & Security → Screen & System Audio Recording, \
-        then press ⇧⌘2 again.
+        then press \(shortcut) again.
         """)
     }
 }
@@ -39,13 +46,16 @@ public enum TextCaptureNotice: Equatable, Sendable {
 /// The small message that appears after a text capture.
 public struct TextCaptureHUD: View {
     private let notice: TextCaptureNotice
+    private let shortcut: String?
 
-    public init(notice: TextCaptureNotice) {
+    /// - Parameter shortcut: The label of the shortcut in use, if it has not been cleared.
+    public init(notice: TextCaptureNotice, shortcut: String? = ShortcutAction.textCapture.defaultShortcut.label) {
         self.notice = notice
+        self.shortcut = shortcut
     }
 
     public var body: some View {
-        NoticeHUD(symbol: notice.symbol, title: notice.title, detail: notice.detail)
+        NoticeHUD(symbol: notice.symbol, title: notice.title, detail: notice.detail(shortcut: shortcut))
     }
 }
 

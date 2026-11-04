@@ -174,7 +174,12 @@ public struct WidgetFace: View {
             case .countdown: CountdownWidget(snapshot: snapshot, now: now)
             case .yearInDots: YearInDotsWidget(now: now)
             case .moon: MoonWidget(now: now)
-            case .daylight: DaylightWidget(now: now)
+            case .daylight:
+                if let place = SunPlace(snapshot) {
+                    DaylightWidget(now: now, place: place)
+                } else {
+                    NoCityMessage()
+                }
             case .storage: StorageWidget(size: size, snapshot: snapshot)
             case .temperature: TemperatureWidget(size: size, snapshot: snapshot)
             case .topApps: TopAppsWidget(size: size, snapshot: snapshot)

@@ -12169,6 +12169,1598 @@
         }
       }
     },
+    "In menu bar, Hub only or Off. Click a module in the sidebar for its options; drag to reorder.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В строке меню, только в Хабе или выключен. Нажмите на модуль в боковом меню, чтобы открыть его настройки. Порядок меняется перетаскиванием."
+          }
+        }
+      }
+    },
+    "All off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключить все"
+          }
+        }
+      }
+    },
+    "Reset order": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить порядок"
+          }
+        }
+      }
+    },
+    "Editing · drag ⋮⋮ to reorder · (−) turns a module off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Правка · ⋮⋮ меняет порядок · (−) выключает модуль"
+          }
+        }
+      }
+    },
+    "opens the Hub from anywhere · click the GlassWork icon also works": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "открывает Хаб откуда угодно · значок GlassWork тоже подойдёт"
+          }
+        }
+      }
+    },
+    "%lld off · + Add modules…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключено: %lld · + Добавить модули…"
+          }
+        }
+      }
+    },
+    "Every module is on.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все модули включены."
+          }
+        }
+      }
+    },
+    "Turn off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключить"
+          }
+        }
+      }
+    },
+    "Show CPU": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать процессор"
+          }
+        }
+      }
+    },
+    "Show memory": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать память"
+          }
+        }
+      }
+    },
+    "Show disk": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать диск"
+          }
+        }
+      }
+    },
+    "Split user / system": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разделять польз. и систему"
+          }
+        }
+      }
+    },
+    "Top apps in panel": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложений в панели"
+          }
+        }
+      }
+    },
+    "Sampling interval": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Частота опроса"
+          }
+        }
+      }
+    },
+    "On battery: poll 2× slower (Low Power 4×)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На батарее опрашивать в 2 раза реже (режим энергосбережения — в 4)"
+          }
+        }
+      }
+    },
+    "Highlight above": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выделять выше"
+          }
+        }
+      }
+    },
+    "Show as": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать как"
+          }
+        }
+      }
+    },
+    "Show swap in panel": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать своп в панели"
+          }
+        }
+      }
+    },
+    "Colour by pressure": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цвет по давлению памяти"
+          }
+        }
+      }
+    },
+    "Show": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать"
+          }
+        }
+      }
+    },
+    "Units": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Единицы"
+          }
+        }
+      }
+    },
+    "Direction": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Направление"
+          }
+        }
+      }
+    },
+    "Hide below": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрывать ниже"
+          }
+        }
+      }
+    },
+    "Hide when fully charged": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрывать при полном заряде"
+          }
+        }
+      }
+    },
+    "Warn above": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предупреждать выше"
+          }
+        }
+      }
+    },
+    "Include unknown sensors (Other)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать неизвестные датчики (Прочие)"
+          }
+        }
+      }
+    },
+    "Format": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Формат"
+          }
+        }
+      }
+    },
+    "Show events starting within": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "События в ближайшие"
+          }
+        }
+      }
+    },
+    "Skip all-day events": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пропускать события на весь день"
+          }
+        }
+      }
+    },
+    "Title length": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Длина названия"
+          }
+        }
+      }
+    },
+    "Include all-day events": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Учитывать события на весь день"
+          }
+        }
+      }
+    },
+    "Warn at": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предупреждать за"
+          }
+        }
+      }
+    },
+    "Show “Free” when no event is on": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать «Свободно»"
+          }
+        }
+      }
+    },
+    "Show seconds": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать секунды"
+          }
+        }
+      }
+    },
+    "Preset lengths, in minutes": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Длительности, в минутах"
+          }
+        }
+      }
+    },
+    "Let the display sleep": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить экрану засыпать"
+          }
+        }
+      }
+    },
+    "Panel size": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размер панели"
+          }
+        }
+      }
+    },
+    "Font": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шрифт"
+          }
+        }
+      }
+    },
+    "Hide when all are done": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрывать, когда всё сделано"
+          }
+        }
+      }
+    },
+    "Copy as": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копировать как"
+          }
+        }
+      }
+    },
+    "Uppercase": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заглавные буквы"
+          }
+        }
+      }
+    },
+    "Include #": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавлять #"
+          }
+        }
+      }
+    },
+    "Remember": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запоминать"
+          }
+        }
+      }
+    },
+    "Warn below": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предупреждать ниже"
+          }
+        }
+      }
+    },
+    "Custom format": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свой формат"
+          }
+        }
+      }
+    },
+    "Show week number": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать номер недели"
+          }
+        }
+      }
+    },
+    "Week numbering": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нумерация недель"
+          }
+        }
+      }
+    },
+    "Auto-discover in ~/Developer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Искать в ~/Developer сами"
+          }
+        }
+      }
+    },
+    "Search depth": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Глубина поиска"
+          }
+        }
+      }
+    },
+    "Count": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считать"
+          }
+        }
+      }
+    },
+    "Show only when connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать только при подключении"
+          }
+        }
+      }
+    },
+    "Green when connected": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зелёный при подключении"
+          }
+        }
+      }
+    },
+    "Weak signal below": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слабый сигнал ниже"
+          }
+        }
+      }
+    },
+    "Grouping": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Группировка"
+          }
+        }
+      }
+    },
+    "Tile size": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размер плиток"
+          }
+        }
+      }
+    },
+    "Also show modules that are in the menu bar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать и модули из строки меню"
+          }
+        }
+      }
+    },
+    "Numbers in menu bar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Числа в строке меню"
+          }
+        }
+      }
+    },
+    "Low battery warning": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предупреждение о низком заряде"
+          }
+        }
+      }
+    },
+    "Notify at": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомлять при"
+          }
+        }
+      }
+    },
+    "Options": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Параметры"
+          }
+        }
+      }
+    },
+    "Advanced": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дополнительно"
+          }
+        }
+      }
+    },
+    "%lld rarely needed options": {
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld редкая настройка"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld редкие настройки"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld редких настроек"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld редких настроек"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Free": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свободно"
+          }
+        }
+      }
+    },
+    "1 s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 с"
+          }
+        }
+      }
+    },
+    "2 s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 с"
+          }
+        }
+      }
+    },
+    "5 s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 с"
+          }
+        }
+      }
+    },
+    "Share": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доля"
+          }
+        }
+      }
+    },
+    "GB": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ГБ"
+          }
+        }
+      }
+    },
+    "Pressure": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Давление"
+          }
+        }
+      }
+    },
+    "Free space": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свободное место"
+          }
+        }
+      }
+    },
+    "Read / write": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтение и запись"
+          }
+        }
+      }
+    },
+    "Both": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оба"
+          }
+        }
+      }
+    },
+    "Bytes/s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Байт/с"
+          }
+        }
+      }
+    },
+    "Bits/s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бит/с"
+          }
+        }
+      }
+    },
+    "Up": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отдача"
+          }
+        }
+      }
+    },
+    "Never": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Никогда"
+          }
+        }
+      }
+    },
+    "10 KB/s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 КБ/с"
+          }
+        }
+      }
+    },
+    "100 KB/s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "100 КБ/с"
+          }
+        }
+      }
+    },
+    "1 MB/s": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 МБ/с"
+          }
+        }
+      }
+    },
+    "Charge": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заряд"
+          }
+        }
+      }
+    },
+    "Time left": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Время работы"
+          }
+        }
+      }
+    },
+    "3d 4h": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3д 4ч"
+          }
+        }
+      }
+    },
+    "3 days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 дня"
+          }
+        }
+      }
+    },
+    "4 hours": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4 часа"
+          }
+        }
+      }
+    },
+    "8 hours": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 часов"
+          }
+        }
+      }
+    },
+    "24 hours": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "24 часа"
+          }
+        }
+      }
+    },
+    "Any time": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Любое время"
+          }
+        }
+      }
+    },
+    "Small": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Маленький"
+          }
+        }
+      }
+    },
+    "Large": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Большой"
+          }
+        }
+      }
+    },
+    "Mono": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Моноширинный"
+          }
+        }
+      }
+    },
+    "Weekday, day, month": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День недели, число, месяц"
+          }
+        }
+      }
+    },
+    "Day, month": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Число, месяц"
+          }
+        }
+      }
+    },
+    "1 level": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 уровень"
+          }
+        }
+      }
+    },
+    "2 levels": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 уровня"
+          }
+        }
+      }
+    },
+    "By category": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По категориям"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без групп"
+          }
+        }
+      }
+    },
+    "Exact": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Точно"
+          }
+        }
+      }
+    },
+    "ms": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "мс"
+          }
+        }
+      }
+    },
+    "%lld results · EN + RU keywords": {
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld результат · по-русски и по-английски"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld результата · по-русски и по-английски"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld результатов · по-русски и по-английски"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld результата · по-русски и по-английски"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Nothing found": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ничего не найдено"
+          }
+        }
+      }
+    },
+    "↩ opens the first result": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↩ открывает первый результат"
+          }
+        }
+      }
+    },
+    "Diagnostics": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Диагностика"
+          }
+        }
+      }
+    },
+    "Keep diagnostic log": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вести журнал диагностики"
+          }
+        }
+      }
+    },
+    "Off by default. Local file only; nothing is sent unless you click Send.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По умолчанию выключен. Хранится только на этом Mac, ничего не отправляется, пока вы сами не нажмёте «Отправить»."
+          }
+        }
+      }
+    },
+    "Reveal log": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать журнал"
+          }
+        }
+      }
+    },
+    "Send to developer…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправить разработчику…"
+          }
+        }
+      }
+    },
+    "Turning this off deletes the log.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если выключить, журнал удалится."
+          }
+        }
+      }
+    },
+    "keeps %lld days": {
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "хранится %lld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "хранится %lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "хранится %lld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "хранится %lld дня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "GlassWork diagnostic log": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Журнал диагностики GlassWork"
+          }
+        }
+      }
+    },
+    "Clipboard history": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История буфера обмена"
+          }
+        }
+      }
+    },
+    "In the app": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В приложении"
+          }
+        }
+      }
+    },
+    "Press the new keys. They need ⌃, ⌥ or ⌘. Esc keeps %@.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите новое сочетание. Нужна клавиша ⌃, ⌥ или ⌘. Esc оставит %@."
+          }
+        }
+      }
+    },
+    "Click a field to record. ⌫ clears it, Esc cancels.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите на поле и введите сочетание. ⌫ очищает, Esc отменяет."
+          }
+        }
+      }
+    },
+    "Type shortcut…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите сочетание…"
+          }
+        }
+      }
+    },
+    "Record Shortcut": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Записать сочетание"
+          }
+        }
+      }
+    },
+    "%@ would stop that key from typing. Add ⌃, ⌥ or ⌘.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ перестанет печатать этот символ. Добавьте ⌃, ⌥ или ⌘."
+          }
+        }
+      }
+    },
+    "%1$@ is already %2$@. Replace it?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ уже занято: %2$@. Заменить?"
+          }
+        }
+      }
+    },
+    "%1$@ is used by %2$@ (macOS). It would stop working there.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ занято в macOS: %2$@. Там оно перестанет работать."
+          }
+        }
+      }
+    },
+    "Replace": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заменить"
+          }
+        }
+      }
+    },
+    "Use Anyway": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё равно использовать"
+          }
+        }
+      }
+    },
+    "Add GlassWork in System Settings → Privacy & Security → Screen & System Audio Recording, then press %@ again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте GlassWork в Системных настройках → Конфиденциальность и безопасность → Запись экрана и системного аудио, затем снова нажмите %@."
+          }
+        }
+      }
+    },
+    "Add GlassWork in System Settings → Privacy & Security → Screen & System Audio Recording, then try again.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте GlassWork в Системных настройках → Конфиденциальность и безопасность → Запись экрана и системного аудио и попробуйте снова."
+          }
+        }
+      }
+    },
+    "Spotlight": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spotlight"
+          }
+        }
+      }
+    },
+    "App Switcher": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переключение приложений"
+          }
+        }
+      }
+    },
+    "Next window": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующее окно"
+          }
+        }
+      }
+    },
+    "Minimize": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сворачивание окна"
+          }
+        }
+      }
+    },
+    "Close window": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрытие окна"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копирование"
+          }
+        }
+      }
+    },
+    "Cut": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вырезание"
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отмена"
+          }
+        }
+      }
+    },
+    "Input source": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Смена раскладки"
+          }
+        }
+      }
+    },
+    "Mission Control": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mission Control"
+          }
+        }
+      }
+    },
+    "App windows": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Окна приложения"
+          }
+        }
+      }
+    },
+    "Previous Space": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предыдущий рабочий стол"
+          }
+        }
+      }
+    },
+    "Next Space": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующий рабочий стол"
+          }
+        }
+      }
+    },
+    "Lock Screen": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Блокировка экрана"
+          }
+        }
+      }
+    },
+    "Screenshot": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Снимок экрана"
+          }
+        }
+      }
+    },
+    "No city yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Города пока нет"
+          }
+        }
+      }
+    },
+    "Add a city in Weather to see sunrise and sunset.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте город в модуле «Погода», и здесь появятся восход и закат."
+          }
+        }
+      }
+    },
+    "Add a city in Weather": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте город в модуле «Погода»"
+          }
+        }
+      }
+    },
+    "Weather Settings…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки погоды…"
+          }
+        }
+      }
+    },
+    "Location": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Место"
+          }
+        }
+      }
+    },
+    "Next sunrise or sunset": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ближайший восход или закат"
+          }
+        }
+      }
+    },
+    "Run “%@”?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустить «%@»?"
+          }
+        }
+      }
+    },
+    "Run": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запустить"
+          }
+        }
+      }
+    },
+    "Untitled": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без названия"
+          }
+        }
+      }
+    },
+    "New command": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новая команда"
+          }
+        }
+      }
+    },
+    "Working directory": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рабочая папка"
+          }
+        }
+      }
+    },
+    "Choose…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать…"
+          }
+        }
+      }
+    },
+    "Timeout": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тайм-аут"
+          }
+        }
+      }
+    },
+    "Ask before running": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спрашивать перед запуском"
+          }
+        }
+      }
+    },
+    "No recent runs": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запусков пока нет"
+          }
+        }
+      }
+    },
     "Day %lld": {
       "localizations": {
         "ru": {
@@ -12729,16 +14321,6 @@
         }
       }
     },
-    "Choose…": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Выбрать…"
-          }
-        }
-      }
-    },
     "The folder cannot be read": {
       "localizations": {
         "ru": {
@@ -13181,6 +14763,90 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac холодный, поэтому пока вентиляторами управляет macOS."
+          }
+        }
+      }
+    },
+    "Down (speed)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузка"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Down"
+          }
+        }
+      }
+    },
+    "Up (speed)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отдача"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up"
+          }
+        }
+      }
+    },
+    "Medium (size)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Средний"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "Running (containers)": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запущенные"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running"
+          }
+        }
+      }
+    },
+    "Quit the app": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завершение приложения"
+          }
+        }
+      }
+    },
+    "Hide the app": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрытие приложения"
           }
         }
       }
@@ -13711,16 +15377,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Учёба"
-          }
-        }
-      }
-    },
-    "Options": {
-      "localizations": {
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Параметры"
           }
         }
       }

@@ -32,7 +32,7 @@ public struct ModulePanel: View {
         case .countdown: CountdownPanel(monitor: monitor)
         case .worldClocks: WorldClocksPanel(monitor: monitor)
         case .date: DatePanel()
-        case .sunMoon: SunMoonPanel()
+        case .sunMoon: SunMoonPanel(monitor: monitor)
         case .colours: ColoursPanel(monitor: monitor)
         case .eject: EjectPanel(monitor: monitor)
         case _ where ModuleID.developerCollected.contains(module):
@@ -59,7 +59,7 @@ struct CPUPanel: View {
             footerAction: { actions.openApp("com.apple.ActivityMonitor") }
         ) {
             BigFigure(text: Format.percent(monitor.cpu?.total ?? 0))
-            if let cpu = monitor.cpu {
+            if let cpu = monitor.cpu, options.flag(ItemOption.splitsUserSystem, default: true) {
                 Text(
                     loc(
                         "User \(Format.percent(cpu.user)) · System \(Format.percent(cpu.system)) · Idle \(Format.percent(cpu.idle))"
@@ -90,7 +90,7 @@ struct CPUPanel: View {
             }
             Divider()
             PanelSection(title: loc("Using the most")) {
-                TopApps(apps: monitor.apps.apps, sort: .cpu, limit: 4)
+                TopApps(apps: monitor.apps.apps, sort: .cpu, limit: options.number(ItemOption.topApps, default: 4))
             }
             if monitor.loadAverage.count == 3 {
                 Text(
@@ -106,6 +106,10 @@ struct CPUPanel: View {
 
     private var subtitle: String {
         loc("\(monitor.cpuInfo.brand) · \(monitor.cpu?.cores.count ?? 0) cores")
+    }
+
+    private var options: [String: String] {
+        actions.moduleOptions(.cpu)
     }
 }
 
@@ -225,12 +229,14 @@ struct MemoryPanel: View {
                 GridRow { legend(parts[0]); legend(parts[1]) }
                 GridRow { legend(parts[2]); legend(parts[3]) }
             }
-            InfoRow(
-                title: loc("Swap used"),
-                value: loc(
-                    "\(Format.bytes(Double(memory.swapUsed), style: .precise)) of \(Format.bytes(Double(memory.swapTotal), style: .precise))"
+            if actions.moduleOptions(.memory).flag(ItemOption.showsSwap, default: true) {
+                InfoRow(
+                    title: loc("Swap used"),
+                    value: loc(
+                        "\(Format.bytes(Double(memory.swapUsed), style: .precise)) of \(Format.bytes(Double(memory.swapTotal), style: .precise))"
+                    )
                 )
-            )
+            }
         }
     }
 

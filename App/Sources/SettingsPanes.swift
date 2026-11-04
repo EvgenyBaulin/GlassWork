@@ -5,10 +5,9 @@ import SwiftUI
 struct WidgetsPane: View {
     let store: SettingsStore
     let personal: PersonalWidgetStore
+    let activity: ActivityStore
     @State private var kind = WidgetKind.activity
     @State private var size = WidgetSize.medium
-    @State private var commandName = ""
-    @State private var commandText = ""
     @State private var endpointText = ""
 
     var body: some View {
@@ -51,22 +50,7 @@ struct WidgetsPane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Section(loc("Commands")) {
-                ForEach(store.settings.widgets.commands) { command in
-                    LabeledContent(command.name, value: command.command)
-                }
-                HStack {
-                    TextField(loc("Name"), text: $commandName)
-                    TextField(loc("Command"), text: $commandText)
-                    Button(loc("Add")) {
-                        guard !commandName.isEmpty, !commandText.isEmpty else { return }
-                        let command = UserCommand(name: commandName, command: commandText)
-                        store.update { $0.widgets.commands.append(command) }
-                        commandName = ""
-                        commandText = ""
-                    }
-                }
-            }
+            CommandsSection(store: store, activity: activity)
             Section(loc("Endpoints")) {
                 ForEach(store.settings.widgets.endpoints) { endpoint in
                     Text(endpoint.url.absoluteString)
@@ -323,25 +307,5 @@ struct AppSettingsBinding {
 
     var autoHides: Binding<Bool> {
         Binding(get: { store.settings.dock.autoHides }, set: { value in store.update { $0.dock.autoHides = value } })
-    }
-}
-
-struct ShortcutsPane: View {
-    var body: some View {
-        Form {
-            Section(loc("Shortcuts")) {
-                LabeledContent(loc("Open the Hub"), value: "⌃⌥Space")
-                LabeledContent(loc("Quit an app"), value: "⌃⌥Q")
-                LabeledContent(loc("Copy text from screen"), value: "⇧⌘2")
-                LabeledContent(loc("Open Settings"), value: "⌘,")
-                LabeledContent(loc("Undo a change in Settings"), value: "⌘Z")
-            }
-            Section(loc("Window Tiles")) {
-                ForEach(TileCommand.all, id: \.self) { command in
-                    LabeledContent(command.title, value: command.shortcut.label)
-                }
-            }
-        }
-        .formStyle(.grouped)
     }
 }

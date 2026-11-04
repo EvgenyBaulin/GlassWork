@@ -7,6 +7,8 @@ public struct DeveloperOptions: Sendable, Equatable {
         public static let refreshMinutes = "refreshMinutes"
         public static let repository = "repository"
         public static let repositories = "repositories"
+        public static let autoDiscover = "autoDiscover"
+        public static let searchDepth = "searchDepth"
     }
 
     public var pingHost = PingHost.fallback
@@ -15,6 +17,10 @@ public struct DeveloperOptions: Sendable, Equatable {
     public var gitRepository: String?
     /// Repositories added by hand, on top of those found in `~/Developer`.
     public var gitRepositories: [String] = []
+    /// Off leaves only the repositories added by hand.
+    public var gitAutoDiscover = true
+    /// How many levels below `~/Developer` to look.
+    public var gitSearchDepth = 2
 
     public init() {}
 
@@ -30,6 +36,8 @@ public struct DeveloperOptions: Sendable, Equatable {
         let git = settings.module(.git)?.options
         gitRepository = git?[Key.repository]
         gitRepositories = Self.decode(git?[Key.repositories])
+        gitAutoDiscover = git?.flag(Key.autoDiscover, default: true) ?? true
+        gitSearchDepth = git?.number(Key.searchDepth, default: 2) == 1 ? 1 : 2
     }
 
     /// Options are plain strings, so a list is stored one path per line.

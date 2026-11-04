@@ -120,10 +120,10 @@ public struct EverydayData: Codable, Sendable, Equatable {
     public static let key = "everyday"
     public static let colorLimit = 12
 
-    public mutating func addColor(_ hex: String) {
+    public mutating func addColor(_ hex: String, limit: Int = EverydayData.colorLimit) {
         colors.removeAll { $0 == hex }
         colors.insert(hex, at: 0)
-        colors = Array(colors.prefix(Self.colorLimit))
+        colors = Array(colors.prefix(limit))
     }
 
     /// Soonest first; dates already gone stay at the end.

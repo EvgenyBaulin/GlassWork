@@ -80,6 +80,16 @@ public final class SystemMonitor {
     public var demand = MonitorDemand()
     public var interval: TimeInterval = 2
     public var slowInterval: TimeInterval = 30
+    /// Reads half as often on battery and a quarter as often in Low Power Mode.
+    public var slowsOnBattery = true
+
+    /// The Weather place the user picked for the sun, if any.
+    public var sunPlaceID: Int?
+
+    /// Where the Sun and Moon item, its panel and the sun widgets all look.
+    public var sunPlace: WeatherPlace? {
+        SunLocation.place(in: weather.places, chosen: sunPlaceID)
+    }
 
     /// Called after each read. Menu bar items redraw from here, without SwiftUI's update machinery.
     @ObservationIgnored public var onUpdate: (() -> Void)?
@@ -179,7 +189,7 @@ public final class SystemMonitor {
         if !kinds.isDisjoint(with: WidgetKind.personalKinds) {
             snapshot.personal = personal.data
         }
-        snapshot.place = weather.places.first
+        snapshot.place = sunPlace
         if kinds.contains(.wordOfDay) {
             snapshot.words = wordOfDay.recent(6, at: date)
         }
@@ -267,6 +277,7 @@ public final class SystemMonitor {
 
     /// Battery power halves the polling rate and Low Power Mode quarters it.
     private var effectiveInterval: TimeInterval {
+        guard slowsOnBattery else { return interval }
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
             return interval * 4
         }

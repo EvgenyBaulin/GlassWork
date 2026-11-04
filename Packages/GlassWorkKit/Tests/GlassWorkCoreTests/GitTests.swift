@@ -71,6 +71,28 @@ struct GitChangeFilterTests {
 }
 
 struct ProtectedFoldersTests {
+    private let home = "/Users/dev"
+
+    @Test(arguments: [
+        "/Users/dev/Documents/app",
+        "/Users/dev/Desktop/app",
+        "/Users/dev/Downloads/app",
+        "/Volumes/USB/app",
+    ])
+    func theseOpenUpWhenAddedByHand(path: String) {
+        #expect(ProtectedFolders.allowsReading(path, isManual: true, home: home))
+        #expect(!ProtectedFolders.allowsReading(path, isManual: false, home: home))
+    }
+
+    @Test(arguments: ["/Users/dev/Pictures/app", "/Users/dev/Movies/app", "/Users/dev/Library/Mobile Documents/x"])
+    func theseStayClosed(path: String) {
+        #expect(!ProtectedFolders.allowsReading(path, isManual: true, home: home))
+    }
+
+    @Test func anOrdinaryFolderIsAlwaysReadable() {
+        #expect(ProtectedFolders.allowsReading("/Users/dev/Developer/app", isManual: false, home: home))
+    }
+
     @Test(arguments: [
         "/Users/dev/Documents/app",
         "/Users/dev/Desktop",
@@ -153,16 +175,90 @@ struct GitCollectorTests {
         }
     }
 
-    @Test func protectedFoldersAreNeverTouched() async throws {
-        let home = try home(["Developer"])
-        defer { try? FileManager.default.removeItem(at: home) }
-        let runner = try runner()
-        let collector = GitCollector(runner: runner, home: home.path) { "/usr/bin/git" }
+    private func repository(_ relative: String, in home: URL) throws -> String {
+        let folder = home.appending(path: relative)
+        try FileManager.default.createDirectory(at: folder.appending(path: ".git"), withIntermediateDirectories: true)
+        return GitDiscovery.plainPath(folder)
+    }
 
-        let reading = await collector.read(manual: [home.path + "/Documents/app"])
+    private func answeringRunner() -> FakeRunner {
+        FakeRunner { _, _ in ProcessOutput(status: 0, stdout: "# branch.head main\n", stderr: "") }
+    }
+
+    private func collector(_ runner: FakeRunner, home: URL) -> GitCollector {
+        GitCollector(runner: runner, home: GitDiscovery.plainPath(home), locate: { "/usr/bin/git" })
+    }
+
+    @Test(arguments: ["Documents/app", "Desktop/app", "Downloads/app"])
+    func aProtectedFolderAddedByHandIsRead(relative: String) async throws {
+        let home = temporaryFolder()
+        let path = try repository(relative, in: home)
+        let runner = answeringRunner()
+
+        let reading = await collector(runner, home: home).read(manual: [path])
+
+        #expect(reading.repositories.first?.problem == nil)
+        #expect(reading.repositories.first?.status?.branch == "main")
+        #expect(!runner.calls.isEmpty)
+    }
+
+    @Test func aProtectedFolderNotAddedByHandIsNeverTouched() async throws {
+        let home = temporaryFolder()
+        let path = try repository("Documents/app", in: home)
+        let runner = answeringRunner()
+        let found = GitRepository(path: path, isManual: false)
+
+        let fresh = await collector(runner, home: home).refresh([found])
+
+        #expect(fresh.first?.problem == .needsPermission)
+        #expect(runner.calls.isEmpty)
+    }
+
+    @Test func discoveryNeverLooksInsideProtectedFolders() async throws {
+        let home = temporaryFolder()
+        _ = try repository("Documents/hidden", in: home)
+        _ = try repository("Developer/visible", in: home)
+        let runner = answeringRunner()
+
+        let reading = await collector(runner, home: home).read(manual: [])
+
+        #expect(reading.repositories.map(\.name) == ["visible"])
+        #expect(runner.calls.allSatisfy { !$0.joined(separator: " ").contains("Documents") })
+    }
+
+    @Test func foldersTheOwnerDidNotOpenStayClosedEvenByHand() async throws {
+        let home = temporaryFolder()
+        let path = try repository("Pictures/app", in: home)
+        let runner = answeringRunner()
+
+        let reading = await collector(runner, home: home).read(manual: [path])
 
         #expect(reading.repositories.first?.problem == .needsPermission)
         #expect(runner.calls.isEmpty)
+    }
+
+    /// macOS refusing a folder must not read as the repository having been deleted.
+    @Test func aFolderMacOSRefusesAsksForPermissionAndIsNotCalledMissing() async throws {
+        let home = temporaryFolder()
+        let path = try repository("Documents/app", in: home)
+        try FileManager.default.setAttributes([.posixPermissions: 0], ofItemAtPath: path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: path) }
+        let runner = answeringRunner()
+
+        let reading = await collector(runner, home: home).read(manual: [path])
+
+        #expect(reading.repositories.first?.problem == .needsPermission)
+    }
+
+    @Test func aRepositoryThatIsReallyGoneIsStillMissing() async throws {
+        let home = temporaryFolder()
+        let folder = home.appending(path: "Documents/app")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let runner = answeringRunner()
+
+        let reading = await collector(runner, home: home).read(manual: [GitDiscovery.plainPath(folder)])
+
+        #expect(reading.repositories.first?.problem == .missing)
     }
 
     @Test func aFolderThatLostItsRepositoryIsReported() async throws {

@@ -89,7 +89,6 @@ private struct SystemPasteboard: PasteboardReading {
 @MainActor
 final class ClipboardController {
     private unowned let model: AppModel
-    private let hotKey = HotKey(keyCode: kVK_ANSI_V, modifiers: shiftKey | cmdKey, id: 2)
     private var timer: Timer?
     private var lastChange = 0
     private var isWanted = false
@@ -108,7 +107,7 @@ final class ClipboardController {
 
     init(model: AppModel) {
         self.model = model
-        hotKey.onPress = { [weak self] in self?.toggleQuickPaste() }
+        model.shortcuts.bind(.quickPaste) { [weak self] in self?.toggleQuickPaste() }
     }
 
     func apply(_ settings: ClipboardSettings, isEnabled: Bool) {
@@ -141,13 +140,13 @@ final class ClipboardController {
         timer.tolerance = 0.1
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
-        hotKey.register()
+        model.shortcuts.setActive(.quickPaste, true)
     }
 
     private func stop() {
         timer?.invalidate()
         timer = nil
-        hotKey.unregister()
+        model.shortcuts.setActive(.quickPaste, false)
     }
 
     private func poll() {

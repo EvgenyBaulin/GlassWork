@@ -57,6 +57,7 @@ struct WidgetSnapshotTests {
             ProcessUsage(pid: 1, name: "Xcode", cpu: 19.3, memory: 3_100_000_000),
             ProcessUsage(pid: 2, name: "Safari", cpu: 9, memory: 1_800_000_000),
         ]
+        snapshot.place = WeatherPlace(id: 1, name: "Moscow", country: "Russia", latitude: 55.75, longitude: 37.62)
         snapshot.everyday.note = "Ship the widgets"
         snapshot.everyday.dates = [ImportantDate(title: "Launch day", date: Self.now.addingTimeInterval(86400 * 12))]
         snapshot.events = [

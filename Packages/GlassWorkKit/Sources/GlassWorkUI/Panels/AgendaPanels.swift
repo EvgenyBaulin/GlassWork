@@ -86,11 +86,17 @@ struct CalendarPanel: View {
 
 struct EndsInPanel: View {
     let monitor: SystemMonitor
+    @Environment(\.panelActions) private var actions
+
+    private var options: [String: String] {
+        actions.moduleOptions(.endsIn)
+    }
 
     var body: some View {
         let agenda = monitor.agenda
         let now = Date()
-        let state = EndsInState(events: agenda.events, at: now)
+        let includeAllDay = options.flag(ItemOption.includesAllDay, default: false)
+        let state = EndsInState(events: agenda.events, at: now, includeAllDay: includeAllDay)
         PanelFrame(module: .endsIn, subtitle: loc("\(state.current.count) now")) {
             if agenda.eventsAccess != .granted {
                 AccessRequest(title: loc("See your events here"), access: agenda.eventsAccess) {
@@ -118,7 +124,8 @@ struct EndsInPanel: View {
 
     private func row(_ event: AgendaEvent, now: Date) -> some View {
         let remaining = event.end.timeIntervalSince(now)
-        let tint: Color = switch EndsInUrgency(remaining: remaining) {
+        let warnAt = TimeInterval(options.number(ItemOption.warnMinutes, default: 5) * 60)
+        let tint: Color = switch EndsInUrgency(remaining: remaining, warnAt: warnAt) {
         case .normal: .primary
         case .soon: Palette.orange
         case .lastMinute: Palette.red

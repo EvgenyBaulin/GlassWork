@@ -39,6 +39,15 @@ struct CommandTests {
         }
     }
 
+    @Test func aTildeInTheDirectoryMeansTheHomeFolder() async {
+        var command = UserCommand(name: "Tests", command: "make test")
+        command.directory = "~/Developer"
+
+        let result = await CommandRunner.run(command, using: FakeRunner())
+
+        #expect(result.tail.contains("cd '\(NSHomeDirectory())/Developer' && make test"))
+    }
+
     @Test func runsInItsDirectory() async {
         var command = UserCommand(name: "Tests", command: "make test")
         command.directory = "/tmp/it's here"
