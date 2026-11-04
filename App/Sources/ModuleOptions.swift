@@ -33,7 +33,7 @@ private struct NowPlayingOptions: View {
 
     private var maxWidth: Binding<Double> {
         Binding(
-            get: { options[ModuleOption.maxWidth].flatMap(Double.init) ?? 180 },
+            get: { options[ModuleOption.maxWidth].flatMap(Double.init) ?? ModuleOption.defaultMaxWidth },
             set: { set(ModuleOption.maxWidth, String(Int($0))) }
         )
     }

@@ -15,7 +15,7 @@ public final class NowPlayingStore {
 
     /// Called when a widget would look different. Position reports alone do not count.
     @ObservationIgnored public var onChange: (() -> Void)?
-    /// Called on any update, so the menu bar can redraw right away.
+    /// The same moments, for the menu bar. VLC reports every second, which must not redraw every item.
     @ObservationIgnored public var onUpdate: (() -> Void)?
 
     @ObservationIgnored private let makeSource: @Sendable () -> NowPlayingSource?
@@ -105,16 +105,21 @@ public final class NowPlayingStore {
                 artwork = nil
             }
             if isDifferent(old, new) {
-                onChange?()
+                changed()
             }
         case let .artwork(id, data):
             guard id == session?.artworkID else { return }
             artwork = ArtworkImage.fitted(data)
-            onChange?()
+            changed()
         case .unavailable:
             isUnavailable = true
             hasLoaded = true
+            changed()
         }
+    }
+
+    private func changed() {
+        onChange?()
         onUpdate?()
     }
 

@@ -168,9 +168,10 @@ struct NowPlayingSessionTests {
 
     @Test func positionReportsAreNotAChange() throws {
         let all = try sessions("now-playing-vlc.jsonl")
-        // Pause, resume, one plain position report, the seek to 30 s and the jump to the start of the next track.
+        // Of the five steps in this session, one is a plain position report.
         let changes = zip(all, all.dropFirst()).filter { $1.looksDifferent(from: $0) }.count
-        #expect(changes < all.count - 1)
+        #expect(all.count == 6)
+        #expect(changes == 4)
         var moved = session()
         moved.elapsed = 12
         moved.elapsedAt = start.addingTimeInterval(2)
@@ -407,6 +408,31 @@ struct NowPlayingStoreTests {
         #expect(changes == 3)
         store.apply(.session(nil))
         #expect(changes == 3)
+    }
+
+    @Test func aPositionReportDoesNotRedrawTheMenuBar() {
+        let store = makeStore()
+        var updates = 0
+        store.onUpdate = { updates += 1 }
+        store.apply(.session(session()))
+        var moved = session()
+        moved.elapsed = 1
+        moved.elapsedAt = date.addingTimeInterval(1)
+        store.apply(.session(moved))
+        #expect(updates == 1)
+        #expect(store.session == moved)
+    }
+
+    @Test func theMonitorRunsTheAdapterOnDemandAndEndsItWithTheLoop() async {
+        let monitor = SystemMonitor(nowPlaying: makeStore())
+        monitor.demand.nowPlaying = true
+        monitor.start()
+        for _ in 0 ..< 500 where !fake.isRunning {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(fake.isRunning)
+        monitor.stop()
+        #expect(!fake.isRunning)
     }
 
     @Test func theAppNameComesFromTheBundleWhenKnown() {

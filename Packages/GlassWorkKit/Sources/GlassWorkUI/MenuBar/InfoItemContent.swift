@@ -52,11 +52,9 @@ extension ItemContent {
         return content
     }
 
-    static let defaultMaxWidth: CGFloat = 180
-
     /// As wide as the text and no wider than the setting, so it changes with the track and not while it plays.
     private static func figureWidth(_ text: String, options: [String: String]) -> CGFloat {
-        let limit = options[ModuleOption.maxWidth].flatMap(Double.init).map { CGFloat($0) } ?? defaultMaxWidth
+        let limit = CGFloat(options[ModuleOption.maxWidth].flatMap(Double.init) ?? ModuleOption.defaultMaxWidth)
         let font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .medium)
         return min(ceil((text as NSString).size(withAttributes: [.font: font]).width), limit)
     }

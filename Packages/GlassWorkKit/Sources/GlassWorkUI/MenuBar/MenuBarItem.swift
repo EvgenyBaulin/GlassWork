@@ -18,6 +18,7 @@ public enum ModuleOption {
     public static let fanFigure = "figure"
     public static let eachFan = "eachFan"
     public static let maxWidth = "maxWidth"
+    public static let defaultMaxWidth = 180.0
     public static let hideWhenIdle = "hideWhenIdle"
 }
 
