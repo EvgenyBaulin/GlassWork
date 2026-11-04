@@ -38,18 +38,24 @@ public struct InteractiveChart: View {
     private let domain: ClosedRange<Double>?
     private let mirrored: Bool
     private let height: CGFloat
+    private let tooltipDate: Date.FormatStyle
     @State private var hover: Date?
 
+    /// `initialHover` starts the chart as if the cursor were there, for tests of the hover state.
     public init(
         series: [ChartSeries],
         domain: ClosedRange<Double>? = nil,
         mirrored: Bool = false,
-        height: CGFloat = 76
+        height: CGFloat = 76,
+        tooltipDate: Date.FormatStyle = Date.FormatStyle(date: .omitted, time: .standard),
+        initialHover: Date? = nil
     ) {
         self.series = series
         self.domain = domain
         self.mirrored = mirrored
         self.height = height
+        self.tooltipDate = tooltipDate
+        _hover = State(initialValue: initialHover)
     }
 
     public var body: some View {
@@ -73,7 +79,7 @@ public struct InteractiveChart: View {
                 ForEach(line.points, id: \.date) { point in
                     AreaMark(
                         x: .value("Time", point.date),
-                        yStart: .value("Base", 0),
+                        yStart: .value("Base", mirrored ? 0 : yDomain.lowerBound),
                         yEnd: .value("Value", plotted(point.value, index: index)),
                         series: .value("Series", line.id)
                     )
@@ -136,15 +142,19 @@ public struct InteractiveChart: View {
                     }
                 }
             if let hover, let position = proxy.position(forX: hover) {
-                ChartTooltip(date: hover, rows: tooltipRows(at: hover))
+                ChartTooltip(date: hover, rows: tooltipRows(at: hover), dateStyle: tooltipDate)
                     .fixedSize()
                     .alignmentGuide(.leading) { size in
                         -tooltipX(position, width: size.width, container: geometry.size.width)
                     }
+                    .offset(y: height < Self.tallEnoughForTooltip ? height + 4 : 0)
                     .allowsHitTesting(false)
             }
         }
     }
+
+    /// Below this the tooltip would sit on the cursor, so it goes under the chart instead.
+    private static let tallEnoughForTooltip: CGFloat = 50
 
     private func snapped(_ date: Date?) -> Date? {
         guard let date else { return nil }
@@ -184,6 +194,7 @@ struct ChartTooltip: View {
 
     let date: Date
     let rows: [Row]
+    var dateStyle = Date.FormatStyle(date: .omitted, time: .standard)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
@@ -195,7 +206,7 @@ struct ChartTooltip: View {
                     Text(row.value).fontWeight(.semibold).monospacedDigit()
                 }
             }
-            Text(date.formatted(date: .omitted, time: .standard))
+            Text(date.formatted(dateStyle))
                 .foregroundStyle(.tertiary)
                 .monospacedDigit()
         }

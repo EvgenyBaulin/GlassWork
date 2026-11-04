@@ -21,6 +21,16 @@
         }
       }
     },
+    "%@ is not responding": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ не отвечает"
+          }
+        }
+      }
+    },
     "%@ left": {
       "localizations": {
         "ru": {
@@ -151,6 +161,40 @@
         }
       }
     },
+    "%lld items": {
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld записи"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld записей"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld запись"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld записей"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld min": {
       "localizations": {
         "ru": {
@@ -167,6 +211,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сейчас: %lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld из %2$lld"
           }
         }
       }
@@ -241,6 +295,16 @@
         }
       }
     },
+    "7-day forecast": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогноз на 7 дней"
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "ru": {
@@ -297,6 +361,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавить город"
+          }
+        }
+      }
+    },
+    "Add a pair": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить пару"
           }
         }
       }
@@ -381,12 +455,62 @@
         }
       }
     },
+    "Allow GlassWork in System Settings to keep a history.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите доступ GlassWork в Системных настройках, чтобы вести историю."
+          }
+        }
+      }
+    },
     "Allow GlassWork in System Settings → Privacy & Security": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Разрешите GlassWork в Системных настройках → Конфиденциальность и безопасность"
+          }
+        }
+      }
+    },
+    "Allow GlassWork in System Settings, or add a city.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите доступ GlassWork в Системных настройках или добавьте город."
+          }
+        }
+      }
+    },
+    "Allow Location": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить геопозицию"
+          }
+        }
+      }
+    },
+    "Allow pasting": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите вставку"
+          }
+        }
+      }
+    },
+    "Already in the list": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уже в списке"
           }
         }
       }
@@ -467,6 +591,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Состав"
+          }
+        }
+      }
+    },
+    "Bundle identifier": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Идентификатор приложения"
+          }
+        }
+      }
+    },
+    "CBR": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ЦБ РФ"
           }
         }
       }
@@ -561,6 +705,76 @@
         }
       }
     },
+    "Clear": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ясно"
+          }
+        }
+      }
+    },
+    "Clear all": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить всё"
+          }
+        }
+      }
+    },
+    "Clear the history?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить историю?"
+          }
+        }
+      }
+    },
+    "Click to copy": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик — скопировать"
+          }
+        }
+      }
+    },
+    "Click to paste · ⌥-click pastes plain text": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик — вставить · ⌥-клик — вставить как простой текст"
+          }
+        }
+      }
+    },
+    "Clipboard": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Буфер обмена"
+          }
+        }
+      }
+    },
+    "Cloudy": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пасмурно"
+          }
+        }
+      }
+    },
     "Colours": {
       "localizations": {
         "ru": {
@@ -651,6 +865,16 @@
         }
       }
     },
+    "Copy text, a link, an image or a file and it appears here. Passwords are never saved.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопируйте текст, ссылку, изображение или файл — они появятся здесь. Пароли никогда не сохраняются."
+          }
+        }
+      }
+    },
     "Core %lld: %@": {
       "localizations": {
         "ru": {
@@ -677,6 +901,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Обратный отсчёт"
+          }
+        }
+      }
+    },
+    "Current location": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текущая геопозиция"
           }
         }
       }
@@ -717,6 +951,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Световой день"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить"
           }
         }
       }
@@ -801,12 +1045,52 @@
         }
       }
     },
+    "Drag to reorder · the first one shows in the menu bar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите, чтобы изменить порядок · первый показывается в строке меню"
+          }
+        }
+      }
+    },
+    "Drizzle": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Морось"
+          }
+        }
+      }
+    },
+    "ECB": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ЕЦБ"
+          }
+        }
+      }
+    },
     "Edit": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Изменить"
+          }
+        }
+      }
+    },
+    "Edit pairs": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменить пары"
           }
         }
       }
@@ -881,12 +1165,42 @@
         }
       }
     },
+    "Extreme": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Экстремальное"
+          }
+        }
+      }
+    },
     "Fans": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Вентиляторы"
+          }
+        }
+      }
+    },
+    "Feels": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ощущается"
+          }
+        }
+      }
+    },
+    "Fiat: CBR, ECB · Crypto: CoinGecko": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Валюты: ЦБ РФ, ЕЦБ · Криптовалюты: CoinGecko"
           }
         }
       }
@@ -901,12 +1215,32 @@
         }
       }
     },
+    "Files": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файлы"
+          }
+        }
+      }
+    },
     "Flagged": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "С флагом"
+          }
+        }
+      }
+    },
+    "Fog": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Туман"
           }
         }
       }
@@ -941,6 +1275,16 @@
         }
       }
     },
+    "Forecast unavailable": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прогноз недоступен"
+          }
+        }
+      }
+    },
     "Free all day": {
       "localizations": {
         "ru": {
@@ -957,6 +1301,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Свободно до %@"
+          }
+        }
+      }
+    },
+    "Freezing rain": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ледяной дождь"
           }
         }
       }
@@ -1011,6 +1365,16 @@
         }
       }
     },
+    "GlassWork needs Accessibility to paste. Until then, a click only copies.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для вставки GlassWork нужен Универсальный доступ. Пока его нет, клик только копирует."
+          }
+        }
+      }
+    },
     "Graph": {
       "localizations": {
         "ru": {
@@ -1027,6 +1391,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "График и цифра"
+          }
+        }
+      }
+    },
+    "H %@  L %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Макс. %1$@  Мин. %2$@"
           }
         }
       }
@@ -1081,6 +1455,36 @@
         }
       }
     },
+    "Highest": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Максимум"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История"
+          }
+        }
+      }
+    },
+    "History is off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История выключена"
+          }
+        }
+      }
+    },
     "Hub": {
       "localizations": {
         "ru": {
@@ -1101,6 +1505,16 @@
         }
       }
     },
+    "Humidity": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Влажность"
+          }
+        }
+      }
+    },
     "Icon size": {
       "localizations": {
         "ru": {
@@ -1111,12 +1525,52 @@
         }
       }
     },
+    "Image": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изображение"
+          }
+        }
+      }
+    },
+    "Image · %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изображение · %@"
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изображения"
+          }
+        }
+      }
+    },
     "Import…": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Импорт…"
+          }
+        }
+      }
+    },
+    "In bar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В строке"
           }
         }
       }
@@ -1171,12 +1625,90 @@
         }
       }
     },
+    "Keep a clipboard history": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вести историю буфера обмена"
+          }
+        }
+      }
+    },
+    "Keep for %lld days": {
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Хранить %lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Хранить %lld дней"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Хранить %lld день"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Хранить %lld дней"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Keep open in a floating window": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Оставить открытым в плавающем окне"
+          }
+        }
+      }
+    },
+    "Keeps up to 500 items for %lld days": {
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Хранит до 500 записей %lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Хранит до 500 записей %lld дней"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Хранит до 500 записей %lld день"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Хранит до 500 записей %lld дней"
+                }
+              }
+            }
           }
         }
       }
@@ -1197,6 +1729,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Запускать при входе"
+          }
+        }
+      }
+    },
+    "Links": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ссылки"
           }
         }
       }
@@ -1241,6 +1783,26 @@
         }
       }
     },
+    "Location is off": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Геопозиция выключена"
+          }
+        }
+      }
+    },
+    "Locations": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Места"
+          }
+        }
+      }
+    },
     "Lock Position": {
       "localizations": {
         "ru": {
@@ -1257,6 +1819,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Низкое"
+          }
+        }
+      }
+    },
+    "Lowest": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Минимум"
           }
         }
       }
@@ -1361,6 +1933,16 @@
         }
       }
     },
+    "Moderate": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Умеренное"
+          }
+        }
+      }
+    },
     "Modular Clock": {
       "localizations": {
         "ru": {
@@ -1377,6 +1959,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Модули"
+          }
+        }
+      }
+    },
+    "Monochrome day change in the menu bar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменение за день без цвета в строке меню"
           }
         }
       }
@@ -1411,12 +2003,32 @@
         }
       }
     },
+    "Needs Accessibility": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нужен Универсальный доступ"
+          }
+        }
+      }
+    },
     "Network": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Сеть"
+          }
+        }
+      }
+    },
+    "Never record from these apps": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не записывать из этих приложений"
           }
         }
       }
@@ -1461,6 +2073,16 @@
         }
       }
     },
+    "No matches": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ничего не найдено"
+          }
+        }
+      }
+    },
     "No note yet": {
       "localizations": {
         "ru": {
@@ -1471,12 +2093,42 @@
         }
       }
     },
+    "No saved forecast yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранённого прогноза пока нет"
+          }
+        }
+      }
+    },
+    "No saved rates yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранённых курсов пока нет"
+          }
+        }
+      }
+    },
     "No sensors available on this Mac": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "На этом Mac нет доступных датчиков"
+          }
+        }
+      }
+    },
+    "No source publishes this pair": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ни один источник не публикует эту пару"
           }
         }
       }
@@ -1501,6 +2153,16 @@
         }
       }
     },
+    "Not responding: %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не отвечают: %@"
+          }
+        }
+      }
+    },
     "Note": {
       "localizations": {
         "ru": {
@@ -1517,6 +2179,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Заметки"
+          }
+        }
+      }
+    },
+    "Nothing copied yet": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока ничего не скопировано"
           }
         }
       }
@@ -1557,6 +2229,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сообщать о низком заряде и перегреве"
+          }
+        }
+      }
+    },
+    "Now": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас"
           }
         }
       }
@@ -1661,12 +2343,32 @@
         }
       }
     },
+    "Open System Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть Системные настройки"
+          }
+        }
+      }
+    },
     "Open the Hub": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Открыть Хаб"
+          }
+        }
+      }
+    },
+    "Open-Meteo did not answer": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open-Meteo не отвечает"
           }
         }
       }
@@ -1721,6 +2423,56 @@
         }
       }
     },
+    "Pairs · drag to reorder": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пары · перетащите, чтобы изменить порядок"
+          }
+        }
+      }
+    },
+    "Partly cloudy": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переменная облачность"
+          }
+        }
+      }
+    },
+    "Paste": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставка"
+          }
+        }
+      }
+    },
+    "Paste on click": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставлять по клику"
+          }
+        }
+      }
+    },
+    "Pasteboard access is denied": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступ к буферу обмена запрещён"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "ru": {
@@ -1737,6 +2489,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выбрать цвет"
+          }
+        }
+      }
+    },
+    "Pin": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрепить"
+          }
+        }
+      }
+    },
+    "Pinned": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закреплённые"
+          }
+        }
+      }
+    },
+    "Pinned items stay.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закреплённые записи останутся."
           }
         }
       }
@@ -1831,6 +2613,36 @@
         }
       }
     },
+    "Rain": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дождь"
+          }
+        }
+      }
+    },
+    "Rates": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Курсы"
+          }
+        }
+      }
+    },
+    "Rates from %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Курсы от %@"
+          }
+        }
+      }
+    },
     "Read": {
       "localizations": {
         "ru": {
@@ -1847,6 +2659,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Чтение · запись"
+          }
+        }
+      }
+    },
+    "Recent": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Недавние"
           }
         }
       }
@@ -1907,6 +2729,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вернуть по умолчанию"
+          }
+        }
+      }
+    },
+    "Retry": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторить"
           }
         }
       }
@@ -1981,6 +2813,26 @@
         }
       }
     },
+    "Search for a city": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найти город"
+          }
+        }
+      }
+    },
+    "Search is unavailable right now": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поиск сейчас недоступен"
+          }
+        }
+      }
+    },
     "Search sensors": {
       "localizations": {
         "ru": {
@@ -2051,6 +2903,46 @@
         }
       }
     },
+    "Show in the menu bar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать в строке меню"
+          }
+        }
+      }
+    },
+    "Show the last item in the menu bar": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать последнюю запись в строке меню"
+          }
+        }
+      }
+    },
+    "Showers": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ливень"
+          }
+        }
+      }
+    },
+    "Showing data from %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данные от %@"
+          }
+        }
+      }
+    },
     "Size": {
       "localizations": {
         "ru": {
@@ -2071,12 +2963,42 @@
         }
       }
     },
+    "Snow": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Снег"
+          }
+        }
+      }
+    },
+    "Snow showers": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Снегопад"
+          }
+        }
+      }
+    },
     "SoC and memory": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "SoC и память"
+          }
+        }
+      }
+    },
+    "Source unavailable": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Источник недоступен"
           }
         }
       }
@@ -2127,6 +3049,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Хранилище и диски"
+          }
+        }
+      }
+    },
+    "Stored on this Mac, not encrypted. Pinned items are kept until you delete them.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хранится на этом Mac без шифрования. Закреплённые записи остаются, пока вы их не удалите."
           }
         }
       }
@@ -2251,6 +3183,16 @@
         }
       }
     },
+    "Text": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст"
+          }
+        }
+      }
+    },
     "The system Dock is hidden while GlassWork Dock runs, and comes back as it was when you quit.": {
       "localizations": {
         "ru": {
@@ -2297,6 +3239,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Этот год"
+          }
+        }
+      }
+    },
+    "Thunderstorm": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гроза"
           }
         }
       }
@@ -2401,6 +3353,36 @@
         }
       }
     },
+    "Try again": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Попробовать снова"
+          }
+        }
+      }
+    },
+    "Type to filter…": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введите для поиска…"
+          }
+        }
+      }
+    },
+    "UV": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "УФ"
+          }
+        }
+      }
+    },
     "Undo a change in Settings": {
       "localizations": {
         "ru": {
@@ -2431,12 +3413,32 @@
         }
       }
     },
+    "Unpin": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открепить"
+          }
+        }
+      }
+    },
     "Up Next": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Дальше"
+          }
+        }
+      }
+    },
+    "Updated %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновлено: %@"
           }
         }
       }
@@ -2481,6 +3483,36 @@
         }
       }
     },
+    "Use a city instead": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать город"
+          }
+        }
+      }
+    },
+    "Use current location": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать геопозицию"
+          }
+        }
+      }
+    },
+    "Use your current location?": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Использовать вашу геопозицию?"
+          }
+        }
+      }
+    },
     "Used": {
       "localizations": {
         "ru": {
@@ -2507,6 +3539,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Версия %@"
+          }
+        }
+      }
+    },
+    "Very high": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очень высокое"
+          }
+        }
+      }
+    },
+    "Weather": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Погода"
           }
         }
       }
@@ -2561,6 +3613,26 @@
         }
       }
     },
+    "Will retry in 5 min": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повтор через 5 мин"
+          }
+        }
+      }
+    },
+    "Wind": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ветер"
+          }
+        }
+      }
+    },
     "Wired": {
       "localizations": {
         "ru": {
@@ -2611,6 +3683,36 @@
         }
       }
     },
+    "Your location is used only to ask Open-Meteo for the forecast.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Геопозиция используется только для запроса прогноза у Open-Meteo."
+          }
+        }
+      }
+    },
+    "Your locations": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваши места"
+          }
+        }
+      }
+    },
+    "You’re offline": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет подключения к сети"
+          }
+        }
+      }
+    },
     "avg CPU": {
       "localizations": {
         "ru": {
@@ -2651,6 +3753,26 @@
         }
       }
     },
+    "macOS asks for access when this is turned on. Cities are managed in the panel.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS запросит доступ при включении. Городами можно управлять в панели."
+          }
+        }
+      }
+    },
+    "macOS will ask to allow pasteboard access. Passwords are never saved.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS запросит доступ к буферу обмена. Пароли никогда не сохраняются."
+          }
+        }
+      }
+    },
     "max": {
       "localizations": {
         "ru": {
@@ -2677,6 +3799,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "на ревью"
+          }
+        }
+      }
+    },
+    "↑↓ select · ↩ paste · 1–9 · esc": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↑↓ выбор · ↩ вставить · 1–9 · esc"
           }
         }
       }
