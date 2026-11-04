@@ -64,6 +64,7 @@ run() {
         cd "$SRC_DIR"
         xcodegen generate --quiet
         xcodebuild -project GlassWork.xcodeproj -scheme GlassWork -configuration Release \
+            CURRENT_PROJECT_VERSION="$(git rev-list --count HEAD)" \
             -derivedDataPath build/DerivedData -destination 'generic/platform=macOS' \
             -allowProvisioningUpdates -quiet build
     ) >> "$LOG" 2>&1 || { log "build failed, installed app left as is"; exit 1; }

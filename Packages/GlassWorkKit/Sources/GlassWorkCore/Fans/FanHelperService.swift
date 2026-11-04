@@ -15,6 +15,8 @@ public final class FanHelperService {
     public enum Mode {
         static let automatic = 0.0
         static let manual = 1.0
+        /// What Apple silicon reports under system control. Only here can a fan stop: mode 0 holds it at minimum.
+        static let system = 3.0
     }
 
     /// Waits between attempts while macOS hands over control of the fans.
@@ -135,6 +137,11 @@ public final class FanHelperService {
     private func restoreFan(_ fan: Int) -> Bool {
         guard let key = modeKey(fan), let mode = smc.read(key), let number = mode.number else { return false }
         guard FanReading.isManualMode(number) else { return true }
+        if let system = mode.encoded(Mode.system), smc.write(key, bytes: system),
+           smc.read(key)?.number == Mode.system
+        {
+            return true
+        }
         guard let automatic = mode.encoded(Mode.automatic) else { return false }
         return writeConfirmed(key, bytes: automatic) { !FanReading.isManualMode($0) }
     }

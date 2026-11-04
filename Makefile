@@ -7,7 +7,9 @@ DERIVED := build/DerivedData
 PACKAGE := Packages/GlassWorkKit
 APP := $(DERIVED)/Build/Products/Release/GlassWork.app
 SWIFT := xcrun swift
-XCB := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED) -destination 'generic/platform=macOS'
+# macOS keeps a widget list per build number, so every commit needs its own.
+BUILD_NUMBER := $(shell git rev-list --count HEAD)
+XCB := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED) -destination 'generic/platform=macOS' CURRENT_PROJECT_VERSION=$(BUILD_NUMBER)
 
 .PHONY: help generate build build-unsigned test test-core snapshots lint format install run clean auto-update-on auto-update-off auto-update-status
 
