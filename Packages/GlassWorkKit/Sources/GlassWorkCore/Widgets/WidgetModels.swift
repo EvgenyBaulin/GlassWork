@@ -54,6 +54,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var network: NetworkSample?
     public var sensors: SensorSample?
     public var processes: [ProcessUsage] = []
+    /// Apps with their helpers added up, under the name people know them by. Heaviest first.
+    public var apps: [ProcessUsage]?
     public var everyday = EverydayData()
     public var events: [AgendaEvent] = []
     public var todos: [TodoItem] = []
@@ -95,6 +97,14 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
 
     public init(date: Date) {
         self.date = date
+    }
+}
+
+public extension WidgetSnapshot {
+    /// What uses the CPU, by app. Raw processes stand in until apps have been read twice: CPU needs two reads.
+    var topUsage: [ProcessUsage] {
+        guard let apps, apps.contains(where: { $0.cpu > 0 }) else { return processes }
+        return apps
     }
 }
 

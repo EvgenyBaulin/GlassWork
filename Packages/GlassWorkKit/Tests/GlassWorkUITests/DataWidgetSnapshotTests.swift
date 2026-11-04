@@ -1,6 +1,8 @@
+import AppKit
 import Foundation
 @testable import GlassWorkCore
 @testable import GlassWorkUI
+import SnapshotTesting
 import SwiftUI
 import Testing
 import WidgetKit
@@ -64,6 +66,28 @@ struct DataWidgetSnapshotTests {
             snapshot.fans?.mode = .max
         }
         state(.fans, snapshot, "max", sizes: WidgetSize.allCases)
+    }
+
+    /// The desktop gives a small widget less room than its nominal size, so this is tighter than any real one.
+    @Test(arguments: ["Running smoothly", "Всё работает"])
+    func uptimeTitleFitsATightWidget(title: String) {
+        let view = MacHealthTitle(text: title).frame(width: 100, height: 20, alignment: .leading)
+        let host = NSHostingView(rootView: view.padding(8).background(.black).environment(\.colorScheme, .dark))
+        host.frame = CGRect(x: 0, y: 0, width: 116, height: 36)
+        withSnapshotTesting(record: .missing) {
+            assertSnapshot(of: host, as: .image(precision: 0.98), named: title == "Всё работает" ? "ru" : "en")
+        }
+    }
+
+    @Test func activityListsAppsByTheirNames() {
+        var snapshot = WidgetSnapshot(date: sampleNow)
+        snapshot.cpu = CPUSample(total: 0.27, user: 0.18, system: 0.09, idle: 0.73, cores: [0.3, 0.2])
+        snapshot.processes = [ProcessUsage(pid: 9, name: "com.apple.WebKit.WebContent", cpu: 40, memory: 1)]
+        snapshot.apps = [
+            ProcessUsage(pid: 1, name: "Google Chrome", cpu: 41.2, memory: 1),
+            ProcessUsage(pid: 2, name: "Xcode", cpu: 19.3, memory: 1),
+        ]
+        state(.activity, snapshot, "apps", sizes: [.large])
     }
 
     @Test func fansWithoutTheService() {

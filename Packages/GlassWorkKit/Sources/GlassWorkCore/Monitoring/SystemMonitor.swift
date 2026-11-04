@@ -153,6 +153,9 @@ public final class SystemMonitor {
         snapshot.sensors = sensors
         if !kinds.isDisjoint(with: [.activity, .topApps]) {
             snapshot.processes = Array(processes.sorted { $0.cpu > $1.cpu }.prefix(12))
+            snapshot.apps = apps.apps.sorted(by: .cpu).prefix(12).map {
+                ProcessUsage(pid: $0.pid, name: $0.name, cpu: $0.cpu, memory: $0.memory)
+            }
         }
         snapshot.everyday = everyday.data
         snapshot.events = agenda.events
