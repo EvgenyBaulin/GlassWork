@@ -34,6 +34,8 @@ public extension WidgetKind {
         case .numeralsClock: loc("Numerals Clock")
         case .minimalClock: loc("Minimal Clock")
         case .flipClock: loc("Flip Clock")
+        case .skyClock: loc("Sky Clock")
+        case .dayAndNight: loc("Day and Night")
         }
     }
 }
@@ -58,7 +60,7 @@ public extension WidgetKind {
         case .note: .notes
         case .timer: .timers
         case .countdown: .countdown
-        case .moon, .daylight: .sunMoon
+        case .moon, .daylight, .skyClock, .dayAndNight: .sunMoon
         }
     }
 }

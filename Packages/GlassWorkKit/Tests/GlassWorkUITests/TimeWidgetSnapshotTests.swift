@@ -12,7 +12,14 @@ import Testing
 struct TimeWidgetSnapshotTests {
     private static let now = Date(timeIntervalSince1970: 1_793_750_000)
 
-    nonisolated static let kinds: [WidgetKind] = [.clock, .numeralsClock, .minimalClock, .flipClock]
+    nonisolated static let kinds: [WidgetKind] = [
+        .clock,
+        .numeralsClock,
+        .minimalClock,
+        .flipClock,
+        .skyClock,
+        .dayAndNight,
+    ]
 
     private var sample: WidgetSnapshot {
         var snapshot = WidgetSnapshot(date: Self.now)
@@ -46,6 +53,33 @@ struct TimeWidgetSnapshotTests {
         for size in WidgetSize.allCases {
             render(kind, size, dark: true)
         }
+    }
+
+    @Test func daylightChartHover() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 3 * 3600) ?? .gmt
+        let days = Astronomy.daylight(
+            from: Self.now,
+            days: 14,
+            latitude: 55.75,
+            longitude: 37.62,
+            calendar: calendar
+        )
+        let chart = InteractiveChart(
+            series: [.daylight(days)],
+            height: 100,
+            tooltipDate: Date.FormatStyle(date: .abbreviated, time: .omitted, timeZone: calendar.timeZone),
+            initialHover: days[6].date
+        )
+        .frame(width: 330)
+        .padding(.bottom, 60)
+        .padding(16)
+        .background(Color(red: 0.13, green: 0.12, blue: 0.19))
+        .environment(\.colorScheme, .dark)
+        let host = NSHostingView(rootView: chart)
+        host.frame = CGRect(x: 0, y: 0, width: 362, height: 200)
+        host.appearance = NSAppearance(named: .darkAqua)
+        assertSnapshot(of: host, as: .image(precision: 0.98), named: "daylight-chart-hover")
     }
 
     @Test(arguments: kinds)

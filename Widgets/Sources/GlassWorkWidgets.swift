@@ -56,6 +56,8 @@ struct TimeWidgets: WidgetBundle {
         NumeralsClockKindWidget()
         MinimalClockKindWidget()
         FlipClockKindWidget()
+        SkyClockKindWidget()
+        DayAndNightKindWidget()
     }
 }
 
@@ -299,5 +301,17 @@ struct MinimalClockKindWidget: Widget {
 struct FlipClockKindWidget: Widget {
     var body: some WidgetConfiguration {
         configuration(.flipClock)
+    }
+}
+
+struct SkyClockKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.skyClock)
+    }
+}
+
+struct DayAndNightKindWidget: Widget {
+    var body: some WidgetConfiguration {
+        configuration(.dayAndNight)
     }
 }

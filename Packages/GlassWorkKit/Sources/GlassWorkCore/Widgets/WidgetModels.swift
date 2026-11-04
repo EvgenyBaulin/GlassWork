@@ -28,7 +28,7 @@ public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
     case screenTime, commands, endpoints, githubReviews, githubActions, contributions
     case digitalClock, modularClock, calendarMonth, upNext, endsIn, todo, note, timer, countdown, yearInDots, moon,
          daylight
-    case clock, numeralsClock, minimalClock, flipClock
+    case clock, numeralsClock, minimalClock, flipClock, skyClock, dayAndNight
 
     public var id: String {
         rawValue

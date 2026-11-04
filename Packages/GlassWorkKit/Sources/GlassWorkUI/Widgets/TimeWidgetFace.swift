@@ -12,6 +12,8 @@ struct TimeWidgetFace: View {
         case .numeralsClock: NumeralsClockWidget(context: context)
         case .minimalClock: MinimalClockWidget(context: context)
         case .flipClock: FlipClockWidget(context: context)
+        case .skyClock: SkyClockWidget(context: context)
+        case .dayAndNight: DayAndNightWidget(context: context)
         default: EmptyView()
         }
     }

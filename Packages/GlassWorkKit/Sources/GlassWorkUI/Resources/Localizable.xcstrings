@@ -965,6 +965,16 @@
         }
       }
     },
+    "Day and Night": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День и ночь"
+          }
+        }
+      }
+    },
     "Daylight": {
       "localizations": {
         "ru": {
@@ -1853,6 +1863,16 @@
         }
       }
     },
+    "Longest day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Самый длинный день"
+          }
+        }
+      }
+    },
     "Low": {
       "localizations": {
         "ru": {
@@ -2099,6 +2119,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дальше"
+          }
+        }
+      }
+    },
+    "Next 14 days": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ближайшие 14 дней"
           }
         }
       }
@@ -2439,6 +2469,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Прочие"
+          }
+        }
+      }
+    },
+    "Other cities": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Другие города"
           }
         }
       }
@@ -2963,6 +3003,16 @@
         }
       }
     },
+    "Shortest day": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Самый короткий день"
+          }
+        }
+      }
+    },
     "Show in the menu bar": {
       "localizations": {
         "ru": {
@@ -3019,6 +3069,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пропустить"
+          }
+        }
+      }
+    },
+    "Sky Clock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Небо"
           }
         }
       }
@@ -3173,12 +3233,32 @@
         }
       }
     },
+    "Sunrise in %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Восход через %@"
+          }
+        }
+      }
+    },
     "Sunset": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Закат"
+          }
+        }
+      }
+    },
+    "Sunset in %@": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закат через %@"
           }
         }
       }
