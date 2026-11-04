@@ -21,6 +21,12 @@ final class DockController {
     /// What the window is sized for.
     private var space = DockSpace.rest
     private var shrink: Task<Void, Never>?
+    /// False while a Dock that hides itself is out of sight.
+    private var isRevealed = true
+    private var pointerMonitors: [Any] = []
+    private var menuObservers: [NSObjectProtocol] = []
+    private var isMenuOpen = false
+    private var hiding: Task<Void, Never>?
 
     /// Long enough for icons to settle before the window closes in around them.
     private static let shrinkDelay = Duration.milliseconds(300)
@@ -36,11 +42,14 @@ final class DockController {
         }
         if window == nil {
             SystemDock.hide()
+            isRevealed = !settings.autoHides
             open()
         }
         state.settings = settings
+        watchPointer(settings.autoHides)
         refreshRunning()
         place()
+        updateReveal()
     }
 
     /// Runs on quit, and the saved values also restore after a crash on the next launch.
@@ -90,6 +99,8 @@ final class DockController {
     /// Restores even with no window, so a Dock left hidden by a crash comes back once it is turned off.
     private func close() {
         shrink?.cancel()
+        watchPointer(false)
+        isRevealed = true
         if let screens {
             NotificationCenter.default.removeObserver(screens)
         }
@@ -175,6 +186,7 @@ final class DockController {
         shrink?.cancel()
         // A bouncing icon rises above the bar, wherever the pointer has gone.
         let wanted = max(requested, state.launching.isEmpty ? .rest : .magnified)
+        updateReveal()
         if wanted >= space {
             space = wanted
             place()
@@ -237,21 +249,124 @@ final class DockController {
     }
 
     /// Always the screen with the menu bar: the "main" screen follows the keyboard focus and would make
-    /// the Dock hop between displays. Every size shares the same middle and bottom edge, so the bar stays
-    /// exactly where it is when the window changes.
-    private func place() {
-        guard let window, let screen = NSScreen.screens.first else { return }
-        let size = DockBarLayout.windowSize(for: space, count: state.settings.items.count, settings: state.settings)
-        let frame = CGRect(
-            x: (screen.frame.midX - size.width / 2).rounded(),
-            y: screen.frame.minY + DockBarLayout.screenGap,
-            width: size.width,
-            height: size.height
+    /// the Dock hop between displays.
+    private var screen: NSScreen? {
+        NSScreen.screens.first
+    }
+
+    private func frame(for space: DockSpace, on screen: NSScreen, isRevealed: Bool = true) -> CGRect {
+        let settings = state.settings
+        return DockBarLayout.windowFrame(
+            size: DockBarLayout.windowSize(for: space, count: settings.items.count, settings: settings),
+            position: settings.position,
+            screen: screen.frame,
+            topInset: screen.frame.maxY - screen.visibleFrame.maxY,
+            isRevealed: isRevealed
         )
-        if window.frame != frame {
-            window.setFrame(frame, display: true)
+    }
+
+    /// A hidden Dock leaves the screen list as well: the frame alone could land on a neighbouring display.
+    private func place(sliding: Bool = false) {
+        guard let window, let screen else { return }
+        let target = frame(for: space, on: screen, isRevealed: isRevealed)
+        if isRevealed {
+            window.orderFront(nil)
         }
-        window.orderFront(nil)
+        if sliding, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = DockAutoHide.slideDuration
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                window.animator().setFrame(target, display: true)
+            } completionHandler: { [weak self] in
+                MainActor.assumeIsolated { self?.leaveScreenIfHidden() }
+            }
+            return
+        }
+        if window.frame != target {
+            window.setFrame(target, display: true)
+        }
+        leaveScreenIfHidden()
+    }
+
+    private func leaveScreenIfHidden() {
+        if !isRevealed {
+            window?.orderOut(nil)
+        }
+    }
+
+    /// Mouse monitors need no permission, and exist only while the Dock hides itself. Moves over the app's own
+    /// windows reach only the local one and moves over any other app only the global one.
+    private func watchPointer(_ wanted: Bool) {
+        guard wanted != !pointerMonitors.isEmpty else { return }
+        guard wanted else {
+            pointerMonitors.forEach(NSEvent.removeMonitor)
+            pointerMonitors = []
+            menuObservers.forEach(NotificationCenter.default.removeObserver)
+            menuObservers = []
+            hiding?.cancel()
+            hiding = nil
+            isMenuOpen = false
+            isRevealed = true
+            return
+        }
+        let moves: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged]
+        if let outside = NSEvent.addGlobalMonitorForEvents(matching: moves, handler: { [weak self] _ in
+            MainActor.assumeIsolated { self?.updateReveal() }
+        }) {
+            pointerMonitors.append(outside)
+        }
+        if let inside = NSEvent.addLocalMonitorForEvents(matching: moves, handler: { [weak self] event in
+            MainActor.assumeIsolated { self?.updateReveal() }
+            return event
+        }) {
+            pointerMonitors.append(inside)
+        }
+        // A context menu lies outside the Dock's window, and the Dock must not slide out from under it.
+        let names = [NSMenu.didBeginTrackingNotification, NSMenu.didEndTrackingNotification]
+        menuObservers = names.map { name in
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
+                let isOpen = note.name == NSMenu.didBeginTrackingNotification
+                MainActor.assumeIsolated {
+                    self?.isMenuOpen = isOpen
+                    self?.updateReveal()
+                }
+            }
+        }
+    }
+
+    /// Slides in at once. Slides out late, so a pointer crossing the gap does not chase the bar.
+    private func updateReveal() {
+        guard let window, let screen else { return }
+        let settings = state.settings
+        let point = NSEvent.mouseLocation
+        let wanted = DockAutoHide.isRevealed(
+            autoHides: settings.autoHides,
+            wasRevealed: isRevealed,
+            isOverDock: DockAutoHide.isOver(point, frame: window.frame),
+            touchesEdge: DockAutoHide.touchesEdge(
+                point,
+                barFrame: frame(for: .rest, on: screen),
+                position: settings.position,
+                screen: screen.frame
+            ),
+            isHeld: isMenuOpen || requested == .folder || !state.launching.isEmpty
+        )
+        if wanted {
+            hiding?.cancel()
+            hiding = nil
+            if !isRevealed {
+                isRevealed = true
+                place(sliding: true)
+            }
+        } else if isRevealed, hiding == nil {
+            hiding = Task { [weak self] in
+                try? await Task.sleep(for: DockAutoHide.hideDelay)
+                guard let self, !Task.isCancelled else { return }
+                hiding = nil
+                isRevealed = false
+                place(sliding: true)
+            }
+        }
     }
 }
 

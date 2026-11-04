@@ -17,8 +17,9 @@ public enum DockSpace: Int, Comparable, Sendable {
 
 /// Where the bar and its icons go for a pointer position. Pure, so the motion is testable.
 ///
-/// Positions are measured from the middle of the Dock, which never moves. The pointer has to be read in
-/// that same frame: read inside the bar, it would shift as the bar widens and feed back into the sizes.
+/// Positions are measured along the bar, from the middle of the Dock, which never moves: across the screen for
+/// a Dock at the bottom, down it for one at a side. The pointer has to be read in that same frame: read inside
+/// the bar, it would shift as the bar widens and feed back into the sizes.
 public struct DockBarLayout: Equatable, Sendable {
     public static let spacing = 8.0
     public static let padding = 8.0
@@ -32,10 +33,11 @@ public struct DockBarLayout: Equatable, Sendable {
     /// How far the Dock stands above the bottom edge of the screen.
     public static let screenGap = 4.0
 
-    /// Width of each icon, in Dock order.
+    /// Size of each icon, in Dock order.
     public let sizes: [Double]
-    /// Left edge of the bar.
+    /// Where the bar starts, along its length.
     public let minX: Double
+    /// The bar's length: its width at the bottom, its height at a side.
     public let width: Double
 
     public var centerX: Double {
@@ -80,22 +82,109 @@ public struct DockBarLayout: Equatable, Sendable {
         settings.magnifies ? max(settings.magnifiedSize - settings.iconSize, 0) : 0
     }
 
-    /// The Dock window's size. Even, so every size shares one center on the pixel grid.
+    /// The Dock window's size. Even along the bar, so every size shares one center on the pixel grid.
     public static func windowSize(for space: DockSpace, count: Int, settings: DockSettings) -> CGSize {
         let base = settings.iconSize
         let growth = growth(settings)
-        var width = restWidth(count: count, base: base)
-        var height = restHeight(base: base)
+        let isVertical = settings.position.isVertical
+        var length = restWidth(count: count, base: base)
+        var depth = restHeight(base: base)
         if space >= .magnified {
-            // Each side only ever takes the growth on its side of the pointer.
-            width += 2 * ceil(DockMagnification.reach) * growth
-            height += growth + bounce * (base + growth)
+            // Each end only ever takes the growth on its side of the pointer.
+            length += 2 * ceil(DockMagnification.reach) * growth
+            depth += growth + bounce * (base + growth)
         }
         if space == .folder {
-            width = max(width, folderCardWidth)
-            height += folderCardHeight + folderCardGap
+            // A card stands above a bar at the bottom and beside a bar at a side.
+            length = max(length, isVertical ? folderCardHeight : folderCardWidth)
+            depth += (isVertical ? folderCardWidth : folderCardHeight) + folderCardGap
         }
-        return CGSize(width: ceil(width / 2) * 2, height: ceil(height))
+        let even = ceil(length / 2) * 2
+        return isVertical ? CGSize(width: ceil(depth), height: even) : CGSize(width: even, height: ceil(depth))
+    }
+
+    /// Where the Dock window goes. Every size shares the same middle and edge, so the bar stays exactly where it
+    /// is when the window changes.
+    ///
+    /// - Parameter topInset: The menu bar's height: a Dock at a side is centered in what is left below it.
+    /// - Parameter isRevealed: False moves the window just past the screen's edge.
+    public static func windowFrame(
+        size: CGSize,
+        position: DockPosition,
+        screen: CGRect,
+        topInset: Double,
+        isRevealed: Bool = true
+    ) -> CGRect {
+        let middleY = (screen.minY + screen.maxY - topInset) / 2
+        let origin = switch position {
+        case .bottom:
+            CGPoint(
+                x: screen.midX - size.width / 2,
+                y: isRevealed ? screen.minY + screenGap : screen.minY - size.height
+            )
+        case .left:
+            CGPoint(
+                x: isRevealed ? screen.minX + screenGap : screen.minX - size.width,
+                y: middleY - size.height / 2
+            )
+        case .right:
+            CGPoint(
+                x: isRevealed ? screen.maxX - screenGap - size.width : screen.maxX,
+                y: middleY - size.height / 2
+            )
+        }
+        return CGRect(x: origin.x.rounded(), y: origin.y.rounded(), width: size.width, height: size.height)
+    }
+
+    /// How deep a strip of the screen a resting Dock takes from windows. Nothing when it hides itself: the
+    /// desktop then uses the whole screen.
+    public static func reservedDepth(_ settings: DockSettings) -> Double {
+        settings.isEnabled && !settings.autoHides ? screenGap + restHeight(base: settings.iconSize) : 0
+    }
+}
+
+/// When a Dock that hides itself shows. Pure, so the rules are testable without touching the real Dock.
+public enum DockAutoHide {
+    /// How close to the edge counts as touching it: the pointer stops a point short of the screen's far edges.
+    static let edgeReach = 1.5
+    public static let slideDuration = 0.25
+    /// Long enough to cross a small gap back to the bar without it sliding away.
+    public static let hideDelay = Duration.milliseconds(400)
+
+    /// True when the pointer has reached the edge the Dock hides behind, somewhere along the bar.
+    public static func touchesEdge(
+        _ point: CGPoint,
+        barFrame: CGRect,
+        position: DockPosition,
+        screen: CGRect
+    ) -> Bool {
+        switch position {
+        case .bottom:
+            point.y <= screen.minY + edgeReach && point.x >= barFrame.minX && point.x <= barFrame.maxX
+        case .left:
+            point.x <= screen.minX + edgeReach && point.y >= barFrame.minY && point.y <= barFrame.maxY
+        case .right:
+            point.x >= screen.maxX - edgeReach && point.y >= barFrame.minY && point.y <= barFrame.maxY
+        }
+    }
+
+    /// True when the pointer is on the Dock or in the gap between it and the screen's edge.
+    public static func isOver(_ point: CGPoint, frame: CGRect) -> Bool {
+        frame.insetBy(dx: -DockBarLayout.screenGap, dy: -DockBarLayout.screenGap).contains(point)
+    }
+
+    /// Whether the Dock should be showing now.
+    ///
+    /// - Parameter isHeld: Something in the Dock needs it to stay, such as an open card or menu, or a launch.
+    public static func isRevealed(
+        autoHides: Bool,
+        wasRevealed: Bool,
+        isOverDock: Bool,
+        touchesEdge: Bool,
+        isHeld: Bool
+    ) -> Bool {
+        guard autoHides else { return true }
+        return isHeld || touchesEdge || (wasRevealed && isOverDock)
     }
 }
 

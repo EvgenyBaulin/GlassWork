@@ -149,8 +149,8 @@ final class WindowTilesController {
         return NSScreen.screens.enumerated().map { index, screen in
             let display = TileDisplay(frame: screen.frame, visibleFrame: screen.visibleFrame)
             // GlassWork's Dock stands on the primary display only.
-            guard dock.isEnabled, index == 0 else { return display }
-            return display.reservingBottom(DockBarLayout.screenGap + DockBarLayout.restHeight(base: dock.iconSize))
+            guard index == 0 else { return display }
+            return display.reserving(DockBarLayout.reservedDepth(dock), at: dock.position)
         }
     }
 

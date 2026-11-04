@@ -2,6 +2,10 @@ import Foundation
 
 public enum DockPosition: String, Codable, CaseIterable, Sendable {
     case bottom, left, right
+
+    public var isVertical: Bool {
+        self != .bottom
+    }
 }
 
 public enum FolderSort: String, Codable, CaseIterable, Sendable {
@@ -40,6 +44,24 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
         sort == .name
             ? apps.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
             : apps
+    }
+}
+
+extension AppFolder {
+    private enum CodingKeys: String, CodingKey {
+        case id, name, apps, symbol, sort
+    }
+
+    /// Missing keys fall back to defaults, so a file from an earlier version keeps loading.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(
+            name: container.decodeIfPresent(String.self, forKey: .name) ?? "",
+            apps: container.decodeIfPresent([DockApp].self, forKey: .apps) ?? []
+        )
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
+        sort = try container.decodeIfPresent(FolderSort.self, forKey: .sort) ?? .manual
     }
 }
 
@@ -91,6 +113,35 @@ public struct DockSettings: Codable, Sendable, Equatable {
             case .widget: []
             }
         }
+    }
+}
+
+extension DockSettings {
+    private enum CodingKeys: String, CodingKey {
+        case isEnabled, position, iconSize, magnifies, magnifiedSize, autoHides, showsRecents, items
+    }
+
+    /// An item this version cannot read is skipped, so the rest of the Dock survives it.
+    private struct LossyItem: Decodable {
+        let value: DockItem?
+
+        init(from decoder: Decoder) {
+            value = try? DockItem(from: decoder)
+        }
+    }
+
+    /// Missing keys fall back to defaults: a file written before a setting existed must keep loading.
+    public init(from decoder: Decoder) throws {
+        self.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? isEnabled
+        position = try container.decodeIfPresent(DockPosition.self, forKey: .position) ?? position
+        iconSize = try container.decodeIfPresent(Double.self, forKey: .iconSize) ?? iconSize
+        magnifies = try container.decodeIfPresent(Bool.self, forKey: .magnifies) ?? magnifies
+        magnifiedSize = try container.decodeIfPresent(Double.self, forKey: .magnifiedSize) ?? magnifiedSize
+        autoHides = try container.decodeIfPresent(Bool.self, forKey: .autoHides) ?? autoHides
+        showsRecents = try container.decodeIfPresent(Bool.self, forKey: .showsRecents) ?? showsRecents
+        items = try container.decodeIfPresent([LossyItem].self, forKey: .items)?.compactMap(\.value) ?? items
     }
 }
 

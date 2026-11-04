@@ -1,6 +1,16 @@
 import GlassWorkCore
 import SwiftUI
 
+public extension DockPosition {
+    var title: String {
+        switch self {
+        case .bottom: loc("Dock position bottom")
+        case .left: loc("Dock position left")
+        case .right: loc("Dock position right")
+        }
+    }
+}
+
 /// What the Dock can ask the app to do.
 @MainActor
 public struct DockActions {
@@ -76,24 +86,53 @@ public struct DockView: View {
         return pointer == nil ? .rest : .magnified
     }
 
-    /// Everything hangs from the bottom edge, so the window can change size without the bar moving.
+    private var position: DockPosition {
+        settings.position
+    }
+
+    /// The edge of the screen the Dock stands on.
+    private var edge: Alignment {
+        switch position {
+        case .bottom: .bottom
+        case .left: .leading
+        case .right: .trailing
+        }
+    }
+
+    /// Everything hangs from the screen's edge, so the window can change size without the bar moving.
     public var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .bottom) {
+            ZStack(alignment: edge) {
                 if let openFolder {
                     FolderCard(folder: openFolder, actions: actions) { openFolderID = nil }
-                        .padding(.bottom, cardLift)
+                        .padding(cardEdge, cardLift)
                 }
-                bar(middle: proxy.size.width / 2)
+                bar(middle: (position.isVertical ? proxy.size.height : proxy.size.width) / 2)
             }
-            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottom)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: edge)
         }
         .coordinateSpace(.named(Self.canvas))
         .onChange(of: space) { _, space in actions.needsSpace(space) }
     }
 
+    private var cardEdge: Edge.Set {
+        switch position {
+        case .bottom: .bottom
+        case .left: .leading
+        case .right: .trailing
+        }
+    }
+
     private var cardLift: Double {
         DockBarLayout.restHeight(base: settings.iconSize) + DockBarLayout.growth(settings) + DockBarLayout.folderCardGap
+    }
+
+    private var stack: AnyLayout {
+        switch position {
+        case .bottom: AnyLayout(HStackLayout(alignment: .bottom, spacing: DockBarLayout.spacing))
+        case .left: AnyLayout(VStackLayout(alignment: .leading, spacing: DockBarLayout.spacing))
+        case .right: AnyLayout(VStackLayout(alignment: .trailing, spacing: DockBarLayout.spacing))
+        }
     }
 
     private func bar(middle: Double) -> some View {
@@ -103,25 +142,26 @@ public struct DockView: View {
             magnified: settings.magnifiedSize,
             pointer: settings.magnifies ? pointer : nil
         )
-        return HStack(alignment: .bottom, spacing: DockBarLayout.spacing) {
+        return stack {
             ForEach(Array(settings.items.enumerated()), id: \.element.id) { index, item in
                 tile(item, size: layout.sizes[index])
             }
         }
         .padding(DockBarLayout.padding)
-        .background(alignment: .bottom) {
-            // Keeps its height: icons grow up and out of it.
+        .background(alignment: edge) {
+            // Keeps its depth: icons grow out of it, away from the screen's edge.
+            let depth = DockBarLayout.restHeight(base: settings.iconSize)
             Color.clear
-                .frame(height: DockBarLayout.restHeight(base: settings.iconSize))
+                .frame(width: position.isVertical ? depth : nil, height: position.isVertical ? nil : depth)
                 .glassEffect(.regular, in: .rect(cornerRadius: 22))
         }
         .onContinuousHover(coordinateSpace: .named(Self.canvas)) { phase in
             switch phase {
-            case let .active(location): movePointer(to: location.x - middle)
+            case let .active(location): movePointer(to: (position.isVertical ? location.y : location.x) - middle)
             case .ended: movePointer(to: nil)
             }
         }
-        .offset(x: layout.centerX)
+        .offset(x: position.isVertical ? 0 : layout.centerX, y: position.isVertical ? layout.centerX : 0)
     }
 
     /// Entering and leaving animate. Moving does not need to: sizes already change continuously.
@@ -142,7 +182,8 @@ public struct DockView: View {
                 app: app,
                 size: size,
                 isRunning: running.contains(app.path),
-                isLaunching: state.launching.contains(app.path)
+                isLaunching: state.launching.contains(app.path),
+                position: position
             ) { actions.open(app) }
                 .contextMenu { DockAppMenu(app: app, actions: actions) }
                 .draggable(app.path)
@@ -154,7 +195,8 @@ public struct DockView: View {
                 folder: folder,
                 size: size,
                 isRunning: folder.apps.contains { running.contains($0.path) },
-                isLaunching: folder.apps.contains { state.launching.contains($0.path) }
+                isLaunching: folder.apps.contains { state.launching.contains($0.path) },
+                position: position
             ) {
                 openFolderID = openFolderID == folder.id ? nil : folder.id
             }
@@ -162,7 +204,9 @@ public struct DockView: View {
                 drop(paths) { dragged, items in DockLayout.drop(dragged, into: folder, in: items) }
             }
         case let .widget(module):
-            WidgetTile(module: module, size: size, monitor: monitor) { actions.showPanel(module) }
+            WidgetTile(module: module, size: size, monitor: monitor, position: position) {
+                actions.showPanel(module)
+            }
         }
     }
 }
@@ -211,10 +255,36 @@ struct AppIcon: View {
     }
 }
 
-/// Jumps until the app is up. Only draws higher, so nothing around the icon moves.
+/// An icon with its running dot, on the side of the screen's edge.
+struct DockIndicated<Icon: View>: View {
+    let position: DockPosition
+    let isLit: Bool
+    @ViewBuilder let icon: Icon
+
+    private var dot: some View {
+        Circle().fill(isLit ? Color.primary : .clear).frame(width: 4, height: 4)
+    }
+
+    var body: some View {
+        switch position {
+        case .bottom: VStack(spacing: 3) { icon
+                dot
+            }
+        case .left: HStack(spacing: 3) { dot
+                icon
+            }
+        case .right: HStack(spacing: 3) { icon
+                dot
+            }
+        }
+    }
+}
+
+/// Jumps until the app is up, away from the screen's edge. Only draws further out, so nothing around it moves.
 struct LaunchBounce: ViewModifier {
     let isActive: Bool
     let size: CGFloat
+    var position = DockPosition.bottom
     /// A fixed height from 0 to 1 in place of the motion, for snapshots.
     var pose: Double?
     @Environment(\.accessibilityReduceMotion) private var reducesMotion
@@ -222,9 +292,13 @@ struct LaunchBounce: ViewModifier {
     func body(content: Content) -> some View {
         let height = size * DockBarLayout.bounce
         let isStill = reducesMotion
+        let direction = direction
         content.keyframeAnimator(initialValue: pose ?? 0, repeating: isActive && pose == nil) { view, lift in
             view
-                .offset(y: isStill ? 0 : -height * lift)
+                .offset(
+                    x: isStill ? 0 : height * lift * direction.width,
+                    y: isStill ? 0 : height * lift * direction.height
+                )
                 .opacity(isStill ? 1 - lift / 2 : 1)
         } keyframes: { _ in
             KeyframeTrack {
@@ -234,6 +308,14 @@ struct LaunchBounce: ViewModifier {
             }
         }
     }
+
+    private var direction: CGSize {
+        switch position {
+        case .bottom: CGSize(width: 0, height: -1)
+        case .left: CGSize(width: 1, height: 0)
+        case .right: CGSize(width: -1, height: 0)
+        }
+    }
 }
 
 struct AppTile: View {
@@ -241,15 +323,15 @@ struct AppTile: View {
     let size: CGFloat
     let isRunning: Bool
     var isLaunching = false
+    var position = DockPosition.bottom
     var pose: Double?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 3) {
+            DockIndicated(position: position, isLit: isRunning || isLaunching) {
                 AppIcon(app: app, size: size)
-                    .modifier(LaunchBounce(isActive: isLaunching, size: size, pose: pose))
-                Circle().fill(isRunning || isLaunching ? Color.primary : .clear).frame(width: 4, height: 4)
+                    .modifier(LaunchBounce(isActive: isLaunching, size: size, position: position, pose: pose))
             }
         }
         .buttonStyle(.plain)
@@ -296,16 +378,16 @@ struct FolderTile: View {
     let size: CGFloat
     let isRunning: Bool
     var isLaunching = false
+    var position = DockPosition.bottom
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 3) {
+            DockIndicated(position: position, isLit: isRunning || isLaunching) {
                 content
                     .frame(width: size, height: size)
                     .background(.white.opacity(0.14), in: .rect(cornerRadius: size / 4.5))
-                    .modifier(LaunchBounce(isActive: isLaunching, size: size))
-                Circle().fill(isRunning || isLaunching ? Color.primary : .clear).frame(width: 4, height: 4)
+                    .modifier(LaunchBounce(isActive: isLaunching, size: size, position: position))
             }
         }
         .buttonStyle(.plain)
@@ -413,12 +495,13 @@ struct WidgetTile: View {
     let module: ModuleID
     let size: CGFloat
     let monitor: SystemMonitor
+    var position = DockPosition.bottom
     let action: () -> Void
 
     var body: some View {
         let content = ItemContent.content(module, monitor: monitor, style: .compact)
         Button(action: action) {
-            VStack(spacing: 3) {
+            DockIndicated(position: position, isLit: false) {
                 VStack(spacing: 1) {
                     Image(systemName: module.symbol).font(.system(size: size * 0.28)).foregroundStyle(module.tint)
                     Text(content.figure)
@@ -429,7 +512,6 @@ struct WidgetTile: View {
                 }
                 .frame(width: size, height: size)
                 .background(.black.opacity(0.28), in: .rect(cornerRadius: size / 4.5))
-                Color.clear.frame(width: 4, height: 4)
             }
         }
         .buttonStyle(.plain)

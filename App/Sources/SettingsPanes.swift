@@ -123,6 +123,13 @@ struct DockPane: View {
                 Toggle(loc("Magnification"), isOn: dock.magnifies)
                 Slider(value: dock.magnifiedSize, in: 48 ... 128) { Text(loc("Magnified size")) }
             }
+            Section(loc("Position")) {
+                Picker(loc("Position on screen"), selection: dock.position) {
+                    ForEach(DockPosition.allCases, id: \.self) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                Toggle(loc("Automatically hide and show"), isOn: dock.autoHides)
+            }
         }
         .formStyle(.grouped)
         .confirmationDialog(loc("Use GlassWork Dock?"), isPresented: $confirming) {
@@ -156,6 +163,14 @@ struct AppSettingsBinding {
             get: { store.settings.dock.magnifiedSize },
             set: { value in store.update { $0.dock.magnifiedSize = value } }
         )
+    }
+
+    var position: Binding<DockPosition> {
+        Binding(get: { store.settings.dock.position }, set: { value in store.update { $0.dock.position = value } })
+    }
+
+    var autoHides: Binding<Bool> {
+        Binding(get: { store.settings.dock.autoHides }, set: { value in store.update { $0.dock.autoHides = value } })
     }
 }
 

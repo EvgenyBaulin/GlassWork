@@ -19,7 +19,14 @@ struct DockSnapshotTests {
         return settings
     }
 
-    private func dock(space: DockSpace, pointer: Double? = nil, running: Set<String> = []) -> some View {
+    private func dock(
+        space: DockSpace,
+        pointer: Double? = nil,
+        running: Set<String> = [],
+        position: DockPosition = .bottom
+    ) -> some View {
+        var settings = settings
+        settings.position = position
         let state = DockLiveState(settings: settings)
         state.running = running
         let size = DockBarLayout.windowSize(for: space, count: apps.count, settings: settings)
@@ -45,6 +52,30 @@ struct DockSnapshotTests {
     @Test(arguments: [true, false])
     func magnifiedAtTheEdge(dark: Bool) {
         snapshotPanel(dock(space: .magnified, pointer: -180), name: "edge", dark: dark)
+    }
+
+    /// The running dots sit on the side of the screen's edge.
+    @Test(arguments: [true, false])
+    func onTheLeft(dark: Bool) {
+        let running = Set(apps.prefix(2).map(\.path))
+        snapshotPanel(dock(space: .rest, running: running, position: .left), name: "left", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func onTheRight(dark: Bool) {
+        let running = Set(apps.prefix(2).map(\.path))
+        snapshotPanel(dock(space: .rest, running: running, position: .right), name: "right", dark: dark)
+    }
+
+    /// Icons grow away from the screen's edge.
+    @Test(arguments: [true, false])
+    func magnifiedOnTheLeft(dark: Bool) {
+        snapshotPanel(dock(space: .magnified, pointer: 0, position: .left), name: "left-middle", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func magnifiedOnTheRight(dark: Bool) {
+        snapshotPanel(dock(space: .magnified, pointer: 0, position: .right), name: "right-middle", dark: dark)
     }
 
     /// Not running, running, and a launch at the top of its jump.
