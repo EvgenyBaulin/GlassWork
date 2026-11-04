@@ -2193,6 +2193,16 @@
         }
       }
     },
+    "Moscow": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Москва"
+          }
+        }
+      }
+    },
     "Name": {
       "localizations": {
         "ru": {

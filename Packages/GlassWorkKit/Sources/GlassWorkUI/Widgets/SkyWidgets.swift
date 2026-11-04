@@ -13,7 +13,7 @@ struct SunPlace {
             latitude = place.latitude
             longitude = place.longitude
         } else {
-            name = "Moscow"
+            name = loc("Moscow")
             latitude = 55.75
             longitude = 37.62
         }

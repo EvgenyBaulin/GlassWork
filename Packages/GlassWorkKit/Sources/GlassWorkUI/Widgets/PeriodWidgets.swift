@@ -314,7 +314,10 @@ struct StopwatchWidget: View {
     private func time(size: CGFloat) -> some View {
         Group {
             if let startedAt = stopwatch.startedAt, !context.showsSeconds {
-                Text(timerInterval: startedAt.addingTimeInterval(-stopwatch.accumulated) ... .distantFuture)
+                Text(
+                    timerInterval: startedAt.addingTimeInterval(-stopwatch.accumulated) ... .distantFuture,
+                    countsDown: false
+                )
             } else {
                 Text(elapsed.elapsedText)
             }

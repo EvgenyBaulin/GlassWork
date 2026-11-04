@@ -6,7 +6,16 @@ import Foundation
 /// Only the app calls this: the widget extension is sandboxed and reads the result from the snapshot.
 @MainActor
 public final class WordOfDayProvider {
-    private var cache: [String: WordOfDay] = [:]
+    /// A word the dictionary did not know is asked for again after an hour, not on every snapshot,
+    /// since snapshots are taken every couple of seconds while desktop widgets are shown.
+    private static let retryAfter: TimeInterval = 3600
+    private struct CacheEntry {
+        let word: WordOfDay
+        let askedAt: Date
+        let isMissing: Bool
+    }
+
+    private var cache: [String: CacheEntry] = [:]
     private let lookup: (String) -> String?
 
     /// `lookup` returns the dictionary's text for a word; tests replace it.
@@ -23,22 +32,21 @@ public final class WordOfDayProvider {
     /// Today's word first, then the days before it.
     public func recent(_ count: Int, at date: Date, calendar: Calendar = .current) -> [WordOfDay] {
         (0 ..< count).compactMap { back in
-            calendar.date(byAdding: .day, value: -back, to: date).map { word(on: $0, calendar: calendar) }
+            calendar.date(byAdding: .day, value: -back, to: date).map { word(on: $0, now: date, calendar: calendar) }
         }
     }
 
-    public func word(on date: Date, calendar: Calendar = .current) -> WordOfDay {
+    /// `now` decides when a word the dictionary did not know is tried again.
+    public func word(on date: Date, now: Date? = nil, calendar: Calendar = .current) -> WordOfDay {
         let day = ScreenTimeLog.dayKey(date, calendar: calendar)
-        if let cached = cache[day] {
-            return cached
+        let now = now ?? date
+        if let cached = cache[day], !cached.isMissing || now.timeIntervalSince(cached.askedAt) < Self.retryAfter {
+            return cached.word
         }
         let word = WordList.word(on: date, calendar: calendar)
         let entry = lookup(word).map { DictionaryEntryParser.parse($0, word: word) } ?? DictionaryEntry()
         let result = WordOfDay(day: day, word: word, entry: entry)
-        // A word the dictionary does not know yet may be known later, so only real answers are kept.
-        if entry != DictionaryEntry() {
-            cache[day] = result
-        }
+        cache[day] = CacheEntry(word: result, askedAt: now, isMissing: entry == DictionaryEntry())
         for key in cache.keys.sorted().dropLast(30) {
             cache[key] = nil
         }

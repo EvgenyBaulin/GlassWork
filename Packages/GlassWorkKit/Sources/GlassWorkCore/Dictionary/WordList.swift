@@ -5,7 +5,7 @@ import Foundation
 public enum WordList {
     public static let words: [String] = [
         "aplomb", "ardent", "arduous", "avid", "banal", "benevolent", "bolster", "candid", "capricious", "cascade",
-        "catalyst", "cherish", "cogent", "compelling", "concise", "conundrum", "copious", "cryptic", "cultivate",
+        "cherish", "cogent", "compelling", "concise", "conundrum", "copious", "cryptic", "cultivate",
         "debacle", "deft", "delineate", "diligent", "discern", "diverge", "eclectic", "elegant", "elicit", "eloquent",
         "elusive", "embark", "emulate", "endeavour", "enigma", "ephemeral", "equanimity", "erudite", "esoteric",
         "euphoria", "exacerbate", "exemplary", "exuberant", "facet", "fastidious", "fathom", "fervent", "flourish",

@@ -91,10 +91,18 @@ struct WordOfDayWidget: View {
     private func body(_ word: WordOfDay, lines: Int) -> some View {
         if let definition = word.definition {
             Text(definition).font(.system(size: 13)).lineLimit(lines)
-        } else if !word.synonyms.isEmpty {
-            Text(loc("Similar: \(word.synonyms.joined(separator: ", "))"))
-                .font(.system(size: 13))
-                .lineLimit(lines)
+        } else {
+            VStack(alignment: .leading, spacing: 4) {
+                if let example = word.example {
+                    Text(verbatim: "“\(example)”").font(.system(size: 13).italic()).lineLimit(max(lines / 2, 2))
+                }
+                if !word.synonyms.isEmpty {
+                    Text(loc("Similar: \(word.synonyms.joined(separator: ", "))"))
+                        .font(.system(size: 13))
+                        .foregroundStyle(word.example == nil ? .primary : .secondary)
+                        .lineLimit(lines)
+                }
+            }
         }
     }
 
@@ -104,7 +112,7 @@ struct WordOfDayWidget: View {
             ForEach(words.dropFirst().prefix(limit)) { word in
                 VStack(alignment: .leading, spacing: 1) {
                     Text(word.word).font(.system(size: 14, weight: .semibold, design: .serif))
-                    if let text = word.definition ?? word.synonyms.first {
+                    if let text = word.definition ?? word.example ?? word.synonyms.first {
                         Text(text).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
                     }
                 }

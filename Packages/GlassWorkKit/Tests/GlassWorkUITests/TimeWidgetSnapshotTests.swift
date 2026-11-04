@@ -70,7 +70,8 @@ struct TimeWidgetSnapshotTests {
             )),
             WordOfDay(day: "2026-11-02", word: "glow", entry: DictionaryEntry(
                 partOfSpeech: "noun",
-                synonyms: ["radiance", "gleam", "shine"]
+                synonyms: ["radiance", "gleam", "shine"],
+                example: "the glow of the embers."
             )),
             WordOfDay(
                 day: "2026-11-01",

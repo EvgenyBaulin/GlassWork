@@ -33,7 +33,14 @@ struct WordOfDayTests {
         #expect(entry.pronunciation == nil)
         #expect(entry.partOfSpeech == "noun")
         #expect(entry.definition == nil)
+        #expect(entry.example == "the gleam of a distant lamp.")
         #expect(entry.synonyms == ["glimmer", "flicker", "glint", "flash", "informal wink"])
+    }
+
+    @Test func thesaurusEntryWithoutAnExample() {
+        let entry = DictionaryEntryParser.parse("gleam adjective glimmering, shining, bright", word: "gleam")
+        #expect(entry.example == nil)
+        #expect(entry.synonyms == ["glimmering", "shining", "bright"])
     }
 
     @Test func skipsSenseNumbersAndStopsAtTheLimit() {
@@ -83,6 +90,21 @@ struct WordOfDayTests {
         #expect(words.first?.definition == "a faint light")
         _ = provider.recent(3, at: date, calendar: calendar)
         #expect(calls == 3)
+    }
+
+    @MainActor
+    @Test func unknownWordsAreAskedForOncePerHour() {
+        var calls = 0
+        let provider = WordOfDayProvider { _ in
+            calls += 1
+            return nil
+        }
+        for second in 0 ..< 10 {
+            _ = provider.word(on: date, now: date.addingTimeInterval(Double(second) * 2), calendar: calendar)
+        }
+        #expect(calls == 1)
+        _ = provider.word(on: date, now: date.addingTimeInterval(3601), calendar: calendar)
+        #expect(calls == 2)
     }
 
     @MainActor
