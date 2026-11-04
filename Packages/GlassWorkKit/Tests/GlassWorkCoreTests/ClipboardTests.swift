@@ -41,9 +41,10 @@ private final class FakePasteboard: PasteboardReading {
         return color
     }
 
-    func imagePNG(limit: Int) -> Data? {
+    /// Ignores the limit on purpose, so the tests show that capture enforces it by itself.
+    func imagePNG(limit _: Int) -> Data? {
         contentReads += 1
-        return image.flatMap { $0.count <= limit ? $0 : nil }
+        return image
     }
 }
 
@@ -148,6 +149,13 @@ struct ClipboardCaptureTests {
         pasteboard.image = Data(count: ClipboardReader.imageLimit + 1)
 
         #expect(capture(pasteboard) == nil)
+    }
+
+    @Test func anImageOfExactlyTenMegabytesIsKept() {
+        let pasteboard = FakePasteboard()
+        pasteboard.image = Data(count: ClipboardReader.imageLimit)
+
+        #expect(capture(pasteboard)?.entry.byteCount == ClipboardReader.imageLimit)
     }
 
     @Test(arguments: ["", "   \n "])
