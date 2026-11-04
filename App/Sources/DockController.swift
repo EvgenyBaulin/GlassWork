@@ -60,6 +60,8 @@ final class DockController {
         panel.level = .dock
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary]
         panel.isReleasedWhenClosed = false
+        // Hide Others in any app counts this app too now that it has a Dock icon.
+        panel.canHide = false
         let hosting = NSHostingView(rootView: DockView(state: state, monitor: model.monitor, actions: actions))
         // The window's size is decided here. Left to the content it would grow from its corner, sideways.
         hosting.sizingOptions = []

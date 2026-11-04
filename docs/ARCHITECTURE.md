@@ -2,8 +2,9 @@
 
 ## Processes
 
-- **GlassWork.app** is an unsandboxed background app (`LSUIElement`). It owns every data collector: system
-  metrics (Mach, IOKit, SMC), shell tools (`git`, `docker`, `gh`), files of local tools, network checks.
+- **GlassWork.app** is an unsandboxed app with a Dock icon and a main window. Closing the window leaves it
+  running in the menu bar. It owns every data collector: system metrics (Mach, IOKit, SMC), shell tools
+  (`git`, `docker`, `gh`), files of local tools, network checks.
 - **GlassWorkWidgets.appex** is the WidgetKit extension. It is sandboxed, so it never runs tools or reads
   arbitrary files. It reads JSON snapshots that the app writes into the shared App Group container and
   performs small actions through App Intents.

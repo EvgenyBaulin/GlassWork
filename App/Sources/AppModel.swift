@@ -16,6 +16,7 @@ final class AppModel {
     private lazy var panels = PanelController(model: self)
     private lazy var statusBar = StatusBarController(model: self)
     private lazy var settingsWindow = SettingsWindowController(model: self)
+    private lazy var mainWindow = MainWindowController(model: self)
     private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private lazy var dock = DockController(model: self)
     private lazy var clipboard = ClipboardController(model: self)
@@ -28,6 +29,7 @@ final class AppModel {
     private let hotKey = HotKey()
     private var hasOpenPanel = false
     private var isSettingsOpen = false
+    private var visibleSection: MainSection?
     private var timer: Timer?
     private var thresholds = ThresholdTracker()
     /// Widgets in the system's desktop layer, as WidgetKit last reported them.
@@ -108,6 +110,18 @@ final class AppModel {
         settingsWindow.show(module: module)
     }
 
+    func showMainWindow() {
+        panels.closeTransient()
+        mainWindow.show()
+    }
+
+    /// The welcome comes first on a new Mac.
+    func showMainWindowAtLaunch() {
+        if store.settings.welcomeCompleted {
+            showMainWindow()
+        }
+    }
+
     func showFanCurves() {
         panels.closeTransient()
         settingsWindow.showFans()
@@ -158,6 +172,12 @@ final class AppModel {
         if isOpen {
             monitor.refresh()
         }
+    }
+
+    /// What the main window has on screen, or nil while it is closed or covered.
+    func mainWindowChanged(visibleSection: MainSection?) {
+        self.visibleSection = visibleSection
+        updateDemand()
     }
 
     /// Runs now and again whenever settings change.

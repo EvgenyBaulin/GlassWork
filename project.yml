@@ -61,7 +61,6 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
-        LSUIElement: true
         CFBundleURLTypes:
           - CFBundleURLName: io.github.evgenybaulin.GlassWork
             CFBundleURLSchemes: [glasswork]

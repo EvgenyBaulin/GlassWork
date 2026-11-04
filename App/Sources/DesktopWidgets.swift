@@ -65,6 +65,7 @@ final class DesktopWidgetController {
         window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1)
         window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         window.isReleasedWhenClosed = false
+        window.canHide = false
         let view = DesktopWidgetView(
             placement: placement,
             state: state,

@@ -22,6 +22,7 @@ final class GlassPanel: NSPanel {
         level = .statusBar
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         isReleasedWhenClosed = false
+        canHide = false
     }
 }
 
@@ -108,6 +109,7 @@ final class PanelController {
         window.titlebarAppearsTransparent = true
         window.level = .floating
         window.isReleasedWhenClosed = false
+        window.canHide = false
         window.center()
         window.makeKeyAndOrderFront(nil)
         detached[module] = window

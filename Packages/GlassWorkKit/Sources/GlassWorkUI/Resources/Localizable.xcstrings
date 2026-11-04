@@ -11386,6 +11386,106 @@
           }
         }
       }
+    },
+    "Apps": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приложения"
+          }
+        }
+      }
+    },
+    "Window Tiles": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раскладка окон"
+          }
+        }
+      }
+    },
+    "Unlock": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разблокировка"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назад"
+          }
+        }
+      }
+    },
+    "Forward": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вперёд"
+          }
+        }
+      }
+    },
+    "This section is not ready yet.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот раздел пока не готов."
+          }
+        }
+      }
+    },
+    "Unlock this Mac": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разблокировка этого Mac"
+          }
+        }
+      }
+    },
+    "Open GlassWork": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть GlassWork"
+          }
+        }
+      }
+    },
+    "Close Window": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть окно"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
