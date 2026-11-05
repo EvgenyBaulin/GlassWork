@@ -82,7 +82,7 @@ public final class SystemMonitor {
     }
 
     /// Timers, notes and other small modules, ticking along with the monitor.
-    public let everyday = EverydayStore()
+    public let everyday: EverydayStore
     /// Git, Docker, Ping and the other developer modules, each at its own pace.
     public let developer = DeveloperStore()
     /// Calendar events and reminders.
@@ -121,6 +121,9 @@ public final class SystemMonitor {
 
     @ObservationIgnored private let sampler = Sampler()
     @ObservationIgnored private var loop: Task<Void, Never>?
+    @ObservationIgnored private var pausedLoop: Task<Void, Never>?
+    /// How often timers and Keep Awake are looked at while nothing else is read.
+    @ObservationIgnored var pausedInterval: TimeInterval = 5
     @ObservationIgnored private var lastSlow = Date.distantPast
     @ObservationIgnored private var lastDevices = Date.distantPast
     @ObservationIgnored private var lastTimeMachine = Date.distantPast
@@ -136,8 +139,10 @@ public final class SystemMonitor {
         clipboard: ClipboardStore = ClipboardStore(),
         nowPlaying: NowPlayingStore = NowPlayingStore(),
         apps: AppUsageStore = AppUsageStore(),
-        personal: PersonalWidgetStore = PersonalWidgetStore()
+        personal: PersonalWidgetStore = PersonalWidgetStore(),
+        everyday: EverydayStore = EverydayStore()
     ) {
+        self.everyday = everyday
         self.apps = apps
         self.personal = personal
         self.weather = weather
@@ -154,6 +159,8 @@ public final class SystemMonitor {
 
     public func start() {
         guard loop == nil else { return }
+        pausedLoop?.cancel()
+        pausedLoop = nil
         loop = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self else { return }
@@ -163,11 +170,25 @@ public final class SystemMonitor {
         }
     }
 
-    /// Nothing is read while the Mac sleeps or the screen is locked.
+    /// Nothing is read while the Mac sleeps or the screen is locked, except for what timers and Keep Awake need.
     public func stop() {
         loop?.cancel()
         loop = nil
         nowPlaying.stop()
+        keepTimeWhilePaused()
+    }
+
+    /// A timer has to ring and Keep Awake has to end with the display off, when the regular tick is paused.
+    private func keepTimeWhilePaused() {
+        guard pausedLoop == nil else { return }
+        pausedLoop = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let interval = self?.pausedInterval else { return }
+                try? await Task.sleep(for: .seconds(interval))
+                guard !Task.isCancelled, let self else { return }
+                everyday.tick(at: Date(), battery: everyday.isKeepingAwake ? BatteryReader.sample() : nil)
+            }
+        }
     }
 
     /// One read of what `kinds` want and the regular tick does not cover.

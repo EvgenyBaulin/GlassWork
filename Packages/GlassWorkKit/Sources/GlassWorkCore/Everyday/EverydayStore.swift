@@ -70,7 +70,7 @@ public final class EverydayStore {
         }
     }
 
-    /// The system lets go by itself at the end, because the tick that would stop Keep Awake pauses on a locked screen.
+    /// The system lets go by itself at the end, because no tick runs while the Mac sleeps.
     private func assertionProperties() -> [String: Any] {
         let type = letsDisplaySleep
             ? kIOPMAssertionTypePreventUserIdleSystemSleep
