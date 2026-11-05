@@ -46,6 +46,7 @@ install: generate ## Release build, copy to /Applications and relaunch
 	-pkill -x GlassWork
 	rm -rf /Applications/GlassWork.app
 	cp -R $(APP) /Applications/
+	-pkill -x GlassWorkWidgets # the old process cannot draw from a replaced bundle
 	open /Applications/GlassWork.app
 
 run: build ## Debug build and launch

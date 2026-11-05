@@ -72,6 +72,8 @@ run() {
     pkill -x GlassWork || true
     rm -rf /Applications/GlassWork.app
     cp -R "$SRC_DIR/build/DerivedData/Build/Products/Release/GlassWork.app" /Applications/
+    # The old process cannot draw from a replaced bundle: widgets turn into grey placeholders.
+    pkill -x GlassWorkWidgets || true
     touch "$STAMP"
     (( was_running )) && open /Applications/GlassWork.app
     log "update finished at $(git -C "$SRC_DIR" rev-parse --short HEAD)"
