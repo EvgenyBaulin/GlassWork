@@ -77,7 +77,7 @@ struct FansWidget: View {
     }
 
     private var perFan: some View {
-        Text(fans.map { "\(shortName($0)) \(Format.rpm($0.rpm))" }.joined(separator: " · "))
+        Text(fans.map { "\(shortName($0)) \(Format.groupedRPM($0.rpm))" }.joined(separator: " · "))
             .font(.system(size: 11, design: .monospaced))
             .foregroundStyle(.secondary)
             .lineLimit(1)

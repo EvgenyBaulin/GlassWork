@@ -1220,7 +1220,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Эндпоинты"
+            "value": "Адреса"
           }
         }
       }
@@ -3018,7 +3018,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Рендеринг"
+            "value": "Отрисовка"
           }
         }
       }
@@ -5422,7 +5422,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Пресеты"
+            "value": "Наборы"
           }
         }
       }
@@ -6590,7 +6590,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сменить хост…"
+            "value": "Сменить сервер…"
           }
         }
       }
@@ -6734,7 +6734,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Введите имя хоста или адрес IPv4."
+            "value": "Введите имя сервера или адрес IPv4."
           }
         }
       }
@@ -6830,7 +6830,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Хост"
+            "value": "Сервер"
           }
         }
       }
@@ -6846,7 +6846,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Хост или IP-адрес"
+            "value": "Сервер или IP-адрес"
           }
         }
       }
@@ -13736,7 +13736,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Тайм-аут"
+            "value": "Время ожидания"
           }
         }
       }
@@ -15486,7 +15486,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сохранить как пресет…"
+            "value": "Сохранить как набор…"
           }
         }
       }
@@ -15496,7 +15496,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сохранить как пресет"
+            "value": "Сохранить как набор"
           }
         }
       }
@@ -15506,7 +15506,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Изменить пресеты…"
+            "value": "Изменить наборы…"
           }
         }
       }
@@ -15516,7 +15516,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Название пресета"
+            "value": "Название набора"
           }
         }
       }
@@ -15618,7 +15618,7 @@
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Пресет меняет виджеты и свои папки. Ваши приложения и стопки остаются."
+            "value": "Набор меняет виджеты и свои папки. Ваши приложения и стопки остаются."
           }
         }
       }
