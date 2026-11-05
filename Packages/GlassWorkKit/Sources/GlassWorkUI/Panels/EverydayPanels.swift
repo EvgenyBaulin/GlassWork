@@ -372,36 +372,6 @@ struct DeviceBatteriesPanel: View {
     }
 }
 
-struct EjectPanel: View {
-    let monitor: SystemMonitor
-    @Environment(\.panelActions) private var actions
-
-    private var volumes: [DiskVolume] {
-        monitor.volumes.filter(\.isEjectable)
-    }
-
-    var body: some View {
-        PanelFrame(module: .eject, subtitle: loc("\(volumes.count) volumes")) {
-            ForEach(volumes) { volume in
-                HStack {
-                    Image(systemName: "externaldrive").foregroundStyle(.secondary)
-                    Text(volume.name).font(.system(size: 13))
-                    Spacer()
-                    Button(loc("Eject")) { eject(volume) }.controlSize(.small)
-                }
-            }
-            if volumes.isEmpty {
-                Text(loc("Nothing to eject")).foregroundStyle(.secondary).font(.system(size: 12))
-            }
-        }
-    }
-
-    private func eject(_ volume: DiskVolume) {
-        try? NSWorkspace.shared.unmountAndEjectDevice(at: URL(filePath: volume.path))
-        monitor.refresh()
-    }
-}
-
 extension Color {
     init(hex: String) {
         let value = UInt32(hex.dropFirst(), radix: 16) ?? 0

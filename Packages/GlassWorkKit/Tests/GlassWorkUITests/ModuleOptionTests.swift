@@ -61,7 +61,9 @@ struct OptionTableTests {
         "Hide at once": "Скрывать сразу",
         "Manual": "Вручную",
         "No sound": "Без звука",
+        "Highest": "Максимум",
         "Ping (sound)": "Звон",
+        "This week": "Эта неделя",
         "Purr": "Мурлыканье",
         "Submarine": "Субмарина",
         "Title": "По названию",
@@ -133,6 +135,8 @@ struct OptionTableTests {
         #expect(loc("Medium (size)") == "Medium")
         #expect(loc("Running (containers)") == "Running")
         #expect(loc("Timeout (ping)") == "Timeout")
+        #expect(loc("Ping (sound)") == "Ping")
+        #expect(loc("Warn at (share)") == "Warn at")
     }
 
     @Test func everySystemShortcutNameIsTranslated() {
@@ -376,6 +380,42 @@ struct ModuleOptionSnapshotTests {
     @Test(arguments: [true, false])
     func todos(dark: Bool) {
         snapshot(.todos, height: 220, name: "todos", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func eject(dark: Bool) {
+        snapshot(.eject, height: 260, name: "eject", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func devServers(dark: Bool) {
+        snapshot(.devServers, height: 260, name: "dev-servers", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func usage(dark: Bool) {
+        snapshot(.aiUsage, height: 180, name: "usage", dark: dark)
+    }
+
+    private func ejectList(startsConfirming: Bool) -> some View {
+        let volumes = ["Backup", "Photos"].map {
+            DiskVolume(name: $0, path: "/Volumes/\($0)", total: 100, free: 50, isInternal: false, isEjectable: true)
+        }
+        return VStack(alignment: .leading, spacing: 10) {
+            EjectList(volumes: volumes, asksFirst: true, startsConfirming: startsConfirming) { _ in }
+        }
+        .padding(12)
+        .frame(width: 320)
+    }
+
+    @Test(arguments: [true, false])
+    func ejectAllSitsUnderTheList(dark: Bool) {
+        snapshotPanel(ejectList(startsConfirming: false), name: "eject-list", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func ejectAllAsksInsideThePanel(dark: Bool) {
+        snapshotPanel(ejectList(startsConfirming: true), name: "eject-confirm", dark: dark)
     }
 
     @Test(arguments: [true, false])

@@ -16074,6 +16074,156 @@
           }
         }
       }
+    },
+    "Eject All": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Извлечь все"
+          }
+        }
+      }
+    },
+    "Eject %lld disks?": {
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Извлечь %lld диска?"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Извлечь %lld дисков?"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Извлечь %lld диск?"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Извлечь %lld диска?"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Ask before Eject All": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спрашивать перед «Извлечь все»"
+          }
+        }
+      }
+    },
+    "Include disk images": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать образы дисков"
+          }
+        }
+      }
+    },
+    "Include network volumes": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать сетевые диски"
+          }
+        }
+      }
+    },
+    "Never eject": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Никогда не извлекать"
+          }
+        }
+      }
+    },
+    "Port range": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Диапазон портов"
+          }
+        }
+      }
+    },
+    "Update every": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновлять каждые"
+          }
+        }
+      }
+    },
+    "Count databases as services": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считать базы данных сервисами"
+          }
+        }
+      }
+    },
+    "Ignore": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не показывать"
+          }
+        }
+      }
+    },
+    "Window": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Период"
+          }
+        }
+      }
+    },
+    "Warn at (share)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warn at"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предупреждать от"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

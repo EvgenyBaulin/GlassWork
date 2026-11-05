@@ -426,7 +426,7 @@ extension AppModel {
                 }
             }
         case let .eject(path):
-            if monitor.volumes.contains(where: { $0.path == path && $0.isEjectable }) {
+            if monitor.ejectableVolumes.contains(where: { $0.path == path }) {
                 try? NSWorkspace.shared.unmountAndEjectDevice(at: URL(filePath: path))
             }
         case let .runCommand(id):
@@ -488,6 +488,7 @@ private extension AppModel {
         monitor.everyday.keepAwakeRule = KeepAwakeRule(options: store.settings.module(.keepAwake)?.options ?? [:])
         monitor.everyday.onTimerFinished = { [weak self] in self?.timerFinished($0) }
         monitor.agenda.todoOptions = TodoOptions(options: store.settings.module(.todos)?.options ?? [:])
+        monitor.ejectOptions = EjectOptions(options: store.settings.module(.eject)?.options ?? [:])
         applyHardwareChoices()
     }
 

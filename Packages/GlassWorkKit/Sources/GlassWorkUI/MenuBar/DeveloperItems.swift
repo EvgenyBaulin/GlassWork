@@ -5,9 +5,9 @@ import SwiftUI
 extension ItemContent {
     static func developer(_ module: ModuleID, _ store: DeveloperStore, options: [String: String]) -> ItemContent {
         switch module {
-        case .aiUsage: aiUsage(store.aiUsage)
+        case .aiUsage: aiUsage(store.aiUsage, options: options)
         case .git: git(store.git, selected: store.options.gitRepository)
-        case .devServers: devServers(store.devServers)
+        case .devServers: devServers(store.devServers, options: options)
         case .docker: docker(store.docker, options: options)
         case .ping: ping(store.ping, options: options)
         case .vpn: vpn(store.vpn, options: options)
@@ -47,12 +47,15 @@ extension ItemContent {
         return parts.joined(separator: " ")
     }
 
-    static func devServers(_ reading: DevServerReading?) -> ItemContent {
-        guard case let .servers(servers) = reading else {
+    static func devServers(_ reading: DevServerReading?, options: [String: String] = [:]) -> ItemContent {
+        guard case let .servers(found) = reading else {
             var item = ItemContent(figure: "—", template: "99")
             item.isDimmed = true
             return item
         }
+        // Databases stay in the panel either way, they just stop counting.
+        let countsServices = options.flag(ItemOption.countsServices, default: true)
+        let servers = countsServices ? found : found.filter { $0.kind == .web }
         var item = ItemContent(figure: "\(servers.count)", template: "99")
         item.glyph = .dots(filled: servers.count, faint: 0)
         item.detail = servers.prefix(5).map { ":\($0.port) \($0.process)" }.joined(separator: " · ")

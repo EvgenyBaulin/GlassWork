@@ -74,6 +74,13 @@ public final class SystemMonitor {
         }
     }
 
+    /// Which volumes can be ejected from here.
+    public var ejectOptions = EjectOptions()
+
+    public var ejectableVolumes: [DiskVolume] {
+        volumes.filter(ejectOptions.allows)
+    }
+
     /// Timers, notes and other small modules, ticking along with the monitor.
     public let everyday = EverydayStore()
     /// Git, Docker, Ping and the other developer modules, each at its own pace.
@@ -183,7 +190,11 @@ public final class SystemMonitor {
         snapshot.memory = memory
         snapshot.gpu = gpus.first
         snapshot.battery = battery
-        snapshot.volumes = volumes
+        snapshot.volumes = volumes.map { volume in
+            var shown = volume
+            shown.isEjectable = ejectOptions.allows(volume)
+            return shown
+        }
         snapshot.network = network
         snapshot.sensors = sensors
         if !kinds.isDisjoint(with: [.activity, .topApps]) {

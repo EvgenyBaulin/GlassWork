@@ -1,3 +1,4 @@
+import DiskArbitration
 import Foundation
 
 public struct DiskVolume: Codable, Sendable, Equatable, Identifiable {
@@ -11,6 +12,9 @@ public struct DiskVolume: Codable, Sendable, Equatable, Identifiable {
     public var free: UInt64
     public var isInternal: Bool
     public var isEjectable: Bool
+    /// Optional, so a widget snapshot written before these existed still reads.
+    public var isDiskImage: Bool?
+    public var isNetwork: Bool?
 
     public var freeShare: Double {
         total > 0 ? Double(free) / Double(total) : 0
@@ -48,7 +52,7 @@ public struct DiskActivity: Codable, Sendable, Equatable {
 public enum DiskReader {
     private static let keys: [URLResourceKey] = [
         .volumeNameKey, .volumeTotalCapacityKey, .volumeAvailableCapacityForImportantUsageKey,
-        .volumeIsInternalKey, .volumeIsEjectableKey, .volumeIsBrowsableKey,
+        .volumeIsInternalKey, .volumeIsEjectableKey, .volumeIsBrowsableKey, .volumeIsLocalKey,
     ]
 
     /// Mounted volumes, the startup disk first. Free space is counted the way Finder counts it.
@@ -76,8 +80,19 @@ public enum DiskReader {
             total: UInt64(total),
             free: UInt64(max(values.volumeAvailableCapacityForImportantUsage ?? 0, 0)),
             isInternal: values.volumeIsInternal ?? false,
-            isEjectable: values.volumeIsEjectable ?? false
+            isEjectable: values.volumeIsEjectable ?? false,
+            isDiskImage: values.volumeIsEjectable == true ? isDiskImage(url) : false,
+            isNetwork: values.volumeIsLocal == false
         )
+    }
+
+    /// Only the disk's description is read, nothing on the volume itself.
+    private static func isDiskImage(_ url: URL) -> Bool {
+        guard let session = DASessionCreate(kCFAllocatorDefault),
+              let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL),
+              let description = DADiskCopyDescription(disk) as? [String: Any]
+        else { return false }
+        return description[kDADiskDescriptionDeviceModelKey as String] as? String == "Disk Image"
     }
 
     public static func counters() -> DiskCounters {

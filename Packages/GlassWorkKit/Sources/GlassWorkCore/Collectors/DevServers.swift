@@ -77,6 +77,53 @@ public enum DevServerReading: Codable, Sendable, Equatable {
     }
 }
 
+/// Which servers the module shows, from what is typed in Settings.
+public struct DevServerRule: Sendable, Equatable {
+    public var ports: ClosedRange<Int>?
+    public var ignoredPorts: Set<Int> = []
+    public var ignoredNames: Set<String> = []
+
+    public init() {}
+
+    /// - Parameters:
+    ///   - range: `3000-9999`. Anything else leaves every port in.
+    ///   - ignored: Ports and process names, separated by commas or spaces: `5432, postgres`.
+    public init(range: String?, ignored: String?) {
+        ports = Self.parseRange(range)
+        let words = (ignored ?? "").split { $0 == "," || $0.isWhitespace }.map { $0.lowercased() }
+        for word in words {
+            let digits = word.hasPrefix(":") ? String(word.dropFirst()) : word
+            if let port = Int(digits) {
+                ignoredPorts.insert(port)
+            } else {
+                ignoredNames.insert(word)
+            }
+        }
+    }
+
+    private static func parseRange(_ text: String?) -> ClosedRange<Int>? {
+        let parts = (text ?? "").split { !$0.isNumber }.compactMap { Int($0) }
+        guard parts.count == 2, parts[0] <= parts[1] else { return nil }
+        return parts[0] ... parts[1]
+    }
+
+    public func keeps(_ server: DevServer) -> Bool {
+        guard !ignoredPorts.contains(server.port), !ignoredNames.contains(server.process.lowercased()) else {
+            return false
+        }
+        return ports?.contains(server.port) ?? true
+    }
+}
+
+public extension DevServerReading {
+    func filtered(by rule: DevServerRule) -> DevServerReading {
+        if case let .servers(servers) = self {
+            return .servers(servers.filter(rule.keeps))
+        }
+        return self
+    }
+}
+
 public struct ProcessDetails: Sendable, Equatable {
     public let uptime: TimeInterval?
     public let tool: String?
