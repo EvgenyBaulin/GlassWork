@@ -444,7 +444,7 @@ extension SettingsIndex {
                 keywords: ["tracking", "учёт"]
             ),
             page("widgets.commands", "Commands", "Команды", .widgets, ["Widgets"], keywords: ["scripts", "скрипты"]),
-            page("widgets.endpoints", "Endpoints", "Эндпоинты", .widgets, ["Widgets"], keywords: ["URL", "сайты"]),
+            page("widgets.endpoints", "Endpoints", "Адреса", .widgets, ["Widgets"], keywords: ["URL", "сайты"]),
             page("tiles.use", "Use Window Tiles", "Включить раскладку окон", .windowTiles, ["Window Tiles"]),
             page(
                 "tiles.preview",
@@ -500,7 +500,7 @@ extension SettingsIndex {
                 .module(.nowPlaying),
                 ["Menu Bar", "Now Playing"]
             ),
-            page("ping.host", "Host", "Хост", .module(.ping), ["Menu Bar", "Ping"], keywords: ["сервер"]),
+            page("ping.host", "Host", "Сервер", .module(.ping), ["Menu Bar", "Ping"], keywords: ["сервер"]),
         ]
     }
 }
