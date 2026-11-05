@@ -247,6 +247,8 @@ final class AppModel {
     /// Goes first: the width of a menu bar item depends on these settings.
     private func applyInfoModules() {
         let settings = store.settings
+        Format.temperatureUnit = settings.module(.sensors)?.options
+            .choice(ItemOption.temperatureUnit, default: .system) ?? .system
         monitor.weather.apply(settings.weather)
         monitor.rates.apply(settings.rates)
         monitor.clipboard.apply(settings.clipboard)
@@ -500,8 +502,6 @@ private extension AppModel {
         monitor.networkInterface = chosen(.network, ItemOption.networkInterface)
         monitor.gpuName = chosen(.gpu, ItemOption.gpuName)
         monitor.volumePath = chosen(.disk, ItemOption.volumePath)
-        Format.temperatureUnit = store.settings.module(.sensors)?.options
-            .choice(ItemOption.temperatureUnit, default: .system) ?? .system
     }
 
     func checkAlerts() {

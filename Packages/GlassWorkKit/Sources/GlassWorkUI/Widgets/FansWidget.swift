@@ -127,8 +127,6 @@ struct FansWidget: View {
                 } else {
                     if state.mode == .curve {
                         presetSwitcher
-                    } else {
-                        modeSwitcher([.auto, .max])
                     }
                     ForEach(fans) { row($0) }
                     Spacer(minLength: 0)
