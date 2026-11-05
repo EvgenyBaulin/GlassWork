@@ -89,8 +89,8 @@ private struct MainWindowContent: View {
                 detail: loc("Nothing here stores your password until the method and its risks are agreed.")
             )
         case .windowTiles: WindowTilesPage(store: model.store, shortcuts: model.shortcuts)
-        case .overview, .settings:
-            SectionPlaceholder(route.section)
+        case .overview: OverviewSection(monitor: model.monitor)
+        case .settings: SectionPlaceholder(route.section)
         }
     }
 

@@ -1,5 +1,6 @@
 import Darwin
 import Foundation
+import SystemConfiguration
 
 /// Cumulative byte counters of one interface.
 public struct InterfaceCounters: Sendable, Equatable {
@@ -69,7 +70,43 @@ public struct NetworkSample: Codable, Sendable, Equatable {
     }
 }
 
+public extension NetworkSample {
+    /// Speeds of one interface. Nil keeps the sum of all of them, and the session totals always cover them all.
+    func only(_ name: String?) -> NetworkSample {
+        guard let name else { return self }
+        let match = interfaces.first { $0.name == name }
+        var sample = self
+        sample.download = match?.download ?? 0
+        sample.upload = match?.upload ?? 0
+        sample.interfaces = match.map { [$0] } ?? []
+        return sample
+    }
+}
+
+/// A physical interface and what macOS calls it.
+public struct NetworkInterfaceInfo: Sendable, Equatable {
+    public var name: String
+    public var title: String
+
+    public init(name: String, title: String) {
+        self.name = name
+        self.title = title
+    }
+}
+
 public enum NetworkReader {
+    /// Every physical interface, in the order macOS lists them.
+    public static func interfaces() -> [NetworkInterfaceInfo] {
+        let all = SCNetworkInterfaceCopyAll() as? [SCNetworkInterface] ?? []
+        return all.compactMap { interface in
+            guard let name = SCNetworkInterfaceGetBSDName(interface) as String?,
+                  NetworkSample.isPhysical(name)
+            else { return nil }
+            let title = SCNetworkInterfaceGetLocalizedDisplayName(interface) as String?
+            return NetworkInterfaceInfo(name: name, title: title.map { "\($0) · \(name)" } ?? name)
+        }
+    }
+
     /// IPv4 address of the first active physical interface.
     public static func localAddress() -> String? {
         var head: UnsafeMutablePointer<ifaddrs>?

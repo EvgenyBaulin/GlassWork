@@ -79,9 +79,37 @@ public struct AIToolUsage: Codable, Sendable, Equatable, Identifiable {
     }
 }
 
+/// Which limit the menu bar shows.
+public enum AIUsageWindowChoice: String, Sendable, CaseIterable {
+    case highest, fiveHour, week
+}
+
+public enum AIUsageOption {
+    public static let window = "window"
+    public static let warnPercent = "warnAt"
+    public static let defaultWarnPercent = 90
+
+    public static func warnShare(_ options: [String: String]) -> Double {
+        Double(min(max(options.number(warnPercent, default: defaultWarnPercent), 1), 100)) / 100
+    }
+}
+
 public struct AIUsageReading: Codable, Sendable, Equatable {
-    /// Share of a limit that turns the module orange.
+    /// Share of a limit that turns the module orange, unless Settings says otherwise.
     public static let alertShare = 0.9
+
+    /// What Settings says. Part of the reading, so widgets follow it too.
+    public private(set) var warnShare: Double?
+
+    public var warnLevel: Double {
+        warnShare ?? Self.alertShare
+    }
+
+    public func warning(at share: Double) -> AIUsageReading {
+        var reading = self
+        reading.warnShare = share
+        return reading
+    }
 
     /// Tools found on this Mac, in display order.
     public let tools: [AIToolUsage]
@@ -102,5 +130,19 @@ public struct AIUsageReading: Codable, Sendable, Equatable {
             usage.peak(at: date).map { (tool: usage.tool, window: $0) }
         }
         return candidates.max { $0.window.used(at: date) < $1.window.used(at: date) }
+    }
+
+    /// The same among one kind of window. A tool that reports only the other kind still shows something.
+    public func peak(at date: Date, choice: AIUsageWindowChoice) -> (tool: AITool, window: AIWindow)? {
+        let kind: AIWindow.Kind? = switch choice {
+        case .highest: nil
+        case .fiveHour: .fiveHour
+        case .week: .week
+        }
+        guard let kind else { return peak(at: date) }
+        let candidates = tools.flatMap { usage in
+            usage.windows.filter { $0.kind == kind }.map { (tool: usage.tool, window: $0) }
+        }
+        return candidates.max { $0.window.used(at: date) < $1.window.used(at: date) } ?? peak(at: date)
     }
 }

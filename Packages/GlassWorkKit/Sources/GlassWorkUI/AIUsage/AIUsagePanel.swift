@@ -2,8 +2,13 @@ import GlassWorkCore
 import SwiftUI
 
 extension ItemContent {
-    static func aiUsage(_ reading: AIUsageReading?, at date: Date = Date()) -> ItemContent {
-        guard let peak = reading?.peak(at: date) else {
+    static func aiUsage(
+        _ reading: AIUsageReading?,
+        at date: Date = Date(),
+        options: [String: String] = [:]
+    ) -> ItemContent {
+        let choice = options.choice(AIUsageOption.window, default: AIUsageWindowChoice.highest)
+        guard let peak = reading?.peak(at: date, choice: choice) else {
             var item = ItemContent(figure: "—", template: "100%")
             item.isDimmed = true
             return item
@@ -11,7 +16,7 @@ extension ItemContent {
         let share = peak.window.used(at: date)
         var item = ItemContent(
             figure: Format.percent(share),
-            alert: share >= AIUsageReading.alertShare ? Palette.orange : nil,
+            alert: share >= reading?.warnLevel ?? AIUsageReading.alertShare ? Palette.orange : nil,
             template: "100%"
         )
         item.glyph = .ring(share)
@@ -94,7 +99,7 @@ struct AIUsagePanel: View {
 
     private func windowRow(_ window: AIWindow) -> some View {
         let share = window.used(at: now)
-        let tint = share >= AIUsageReading.alertShare ? Palette.orange : Palette.green
+        let tint = share >= reading?.warnLevel ?? AIUsageReading.alertShare ? Palette.orange : Palette.green
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(window.kind == .fiveHour ? loc("5-hour window") : loc("This week")).font(.system(size: 12))

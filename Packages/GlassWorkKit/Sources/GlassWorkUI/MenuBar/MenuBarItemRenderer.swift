@@ -24,6 +24,7 @@ public final class MenuBarItemRenderer {
     private static let padding: CGFloat = 4
     private static let symbolWidth: CGFloat = 16
     private static let graphWidth: CGFloat = 34
+    private static let graphHeight: CGFloat = 16
     private static let labelWidth: CGFloat = 8
 
     public init(
@@ -89,13 +90,25 @@ public final class MenuBarItemRenderer {
         if style == .graph || style == .graphAndFigure {
             if let glyph = content.glyph {
                 parts.append("\(glyph)")
-            } else if let values = content.values {
-                parts.append("\(values)")
-            } else if let metric = content.metric {
-                parts.append("\(monitor.points(metric, in: .minute).last?.date.timeIntervalSince1970 ?? 0)")
+            } else if let values = content.graphValues(monitor) {
+                parts.append("\(Self.graphLevels(values, domain: content.domain))")
             }
         }
         return parts.joined(separator: "|")
+    }
+
+    /// A graph in device pixels. A slow metric moves less than a pixel between reads, so a change nobody could
+    /// see does not have to cost a new image for the status item.
+    static func graphLevels(_ values: [Double], domain: ClosedRange<Double>?) -> [Int] {
+        let pixels = graphHeight * 2
+        return values.map { Int((graphShare($0, of: values, domain: domain) * pixels).rounded()) }
+    }
+
+    /// Where a value sits on the graph, from 0 to 1.
+    private static func graphShare(_ value: Double, of values: [Double], domain: ClosedRange<Double>?) -> Double {
+        let upper = domain?.upperBound ?? max(values.max() ?? 1, 0.000_1)
+        let lower = domain?.lowerBound ?? 0
+        return min(max((value - lower) / max(upper - lower, 0.000_1), 0), 1)
     }
 
     private func draw(_ content: ItemContent) {
@@ -212,14 +225,12 @@ public final class MenuBarItemRenderer {
         }
         guard let values = content.graphValues(monitor), values.count > 1 else { return }
         let color = content.accent?.color.map(NSColor.init) ?? color
-        let upper = content.domain?.upperBound ?? max(values.max() ?? 1, 0.000_1)
-        let lower = content.domain?.lowerBound ?? 0
-        let height: CGFloat = 16
+        let height = Self.graphHeight
         let bottom = (bounds.height - height) / 2
         let step = Self.graphWidth / CGFloat(values.count - 1)
         let line = NSBezierPath()
         for (index, value) in values.enumerated() {
-            let share = min(max((value - lower) / max(upper - lower, 0.000_1), 0), 1)
+            let share = Self.graphShare(value, of: values, domain: content.domain)
             let point = CGPoint(x: x + CGFloat(index) * step, y: bottom + height * share)
             if index == 0 {
                 line.move(to: point)

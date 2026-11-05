@@ -202,8 +202,8 @@ final class AppModel {
     func mainWindowChanged(visibleSection: MainSection?) {
         self.visibleSection = visibleSection
         updateDemand()
-        if visibleSection == .apps {
-            monitor.refresh()
+        if visibleSection == .apps || visibleSection == .overview {
+            monitor.refresh(includingSlow: true)
             monitor.apps.refresh()
         }
     }
@@ -247,6 +247,8 @@ final class AppModel {
     /// Goes first: the width of a menu bar item depends on these settings.
     private func applyInfoModules() {
         let settings = store.settings
+        Format.temperatureUnit = settings.module(.sensors)?.options
+            .choice(ItemOption.temperatureUnit, default: .system) ?? .system
         monitor.weather.apply(settings.weather)
         monitor.rates.apply(settings.rates)
         monitor.clipboard.apply(settings.clipboard)
@@ -264,15 +266,14 @@ final class AppModel {
         // Live windows and charts sample on every tick; other system widgets read once a minute.
         let placed = placedWidgetKinds
         var demand = MonitorDemand(widgets: desktopWidgetKinds.union(systemWidgetKinds.filter(\.keepsHistory)))
+            .adding(visibleSection?.monitorDemand ?? MonitorDemand())
         // A widget in the Dock shows a live figure, just as a menu bar item does.
         let docked = store.settings.dock.shownWidgets
         let modes = store.settings.modules.filter { $0.mode == .menuBar }.map(\.id) + docked
         let everything = hasOpenPanel
-        let showsApps = visibleSection == .apps
-        demand.liveApps = everything || showsApps || isQuickQuitOpen
-        demand.cpu = demand.cpu || everything || showsApps || modes.contains(.cpu) || modes.contains(.overview)
-        demand.memory = demand.memory || everything || showsApps || modes.contains(.memory)
-            || modes.contains(.overview)
+        demand.liveApps = demand.liveApps || everything || isQuickQuitOpen
+        demand.cpu = demand.cpu || everything || modes.contains(.cpu) || modes.contains(.overview)
+        demand.memory = demand.memory || everything || modes.contains(.memory) || modes.contains(.overview)
         demand.network = demand.network || everything || modes.contains(.network)
         let overviewShowsDisk = modes.contains(.overview)
             && store.settings.module(.overview)?.options.flag(ItemOption.showsDisk, default: false) == true
@@ -281,6 +282,7 @@ final class AppModel {
         demand.gpu = demand.gpu || everything || modes.contains(.gpu)
         demand.sensors = demand.sensors || everything || isSettingsOpen || modes.contains(.sensors)
             || modes.contains(.fans) || store.settings.alerts.isEnabled
+        demand.sensorDetail = everything || isSettingsOpen ? .live : demand.sensorDetail
         demand.processes = everything
         demand.developer = store.settings.developerDemand(panelOpen: everything)
             .union(placed.compactMap(\.developerModule))
@@ -426,7 +428,7 @@ extension AppModel {
                 }
             }
         case let .eject(path):
-            if monitor.volumes.contains(where: { $0.path == path && $0.isEjectable }) {
+            if monitor.ejectableVolumes.contains(where: { $0.path == path }) {
                 try? NSWorkspace.shared.unmountAndEjectDevice(at: URL(filePath: path))
             }
         case let .runCommand(id):
@@ -485,6 +487,21 @@ private extension AppModel {
         monitor.everyday.letsDisplaySleep = store.settings.module(.keepAwake)?.options
             .flag(ItemOption.letsDisplaySleep, default: false) ?? false
         monitor.sunPlaceID = store.settings.module(.sunMoon)?.options[ItemOption.sunPlace].flatMap { Int($0) }
+        monitor.everyday.keepAwakeRule = KeepAwakeRule(options: store.settings.module(.keepAwake)?.options ?? [:])
+        monitor.everyday.onTimerFinished = { [weak self] in self?.timerFinished($0) }
+        monitor.agenda.todoOptions = TodoOptions(options: store.settings.module(.todos)?.options ?? [:])
+        monitor.ejectOptions = EjectOptions(options: store.settings.module(.eject)?.options ?? [:])
+        applyHardwareChoices()
+    }
+
+    /// An empty or missing value means the Mac's own pick.
+    func applyHardwareChoices() {
+        func chosen(_ module: ModuleID, _ key: String) -> String? {
+            store.settings.module(module)?.options[key].flatMap { $0.isEmpty ? nil : $0 }
+        }
+        monitor.networkInterface = chosen(.network, ItemOption.networkInterface)
+        monitor.gpuName = chosen(.gpu, ItemOption.gpuName)
+        monitor.volumePath = chosen(.disk, ItemOption.volumePath)
     }
 
     func checkAlerts() {

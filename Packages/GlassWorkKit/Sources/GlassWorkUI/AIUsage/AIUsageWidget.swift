@@ -227,7 +227,7 @@ struct AIUsageWidget: View {
     }
 
     private func tint(_ share: Double) -> Color {
-        if share >= AIUsageReading.alertShare {
+        if share >= context.snapshot.aiUsage?.warnLevel ?? AIUsageReading.alertShare {
             return Palette.red
         }
         return share >= 0.7 ? Palette.orange : Palette.green

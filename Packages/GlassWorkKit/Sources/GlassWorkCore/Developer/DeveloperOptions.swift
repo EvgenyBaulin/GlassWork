@@ -4,6 +4,11 @@ import Foundation
 public struct DeveloperOptions: Sendable, Equatable {
     public enum Key {
         public static let host = "host"
+        public static let pingInterval = "intervalSeconds"
+        public static let pingTimeout = "timeoutSeconds"
+        public static let devServerPorts = "portRange"
+        public static let devServerSeconds = "updateSeconds"
+        public static let devServerIgnore = "ignore"
         public static let refreshMinutes = "refreshMinutes"
         public static let repository = "repository"
         public static let repositories = "repositories"
@@ -12,6 +17,12 @@ public struct DeveloperOptions: Sendable, Equatable {
     }
 
     public var pingHost = PingHost.fallback
+    public var pingIntervalSeconds = 30
+    public var pingTimeoutSeconds = 2
+    public var devServerSeconds = 30
+    public var devServerRule = DevServerRule()
+    /// The share of a limit that counts as nearly used up.
+    public var usageWarnShare = AIUsageReading.alertShare
     public var aiRefreshMinutes = 5
     /// The repository shown in the menu bar.
     public var gitRepository: String?
@@ -28,6 +39,13 @@ public struct DeveloperOptions: Sendable, Equatable {
         if let host = settings.module(.ping)?.options[Key.host], PingHost.isValid(host) {
             pingHost = host
         }
+        let ping = settings.module(.ping)?.options ?? [:]
+        pingIntervalSeconds = min(max(ping.number(Key.pingInterval, default: 30), 5), 600)
+        pingTimeoutSeconds = min(max(ping.number(Key.pingTimeout, default: 2), 1), 10)
+        let servers = settings.module(.devServers)?.options ?? [:]
+        devServerSeconds = min(max(servers.number(Key.devServerSeconds, default: 30), 5), 600)
+        devServerRule = DevServerRule(range: servers[Key.devServerPorts], ignored: servers[Key.devServerIgnore])
+        usageWarnShare = AIUsageOption.warnShare(settings.module(.aiUsage)?.options ?? [:])
         if let minutes = settings.module(.aiUsage)?.options[Key.refreshMinutes].flatMap({ Int($0) }),
            (1 ... 1440).contains(minutes)
         {

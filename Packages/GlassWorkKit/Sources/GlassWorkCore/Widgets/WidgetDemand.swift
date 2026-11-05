@@ -46,10 +46,32 @@ public extension MonitorDemand {
         disk = !kinds.isDisjoint(with: [.storage, .diskActivity])
         battery = !kinds.isDisjoint(with: [.battery, .todayAtAGlance])
         sensors = !kinds.isDisjoint(with: [.temperature, .fans])
+        sensorDetail = sensors ? .full : .summary
         slowProcesses = !kinds.isDisjoint(with: [.activity, .topApps])
         developer = Set(kinds.compactMap(\.developerModule))
         devices = kinds.contains(.devices)
         timeMachine = kinds.contains(.timeMachine)
+    }
+
+    /// Everything either side asks for.
+    func adding(_ other: MonitorDemand) -> MonitorDemand {
+        var both = self
+        both.cpu = cpu || other.cpu
+        both.memory = memory || other.memory
+        both.network = network || other.network
+        both.disk = disk || other.disk
+        both.battery = battery || other.battery
+        both.gpu = gpu || other.gpu
+        both.sensors = sensors || other.sensors
+        both.sensorDetail = max(sensorDetail, other.sensorDetail)
+        both.processes = processes || other.processes
+        both.slowProcesses = slowProcesses || other.slowProcesses
+        both.liveApps = liveApps || other.liveApps
+        both.developer = developer.union(other.developer)
+        both.devices = devices || other.devices
+        both.timeMachine = timeMachine || other.timeMachine
+        both.nowPlaying = nowPlaying || other.nowPlaying
+        return both
     }
 
     /// What this asks for that `other` does not read already.
@@ -61,7 +83,8 @@ public extension MonitorDemand {
         rest.disk = disk && !other.disk
         rest.battery = battery && !other.battery
         rest.gpu = gpu && !other.gpu
-        rest.sensors = sensors && !other.sensors
+        rest.sensors = sensors && (!other.sensors || sensorDetail > other.sensorDetail)
+        rest.sensorDetail = sensorDetail
         rest.slowProcesses = slowProcesses && !other.slowProcesses && !other.processes
         return rest
     }

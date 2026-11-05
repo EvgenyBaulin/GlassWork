@@ -45,6 +45,33 @@ struct OptionTableTests {
     private static let choiceRussian: [String: String] = [
         "1 MB/s": "1 МБ/с",
         "1 hour": "1 час",
+        "1 min": "1 мин",
+        "10%": "10%",
+        "15 min": "15 мин",
+        "2 hours": "2 часа",
+        "20%": "20%",
+        "30%": "30%",
+        "5 hours": "5 часов",
+        "Completed items": "Выполненные",
+        "Due date": "По сроку",
+        "Glass": "Стекло",
+        "Hero": "Герой",
+        "Hide after 1 day": "Скрывать через день",
+        "Hide after 1 week": "Скрывать через неделю",
+        "Hide at once": "Скрывать сразу",
+        "Manual": "Вручную",
+        "No sound": "Без звука",
+        "Highest": "Максимум",
+        "Ping (sound)": "Звон",
+        "This week": "Эта неделя",
+        "Purr": "Мурлыканье",
+        "Submarine": "Субмарина",
+        "Title": "По названию",
+        "Until turned off": "Пока не выключу",
+        "10 s": "10 с",
+        "30 s": "30 с",
+        "°C": "°C",
+        "°F": "°F",
         "1 level": "1 уровень",
         "1 s": "1 с",
         "10 KB/s": "10 КБ/с",
@@ -107,6 +134,9 @@ struct OptionTableTests {
         #expect(loc("Up (speed)") == "Up")
         #expect(loc("Medium (size)") == "Medium")
         #expect(loc("Running (containers)") == "Running")
+        #expect(loc("Timeout (ping)") == "Timeout")
+        #expect(loc("Ping (sound)") == "Ping")
+        #expect(loc("Warn at (share)") == "Warn at")
     }
 
     @Test func everySystemShortcutNameIsTranslated() {
@@ -335,5 +365,78 @@ struct ModuleOptionSnapshotTests {
     @Test(arguments: [true, false])
     func date(dark: Bool) {
         snapshot(.date, height: 300, name: "date", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func timers(dark: Bool) {
+        snapshot(.timers, height: 260, name: "timers", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func keepAwake(dark: Bool) {
+        snapshot(.keepAwake, height: 220, name: "keep-awake", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func todos(dark: Bool) {
+        snapshot(.todos, height: 220, name: "todos", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func eject(dark: Bool) {
+        snapshot(.eject, height: 260, name: "eject", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func devServers(dark: Bool) {
+        snapshot(.devServers, height: 260, name: "dev-servers", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func usage(dark: Bool) {
+        snapshot(.aiUsage, height: 180, name: "usage", dark: dark)
+    }
+
+    private func ejectList(startsConfirming: Bool) -> some View {
+        let volumes = ["Backup", "Photos"].map {
+            DiskVolume(name: $0, path: "/Volumes/\($0)", total: 100, free: 50, isInternal: false, isEjectable: true)
+        }
+        return VStack(alignment: .leading, spacing: 10) {
+            EjectList(volumes: volumes, asksFirst: true, startsConfirming: startsConfirming) { _ in }
+        }
+        .padding(12)
+        .frame(width: 320)
+    }
+
+    @Test(arguments: [true, false])
+    func ejectAllSitsUnderTheList(dark: Bool) {
+        snapshotPanel(ejectList(startsConfirming: false), name: "eject-list", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func ejectAllAsksInsideThePanel(dark: Bool) {
+        snapshotPanel(ejectList(startsConfirming: true), name: "eject-confirm", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func aTickedTodoStaysOnTheList(dark: Bool) {
+        let rows = VStack(alignment: .leading, spacing: 8) {
+            TodoRow(item: TodoItem(id: "1", title: "Call the bank", listName: "Home")) {}
+            TodoRow(item: TodoItem(id: "2", title: "Pay rent", listName: "Home", isCompleted: true)) {}
+        }
+        .padding(12)
+        .frame(width: 300)
+        snapshotPanel(rows, name: "todo-rows", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func ping(dark: Bool) {
+        snapshot(.ping, height: 220, name: "ping", dark: dark)
+    }
+
+    /// The list comes from the Mac, but only the chosen value shows while the picker is closed.
+    @Test(arguments: [true, false])
+    func aPickerOfThisMacsDisks(dark: Bool) {
+        snapshot(.disk, height: 180, name: "disk", dark: dark)
     }
 }

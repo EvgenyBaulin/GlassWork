@@ -114,6 +114,30 @@ public struct HubOptionRows: View {
     }
 }
 
+/// A picker of what this Mac has. A choice that is not connected now stays on the list, marked as such.
+private struct LiveOptionPicker: View {
+    let title: String
+    let source: LiveOptionSource
+    @Binding var value: String
+    @State private var choices: [OptionChoice] = []
+
+    private var isMissing: Bool {
+        !value.isEmpty && !choices.contains { $0.value == value }
+    }
+
+    var body: some View {
+        Picker(title, selection: $value) {
+            Text(loc(String.LocalizationValue(source.automaticTitle))).tag("")
+            ForEach(choices, id: \.value) { Text(verbatim: $0.title).tag($0.value) }
+            if isMissing {
+                Text(loc("\(value) (not connected)")).tag(value)
+            }
+        }
+        .pickerStyle(.menu)
+        .task { choices = source.choices() }
+    }
+}
+
 /// One table entry as a control. Everything goes through `store.update`, so ⌘Z takes it back.
 struct OptionRow: View {
     let spec: ModuleOptionSpec
@@ -146,6 +170,8 @@ struct OptionRow: View {
             } else {
                 picker(choices).pickerStyle(.menu)
             }
+        case let .live(source):
+            LiveOptionPicker(title: spec.localizedTitle, source: source, value: value)
         case let .number(range, step, unit):
             LabeledContent(spec.localizedTitle) {
                 HStack(spacing: 6) {

@@ -23,6 +23,14 @@ public final class AgendaStore {
     public private(set) var events: [AgendaEvent] = []
     public private(set) var todos: [TodoItem] = []
 
+    @ObservationIgnored public var todoOptions = TodoOptions() {
+        didSet {
+            if todoOptions != oldValue, remindersAccess == .granted {
+                loadReminders()
+            }
+        }
+    }
+
     @ObservationIgnored private let store = EKEventStore()
 
     public init() {
@@ -106,7 +114,27 @@ public final class AgendaStore {
         )
         store.fetchReminders(matching: predicate) { [weak self] reminders in
             let items = (reminders ?? []).map(Self.todoItem)
-            Task { @MainActor in self?.todos = items }
+            Task { @MainActor in self?.addCompleted(to: items) }
+        }
+    }
+
+    /// The same access covers ticked reminders, so this asks for nothing new.
+    private func addCompleted(to open: [TodoItem]) {
+        guard let seconds = todoOptions.completed.seconds else {
+            todos = todoOptions.arranged(open, now: Date())
+            return
+        }
+        let predicate = store.predicateForCompletedReminders(
+            withCompletionDateStarting: Date().addingTimeInterval(-seconds),
+            ending: nil,
+            calendars: nil
+        )
+        store.fetchReminders(matching: predicate) { [weak self] reminders in
+            let done = (reminders ?? []).map(Self.todoItem)
+            Task { @MainActor in
+                guard let self else { return }
+                self.todos = self.todoOptions.arranged(open + done, now: Date())
+            }
         }
     }
 
@@ -118,7 +146,8 @@ public final class AgendaStore {
             listColor: hex(reminder.calendar?.cgColor),
             due: reminder.dueDateComponents?.date,
             isFlagged: reminder.priority == 1,
-            isCompleted: reminder.isCompleted
+            isCompleted: reminder.isCompleted,
+            completedAt: reminder.completionDate
         )
     }
 

@@ -99,6 +99,8 @@ public final class DeveloperStore {
         case .aiUsage: TimeInterval(options.aiRefreshMinutes * 60)
         case .wifi: 5
         case .vpn: 10
+        case .ping: TimeInterval(options.pingIntervalSeconds)
+        case .devServers: TimeInterval(options.devServerSeconds)
         // FSEvents covers changes, so this pass only picks up new repositories.
         case .git: 300
         default: 30
@@ -123,7 +125,7 @@ public final class DeveloperStore {
         load(.aiUsage) {
             await collector.read(at: date)
         } apply: { store, value in
-            store.aiUsage = value
+            store.aiUsage = value.warning(at: store.options.usageWarnShare)
         }
     }
 
@@ -165,8 +167,9 @@ public final class DeveloperStore {
 
     private func readDevServers() {
         let collector = DevServerCollector(runner: runner)
+        let rule = options.devServerRule
         load(.devServers) {
-            await collector.read()
+            await collector.read().filtered(by: rule)
         } apply: { store, value in
             store.devServers = value
         }
@@ -233,6 +236,11 @@ public final class DeveloperStore {
         if options.pingHost != old.pingHost {
             ping = PingLog()
             lastRead[.ping] = nil
+        }
+        ping.follow(intervalSeconds: options.pingIntervalSeconds)
+        aiUsage = aiUsage?.warning(at: options.usageWarnShare)
+        if options.devServerRule != old.devServerRule {
+            lastRead[.devServers] = nil
         }
         if options.gitRepositories != old.gitRepositories
             || options.gitAutoDiscover != old.gitAutoDiscover

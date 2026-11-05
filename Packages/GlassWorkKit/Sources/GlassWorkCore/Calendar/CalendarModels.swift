@@ -98,10 +98,11 @@ public struct TodoItem: Codable, Sendable, Equatable, Identifiable {
     public var due: Date?
     public var isFlagged: Bool
     public var isCompleted: Bool
+    public var completedAt: Date?
 
     public init(
         id: String, title: String, listName: String, listColor: String = "#3B82F6",
-        due: Date? = nil, isFlagged: Bool = false, isCompleted: Bool = false
+        due: Date? = nil, isFlagged: Bool = false, isCompleted: Bool = false, completedAt: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -110,6 +111,66 @@ public struct TodoItem: Codable, Sendable, Equatable, Identifiable {
         self.due = due
         self.isFlagged = isFlagged
         self.isCompleted = isCompleted
+        self.completedAt = completedAt
+    }
+}
+
+public enum TodoSort: String, Sendable, CaseIterable {
+    /// The order the Reminders app keeps.
+    case manual
+    case dueDate, title
+}
+
+/// How long a ticked item stays on the list.
+public enum CompletedTodos: String, Sendable, CaseIterable {
+    case hide, day, week
+
+    public var seconds: TimeInterval? {
+        switch self {
+        case .hide: nil
+        case .day: 86400
+        case .week: 7 * 86400
+        }
+    }
+}
+
+/// The order of the to-do list, which the panel and the widgets share.
+public struct TodoOptions: Sendable, Equatable {
+    public var sort = TodoSort.manual
+    public var completed = CompletedTodos.hide
+
+    public init() {}
+
+    public init(options: [String: String]) {
+        sort = options.choice(ItemOption.todoSort, default: .manual)
+        completed = options.choice(ItemOption.todoCompleted, default: .hide)
+    }
+
+    /// Open items first, then the ticked ones still on the list, the latest of them first.
+    public func arranged(_ items: [TodoItem], now: Date) -> [TodoItem] {
+        let open = items.filter { !$0.isCompleted }
+        let oldest = completed.seconds.map { now.addingTimeInterval(-$0) }
+        let done = items.filter { item in
+            guard item.isCompleted, let oldest, let finished = item.completedAt else { return false }
+            return finished >= oldest
+        }
+        return sorted(open) + done.sorted { ($0.completedAt ?? now) > ($1.completedAt ?? now) }
+    }
+
+    private func sorted(_ items: [TodoItem]) -> [TodoItem] {
+        switch sort {
+        case .manual:
+            items
+        case .title:
+            items.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+        case .dueDate:
+            // No date goes last, and the sort has to keep the list's order among equals.
+            items.enumerated().sorted { first, second in
+                let left = first.element.due ?? .distantFuture
+                let right = second.element.due ?? .distantFuture
+                return left == right ? first.offset < second.offset : left < right
+            }.map(\.element)
+        }
     }
 }
 

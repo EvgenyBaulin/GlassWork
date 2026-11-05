@@ -100,6 +100,36 @@ public struct SensorSample: Codable, Sendable, Equatable {
     }
 }
 
+/// How much of the sensors a screen needs. Every temperature key is a separate call to the SMC and a Mac can
+/// have more than 200, so reading them all on every tick would cost more than the rest of the app together.
+public enum SensorDetail: Int, Comparable, Sendable {
+    /// Only what the menu bar shows, every few seconds.
+    case summary
+    /// Every sensor, every few seconds, for widgets.
+    case full
+    /// Every sensor on every tick, for a list on screen.
+    case live
+
+    public static func < (first: SensorDetail, second: SensorDetail) -> Bool {
+        first.rawValue < second.rawValue
+    }
+}
+
+/// When sensors are due. Temperatures move slowly, so only a list on screen gets every tick.
+struct SensorPace {
+    static let interval: TimeInterval = 5
+    /// A tick lands a little early or late, and missing by a hair would cost a whole tick.
+    private static let tolerance: TimeInterval = 0.5
+
+    private var last = Date.distantPast
+
+    mutating func isDue(_ detail: SensorDetail, at date: Date) -> Bool {
+        guard detail == .live || date.timeIntervalSince(last) >= Self.interval - Self.tolerance else { return false }
+        last = date
+        return true
+    }
+}
+
 public enum FanHardware {
     /// Macs without fans hide the module altogether.
     public static let hasFans = (SMCClient()?.read("FNum")?.number ?? 0) > 0
@@ -120,8 +150,12 @@ public final class SensorReader: Sendable {
         fanCount = Int(client.read("FNum")?.number ?? 0)
     }
 
-    public func sample() -> SensorSample {
-        let readings = temperatureKeys.compactMap { key -> SensorReading? in
+    /// - Parameter choices: The temperatures that matter, or nil for all of them. Fans are always read.
+    public func sample(showing choices: Set<SensorChoice>? = nil) -> SensorSample {
+        let keys = choices.map { wanted in
+            temperatureKeys.filter { key in wanted.contains { $0.covers(key) } }
+        } ?? temperatureKeys
+        let readings = keys.compactMap { key -> SensorReading? in
             guard let celsius = client.read(key)?.number, SensorSample.isPlausible(celsius) else { return nil }
             return SensorReading(key: key, group: SensorGroup(key: key), celsius: celsius)
         }

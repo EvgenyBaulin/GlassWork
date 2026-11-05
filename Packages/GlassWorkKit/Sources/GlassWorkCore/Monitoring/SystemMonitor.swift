@@ -14,6 +14,7 @@ public struct MonitorDemand: Sendable, Equatable {
     public var battery = false
     public var gpu = false
     public var sensors = false
+    public var sensorDetail = SensorDetail.summary
     public var processes = false
     /// The process list on the slow pace: `ps` every two seconds is too much for a widget.
     public var slowProcesses = false
@@ -54,6 +55,30 @@ public final class SystemMonitor {
                 histories[.temperature] = nil
             }
         }
+    }
+
+    /// The interface the Network module follows. Nil adds up all of them.
+    public var networkInterface: String?
+
+    /// The GPU the module shows. Everything reads the first one, so this one goes first.
+    public var gpuName: String? {
+        didSet {
+            gpus = gpus.startingWith(gpuName)
+        }
+    }
+
+    /// The volume the Disk module shows. Nil keeps the startup disk first.
+    public var volumePath: String? {
+        didSet {
+            volumes = volumes.startingWith(volumePath)
+        }
+    }
+
+    /// Which volumes can be ejected from here.
+    public var ejectOptions = EjectOptions()
+
+    public var ejectableVolumes: [DiskVolume] {
+        volumes.filter(ejectOptions.allows)
     }
 
     /// Timers, notes and other small modules, ticking along with the monitor.
@@ -149,20 +174,27 @@ public final class SystemMonitor {
     ///
     /// This serves system widgets, which refresh once a minute: sampling them on every tick would cost far more.
     public func readForWidgets(_ kinds: Set<WidgetKind>) async {
-        let extra = MonitorDemand(widgets: kinds).subtracting(demand)
+        var extra = MonitorDemand(widgets: kinds).subtracting(demand)
         guard isRunning, extra.readsSamples else { return }
-        await apply(sampler.read(extra, includeSlow: true), at: Date())
+        // Once a minute is rare enough, and a widget must not wait for the monitor's own pace.
+        extra.sensorDetail = .live
+        await apply(sampler.read(extra, includeSlow: true, temperature: temperatureSource), at: Date())
     }
 
     /// What `kinds` show, from the latest readings. Nothing is read here, so calling it often costs little.
     public func widgetSnapshot(for kinds: Set<WidgetKind>, at date: Date = Date()) -> WidgetSnapshot {
         var snapshot = WidgetSnapshot(date: date)
+        snapshot.temperatureUnit = Format.temperatureUnit
         snapshot.cpu = cpu
         snapshot.cpuInfo = cpuInfo
         snapshot.memory = memory
         snapshot.gpu = gpus.first
         snapshot.battery = battery
-        snapshot.volumes = volumes
+        snapshot.volumes = volumes.map { volume in
+            var shown = volume
+            shown.isEjectable = ejectOptions.allows(volume)
+            return shown
+        }
         snapshot.network = network
         snapshot.sensors = sensors
         if !kinds.isDisjoint(with: [.activity, .topApps]) {
@@ -263,7 +295,13 @@ public final class SystemMonitor {
     }
 
     /// Reads right away, for example when a panel opens.
-    public func refresh() {
+    ///
+    /// - Parameter includingSlow: Also reads what normally waits for the slow pace, such as disk space, for a
+    ///   screen that would otherwise stay empty until then.
+    public func refresh(includingSlow: Bool = false) {
+        if includingSlow {
+            lastSlow = .distantPast
+        }
         Task { await tick() }
     }
 
@@ -290,9 +328,9 @@ public final class SystemMonitor {
         if includeSlow {
             lastSlow = now
         }
-        let reading = await sampler.read(demand, includeSlow: includeSlow)
+        let reading = await sampler.read(demand, includeSlow: includeSlow, temperature: temperatureSource)
         apply(reading, at: now)
-        everyday.tick(at: now)
+        everyday.tick(at: now, battery: battery)
         developer.tick(at: now, demand: demand.developer)
         apps.tick(at: now, isLive: demand.liveApps)
         weather.tick(at: now)
@@ -341,8 +379,8 @@ public final class SystemMonitor {
             record(.memory, value.usedShare, date)
         }
         if let value = reading.gpus {
-            gpus = value
-            if let first = value.first {
+            gpus = value.startingWith(gpuName)
+            if let first = gpus.first {
                 record(.gpu, first.device, date)
             }
         }
@@ -361,7 +399,7 @@ public final class SystemMonitor {
     }
 
     private func applyStorage(_ reading: Sampler.Reading, at date: Date) {
-        if let value = reading.network {
+        if let value = reading.network?.only(networkInterface) {
             network = value
             record(.download, value.download, date)
             record(.upload, value.upload, date)
@@ -372,12 +410,22 @@ public final class SystemMonitor {
             record(.diskWrite, value.write, date)
         }
         if let value = reading.volumes {
-            volumes = value
+            volumes = value.startingWith(volumePath)
         }
     }
 
     private func record(_ metric: Metric, _ value: Double, _ date: Date) {
         histories[metric, default: TieredHistory()].append(value, at: date)
+    }
+}
+
+extension Array where Element: Identifiable, Element.ID == String {
+    /// The chosen one first and the rest in their order. A choice that is gone changes nothing.
+    func startingWith(_ id: String?) -> [Element] {
+        guard let id, let index = firstIndex(where: { $0.id == id }) else { return self }
+        var ordered = self
+        ordered.insert(ordered.remove(at: index), at: 0)
+        return ordered
     }
 }
 
@@ -405,9 +453,10 @@ actor Sampler {
     private var disk: DiskCounters?
     private var diskDate = Date()
     private lazy var sensorReader = SensorReader()
-    private var sensorTick = 0
+    private var sensorPace = SensorPace()
 
-    func read(_ demand: MonitorDemand, includeSlow: Bool) async -> Reading {
+    /// - Parameter temperature: What the temperature graph records, which the summary has to include.
+    func read(_ demand: MonitorDemand, includeSlow: Bool, temperature: SensorChoice) async -> Reading {
         var reading = Reading()
         if demand.cpu {
             readCPU(into: &reading)
@@ -424,8 +473,10 @@ actor Sampler {
         if demand.gpu {
             reading.gpus = GPUReader.samples()
         }
-        if demand.sensors {
-            reading.sensors = sensorReader?.sample()
+        if demand.sensors, sensorPace.isDue(demand.sensorDetail, at: Date()) {
+            // Alerts watch the average CPU temperature, whatever the graph shows.
+            let summary: Set<SensorChoice> = [temperature, .averageCPU]
+            reading.sensors = sensorReader?.sample(showing: demand.sensorDetail == .summary ? summary : nil)
         }
         if demand.processes || (includeSlow && demand.slowProcesses) {
             reading.processes = await ProcessList.read()
@@ -439,12 +490,6 @@ actor Sampler {
             }
         }
         return reading
-    }
-
-    /// Temperatures move slowly: every third read is enough unless a panel shows them live.
-    private func shouldReadSensors(detailed: Bool) -> Bool {
-        sensorTick += 1
-        return detailed || sensorTick % 3 == 1
     }
 
     private func readCPU(into reading: inout Reading) {

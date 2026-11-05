@@ -36,6 +36,19 @@ extension SensorChoice: RawRepresentable, Codable {
     }
 }
 
+public extension SensorChoice {
+    /// True when `celsius(for:)` needs this key to answer for this choice.
+    func covers(_ key: String) -> Bool {
+        let group = SensorGroup(key: key)
+        return switch self {
+        case .averageCPU, .hottestCPU: group == .cpuPerformance || group == .cpuEfficiency
+        case .averageGPU: group == .gpu
+        case .averageSoC: group == .soc
+        case let .sensor(chosen): key == chosen
+        }
+    }
+}
+
 public extension SensorSample {
     func celsius(for choice: SensorChoice) -> Double? {
         switch choice {
