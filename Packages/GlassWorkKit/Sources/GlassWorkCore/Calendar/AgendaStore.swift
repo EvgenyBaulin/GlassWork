@@ -22,11 +22,21 @@ public final class AgendaStore {
     public private(set) var remindersAccess: DataAccess
     public private(set) var events: [AgendaEvent] = []
     public private(set) var todos: [TodoItem] = []
+    /// Every calendar on the Mac, shown or not.
+    public private(set) var calendars: [CalendarChoice] = []
 
     @ObservationIgnored public var todoOptions = TodoOptions() {
         didSet {
             if todoOptions != oldValue, remindersAccess == .granted {
                 loadReminders()
+            }
+        }
+    }
+
+    @ObservationIgnored public var calendarOptions = CalendarOptions() {
+        didSet {
+            if calendarOptions != oldValue, eventsAccess == .granted {
+                loadEvents()
             }
         }
     }
@@ -86,8 +96,26 @@ public final class AgendaStore {
     private func loadEvents() {
         let start = Calendar.current.startOfDay(for: Date())
         let end = start.addingTimeInterval(86400 * 2)
-        let predicate = store.predicateForEvents(withStart: start, end: end, calendars: nil)
+        let all = store.calendars(for: .event)
+        calendars = all.map(Self.calendarChoice).sorted { ($0.account, $0.title) < ($1.account, $1.title) }
+        let shown = all.filter { calendarOptions.shows(Self.calendarChoice($0)) }
+        // An empty list would mean every calendar to EventKit, as nil does not.
+        guard !shown.isEmpty else {
+            events = []
+            return
+        }
+        let predicate = store.predicateForEvents(withStart: start, end: end, calendars: shown)
         events = store.events(matching: predicate).map(Self.agendaEvent).sorted { $0.start < $1.start }
+    }
+
+    private static func calendarChoice(_ calendar: EKCalendar) -> CalendarChoice {
+        CalendarChoice(
+            id: calendar.calendarIdentifier,
+            title: calendar.title,
+            account: calendar.source?.title ?? "",
+            color: hex(calendar.cgColor),
+            isBirthdays: calendar.type == .birthday
+        )
     }
 
     private static func agendaEvent(_ event: EKEvent) -> AgendaEvent {

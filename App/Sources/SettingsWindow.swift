@@ -310,7 +310,7 @@ struct ModulePane: View {
                     )
                 }
             }
-            ModuleOptions(module: module, store: store)
+            ModuleOptions(module: module, store: store, agenda: monitor.agenda)
             ModuleOptionRows(module: module, store: store)
             if module == .sensors {
                 SensorsMenuBarSection(selection: sensor, sample: monitor.sensors)
