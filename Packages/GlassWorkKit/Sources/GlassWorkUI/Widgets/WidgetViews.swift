@@ -129,7 +129,7 @@ public extension WidgetKind {
     }
 }
 
-/// One widget face, shared by WidgetKit and GlassWork's own desktop windows.
+/// One widget face.
 public struct WidgetFace: View {
     private let kind: WidgetKind
     private let size: WidgetSize
@@ -137,7 +137,8 @@ public struct WidgetFace: View {
     private let now: Date
     private let showsSeconds: Bool
 
-    /// `showsSeconds` is false in WidgetKit, which refreshes once a minute and would show stale seconds.
+    /// `showsSeconds` is false in WidgetKit, which refreshes once a minute and would show stale seconds. The true
+    /// default draws fixed times, which keeps snapshots the same from run to run.
     public init(
         kind: WidgetKind,
         size: WidgetSize,

@@ -24,7 +24,6 @@ final class AppModel {
     private lazy var runningApps = RunningAppsObserver(store: monitor.apps)
     private lazy var quickQuit = QuickQuitController(model: self)
     private let quitter = QuitService(system: WorkspaceQuitSystem())
-    private lazy var desktopWidgets = DesktopWidgetController(model: self)
     private lazy var dock = DockController(model: self)
     private(set) lazy var clipboard = ClipboardController(model: self)
     private lazy var textCapture = TextCaptureController(model: self)
@@ -235,7 +234,6 @@ final class AppModel {
         applyInfoModules()
         statusBar.apply(store.settings)
         monitor.developer.options = DeveloperOptions(settings: store.settings)
-        desktopWidgets.apply(store.settings.widgets)
         dock.apply(store.settings.dock)
         windowTiles.apply(store.settings.windowTiles)
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
@@ -263,9 +261,9 @@ final class AppModel {
     }
 
     private func updateDemand() {
-        // Live windows and charts sample on every tick; other system widgets read once a minute.
-        let placed = placedWidgetKinds
-        var demand = MonitorDemand(widgets: desktopWidgetKinds.union(systemWidgetKinds.filter(\.keepsHistory)))
+        // Charts sample on every tick; other widgets read once a minute.
+        let placed = systemWidgetKinds
+        var demand = MonitorDemand(widgets: placed.filter(\.keepsHistory))
             .adding(visibleSection?.monitorDemand ?? MonitorDemand())
         // A widget in the Dock shows a live figure, just as a menu bar item does.
         let docked = store.settings.dock.shownWidgets
@@ -297,14 +295,6 @@ final class AppModel {
         monitor.rates.isActive = isWanted(.rates) || placed.contains(.rates)
     }
 
-    private var desktopWidgetKinds: Set<WidgetKind> {
-        Set(store.settings.widgets.placements.map(\.kind))
-    }
-
-    private var placedWidgetKinds: Set<WidgetKind> {
-        desktopWidgetKinds.union(systemWidgetKinds)
-    }
-
     func closePanels() {
         panels.closeTransient()
     }
@@ -329,7 +319,7 @@ final class AppModel {
         checkSystemWidgets()
         Task {
             let hasNewWidgets = await refreshSystemWidgetKinds()
-            let kinds = placedWidgetKinds
+            let kinds = systemWidgetKinds
             if kinds.contains(.endpoints) {
                 await monitor.activity.check(store.settings.widgets.endpoints)
             }
@@ -371,9 +361,9 @@ final class AppModel {
         return true
     }
 
-    /// The one place widget data comes together, for system widgets and GlassWork's own windows alike.
-    func makeWidgetSnapshot() -> WidgetSnapshot {
-        let kinds = placedWidgetKinds
+    /// The one place widget data comes together.
+    private func makeWidgetSnapshot() -> WidgetSnapshot {
+        let kinds = systemWidgetKinds
         var snapshot = monitor.widgetSnapshot(for: kinds)
         snapshot.commands = store.settings.widgets.commands
         snapshot.endpoints = store.settings.widgets.endpoints
@@ -534,13 +524,12 @@ private extension AppModel {
 
     /// Only what is on screen counts, so the adapter process does not run for nothing.
     var wantsNowPlaying: Bool {
-        let widgets = store.settings.widgets.placements.contains { $0.kind == .nowPlaying || $0.kind == .lyrics }
-        return isWanted(.nowPlaying) || widgets || nowPlaying.hasSystemWidget
+        isWanted(.nowPlaying) || nowPlaying.hasSystemWidget
     }
 
     var wantsLyrics: Bool {
         guard store.settings.module(.nowPlaying)?.options[ModuleOption.onlineLyrics] != "false" else { return false }
-        return store.settings.widgets.placements.contains { $0.kind == .lyrics } || nowPlaying.hasSystemLyricsWidget
+        return nowPlaying.hasSystemLyricsWidget
     }
 
     func checkSystemWidgets() {

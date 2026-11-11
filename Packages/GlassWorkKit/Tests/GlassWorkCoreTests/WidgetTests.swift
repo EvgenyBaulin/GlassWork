@@ -3,11 +3,6 @@ import Foundation
 import Testing
 
 struct WidgetModelTests {
-    @Test(arguments: [(170.0, 170.0), (100.0, 194.0), (90.0, 0.0), (300.0, 388.0)])
-    func snapsToTheGrid(value: Double, expected: Double) {
-        #expect(WidgetPlacement.snapped(value) == (value == 170 ? 194 : expected))
-    }
-
     @Test func snapshotSurvivesTheSharedStore() throws {
         let directory = FileManager.default.temporaryDirectory
             .appending(path: "GlassWorkWidgets-\(UUID().uuidString)", directoryHint: .isDirectory)

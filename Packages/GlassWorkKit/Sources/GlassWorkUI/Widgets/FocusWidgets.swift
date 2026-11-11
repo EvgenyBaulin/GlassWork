@@ -153,7 +153,7 @@ struct PomodoroWidget: View {
         .frame(width: diameter, height: diameter)
     }
 
-    /// In WidgetKit the countdown runs on its own; GlassWork's own windows redraw each second.
+    /// In WidgetKit the countdown runs on its own. Snapshots draw a fixed time.
     @ViewBuilder
     private func countdown(_ state: PomodoroState) -> some View {
         if context.showsSeconds {

@@ -160,11 +160,7 @@ struct PullRequestDigestTests {
     }
 }
 
-struct SystemOnlyWidgetTests {
-    @Test func newWidgetsStayOutOfTheAppsOwnWindows() {
-        #expect(WidgetKind.gallery.allSatisfy { !WidgetKind.systemOnlyKinds.contains($0) })
-    }
-
+struct SystemWidgetDemandTests {
     @Test func todayAskForTheBattery() {
         #expect(MonitorDemand(widgets: [.todayAtAGlance]).battery)
     }

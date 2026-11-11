@@ -383,8 +383,7 @@ struct StopwatchWidget: View {
         Text(loc("Click to open Timers")).font(.system(size: 10)).foregroundStyle(.tertiary).lineLimit(1)
     }
 
-    /// In WidgetKit a running stopwatch counts on its own between refreshes; GlassWork's own windows redraw each
-    /// second.
+    /// In WidgetKit a running stopwatch counts on its own between refreshes. Snapshots draw a fixed time.
     private func time(size: CGFloat) -> some View {
         Group {
             if let startedAt = stopwatch.startedAt, !context.showsSeconds {
