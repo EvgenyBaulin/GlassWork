@@ -490,6 +490,7 @@ private extension AppModel {
         monitor.everyday.keepAwakeRule = KeepAwakeRule(options: store.settings.module(.keepAwake)?.options ?? [:])
         monitor.everyday.onTimerFinished = { [weak self] in self?.timerFinished($0) }
         monitor.agenda.todoOptions = TodoOptions(options: store.settings.module(.todos)?.options ?? [:])
+        monitor.agenda.calendarOptions = CalendarOptions(options: store.settings.module(.calendar)?.options ?? [:])
         monitor.ejectOptions = EjectOptions(options: store.settings.module(.eject)?.options ?? [:])
         applyHardwareChoices()
     }

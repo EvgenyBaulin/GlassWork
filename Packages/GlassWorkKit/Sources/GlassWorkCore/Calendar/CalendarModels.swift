@@ -189,3 +189,49 @@ public enum TodoFilter: String, Codable, CaseIterable, Sendable {
         }
     }
 }
+
+/// One of the Mac's calendars, as a row in Settings.
+public struct CalendarChoice: Identifiable, Sendable, Equatable {
+    public var id: String
+    public var title: String
+    public var account: String
+    public var color: String
+    public var isBirthdays: Bool
+
+    public init(id: String, title: String, account: String, color: String, isBirthdays: Bool = false) {
+        self.id = id
+        self.title = title
+        self.account = account
+        self.color = color
+        self.isBirthdays = isBirthdays
+    }
+}
+
+/// Which calendars feed the panels, the menu bar, the Dock and the widgets.
+public struct CalendarOptions: Sendable, Equatable {
+    /// Nil until the first choice: everything shows except birthdays, which are not meetings.
+    private var hidden: Set<String>?
+
+    public init() {}
+
+    public init(options: [String: String]) {
+        hidden = options[ItemOption.hiddenCalendars].map { text in
+            Set(text.split(separator: ",").map(String.init))
+        }
+    }
+
+    public func shows(_ calendar: CalendarChoice) -> Bool {
+        hidden.map { !$0.contains(calendar.id) } ?? !calendar.isBirthdays
+    }
+
+    /// The stored value after one row changes. The first choice also records the others as they look now.
+    public func stored(after calendar: CalendarChoice, isShown: Bool, among all: [CalendarChoice]) -> String {
+        var names = hidden ?? Set(all.filter { !shows($0) }.map(\.id))
+        if isShown {
+            names.remove(calendar.id)
+        } else {
+            names.insert(calendar.id)
+        }
+        return names.sorted().joined(separator: ",")
+    }
+}

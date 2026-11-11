@@ -196,7 +196,7 @@ public enum SettingsIndex {
             module: .calendar,
             english: "Calendar",
             russian: "Календарь",
-            keywords: ["events", "события"]
+            keywords: ["events", "события", "calendars", "календари", "birthdays", "дни рождения"]
         ),
         ModuleSearchWords(module: .endsIn, english: "Ends In", russian: "До конца", keywords: ["meeting", "встреча"]),
         ModuleSearchWords(module: .todos, english: "To-Dos", russian: "Задачи", keywords: ["reminders", "напоминания"]),

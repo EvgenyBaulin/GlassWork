@@ -44,6 +44,7 @@ public enum ItemOption {
     public static let volumePath = "volume"
     public static let showsUnknownSensors = "unknownSensors"
     public static let uptimeFormat = "uptimeFormat"
+    public static let hiddenCalendars = "hiddenCalendars"
     public static let calendarWindowHours = "windowHours"
     public static let skipsAllDay = "skipAllDay"
     public static let titleLength = "titleLength"

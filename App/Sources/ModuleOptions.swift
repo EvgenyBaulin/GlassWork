@@ -6,9 +6,11 @@ import SwiftUI
 struct ModuleOptions: View {
     let module: ModuleID
     let store: SettingsStore
+    let agenda: AgendaStore
 
     var body: some View {
         switch module {
+        case .calendar: CalendarChoiceSection(agenda: agenda, store: store)
         case .weather: WeatherOptions(store: store)
         case .rates: RatesOptions(store: store)
         case .clipboard: ClipboardOptions(store: store)

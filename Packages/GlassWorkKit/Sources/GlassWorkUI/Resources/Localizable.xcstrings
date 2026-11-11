@@ -16224,6 +16224,26 @@
           }
         }
       }
+    },
+    "Calendars": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Календари"
+          }
+        }
+      }
+    },
+    "Allow calendar access in the Calendar panel to choose calendars.": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы выбрать календари, разрешите доступ в панели «Календарь»."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
