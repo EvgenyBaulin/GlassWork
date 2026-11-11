@@ -10,8 +10,8 @@ A Liquid Glass companion for macOS: live menu bar modules, desktop widgets and a
   plus developer modules (coding-assistant usage limits, Git, dev servers, containers, ping, VPN, Wi-Fi, uptime)
   and everyday ones (calendar, world clocks, timers, keep awake, now playing, notes, to-dos, weather, exchange
   rates and more). Each item can show a symbol, a figure, a graph, both, or a label, and keeps a fixed width.
-- **Desktop widgets.** Native WidgetKit widgets in small, medium, large and extra large sizes, and the same
-  widgets as live floating desktop windows that update every second.
+- **Desktop widgets.** Native WidgetKit widgets in small, medium, large and extra large sizes, with sample data
+  and a short description in the macOS widget gallery.
 - **Dock.** A Dock replacement on any edge of the screen, with live widgets beside your apps, folders, stacks,
   Downloads and presets. It is off until you turn it on.
 - **Main window.** What every app uses right now and over the last week, with helpers counted in. Apps can be
@@ -44,7 +44,7 @@ make help         # all commands
 
 | Path | What |
 |---|---|
-| `App/` | The GlassWork app: menu bar items, settings, desktop windows, Dock |
+| `App/` | The GlassWork app: menu bar items, settings, Dock |
 | `Widgets/` | WidgetKit extension (sandboxed, reads shared snapshots) |
 | `Helper/` | Optional privileged daemon that changes fan speed |
 | `Packages/GlassWorkKit/` | `GlassWorkCore` (collectors, models, storage) and `GlassWorkUI` (shared views) |
@@ -58,7 +58,7 @@ Architecture notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 1. Foundation and system menu bar modules
 2. Developer modules
 3. Everyday modules, weather and exchange rates
-4. WidgetKit widgets and floating desktop widgets
+4. WidgetKit widgets
 5. Dock
 
 ## License

@@ -9,14 +9,6 @@ public extension WidgetKind {
     /// Filled by the `gh` tool, which is worth running only for these.
     static let githubKinds: Set<WidgetKind> = [.github, .githubReviews, .githubActions, .contributions]
 
-    /// Only in the system gallery: GlassWork's own desktop windows do not get new widgets.
-    static let systemOnlyKinds: Set<WidgetKind> = [.github, .todayAtAGlance, .photoFrame, .onThisDay, .birthdays]
-
-    /// What GlassWork's own desktop windows offer. Macs without fans never see the Fans widget.
-    static var gallery: [WidgetKind] {
-        allCases.filter { ($0 != .fans || FanHardware.hasFans) && !systemOnlyKinds.contains($0) }
-    }
-
     /// The developer module that collects this widget's data.
     var developerModule: ModuleID? {
         switch self {

@@ -1,6 +1,6 @@
 import Foundation
 
-public enum WidgetSize: String, Codable, CaseIterable, Sendable {
+public enum WidgetSize: String, CaseIterable, Sendable {
     case small, medium, large, extraLarge
 
     /// Points, as macOS draws widgets.
@@ -20,8 +20,8 @@ public enum WidgetSize: String, Codable, CaseIterable, Sendable {
     }
 }
 
-/// Every desktop widget. The raw value is stored in settings and used as the WidgetKit kind.
-public enum WidgetKind: String, Codable, CaseIterable, Sendable, Identifiable {
+/// Every widget. The raw value is the WidgetKit kind.
+public enum WidgetKind: String, CaseIterable, Sendable, Identifiable {
     case activity, battery, macHealth, storage, temperature, topApps, network
     /// Kept under its first identifier so widgets already on the desktop keep working.
     case uptime = "io.github.evgenybaulin.glasswork.uptime"
@@ -118,37 +118,10 @@ public extension WidgetSnapshot {
     }
 }
 
-/// A widget placed on the desktop as GlassWork's own window.
-public struct WidgetPlacement: Codable, Sendable, Equatable, Identifiable {
-    public var id = UUID()
-    public var kind: WidgetKind
-    public var size: WidgetSize
-    public var x: Double
-    public var y: Double
-    public var isLocked = false
-
-    public init(kind: WidgetKind, size: WidgetSize, x: Double, y: Double) {
-        self.kind = kind
-        self.size = size
-        self.x = x
-        self.y = y
-    }
-
-    /// Grid step: the small widget plus the gap macOS leaves between widgets.
-    public static let gridStep = 170.0 + 24.0
-
-    public static func snapped(_ value: Double) -> Double {
-        (value / gridStep).rounded() * gridStep
-    }
-}
-
-/// Floating widgets and how WidgetKit widgets refresh.
+/// How WidgetKit widgets refresh, and the data some of them show. Old files may hold keys of removed features:
+/// decoding skips them and `SettingsFile` writes them back untouched.
 public struct WidgetSettings: Codable, Sendable, Equatable {
-    public var placements: [WidgetPlacement] = []
-    /// One arrangement per set of connected displays.
-    public var layouts: [String: [WidgetPlacement]] = [:]
     public var refreshSeconds = 60
-    public var glassDensity = 0.0
     public var tracksScreenTime = false
     public var commands: [UserCommand] = []
     public var endpoints: [Endpoint] = []

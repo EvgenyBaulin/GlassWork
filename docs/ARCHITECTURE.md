@@ -16,7 +16,7 @@
   outlive the app. The script sits in the app's resources and needs nothing but what macOS ships.
 
 ```
-collectors ──► app state ──► menu bar items / desktop windows / Dock
+collectors ──► app state ──► menu bar items / Dock
                     │
                     └──► SnapshotStore (App Group container, JSON) ──► widget timelines
 ```
@@ -51,10 +51,10 @@ FanEngine (pure) ──► FanControlModel ──► XPC ──► FanHelperServ
 
 The app is the only place that reads anything. Widgets get a `WidgetSnapshot`:
 
-- `AppModel.makeWidgetSnapshot()` builds it for system widgets and desktop windows alike. It only copies the
-  latest readings, so calling it often costs little, and it carries only what placed widgets show.
-- The kinds placed as desktop windows join the regular 2 s tick. System widgets, which WidgetKit reports through
-  `WidgetCenter`, get one read a minute, except charts that need steady samples. See `MonitorDemand(widgets:)`.
+- `AppModel.makeWidgetSnapshot()` builds it. It only copies the latest readings, so calling it often costs little,
+  and it carries only what placed widgets show.
+- Placed widgets, which WidgetKit reports through `WidgetCenter`, get one read a minute, except charts that need
+  steady samples. See `MonitorDemand(widgets:)`.
 
 A button in a widget cannot do anything by itself, because the extension is sandboxed:
 
@@ -64,8 +64,8 @@ Button(intent:) ──► WidgetActionIntent ──► WidgetCommandInbox (App G
                        FanControlModel, EventKit, timers, eject ◄── AppModel.perform ┘
 ```
 
-- `GlassWorkUI` cannot name an intent, which must live in the extension to be found. Each host supplies a
-  `WidgetActionRenderer`: the extension a button that runs the intent, the app one that calls the model directly.
+- `GlassWorkUI` cannot name an intent, which must live in the extension to be found. The extension supplies a
+  `WidgetActionRenderer` that makes a button running the intent. Without one a button is only a picture.
 - A command is dropped after 10 s, so a Max tapped while the app was closed cannot start the fans later.
 - `AppModel.perform` trusts nothing in a command and checks it against current state. Without fan control
   `FanControlModel.perform` does nothing, and the widget shows the button as a picture with no action.

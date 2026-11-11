@@ -6,8 +6,6 @@ struct WidgetsPane: View {
     let store: SettingsStore
     let personal: PersonalWidgetStore
     let activity: ActivityStore
-    @State private var kind = WidgetKind.activity
-    @State private var size = WidgetSize.medium
     @State private var endpointText = ""
 
     var body: some View {
@@ -19,28 +17,6 @@ struct WidgetsPane: View {
                 Text(loc("System widgets"))
             }
             PersonalWidgetsSection(store: store, personal: personal)
-            Section(loc("Live desktop widgets")) {
-                ForEach(store.settings.widgets.placements) { placement in
-                    HStack {
-                        Text(placement.kind.title)
-                        Spacer()
-                        Button(loc("Remove")) {
-                            store.update { $0.widgets.placements.removeAll { $0.id == placement.id } }
-                        }
-                    }
-                }
-                Picker(loc("Widget"), selection: $kind) {
-                    ForEach(WidgetKind.gallery) { Text($0.title).tag($0) }
-                }
-                Picker(loc("Size"), selection: $size) {
-                    Text("S").tag(WidgetSize.small)
-                    Text("M").tag(WidgetSize.medium)
-                    Text("L").tag(WidgetSize.large)
-                    Text("XL").tag(WidgetSize.extraLarge)
-                }
-                .pickerStyle(.segmented)
-                Button(loc("Add Widget")) { add() }
-            }
             Section(loc("Screen Time")) {
                 Toggle(loc("Track which app is in front"), isOn: Binding(
                     get: { store.settings.widgets.tracksScreenTime },
@@ -66,14 +42,6 @@ struct WidgetsPane: View {
             }
         }
         .formStyle(.grouped)
-    }
-
-    private func add() {
-        let visible = NSScreen.main?.visibleFrame ?? .zero
-        let count = Double(store.settings.widgets.placements.count)
-        let x = visible.minX + 24 + count * WidgetPlacement.gridStep
-        let y = visible.maxY - 24 - size.height
-        store.update { $0.widgets.placements.append(WidgetPlacement(kind: kind, size: size, x: x, y: y)) }
     }
 }
 

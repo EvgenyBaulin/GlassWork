@@ -433,7 +433,6 @@ extension SettingsIndex {
             page("dock.iconSize", "Icon size", "Размер значков", .dock, ["Dock"]),
             page("dock.magnification", "Magnification", "Увеличение", .dock, ["Dock"]),
             page("dock.magnified", "Magnified size", "Размер при увеличении", .dock, ["Dock"]),
-            page("widgets.desktop", "Live desktop widgets", "Живые виджеты на столе", .widgets, ["Widgets"]),
             page("widgets.system", "System widgets", "Системные виджеты", .widgets, ["Widgets"]),
             page(
                 "widgets.screenTime",

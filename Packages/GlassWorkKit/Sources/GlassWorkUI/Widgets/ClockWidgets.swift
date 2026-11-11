@@ -6,7 +6,7 @@ struct TimeContext {
     let size: WidgetSize
     let snapshot: WidgetSnapshot
     let now: Date
-    /// Seconds only move in GlassWork's own windows; WidgetKit refreshes once a minute.
+    /// False in WidgetKit, which refreshes once a minute. True draws fixed times, for snapshots.
     let showsSeconds: Bool
 
     var places: [ClockPlace] {

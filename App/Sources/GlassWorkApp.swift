@@ -75,7 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// A click on the Dock icon, or opening the app again from Finder or Spotlight.
     ///
-    /// The flag says nothing here: the Dock bar and desktop widgets are windows too.
+    /// The flag says nothing here: the Dock bar is a window too.
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
         showMainWindow()
         return false
