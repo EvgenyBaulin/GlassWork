@@ -545,8 +545,9 @@ struct NowPlayingAdapterTests {
         }
     }
 
+    /// Up to 30 s: on a busy machine, such as right after a build, starting Perl alone can take seconds.
     private func wait(_ condition: () -> Bool) async throws {
-        for _ in 0 ..< 400 where !condition() {
+        for _ in 0 ..< 3000 where !condition() {
             try await Task.sleep(for: .milliseconds(10))
         }
     }
