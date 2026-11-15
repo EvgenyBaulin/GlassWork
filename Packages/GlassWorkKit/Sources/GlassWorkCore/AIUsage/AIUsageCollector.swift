@@ -1,10 +1,8 @@
 import Foundation
 
-/// Where exact limits will come from once a server request exists.
-///
-/// Today usage comes from local files only: nothing here reads a token or the Keychain or opens a
-/// connection. A later implementation can ask the tool's server and return a corrected usage;
-/// `AIUsageCollector` calls this for every tool it found and needs no other change.
+/// Corrects what the files say. `AILiveLimits` asks the tools themselves (`claude -p /usage`,
+/// `codex app-server`); nothing here reads a token or the Keychain or opens a connection of its own.
+/// `AIUsageCollector` calls this for every tool it found.
 public protocol AILimitProvider: Sendable {
     func refined(_ usage: AIToolUsage) async -> AIToolUsage
 }
