@@ -181,6 +181,49 @@ struct AppUsageSumTests {
     func aProcessOfNoListedAppIsIgnored() {
         #expect(usage([counters(999, seconds: 1)], owners: [:]).isEmpty)
     }
+
+    @Test
+    func twoCopiesOfOneAppAddUpInOneRow() throws {
+        var second = slack
+        second.pid = 250
+        let result = AppUsageGrouping.usage(
+            apps: [slack, second],
+            counters: [counters(200, seconds: 1, memory: 100), counters(250, seconds: 1, memory: 40)],
+            previous: [:],
+            seconds: 10,
+            owners: [200: slack.id, 250: slack.id]
+        )
+        let app = try #require(result.only)
+        #expect(app.pid == slack.pid)
+        #expect(app.memory == 140)
+    }
+
+    @Test
+    func twoAppsWithoutABundleIDAtOnePathAddUpInOneRow() throws {
+        let first = RunningAppInfo(
+            pid: 400,
+            name: "Tool",
+            bundleID: nil,
+            path: "/Applications/Tool.app",
+            role: .regular
+        )
+        var second = first
+        second.pid = 401
+        let result = AppUsageGrouping.usage(
+            apps: [first, second],
+            counters: [counters(400, seconds: 1, memory: 1), counters(401, seconds: 1, memory: 2)],
+            previous: [:],
+            seconds: 10,
+            owners: [400: first.id, 401: first.id]
+        )
+        #expect(try #require(result.only).memory == 3)
+    }
+}
+
+private extension Array {
+    var only: Element? {
+        count == 1 ? first : nil
+    }
 }
 
 struct AppListTests {
