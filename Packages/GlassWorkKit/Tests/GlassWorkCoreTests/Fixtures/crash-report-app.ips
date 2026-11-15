@@ -1,0 +1,26 @@
+{"app_name":"GlassWork","timestamp":"2026-11-15 20:00:19.00 +0300","app_version":"0.1.0","slice_uuid":"00000000-0000-0000-0000-000000000000","build_version":"34","platform":1,"bundleID":"io.github.evgenybaulin.GlassWork","share_with_app_devs":0,"is_first_party":0,"bug_type":"309","os_version":"macOS 27.2","name":"GlassWork","incident_id":"00000000-0000-0000-0000-000000000000"}
+{
+  "uptime" : 260,
+  "procName" : "GlassWork",
+  "procPath" : "\/Applications\/GlassWork.app\/Contents\/MacOS\/GlassWork",
+  "captureTime" : "2026-11-15 19:59:52.1032 +0300",
+  "procLaunch" : "2026-11-15 19:59:47.7317 +0300",
+  "exception" : {"codes":"0x0000000000000001, 0x000000018bc0d604","rawCodes":[1,6639638020],"type":"EXC_BREAKPOINT","signal":"SIGTRAP"},
+  "termination" : {"flags":0,"code":5,"namespace":"SIGNAL","indicator":"Trace\/BPT trap: 5","byProc":"exc handler","byPid":3754},
+  "faultingThread" : 1,
+  "threads" : [
+    {"id":1,"queue":"com.apple.main-thread","frames":[{"imageOffset":10,"symbol":"mach_msg2_trap","imageIndex":1}]},
+    {"id":2,"queue":"com.apple.root.user-initiated-qos.cooperative","frames":[
+      {"imageOffset":20,"symbol":"_assertionFailure(_:_:file:line:flags:)","imageIndex":2},
+      {"imageOffset":30,"sourceFile":"\/<compiler-generated>","symbol":"specialized _NativeDictionary.merge<A>(trappingOnDuplicates:)","imageIndex":0},
+      {"imageOffset":40,"sourceFile":"\/<compiler-generated>","symbol":"specialized Dictionary.init<A>(uniqueKeysWithValues:)","imageIndex":0},
+      {"imageOffset":50,"sourceLine":217,"sourceFile":"AppUsage.swift","symbol":"specialized static AppUsageGrouping.usage(apps:counters:previous:seconds:owners:)","imageIndex":0},
+      {"imageOffset":60,"sourceLine":127,"sourceFile":"AppUsageReader.swift","symbol":"AppUsageReader.read(_:at:)","imageIndex":0}
+    ]}
+  ],
+  "usedImages" : [
+    {"source":"P","arch":"arm64","name":"GlassWork","CFBundleIdentifier":"io.github.evgenybaulin.GlassWork"},
+    {"source":"P","arch":"arm64e","name":"libsystem_kernel.dylib"},
+    {"source":"P","arch":"arm64e","name":"libswiftCore.dylib"}
+  ]
+}
