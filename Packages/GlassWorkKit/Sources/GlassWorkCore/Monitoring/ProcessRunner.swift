@@ -20,6 +20,8 @@ public struct ProcessOutput: Sendable, Equatable {
 public enum ProcessRunnerError: Error, Equatable {
     case notFound(String)
     case timedOut(String)
+    /// A session ended before the line it waited for.
+    case endedWithoutAnswer(String)
 }
 
 /// `Foundation.Process` wrapper with a hard timeout.
