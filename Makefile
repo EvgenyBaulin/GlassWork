@@ -7,11 +7,12 @@ DERIVED := build/DerivedData
 PACKAGE := Packages/GlassWorkKit
 APP := $(DERIVED)/Build/Products/Release/GlassWork.app
 SWIFT := xcrun swift
+ICONSET := App/Resources/Assets.xcassets/AppIcon.appiconset
 # macOS keeps a widget list per build number, so every commit needs its own.
 BUILD_NUMBER := $(shell git rev-list --count HEAD)
 XCB := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED) -destination 'generic/platform=macOS' CURRENT_PROJECT_VERSION=$(BUILD_NUMBER)
 
-.PHONY: help generate build build-unsigned test test-core snapshots lint format install run clean auto-update-on auto-update-off auto-update-status
+.PHONY: help generate build build-unsigned test test-core snapshots lint format install run clean app-icon auto-update-on auto-update-off auto-update-status
 
 help: ## Show this help
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-16s %s\n", $$1, $$2}'
@@ -52,6 +53,14 @@ install: generate ## Release build, copy to /Applications and relaunch
 run: build ## Debug build and launch
 	-pkill -x GlassWork
 	open $(DERIVED)/Build/Products/Debug/GlassWork.app
+
+app-icon: ## Redraw the app icon from scripts/app-icon.swift into every size
+	mkdir -p build
+	$(SWIFT) scripts/app-icon.swift build/AppIcon-1024.png
+	@for size in 16 32 128 256 512; do \
+		sips -z $$size $$size build/AppIcon-1024.png --out $(ICONSET)/icon_$${size}x$${size}.png >/dev/null; \
+		sips -z $$((size * 2)) $$((size * 2)) build/AppIcon-1024.png --out $(ICONSET)/icon_$${size}x$${size}@2x.png >/dev/null; \
+	done
 
 clean: ## Remove build products
 	rm -rf build $(PACKAGE)/.build
