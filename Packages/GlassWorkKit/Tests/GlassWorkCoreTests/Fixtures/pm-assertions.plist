@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>4242</key>
+	<array>
+		<dict>
+			<key>AllowsDeviceRestart</key>
+			<integer>1</integer>
+			<key>AssertLevel</key>
+			<integer>255</integer>
+			<key>AssertName</key>
+			<string>GlassWork Keep Awake</string>
+			<key>AssertPID</key>
+			<integer>4242</integer>
+			<key>AssertStartWhen</key>
+			<date>2026-11-15T20:00:00Z</date>
+			<key>AssertType</key>
+			<string>PreventUserIdleSystemSleep</string>
+			<key>AssertionId</key>
+			<integer>40002</integer>
+			<key>GlobalUniqueID</key>
+			<integer>2</integer>
+			<key>Process Name</key>
+			<string>GlassWork</string>
+		</dict>
+	</array>
+	<key>512</key>
+	<array>
+		<dict>
+			<key>AllowsDeviceRestart</key>
+			<integer>1</integer>
+			<key>AssertLevel</key>
+			<integer>255</integer>
+			<key>AssertName</key>
+			<string>NSURLSessionTask 1</string>
+			<key>AssertPID</key>
+			<integer>512</integer>
+			<key>AssertStartWhen</key>
+			<date>2026-11-15T21:00:00Z</date>
+			<key>AssertType</key>
+			<string>BackgroundTask</string>
+			<key>AssertionId</key>
+			<integer>40001</integer>
+			<key>GlobalUniqueID</key>
+			<integer>1</integer>
+			<key>Process Name</key>
+			<string>nsurlsessiond</string>
+		</dict>
+	</array>
+	<key>628</key>
+	<array>
+		<dict>
+			<key>AllowsDeviceRestart</key>
+			<integer>1</integer>
+			<key>AssertLevel</key>
+			<integer>255</integer>
+			<key>AssertName</key>
+			<string>Powerd - Prevent sleep while display is on</string>
+			<key>AssertPID</key>
+			<integer>628</integer>
+			<key>AssertStartWhen</key>
+			<date>2026-11-15T16:58:00Z</date>
+			<key>AssertType</key>
+			<string>PreventUserIdleSystemSleep</string>
+			<key>AssertionId</key>
+			<integer>32773</integer>
+			<key>GlobalUniqueID</key>
+			<integer>670014996485</integer>
+			<key>Process Name</key>
+			<string>powerd</string>
+		</dict>
+	</array>
+	<key>777</key>
+	<array>
+		<dict>
+			<key>AssertLevel</key>
+			<integer>0</integer>
+			<key>AssertName</key>
+			<string>Video Wake Lock</string>
+			<key>AssertPID</key>
+			<integer>777</integer>
+			<key>AssertStartWhen</key>
+			<date>2026-11-15T20:00:00Z</date>
+			<key>AssertType</key>
+			<string>PreventUserIdleDisplaySleep</string>
+			<key>AssertionId</key>
+			<integer>40003</integer>
+			<key>GlobalUniqueID</key>
+			<integer>3</integer>
+			<key>Process Name</key>
+			<string>Safari</string>
+		</dict>
+	</array>
+	<key>83453</key>
+	<array>
+		<dict>
+			<key>AllowsDeviceRestart</key>
+			<integer>1</integer>
+			<key>AssertLevel</key>
+			<integer>255</integer>
+			<key>AssertName</key>
+			<string>caffeinate command-line tool</string>
+			<key>AssertPID</key>
+			<integer>83453</integer>
+			<key>AssertStartWhen</key>
+			<date>2026-11-15T21:56:10Z</date>
+			<key>AssertType</key>
+			<string>PreventUserIdleDisplaySleep</string>
+			<key>AssertionId</key>
+			<integer>35978</integer>
+			<key>AssertionOnBehalfOfPID</key>
+			<integer>78322</integer>
+			<key>Details</key>
+			<string>caffeinate asserting on behalf of Process ID 78322</string>
+			<key>GlobalUniqueID</key>
+			<integer>77506979925130</integer>
+			<key>Process Name</key>
+			<string>caffeinate</string>
+		</dict>
+	</array>
+	<key>93223</key>
+	<array>
+		<dict>
+			<key>AllowsDeviceRestart</key>
+			<integer>1</integer>
+			<key>AssertLevel</key>
+			<integer>255</integer>
+			<key>AssertName</key>
+			<string>caffeinate command-line tool</string>
+			<key>AssertPID</key>
+			<integer>93223</integer>
+			<key>AssertStartWhen</key>
+			<date>2026-11-15T22:00:19Z</date>
+			<key>AssertType</key>
+			<string>PreventUserIdleSystemSleep</string>
+			<key>AssertionId</key>
+			<integer>36056</integer>
+			<key>Details</key>
+			<string>caffeinate asserting on behalf of 'scripts/build.sh' (pid 93222)</string>
+			<key>GlobalUniqueID</key>
+			<integer>78576426781912</integer>
+			<key>Process Name</key>
+			<string>caffeinate</string>
+			<key>TimeoutAction</key>
+			<string>TimeoutActionRelease</string>
+		</dict>
+	</array>
+	<key>93380</key>
+	<array>
+		<dict>
+			<key>AllowsDeviceRestart</key>
+			<integer>1</integer>
+			<key>AssertLevel</key>
+			<integer>255</integer>
+			<key>AssertName</key>
+			<string>Xcode running tests.</string>
+			<key>AssertPID</key>
+			<integer>93380</integer>
+			<key>AssertStartWhen</key>
+			<date>2026-11-15T22:00:24Z</date>
+			<key>AssertType</key>
+			<string>PreventUserIdleSystemSleep</string>
+			<key>AssertionId</key>
+			<integer>36064</integer>
+			<key>GlobalUniqueID</key>
+			<integer>78597901618400</integer>
+			<key>Process Name</key>
+			<string>xcodebuild</string>
+		</dict>
+	</array>
+	<key>95990</key>
+	<array>
+		<dict>
+			<key>AllowsDeviceRestart</key>
+			<integer>1</integer>
+			<key>AssertLevel</key>
+			<integer>255</integer>
+			<key>AssertName</key>
+			<string>caffeinate command-line tool</string>
+			<key>AssertPID</key>
+			<integer>95990</integer>
+			<key>AssertStartWhen</key>
+			<date>2026-11-15T22:01:07Z</date>
+			<key>AssertTimeoutTimeLeft</key>
+			<integer>300</integer>
+			<key>AssertTimeoutUpdateTime</key>
+			<date>2026-11-15T22:01:07Z</date>
+			<key>AssertType</key>
+			<string>PreventUserIdleSystemSleep</string>
+			<key>AssertionId</key>
+			<integer>36077</integer>
+			<key>Details</key>
+			<string>caffeinate asserting for 300 secs</string>
+			<key>GlobalUniqueID</key>
+			<integer>78782585212141</integer>
+			<key>Process Name</key>
+			<string>caffeinate</string>
+			<key>TimeoutAction</key>
+			<string>TimeoutActionRelease</string>
+			<key>TimeoutSeconds</key>
+			<integer>300</integer>
+		</dict>
+	</array>
+</dict>
+</plist>
