@@ -259,3 +259,24 @@ struct AIRefreshOptionTests {
         #expect(DeveloperOptions(settings: settings).aiRefreshMinutes == minutes)
     }
 }
+
+struct AIUsageSourceTests {
+    @Test func oldSnapshotsWithoutSourceStillDecode() throws {
+        let json = #"{"tool":"codex","windows":[],"isUnreadable":false}"#
+        let usage = try JSONDecoder().decode(AIToolUsage.self, from: Data(json.utf8))
+        #expect(usage.source == nil)
+    }
+
+    @Test func aReadingIsLiveWhenAnyToolIsLive() {
+        let reading = AIUsageReading(
+            tools: [AIToolUsage(tool: .claudeCode), AIToolUsage(tool: .codex, source: .tool)],
+            readAt: Date()
+        )
+        #expect(reading.isLive)
+    }
+
+    @Test func filesOnlyIsNotLive() {
+        let reading = AIUsageReading(tools: [AIToolUsage(tool: .codex, source: .files)], readAt: Date())
+        #expect(!reading.isLive)
+    }
+}

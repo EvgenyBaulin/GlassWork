@@ -56,18 +56,35 @@ public struct AIWindow: Codable, Sendable, Equatable {
     }
 }
 
+/// Where the numbers of a tool came from.
+public enum AIUsageSource: String, Codable, Sendable {
+    /// The tool's own files on this Mac.
+    case files
+    /// The tool itself, asked by GlassWork: `claude -p /usage` or `codex app-server`.
+    case tool
+}
+
 public struct AIToolUsage: Codable, Sendable, Equatable, Identifiable {
     public let tool: AITool
     public var windows: [AIWindow]
     public var updatedAt: Date?
     /// True when usage files exist but could not be read.
     public var isUnreadable: Bool
+    /// nil = read from the tool's files, as in snapshots saved before the tools were asked directly.
+    public var source: AIUsageSource?
 
-    public init(tool: AITool, windows: [AIWindow] = [], updatedAt: Date? = nil, isUnreadable: Bool = false) {
+    public init(
+        tool: AITool,
+        windows: [AIWindow] = [],
+        updatedAt: Date? = nil,
+        isUnreadable: Bool = false,
+        source: AIUsageSource? = nil
+    ) {
         self.tool = tool
         self.windows = windows
         self.updatedAt = updatedAt
         self.isUnreadable = isUnreadable
+        self.source = source
     }
 
     public var id: AITool {
@@ -118,6 +135,11 @@ public struct AIUsageReading: Codable, Sendable, Equatable {
     public init(tools: [AIToolUsage], readAt: Date) {
         self.tools = tools
         self.readAt = readAt
+    }
+
+    /// True when at least one tool was asked directly rather than read from its files.
+    public var isLive: Bool {
+        tools.contains { $0.source == .tool }
     }
 
     public var missing: [AITool] {
