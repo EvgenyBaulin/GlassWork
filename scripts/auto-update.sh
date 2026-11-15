@@ -56,6 +56,15 @@ run() {
     else
         git clone --quiet --branch main "$REPO_URL" "$SRC_DIR"
     fi
+    # The LaunchAgent runs a copy of this script made by `enable`, which never changed by itself.
+    # A newer one in the checkout replaces the copy and finishes this update.
+    local fresh="$SRC_DIR/scripts/auto-update.sh" copy="$STATE_DIR/auto-update.sh"
+    if [[ -z "${GW_UPDATER_REFRESHED:-}" && -f "$fresh" ]] && ! cmp -s "$fresh" "${BASH_SOURCE[0]}"; then
+        cp "$fresh" "$copy"
+        chmod +x "$copy"
+        log "updater script refreshed from the checkout"
+        GW_UPDATER_REFRESHED=1 exec "$copy" run --force
+    fi
     printf 'DEVELOPMENT_TEAM = %s\n' "$team_id" > "$SRC_DIR/Config/Local.xcconfig"
 
     local was_running=0
@@ -76,7 +85,9 @@ run() {
     pkill -x GlassWorkWidgets || true
     touch "$STAMP"
     (( was_running )) && open /Applications/GlassWork.app
-    log "update finished at $(git -C "$SRC_DIR" rev-parse --short HEAD)"
+    local build
+    build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' /Applications/GlassWork.app/Contents/Info.plist 2>/dev/null || echo '?')"
+    log "update finished at $(git -C "$SRC_DIR" rev-parse --short HEAD), build $build"
 }
 
 enable() {

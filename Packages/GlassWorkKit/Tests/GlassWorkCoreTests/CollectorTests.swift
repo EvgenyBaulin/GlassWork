@@ -79,6 +79,15 @@ struct NetworkTests {
         #expect(NetworkSample.between(old, new, seconds: 2).download == 0)
     }
 
+    @Test func anInterfaceListedTwiceDoesNotCrash() {
+        let old = [
+            InterfaceCounters(name: "en0", received: 1000, sent: 100),
+            InterfaceCounters(name: "en0", received: 1000, sent: 100),
+        ]
+        let new = [InterfaceCounters(name: "en0", received: 3000, sent: 100)]
+        #expect(NetworkSample.between(old, new, seconds: 2).download == 1000)
+    }
+
     @Test func readsLiveCounters() {
         #expect(!NetworkReader.counters().isEmpty)
     }

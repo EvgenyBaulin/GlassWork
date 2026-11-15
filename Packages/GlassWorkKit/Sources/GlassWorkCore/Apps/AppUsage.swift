@@ -214,7 +214,8 @@ public enum AppUsageGrouping {
         seconds: TimeInterval?,
         owners: [Int32: String]
     ) -> [AppUsage] {
-        var sums = Dictionary(uniqueKeysWithValues: apps.map { app in
+        // Two copies of one app share an id, and their processes add up in one row under the first copy.
+        var sums = Dictionary(apps.map { app in
             (app.id, AppUsage(
                 id: app.id,
                 pid: app.pid,
@@ -225,7 +226,7 @@ public enum AppUsageGrouping {
                 memory: 0,
                 helpers: -1
             ))
-        })
+        }, uniquingKeysWith: { first, _ in first })
         for process in counters {
             guard let id = owners[process.pid], sums[id] != nil else { continue }
             sums[id]?.memory += process.memory

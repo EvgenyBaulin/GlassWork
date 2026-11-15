@@ -41,7 +41,8 @@ public struct NetworkSample: Codable, Sendable, Equatable {
         sessionReceived: UInt64 = 0,
         sessionSent: UInt64 = 0
     ) -> NetworkSample {
-        let old = Dictionary(uniqueKeysWithValues: previous.map { ($0.name, $0) })
+        // The kernel lists each interface once, but a crash is too high a price if it ever does not.
+        let old = Dictionary(previous.map { ($0.name, $0) }, uniquingKeysWith: { _, last in last })
         var interfaces: [Interface] = []
         var received: UInt64 = 0
         var sent: UInt64 = 0
