@@ -1,0 +1,11 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 0,
+  "total_cost_usd": 0,
+  "duration_ms": 1418,
+  "local_command": "usage",
+  "session_id": "00000000-0000-4000-8000-000000000000",
+  "result": "You are currently using your subscription to power your Claude Code usage\n\nCurrent session: 47% used · resets Nov 16 at 3:20am (Europe/Moscow)\nCurrent week (all models): 43% used · resets Nov 16 at 2:59pm (Europe/Moscow)\nCurrent week (Fable): 27% used · resets Nov 16 at 3pm (Europe/Moscow)\n"
+}
