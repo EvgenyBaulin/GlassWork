@@ -546,7 +546,7 @@ struct NowPlayingAdapterTests {
     }
 
     private func wait(_ condition: () -> Bool) async throws {
-        for _ in 0 ..< 400 where !condition() {
+        for _ in 0 ..< 3000 where !condition() { // 30 s: right after a build, Perl can take seconds to start
             try await Task.sleep(for: .milliseconds(10))
         }
     }

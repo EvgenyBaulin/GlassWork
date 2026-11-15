@@ -7,6 +7,8 @@ public enum DiagnosticEvent: Sendable, Equatable {
     case settingsProblem
     case shortcutRefused(action: String)
     case gitHubFailed(status: Int32)
+    /// From the crash report macOS wrote, read on the next launch.
+    case crashed(CrashSummary)
 
     var line: String {
         switch self {
@@ -14,7 +16,22 @@ public enum DiagnosticEvent: Sendable, Equatable {
         case .settingsProblem: "settings file could not be read or saved"
         case let .shortcutRefused(action): "shortcut refused by macOS: \(Self.safe(action))"
         case let .gitHubFailed(status): "gh failed with status \(status)"
+        case let .crashed(crash): Self.crashLine(crash)
         }
+    }
+
+    private static func crashLine(_ crash: CrashSummary) -> String {
+        var line = "crash: \(safe(crash.process)) build \(safe(crash.build)), \(safe(crash.exception))"
+        if let function = crash.function {
+            line += " in \(safe(function))"
+            if let file = crash.file {
+                line += " \(safe(file))" + (crash.line.map { ":\($0)" } ?? "")
+            }
+        }
+        if let date = crash.date {
+            line += ", crashed at \(date.formatted(.iso8601))"
+        }
+        return line
     }
 
     /// These values are identifiers and version numbers; anything else in them is dropped.
