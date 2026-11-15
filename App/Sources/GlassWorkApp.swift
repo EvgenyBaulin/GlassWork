@@ -33,7 +33,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_: Notification) {
         // Read first: the event is only there during launch.
-        let isQuietLaunch = wasOpenedAtLogin
+        let openedAtLogin = wasOpenedAtLogin
+        let showWindow: Bool
+        switch AppKeeper.start() {
+        case .exit:
+            exit(0)
+        case let .run(handedOver):
+            showWindow = handedOver
+        }
+        AppKeeper.quitOnSIGTERM()
+        // launchd starts the app at login and after a crash; neither should put a window in front.
+        let isQuietLaunch = openedAtLogin || (AppKeeper.launchedByKeeper && !showWindow)
         model = AppModel()
         if let pendingDestination {
             model?.open(pendingDestination)
@@ -66,6 +76,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_: Notification) {
         model?.prepareToQuit()
+        AppKeeper.didQuit()
     }
 
     /// The app lives in the menu bar, so closing the window is not the end of it.
