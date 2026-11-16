@@ -20,6 +20,7 @@ public struct IslandActions {
     public var restartContainer: ((String) -> Void)?
     public var containerLogs: ((String) -> Void)?
     public var openURL: (URL) -> Void
+    public var openXcode: () -> Void
     public var playPause: () -> Void
     public var next: () -> Void
     public var previous: () -> Void
@@ -49,6 +50,7 @@ public struct IslandActions {
         restartContainer: ((String) -> Void)? = nil,
         containerLogs: ((String) -> Void)? = nil,
         openURL: @escaping (URL) -> Void = { _ in },
+        openXcode: @escaping () -> Void = {},
         playPause: @escaping () -> Void = {},
         next: @escaping () -> Void = {},
         previous: @escaping () -> Void = {},
@@ -75,6 +77,7 @@ public struct IslandActions {
         self.restartContainer = restartContainer
         self.containerLogs = containerLogs
         self.openURL = openURL
+        self.openXcode = openXcode
         self.playPause = playPause
         self.next = next
         self.previous = previous

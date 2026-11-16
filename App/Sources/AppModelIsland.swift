@@ -11,6 +11,7 @@ extension AppModel {
         if let batteries = islandFeeds.deviceBatteries {
             input.deviceBatteries = batteries
         }
+        input.build = buildWatcher.reading
         island.update(input: input, now: Date())
     }
 
@@ -41,6 +42,7 @@ extension AppModel {
             openNetworkSettings: Self.openNetworkSettings,
             // DeveloperStore exposes readings only. Optional restart/log buttons stay hidden.
             openURL: { NSWorkspace.shared.open($0) },
+            openXcode: { Self.openApplication("com.apple.dt.Xcode") },
             playPause: { [weak self] in self?.monitor.nowPlaying.perform(.toggle) },
             next: { [weak self] in self?.monitor.nowPlaying.perform(.next) },
             previous: { [weak self] in self?.monitor.nowPlaying.perform(.previous) },
@@ -105,7 +107,11 @@ extension AppModel {
     }
 
     private static func openActivityMonitor() {
-        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.ActivityMonitor")
+        openApplication("com.apple.ActivityMonitor")
+    }
+
+    private static func openApplication(_ bundleID: String) {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID)
         else { return }
         NSWorkspace.shared.openApplication(at: url, configuration: .init())
     }

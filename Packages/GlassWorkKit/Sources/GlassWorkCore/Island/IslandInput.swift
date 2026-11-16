@@ -17,6 +17,7 @@ public struct IslandInput: Sendable, Equatable {
     public var pingHost: String?
     public var docker: DockerReading?
     public var devServers: DevServerReading?
+    public var build: BuildReading?
     public var battery: BatterySample?
     public var isKeepingAwake = false
     public var keepAwakeEnds: Date?

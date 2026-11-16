@@ -1,7 +1,7 @@
 import Foundation
 
 public enum IslandEventKind: String, CaseIterable, Sendable {
-    case meeting, inProgress, timers, systemAlert, network, devServers, charging
+    case meeting, inProgress, timers, systemAlert, network, build, devServers, charging
     case keepAwake, nowPlaying, weather, copied
     case downloads, airPods, volume, agents
 
@@ -66,6 +66,8 @@ public enum IslandDetail: Sendable, Equatable {
     case systemAlert(IslandSystemAlert)
     case network(IslandNetworkDetail)
     case devServers(IslandDeveloperDetail)
+    /// An Xcode build running, or one that just ended.
+    case build(BuildReading)
     case charging(BatterySample)
     /// Only GlassWork's own mode, with its scheduled end.
     case keepAwake(endsAt: Date)
@@ -100,6 +102,7 @@ public struct IslandEvent: Identifiable, Equatable, Sendable {
     var isTransition: Bool {
         switch detail {
         case .network, .devServers, .charging, .copied, .levels, .headphones: true
+        case .build: expires != nil
         // Finished downloads stay for their moment; ones in progress follow each reading.
         case .downloads: expires != nil
         default: false

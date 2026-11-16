@@ -9,7 +9,7 @@ private let islandNow = Date(timeIntervalSince1970: 1_794_831_360)
 private enum IslandSample: String, CaseIterable {
     case meeting, timers, copied, charging, systemAlert, network, devServers, nowPlaying, keepAwake, inProgress
     case levels, headphones
-    case downloads
+    case downloads, buildRunning, buildFailed, buildSucceeded
 }
 
 @MainActor
@@ -79,9 +79,29 @@ private enum IslandSamples {
             input.isKeepingAwake = true
             input.keepAwakeEnds = islandNow.addingTimeInterval(84)
         case .levels, .headphones: input = levelsInput(sample)
-        case .downloads: input.downloads = downloads
+        case .downloads, .buildRunning, .buildFailed, .buildSucceeded: input = progressInput(sample)
         }
         return input
+    }
+
+    static func progressInput(_ sample: IslandSample) -> IslandInput {
+        var input = IslandInput()
+        if sample == .downloads {
+            input.downloads = downloads
+        } else {
+            input.build = build(sample)
+        }
+        return input
+    }
+
+    static func build(_ sample: IslandSample) -> BuildReading {
+        let started = islandNow.addingTimeInterval(-74)
+        guard sample != .buildRunning else { return .running(BuildRun(name: "Pocket", started: started)) }
+        let succeeded = sample == .buildSucceeded
+        return .finished(BuildResult(
+            name: "Pocket", succeeded: succeeded, errors: succeeded ? 0 : 3, warnings: 2,
+            started: started, finished: islandNow
+        ))
     }
 
     static let downloads = [
@@ -221,6 +241,7 @@ private enum IslandSamples {
         case .downloads: previous.downloads = previous.downloads
             .map { var file = $0; file.isDownloading = true; return file }
         case .headphones: previous.levels?.outputName = "MacBook Pro Speakers"
+        case .buildFailed, .buildSucceeded: previous.build = .running(BuildRun(name: "Pocket", started: islandNow))
         default: break
         }
         store.update(input: previous, now: islandNow.addingTimeInterval(-120))
