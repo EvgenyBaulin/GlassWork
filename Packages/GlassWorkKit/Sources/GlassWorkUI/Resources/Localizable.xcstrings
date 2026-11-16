@@ -187,6 +187,22 @@
         }
       }
     },
+    "%lld items already there": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld items already there"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уже на полке: %lld"
+          }
+        }
+      }
+    },
     "%lld Performance · %lld Efficiency": {
       "localizations": {
         "ru": {
@@ -413,6 +429,22 @@
         }
       }
     },
+    "1 item already there": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 item already there"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уже на полке: 1"
+          }
+        }
+      }
+    },
     "1 min": {
       "localizations": {
         "ru": {
@@ -549,6 +581,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавьте команды в настройках"
+          }
+        }
+      }
+    },
+    "Added to the Shelf": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added to the Shelf"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавлено на полку"
           }
         }
       }
@@ -1471,6 +1519,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Перетащите файлы сюда, чтобы оставить на потом"
+          }
+        }
+      }
+    },
+    "Drop to park on the Shelf": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop to park on the Shelf"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отпустите, чтобы положить на полку"
           }
         }
       }
@@ -3605,6 +3669,38 @@
         }
       }
     },
+    "Release to add %lld files": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Release to add %lld files"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отпустите, чтобы добавить файлы: %lld"
+          }
+        }
+      }
+    },
+    "Release to add 1 file": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Release to add 1 file"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отпустите, чтобы добавить файл"
+          }
+        }
+      }
+    },
     "Remove": {
       "localizations": {
         "ru": {
@@ -4335,6 +4431,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Текст"
+          }
+        }
+      }
+    },
+    "The Shelf is empty": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Shelf is empty"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полка пуста"
           }
         }
       }

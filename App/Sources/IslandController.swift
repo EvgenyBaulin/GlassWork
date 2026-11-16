@@ -10,6 +10,17 @@ final class IslandController {
     private let store: IslandStore
     private let actions: IslandActions
     private let statusItemsMinX: (NSScreen) -> CGFloat?
+    private let shelfItemCount: () -> Int
+    private let dropOnShelf: ([URL]) -> Void
+    /// Whether files dragged to the notch open the drop zone: the Shelf module is on.
+    var acceptsShelfDrops = false {
+        didSet {
+            if !acceptsShelfDrops {
+                endDrag()
+            }
+        }
+    }
+
     private var panel: IslandPanel?
     private var hosting: IslandHostingView?
     private var surface: IslandView?
@@ -26,11 +37,20 @@ final class IslandController {
     private var isEnabled = false
     private var pointerInside = false
     private var observationGeneration = 0
+    /// The drag pasteboard's change count at the last mouse press: a count that moved since means a drag
+    /// session started, so files left there by an earlier drag never open the drop zone.
+    private var pressChangeCount = NSPasteboard(name: .drag).changeCount
+    private var isDraggingOverPanel = false
 
-    init(store: IslandStore, actions: IslandActions, statusItemsMinX: @escaping (NSScreen) -> CGFloat?) {
+    init(
+        store: IslandStore, actions: IslandActions, statusItemsMinX: @escaping (NSScreen) -> CGFloat?,
+        shelfItemCount: @escaping () -> Int, dropOnShelf: @escaping ([URL]) -> Void
+    ) {
         self.store = store
         self.actions = actions
         self.statusItemsMinX = statusItemsMinX
+        self.shelfItemCount = shelfItemCount
+        self.dropOnShelf = dropOnShelf
     }
 
     func apply(_ settings: IslandSettings) {
@@ -62,6 +82,7 @@ final class IslandController {
         surfaceFrame = .zero
         targetFrame = .zero
         pointerInside = false
+        isDraggingOverPanel = false
         if let screenObserver {
             NotificationCenter.default.removeObserver(screenObserver)
         }
@@ -87,12 +108,16 @@ final class IslandController {
         }
         // Event-driven hit testing allows transparent corners and animation padding to pass clicks through.
         // There is no pointer poll or periodic work while idle.
-        let events: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged, .rightMouseDragged]
-        pointerMonitor = NSEvent.addGlobalMonitorForEvents(matching: events) { [weak self] _ in
-            MainActor.assumeIsolated { self?.updatePointer() }
+        // Presses and releases also come here, to tell a file drag from a plain mouse drag.
+        let events: NSEvent.EventTypeMask = [
+            .mouseMoved, .leftMouseDragged, .rightMouseDragged, .leftMouseDown, .leftMouseUp,
+        ]
+        pointerMonitor = NSEvent.addGlobalMonitorForEvents(matching: events) { [weak self] event in
+            let type = event.type
+            MainActor.assumeIsolated { self?.pointerEvent(type) }
         }
         localPointerMonitor = NSEvent.addLocalMonitorForEvents(matching: events) { [weak self] event in
-            MainActor.assumeIsolated { self?.updatePointer() }
+            MainActor.assumeIsolated { self?.pointerEvent(event.type) }
             return event
         }
     }
@@ -170,6 +195,10 @@ final class IslandController {
             let window = IslandPanel()
             let host = IslandHostingView(rootView: AnyView(EmptyView()))
             host.onPointer = { [weak self] in self?.updatePointer() }
+            host.registerForDraggedTypes([.fileURL])
+            host.onDragEntered = { [weak self] urls in self?.dragEntered(urls) ?? false }
+            host.onDragExited = { [weak self] in self?.endDrag() }
+            host.onDrop = { [weak self] urls in self?.dropped(urls) ?? false }
             host.sizingOptions = []
             window.contentView = host
             hosting = host
@@ -188,10 +217,66 @@ final class IslandController {
         panel?.setFrame(frame, display: true)
     }
 
+    private func pointerEvent(_ type: NSEvent.EventType) {
+        if type == .leftMouseDown {
+            pressChangeCount = NSPasteboard(name: .drag).changeCount
+        }
+        updatePointer()
+    }
+
+    /// Opens the drop zone when files are dragged to the notch, and closes it when the drag goes elsewhere.
+    /// Only the notch with a small margin counts; once open, the zone's own area keeps it open.
+    private func trackDrag() {
+        guard isEnabled, acceptsShelfDrops, let geometry = currentGeometry, geometry.hasNotch,
+              !isDraggingOverPanel else { return }
+        let location = NSEvent.mouseLocation
+        let pressed = NSEvent.pressedMouseButtons & 1 != 0
+        if store.dropPreview != nil {
+            if !pressed || !surfaceFrame.insetBy(dx: -6, dy: -6).contains(location) {
+                endDrag()
+            }
+            return
+        }
+        guard pressed, geometry.dropTriggerFrame.contains(location) else { return }
+        let board = NSPasteboard(name: .drag)
+        guard board.changeCount != pressChangeCount, let urls = Self.fileURLs(board), !urls.isEmpty else { return }
+        store.beginDrop(IslandDropPreview(urls: urls, onShelf: shelfItemCount()))
+    }
+
+    private static func fileURLs(_ board: NSPasteboard) -> [URL]? {
+        board.readObjects(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL]
+    }
+
+    private func dragEntered(_ urls: [URL]) -> Bool {
+        guard isEnabled, acceptsShelfDrops, !urls.isEmpty else { return false }
+        isDraggingOverPanel = true
+        store.beginDrop(IslandDropPreview(urls: urls, onShelf: shelfItemCount()))
+        return true
+    }
+
+    private func dropped(_ urls: [URL]) -> Bool {
+        guard isEnabled, acceptsShelfDrops, !urls.isEmpty else { return false }
+        isDraggingOverPanel = false
+        store.endDrop()
+        dropOnShelf(urls)
+        store.showShelfDrop(count: urls.count, now: Date())
+        updatePointer()
+        return true
+    }
+
+    private func endDrag() {
+        isDraggingOverPanel = false
+        store.endDrop()
+        updatePointer()
+    }
+
     private func updatePointer() {
+        trackDrag()
         guard isEnabled, let panel, panel.isVisible, let surface else { return }
         let inside = surface.contains(NSEvent.mouseLocation, in: surfaceFrame)
-        panel.ignoresMouseEvents = !inside
+        panel.ignoresMouseEvents = !(inside || isDraggingOverPanel)
+        // While files are dragged over, the drop zone alone decides what shows.
+        guard store.dropPreview == nil else { return }
         if !inside, store.lifecycle.phase == .expanded, store.lifecycle.nextDeadline == nil {
             store.lifecycle.pointerExited(at: Date())
         }
@@ -262,6 +347,9 @@ final class IslandController {
 @MainActor
 private final class IslandHostingView: NSHostingView<AnyView> {
     var onPointer: (() -> Void)?
+    var onDragEntered: (([URL]) -> Bool)?
+    var onDragExited: (() -> Void)?
+    var onDrop: (([URL]) -> Bool)?
     private var pointerTracking: NSTrackingArea?
 
     override var needsPanelToBecomeKey: Bool {
@@ -295,6 +383,32 @@ private final class IslandHostingView: NSHostingView<AnyView> {
 
     override func mouseMoved(with _: NSEvent) {
         onPointer?()
+    }
+
+    private func files(_ sender: any NSDraggingInfo) -> [URL] {
+        sender.draggingPasteboard.readObjects(
+            forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]
+        ) as? [URL] ?? []
+    }
+
+    override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
+        onDragEntered?(files(sender)) == true ? .copy : []
+    }
+
+    override func draggingUpdated(_ sender: any NSDraggingInfo) -> NSDragOperation {
+        onDragEntered?(files(sender)) == true ? .copy : []
+    }
+
+    override func draggingExited(_: (any NSDraggingInfo)?) {
+        onDragExited?()
+    }
+
+    override func draggingEnded(_: any NSDraggingInfo) {
+        onDragExited?()
+    }
+
+    override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
+        onDrop?(files(sender)) ?? false
     }
 }
 

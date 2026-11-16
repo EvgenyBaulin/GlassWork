@@ -30,6 +30,11 @@ public enum IslandEventBuilder {
         return enriched(result, input: current, now: now)
     }
 
+    /// The moment after files were dropped on the shelf at the notch.
+    public static func shelfDrop(count: Int, now: Date) -> IslandEvent {
+        transient(id: "shelfDrop", kind: .shelfDrop, detail: .shelfDrop(count: count), now: now)
+    }
+
     private static func enriched(_ events: [IslandEvent], input: IslandInput, now: Date) -> [IslandEvent] {
         let context = IslandContext(input: input, now: now)
         return events.map { event in

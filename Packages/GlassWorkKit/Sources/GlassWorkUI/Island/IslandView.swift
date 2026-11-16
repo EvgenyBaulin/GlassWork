@@ -70,6 +70,25 @@ public struct IslandView: View {
 
     @ViewBuilder
     private func surface(now: Date) -> some View {
+        if let preview = store.dropPreview {
+            dropZone(preview)
+        } else {
+            phaseSurface(now: now)
+        }
+    }
+
+    private func dropZone(_ preview: IslandDropPreview) -> some View {
+        IslandShelfDropZone(preview: preview)
+            .padding(.horizontal, 16)
+            .padding(.top, geometry.notch.height + 12)
+            .padding(.bottom, 16)
+            .frame(width: expandedWidth)
+            .background(IslandShape(radius: 28).fill(.black))
+            .accessibilityLabel(loc("GlassWork Island, \(loc("Drop to park on the Shelf"))"))
+    }
+
+    @ViewBuilder
+    private func phaseSurface(now: Date) -> some View {
         switch store.lifecycle.phase {
         case .idle, .peek:
             let peek = store.lifecycle.phase == .peek
@@ -208,7 +227,12 @@ public struct IslandView: View {
 
     /// Screen-space bounds shared with the panel host. Compact wings retain the camera's center.
     public func surfaceFrame(now: Date) -> CGRect {
-        switch store.lifecycle.phase {
+        if store.dropPreview != nil {
+            return geometry.expandedFrame(size: CGSize(
+                width: expandedWidth, height: geometry.notch.height + 12 + IslandShelfDropZone.height + 16
+            ))
+        }
+        return switch store.lifecycle.phase {
         case .idle: geometry.notch
         case .peek: geometry.peekFrame
         case .compact:
@@ -224,6 +248,7 @@ public struct IslandView: View {
     /// Uses the same curved outline as the visible surface, including its ears at the screen edge.
     public func contains(_ point: CGPoint, in frame: CGRect) -> Bool {
         let radius: CGFloat = switch store.lifecycle.phase {
+        case _ where store.dropPreview != nil: 28
         case .idle, .peek: 14
         case .compact: 16
         case .expanded: store.queue.events.isEmpty ? 14 : 28
