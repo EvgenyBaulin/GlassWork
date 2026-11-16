@@ -32,6 +32,7 @@ final class DockController {
     private var isRevealed = true
     private lazy var pointerWatcher = DockPointerWatcher { [weak self] in self?.updateReveal() }
     private var hiding: Task<Void, Never>?
+    private let tooltip = DockTooltip()
     private lazy var trash = DockTrash { [weak self] full in
         if self?.state.trashIsFull != full {
             self?.state.trashIsFull = full
@@ -119,6 +120,7 @@ final class DockController {
         }
         shrink?.cancel()
         trash.stop()
+        tooltip.hide()
         watchPointer(false)
         folders.watch([])
         state.openCard = nil
@@ -392,6 +394,7 @@ final class DockController {
 
     private func leaveScreenIfHidden() {
         if !isRevealed {
+            tooltip.hide()
             window?.orderOut(nil)
         }
     }
@@ -459,6 +462,9 @@ extension DockController {
             },
             needsSpace: { [weak self] space in
                 self?.requested = space
+                if space == .folder {
+                    self?.tooltip.hide()
+                }
                 self?.updateCardDismissal(isOpen: space == .folder)
                 self?.updateSpace()
             },
@@ -474,6 +480,14 @@ extension DockController {
             openSettings: { [weak self] in self?.model.showMainWindow(.dock) }
         )
         actions.trash = trash.actions
+        actions.hover = { [weak self] hover in
+            guard let self else { return }
+            if state.openCard != nil {
+                tooltip.hide()
+            } else {
+                tooltip.update(hover, in: window, position: state.settings.position)
+            }
+        }
         return actions
     }
 }

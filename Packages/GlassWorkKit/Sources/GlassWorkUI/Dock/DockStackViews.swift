@@ -95,8 +95,10 @@ struct StackTile: View {
         stack.isDownloads ? DockFiles.overallProgress(files) : nil
     }
 
-    private var title: String {
-        progress.map { "\(stack.name) · \(Format.percent($0))" } ?? stack.name
+    /// The name, and how far Downloads has come.
+    static func title(_ stack: DockStack, files: [DockFile]) -> String {
+        let progress = stack.isDownloads ? DockFiles.overallProgress(files) : nil
+        return progress.map { "\(stack.name) · \(Format.percent($0))" } ?? stack.name
     }
 
     var body: some View {
@@ -119,7 +121,6 @@ struct StackTile: View {
             }
         }
         .buttonStyle(.plain)
-        .help(title)
     }
 }
 

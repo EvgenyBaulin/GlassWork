@@ -74,6 +74,8 @@ public struct DockActions {
     public var openSettings: () -> Void
     /// Set by the app; without it the Trash only shows.
     public var trash: DockTrashActions?
+    /// The item under the pointer, for its name label. Set by the app; without it there is no label.
+    public var hover: ((DockHover) -> Void)?
 
     public init(
         open: @escaping (DockApp) -> Void,
@@ -300,6 +302,7 @@ public struct DockView: View {
         switch slot {
         case let .item(item):
             tile(item, size: size)
+                .modifier(DockHoverLabel(id: item.id, text: label(item)) { actions.hover?($0) })
         case .previousPage:
             DockPagerTile(direction: .previous, size: size, arrangement: arrangement, position: position) {
                 actions.turnPage(-1)
@@ -310,6 +313,7 @@ public struct DockView: View {
             }
         case .trash:
             TrashTile(isFull: state.trashIsFull, size: size, position: position) { actions.trash?.open() }
+                .modifier(DockHoverLabel(id: slot.id, text: loc("Trash")) { actions.hover?($0) })
                 .contextMenu {
                     Button(loc("Open Trash")) { actions.trash?.open() }
                     Button(loc("Empty Trash…")) { actions.trash?.empty() }.disabled(!state.trashIsFull)
@@ -325,6 +329,14 @@ public struct DockView: View {
 
     private func toggleCard(_ item: DockItem) {
         state.openCard = state.openCard == item.id ? nil : item.id
+    }
+
+    private func label(_ item: DockItem) -> String {
+        var stackTitle = ""
+        if case let .stack(stack) = item {
+            stackTitle = StackTile.title(stack, files: state.files[stack.path] ?? [])
+        }
+        return DockLabelText.of(item, stackTitle: stackTitle)
     }
 
     @ViewBuilder
