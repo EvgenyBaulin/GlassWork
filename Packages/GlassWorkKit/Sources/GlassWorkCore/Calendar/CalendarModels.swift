@@ -197,6 +197,13 @@ public enum TodoFilter: String, Codable, CaseIterable, Sendable {
     }
 }
 
+public extension TodoFilter {
+    /// How many open reminders each filter would show.
+    static func counts(in items: [TodoItem], now: Date, calendar: Calendar = .current) -> [TodoFilter: Int] {
+        Dictionary(uniqueKeysWithValues: allCases.map { ($0, $0.apply(to: items, now: now, calendar: calendar).count) })
+    }
+}
+
 /// One of the Mac's calendars, as a row in Settings.
 public struct CalendarChoice: Identifiable, Sendable, Equatable {
     public var id: String

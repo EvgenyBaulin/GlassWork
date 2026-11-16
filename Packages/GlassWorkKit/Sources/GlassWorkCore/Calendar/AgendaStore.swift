@@ -21,6 +21,8 @@ public final class AgendaStore {
     public private(set) var eventsAccess: DataAccess
     public private(set) var remindersAccess: DataAccess
     public private(set) var events: [AgendaEvent] = []
+    /// False until the first read of events has finished, so a panel can tell "loading" from "no events".
+    public private(set) var eventsLoaded = false
     public private(set) var todos: [TodoItem] = []
     /// Every calendar on the Mac, shown or not.
     public private(set) var calendars: [CalendarChoice] = []
@@ -70,7 +72,12 @@ public final class AgendaStore {
 
     public func refresh() {
         if eventsAccess == .granted {
-            loadEvents()
+            if eventsLoaded {
+                loadEvents()
+            } else {
+                // The first read can take a moment, so the panel gets to show its loading state first.
+                Task { @MainActor [weak self] in self?.loadEvents() }
+            }
         }
         if remindersAccess == .granted {
             loadReminders()
@@ -102,10 +109,12 @@ public final class AgendaStore {
         // An empty list would mean every calendar to EventKit, as nil does not.
         guard !shown.isEmpty else {
             events = []
+            eventsLoaded = true
             return
         }
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: shown)
         events = store.events(matching: predicate).map(Self.agendaEvent).sorted { $0.start < $1.start }
+        eventsLoaded = true
     }
 
     private static func calendarChoice(_ calendar: EKCalendar) -> CalendarChoice {
