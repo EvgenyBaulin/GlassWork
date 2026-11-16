@@ -25,6 +25,8 @@ final class IslandFeeds {
     private var deviceListener: AudioObjectPropertyListenerBlock?
     private var batteryRead: Task<Void, Never>?
     private var brightnessTimer: Timer?
+    /// The previous poll's reading, shown or not: automatic brightness moves it without showing the island.
+    private var lastBrightness: Double?
 
     private var downloadsPath: String?
     private var folderSource: (any DispatchSourceFileSystemObject)?
@@ -64,6 +66,7 @@ final class IslandFeeds {
         brightnessTimer = nil
         watchDownloads(nil)
         levels = nil
+        lastBrightness = nil
         deviceBatteries = nil
     }
 
@@ -166,7 +169,9 @@ final class IslandFeeds {
     private func pollBrightness() {
         guard isRunning, batteryRead == nil, var current = levels else { return }
         let brightness = SystemLevelsReader.readBrightness()
-        guard IslandFeedRules.brightnessChanged(from: current.brightness, to: brightness) else { return }
+        let previous = lastBrightness ?? current.brightness
+        lastBrightness = brightness
+        guard IslandFeedRules.brightnessChanged(from: previous, to: brightness) else { return }
         current.brightness = brightness
         levels = current
         onChange()

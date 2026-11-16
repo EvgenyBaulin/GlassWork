@@ -4,8 +4,10 @@ import Foundation
 public enum IslandFeedRules {
     /// How many finished files travel along, so the island can show them as done.
     public static let finishedLimit = 10
-    /// Below this, a brightness difference is sensor jitter or an ambient-light step, not a change worth showing.
-    public static let brightnessThreshold = 0.02
+    /// The smallest jump between two readings a second apart that counts as the user changing brightness. A
+    /// brightness key moves it by 1/16 at once; automatic brightness drifts in much smaller steps, so its slow
+    /// changes never show the island.
+    public static let brightnessThreshold = 0.05
 
     /// The Downloads folder as the island wants it: files in progress, and the newest finished ones.
     ///
@@ -22,7 +24,8 @@ public enum IslandFeedRules {
         return DockFiles.sorted(active) + finished.prefix(finishedLimit)
     }
 
-    /// True when a reading is worth passing on: the first one, one that appears or vanishes, or a real step.
+    /// True when a reading is worth passing on: the first one, one that appears or vanishes, or a jump since the
+    /// previous reading (not since the last one shown).
     public static func brightnessChanged(from old: Double?, to new: Double?) -> Bool {
         switch (old, new) {
         case let (old?, new?): abs(old - new) >= brightnessThreshold
