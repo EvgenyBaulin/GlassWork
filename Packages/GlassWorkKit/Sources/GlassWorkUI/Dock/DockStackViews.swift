@@ -251,6 +251,7 @@ struct StackFan: View {
         }
         .buttonStyle(.plain)
         .draggable(URL(filePath: file.path))
+        .modifier(DockFilePreview(file: file, edge: .leading))
     }
 }
 
@@ -301,6 +302,7 @@ struct StackGrid: View {
         }
         .buttonStyle(.plain)
         .draggable(URL(filePath: file.path))
+        .modifier(DockFilePreview(file: file))
     }
 }
 
@@ -365,6 +367,7 @@ struct DownloadsCard: View {
             }
             .buttonStyle(.plain)
             .draggable(URL(filePath: file.path))
+            .modifier(DockFilePreview(file: file))
         }
     }
 
