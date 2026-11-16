@@ -16980,6 +16980,38 @@
           }
         }
       }
+    },
+    "%@ · %lld apps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %lld apps"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · приложений: %lld"
+          }
+        }
+      }
+    },
+    "%@ — %@, hold for card": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — %@, hold for card"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — %@, удерживайте для карточки"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

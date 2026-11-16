@@ -113,7 +113,6 @@ struct AppTile: View {
             }
         }
         .buttonStyle(.plain)
-        .help(app.name)
     }
 }
 
@@ -134,7 +133,6 @@ struct TrashTile: View {
             }
         }
         .buttonStyle(.plain)
-        .help(loc("Trash"))
     }
 }
 
@@ -157,7 +155,6 @@ struct FolderTile: View {
             }
         }
         .buttonStyle(.plain)
-        .help(folder.name)
     }
 
     @ViewBuilder
@@ -296,6 +293,5 @@ struct WidgetTile: View {
                 press.left()
             }
         }
-        .help(module.title)
     }
 }
