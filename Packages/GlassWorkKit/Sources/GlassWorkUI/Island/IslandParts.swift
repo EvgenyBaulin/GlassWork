@@ -103,3 +103,42 @@ struct IslandLevelBars: View {
         .accessibilityHidden(true)
     }
 }
+
+/// A level with its percentage and a bar that can be dragged.
+struct IslandLevelRow: View {
+    let symbol: String
+    let title: String
+    let subtitle: String
+    let value: Double
+    let tint: Color
+    let set: ((Double) -> Void)?
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 10) {
+                Image(systemName: symbol)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 32, height: 32)
+                    .background(tint, in: .rect(cornerRadius: 8))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title).font(.system(size: 13, weight: .semibold))
+                    if !subtitle.isEmpty {
+                        Text(subtitle).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
+                    }
+                }
+                Spacer()
+                Text(Format.percent(value)).font(.system(size: 13, weight: .medium, design: .monospaced))
+            }
+            GeometryReader { proxy in
+                ThinBar(value: value, tint: tint)
+                    .frame(maxHeight: .infinity)
+                    .contentShape(.rect)
+                    .gesture(DragGesture(minimumDistance: 0).onChanged { drag in
+                        set?(min(max(drag.location.x / max(proxy.size.width, 1), 0), 1))
+                    })
+            }
+            .frame(height: 10)
+        }
+    }
+}

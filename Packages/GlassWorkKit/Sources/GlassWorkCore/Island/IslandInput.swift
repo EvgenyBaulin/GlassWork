@@ -28,6 +28,8 @@ public struct IslandInput: Sendable, Equatable {
     /// The caller supplies a thumbnail; building events never reads the history folder.
     public var clipboardPreview: Data?
     public var clipboardImageURL: URL?
+    /// Filled by the host, which listens for changes; nil when it does not.
+    public var levels: SystemLevels?
 
     public init() {}
 

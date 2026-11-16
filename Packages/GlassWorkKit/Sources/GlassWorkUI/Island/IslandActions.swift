@@ -25,6 +25,8 @@ public struct IslandActions {
     public var previous: () -> Void
     public var seek: (TimeInterval) -> Void
     public var setVolume: (Double) -> Void
+    /// Nil when the display's brightness cannot be set.
+    public var setBrightness: ((Double) -> Void)?
     public var extendKeepAwake: (TimeInterval) -> Void
     public var stopKeepAwake: () -> Void
     public var dismiss: (String) -> Void

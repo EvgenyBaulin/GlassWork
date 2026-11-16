@@ -14,6 +14,9 @@ public enum IslandEventBuilder {
         if let entry = current.clipboardEntry, entry.id != previous.clipboardEntry?.id {
             result.append(transient(id: "copied", kind: .copied, detail: .copied(entry), now: now))
         }
+        if let changed = levelChange(current.levels, previous.levels), let levels = current.levels {
+            result.append(transient(id: "levels", kind: .volume, detail: .levels(levels, changed: changed), now: now))
+        }
         return enriched(result, input: current, now: now)
     }
 
@@ -81,6 +84,18 @@ public enum IslandEventBuilder {
             result.append(transient(id: "ping", kind: .network, detail: .network(.pingRecovered(ping)), now: now))
         }
         return result
+    }
+
+    /// Only a change counts: the first reading, or one that stops coming, shows nothing.
+    static func levelChange(_ current: SystemLevels?, _ previous: SystemLevels?) -> IslandLevel? {
+        guard let current, let previous else { return nil }
+        if current.volume != previous.volume || current.isMuted != previous.isMuted {
+            return current.volume == nil ? nil : .volume
+        }
+        if current.brightness != previous.brightness, current.brightness != nil {
+            return .brightness
+        }
+        return nil
     }
 
     private static func isBadPing(_ outcome: PingOutcome) -> Bool {
