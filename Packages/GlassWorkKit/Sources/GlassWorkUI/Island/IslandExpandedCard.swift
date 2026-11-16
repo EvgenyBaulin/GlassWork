@@ -70,6 +70,7 @@ struct IslandExpandedCard: View {
         case let .systemAlert(alert): systemContent(alert)
         case let .network(detail): networkContent(detail)
         case let .devServers(detail): developerContent(detail)
+        case let .build(reading): buildContent(reading)
         case let .keepAwake(end): keepAwakeContent(end)
         case let .downloads(files): downloadsContent(files)
         case let .headphones(_, batteries): headphonesContent(batteries)
@@ -339,6 +340,25 @@ struct IslandExpandedCard: View {
             return server
         }
         return event.context.servers.first { $0.url != nil }
+    }
+
+    /// Counts of what the build found, and a way to the project that produced them.
+    private func buildContent(_ reading: BuildReading) -> some View {
+        VStack(spacing: 12) {
+            if case let .finished(result) = reading {
+                IslandRow(
+                    symbol: "xmark.octagon", title: loc("Errors"), subtitle: "",
+                    value: String(result.errors), tint: result.errors > 0 ? Palette.red : Palette.gray
+                )
+                IslandRow(
+                    symbol: "exclamationmark.triangle", title: loc("Warnings"), subtitle: "",
+                    value: String(result.warnings), tint: result.warnings > 0 ? Palette.orange : Palette.gray
+                )
+            }
+            HStack(spacing: 8) {
+                IslandCapsule(title: loc("Open Xcode"), action: actions.openXcode)
+            }
+        }
     }
 
     private func keepAwakeContent(_ end: Date) -> some View {

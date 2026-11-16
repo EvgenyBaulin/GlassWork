@@ -11,6 +11,7 @@ import WidgetKit
 final class AppModel {
     let store = SettingsStore()
     let island = IslandStore()
+    let buildWatcher = BuildWatcher()
     private lazy var islandController = IslandController(
         store: island, actions: islandActions,
         statusItemsMinX: { [weak self] in self?.statusBar.leftmostItemX(on: $0) }
@@ -75,6 +76,7 @@ final class AppModel {
             )
         }
         fans.applyLaunchMode()
+        buildWatcher.onChange = { [weak self] in self?.updateIsland() }
         monitor.onUpdate = { [weak self] in
             self?.statusBar.refreshItems()
             self?.checkAlerts()
@@ -252,6 +254,7 @@ final class AppModel {
             isEnabled: store.settings.island.isEnabled,
             downloadsPath: store.settings.dock.stacks.first(where: \.isDownloads)?.path
         )
+        buildWatcher.setEnabled(store.settings.island.isEnabled)
         updateIsland()
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
         applyPolling()

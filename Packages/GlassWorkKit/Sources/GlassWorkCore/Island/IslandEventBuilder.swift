@@ -9,6 +9,10 @@ public enum IslandEventBuilder {
         result += downloads(current.downloads, previous: previous.downloads, now: now)
         result += network(current, previous: previous, now: now)
         result += developer(current, previous: previous, now: now)
+        // Only a result that arrived since the last reading shows, so enabling the island never replays one.
+        if case .finished = current.build, current.build != previous.build, let build = current.build {
+            result.append(transient(id: "build", kind: .build, detail: .build(build), now: now))
+        }
         if previous.battery?.isOnAC == false, let battery = current.battery, battery.isOnAC {
             result.append(transient(id: "charging", kind: .charging, detail: .charging(battery), now: now))
         }
@@ -49,6 +53,9 @@ public enum IslandEventBuilder {
         }
         if input.isKeepingAwake, let end = input.keepAwakeEnds, end > now {
             result.append(IslandEvent(id: "keepAwake", kind: .keepAwake, since: now, detail: .keepAwake(endsAt: end)))
+        }
+        if case let .running(run) = input.build {
+            result.append(IslandEvent(id: "build", kind: .build, since: now, detail: .build(.running(run))))
         }
         if let session = input.nowPlaying, session.isPlaying {
             result.append(IslandEvent(id: "nowPlaying", kind: .nowPlaying, since: now, detail: .nowPlaying(session)))

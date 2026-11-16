@@ -17,6 +17,7 @@ struct IslandPresentation {
         case .systemAlert: event.context.isOverheated ? Palette.orange : Palette.red
         case .network(.pingRecovered): Palette.green
         case .network: Palette.red
+        case let .build(reading): buildTint(reading)
         case .charging, .keepAwake: Palette.green
         case .nowPlaying: artworkTint
         case .copied: Palette.teal
@@ -40,6 +41,7 @@ struct IslandPresentation {
         case .timers: "timer"
         case .systemAlert, .devServers(.containerExited): "exclamationmark.triangle"
         case .network: "globe"
+        case .build: "hammer.fill"
         case .devServers(.serverAppeared): "play.fill"
         case .charging: "bolt.fill"
         case .keepAwake: "cup.and.heat.waves.fill"
@@ -67,6 +69,7 @@ struct IslandPresentation {
         case .network(.wifiLost): loc("Wi-Fi")
         case .network(.vpnOff): loc("VPN")
         case .network(.pingRecovered): loc("Ping")
+        case let .build(reading): buildName(reading) ?? loc("Build")
         case let .devServers(.containerExited(container)): container.name
         case let .devServers(.serverAppeared(server)): server.tool ?? server.process
         case .charging, .keepAwake, .nowPlaying: ""
@@ -90,6 +93,7 @@ struct IslandPresentation {
         case .network(.wifiLost): loc("Wi-Fi lost")
         case .network(.vpnOff): loc("VPN disconnected")
         case .network(.pingRecovered): loc("Ping back to normal")
+        case let .build(reading): buildTitle(reading)
         case let .devServers(.containerExited(container)): containerTitle(container)
         case let .devServers(.serverAppeared(server)): loc("\(server.tool ?? server.process) server is up")
         case .charging: loc("Charging")
@@ -118,6 +122,7 @@ struct IslandPresentation {
         case .network(.wifiLost): loc("lost")
         case .network(.vpnOff): loc("off")
         case let .network(.pingRecovered(outcome)): pingValue(outcome)
+        case let .build(reading): buildValue(reading)
         case let .devServers(.containerExited(container)): container.status
         case let .devServers(.serverAppeared(server)): ":\(server.port)"
         case let .charging(battery): Format.percent(battery.charge)
@@ -140,6 +145,7 @@ struct IslandPresentation {
                 return loc("exit \(code)")
             }
             return loc("exited")
+        case let .build(.finished(result)): return buildCompactOutcome(result)
         default: return value
         }
     }
@@ -164,6 +170,7 @@ struct IslandPresentation {
         case .network(.wifiLost): loc("Reconnecting…")
         case let .network(.vpnOff(vpn)): vpn.services.first?.name ?? ""
         case let .network(.pingRecovered(outcome)): pingValue(outcome)
+        case let .build(reading): buildSubtitle(reading)
         case let .devServers(.containerExited(container)):
             [container.image, event.context.dockerContext].compactMap(\.self).joined(separator: " · ")
         case let .devServers(.serverAppeared(server)): server.project
@@ -191,6 +198,62 @@ struct IslandPresentation {
         case let .downloads(files): files.count == 1 ? files[0].name : ""
         case .headphones: loc("Connected")
         }
+    }
+
+    private func buildTint(_ reading: BuildReading) -> Color {
+        guard case let .finished(result) = reading else { return Palette.blue }
+        return result.succeeded ? Palette.green : Palette.red
+    }
+
+    private func buildName(_ reading: BuildReading) -> String? {
+        switch reading {
+        case let .running(run): run.name
+        case let .finished(result): result.name
+        }
+    }
+
+    private func buildTitle(_ reading: BuildReading) -> String {
+        switch reading {
+        case let .running(run): run.name.map { loc("Building \($0)") } ?? loc("Building")
+        case let .finished(result):
+            if result.succeeded {
+                loc("Build succeeded")
+            } else {
+                loc("Build failed")
+            }
+        }
+    }
+
+    /// Time so far while it runs, the outcome once it ended.
+    private func buildValue(_ reading: BuildReading) -> String {
+        switch reading {
+        case let .running(run): PlaybackTime.text(max(now.timeIntervalSince(run.started), 0))
+        case let .finished(result): buildOutcome(result)
+        }
+    }
+
+    /// Short enough for a wing, which sizes itself for proportional text although the value is monospaced.
+    private func buildCompactOutcome(_ result: BuildResult) -> String {
+        if result.succeeded {
+            return loc("done")
+        }
+        return result.errors > 0 ? loc("\(result.errors) err") : loc("failed")
+    }
+
+    private func buildOutcome(_ result: BuildResult) -> String {
+        if result.succeeded {
+            return loc("done")
+        }
+        return result.errors > 0 ? loc("\(result.errors) errors") : loc("failed")
+    }
+
+    private func buildSubtitle(_ reading: BuildReading) -> String {
+        guard case let .finished(result) = reading else { return "" }
+        return [
+            result.errors > 0 ? loc("\(result.errors) errors") : nil,
+            result.warnings > 0 ? loc("\(result.warnings) warnings") : nil,
+            loc("took \(PlaybackTime.text(result.duration))"),
+        ].compactMap(\.self).joined(separator: " · ")
     }
 
     /// The buds, not the case, which charges them.
