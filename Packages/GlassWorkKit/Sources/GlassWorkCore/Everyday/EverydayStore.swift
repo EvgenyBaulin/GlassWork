@@ -34,14 +34,23 @@ public final class EverydayStore {
         update { $0.timers.append(CountdownTimer(title: title, duration: duration, start: Date())) }
     }
 
-    /// Removes finished timers and reports them, and ends Keep Awake when its time or the battery runs out.
+    public func dismissFinishedTimer(_ id: UUID) {
+        update { $0.finishedTimers.removeAll { $0.id == id } }
+    }
+
+    /// Moves finished timers to the finished list and reports them, and ends Keep Awake when its time or the battery
+    /// runs out.
     public func tick(at date: Date = Date(), battery: BatterySample? = nil) {
         if isKeepingAwake, keepAwakeRule.shouldStop(endingAt: keepAwakeEnds, at: date, battery: battery) {
             toggleKeepAwake(at: date)
         }
         let finished = data.timers.filter { $0.isFinished(at: date) }
         guard !finished.isEmpty else { return }
-        update { $0.timers.removeAll { $0.isFinished(at: date) } }
+        update { data in
+            data.timers.removeAll { $0.isFinished(at: date) }
+            let done = finished.map { FinishedTimer($0, finishedAt: min($0.endDate ?? date, date)) }
+            data.finishedTimers = Array((done.reversed() + data.finishedTimers).prefix(EverydayData.finishedLimit))
+        }
         finished.forEach { onTimerFinished?($0) }
     }
 

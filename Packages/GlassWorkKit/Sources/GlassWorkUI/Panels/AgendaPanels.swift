@@ -75,24 +75,51 @@ struct CalendarPanel: View {
             footerTitle: loc("Open Calendar"),
             footerAction: { actions.openApp("com.apple.iCal") }
         ) {
-            if agenda.eventsAccess == .granted {
-                if today.isEmpty {
-                    Text(loc("No events today")).foregroundStyle(.secondary).font(.system(size: 12))
+            CalendarAgenda(
+                access: agenda.eventsAccess,
+                isLoaded: agenda.eventsLoaded,
+                today: today,
+                tomorrow: tomorrow,
+                request: { Task { await agenda.requestEventsAccess() } },
+                openSettings: { AgendaPrivacy.calendars.map(actions.openURL) }
+            )
+        }
+    }
+}
+
+/// What the Calendar panel shows for each state of access and loading.
+struct CalendarAgenda: View {
+    let access: DataAccess
+    let isLoaded: Bool
+    let today: [AgendaEvent]
+    let tomorrow: AgendaEvent?
+    let request: () -> Void
+    var openSettings: (() -> Void)?
+
+    var body: some View {
+        if access != .granted {
+            AccessRequest(
+                title: loc("See your events here"),
+                access: access,
+                request: request,
+                openSettings: openSettings
+            )
+        } else if !isLoaded {
+            HStack(spacing: 8) {
+                ProgressView().controlSize(.small)
+                Text(loc("Loading…")).foregroundStyle(.secondary).font(.system(size: 12))
+            }
+            .frame(maxWidth: .infinity, minHeight: 60)
+        } else {
+            if today.isEmpty {
+                Text(loc("No events today")).foregroundStyle(.secondary).font(.system(size: 12))
+            }
+            ForEach(today) { AgendaRow(event: $0, detail: timeRange($0)) }
+            if let tomorrow {
+                Divider()
+                PanelSection(title: loc("Tomorrow")) {
+                    AgendaRow(event: tomorrow, detail: timeRange(tomorrow))
                 }
-                ForEach(today) { AgendaRow(event: $0, detail: timeRange($0)) }
-                if let tomorrow {
-                    Divider()
-                    PanelSection(title: loc("Tomorrow")) {
-                        AgendaRow(event: tomorrow, detail: timeRange(tomorrow))
-                    }
-                }
-            } else {
-                AccessRequest(
-                    title: loc("See your events here"),
-                    access: agenda.eventsAccess,
-                    request: { Task { await agenda.requestEventsAccess() } },
-                    openSettings: { AgendaPrivacy.calendars.map(actions.openURL) }
-                )
             }
         }
     }
@@ -164,6 +191,7 @@ struct TodosPanel: View {
     let monitor: SystemMonitor
     @State private var filter = TodoFilter.all
     @State private var draft = ""
+    @State private var undoItem: TodoItem?
     @Environment(\.panelActions) private var actions
 
     var body: some View {
@@ -176,15 +204,7 @@ struct TodosPanel: View {
             footerAction: { actions.openApp("com.apple.reminders") }
         ) {
             if agenda.remindersAccess == .granted {
-                Picker("", selection: $filter) {
-                    Text(loc("All")).tag(TodoFilter.all)
-                    Text(loc("Today")).tag(TodoFilter.today)
-                    Text(loc("Overdue")).tag(TodoFilter.overdue)
-                    Text(loc("Flagged")).tag(TodoFilter.flagged)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .controlSize(.small)
+                TodoFilterPicker(filter: $filter, counts: TodoFilter.counts(in: agenda.todos, now: Date()))
                 if items.isEmpty {
                     AllClear()
                 }
@@ -198,6 +218,19 @@ struct TodosPanel: View {
                     }
                 }
                 .frame(maxHeight: 280)
+                if let undoItem {
+                    UndoToast(message: loc("Completed")) {
+                        agenda.setCompleted(undoItem, false)
+                        self.undoItem = nil
+                    }
+                    // Restarts for each new item, and stops by itself if the panel closes.
+                    .task(id: undoItem.id) {
+                        try? await Task.sleep(for: .seconds(4))
+                        if !Task.isCancelled {
+                            self.undoItem = nil
+                        }
+                    }
+                }
                 TextField(loc("Add a reminder"), text: $draft)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit {
@@ -217,7 +250,46 @@ struct TodosPanel: View {
     }
 
     private func row(_ item: TodoItem, agenda: AgendaStore) -> some View {
-        TodoRow(item: item) { agenda.setCompleted(item, !item.isCompleted) }
+        TodoRow(item: item) {
+            agenda.setCompleted(item, !item.isCompleted)
+            undoItem = item.isCompleted ? nil : item
+        }
+    }
+}
+
+/// The four filters, each with how many reminders it holds.
+struct TodoFilterPicker: View {
+    @Binding var filter: TodoFilter
+    let counts: [TodoFilter: Int]
+
+    var body: some View {
+        Picker("", selection: $filter) {
+            Text(loc("All \(counts[.all] ?? 0)")).tag(TodoFilter.all)
+            Text(loc("Today \(counts[.today] ?? 0)")).tag(TodoFilter.today)
+            Text(loc("Overdue \(counts[.overdue] ?? 0)")).tag(TodoFilter.overdue)
+            Text(loc("Flagged \(counts[.flagged] ?? 0)")).tag(TodoFilter.flagged)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .controlSize(.small)
+    }
+}
+
+/// A short note under a list that offers to take the last action back.
+struct UndoToast: View {
+    let message: String
+    let undo: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.green)
+            Text(message).font(.system(size: 12))
+            Spacer()
+            Button(loc("Undo"), action: undo).buttonStyle(.link).font(.system(size: 12, weight: .medium))
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
     }
 }
 

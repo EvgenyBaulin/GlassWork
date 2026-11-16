@@ -317,6 +317,7 @@ public extension ModuleOptionSpec {
                     OptionChoice(ColourFormat.hex.rawValue, "HEX"),
                     OptionChoice(ColourFormat.rgb.rawValue, "RGB"),
                     OptionChoice(ColourFormat.hsl.rawValue, "HSL"),
+                    OptionChoice(ColourFormat.swiftUI.rawValue, "SwiftUI"),
                 ]),
                 fallback: ColourFormat.hex.rawValue
             ),

@@ -39,6 +39,17 @@ struct ColourFormatTests {
         #expect(ColourFormat.rgb.text(hex: "#6B5BB5", isUppercase: true, hasHash: true) == "rgb(107, 91, 181)")
     }
 
+    @Test func swiftUIGivesColourInitialiser() {
+        #expect(
+            ColourFormat.swiftUI.text(hex: "#3D85FA", isUppercase: true, hasHash: true)
+                == "Color(red: 0.24, green: 0.52, blue: 0.98)"
+        )
+        #expect(
+            ColourFormat.swiftUI.text(hex: "#000000", isUppercase: false, hasHash: false)
+                == "Color(red: 0.00, green: 0.00, blue: 0.00)"
+        )
+    }
+
     @Test(arguments: [
         ("#6B5BB5", "hsl(251, 38%, 53%)"),
         ("#FF0000", "hsl(0, 100%, 50%)"),

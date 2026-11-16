@@ -146,7 +146,7 @@ public enum UptimeFormat: String, Sendable, CaseIterable {
 }
 
 public enum ColourFormat: String, Sendable, CaseIterable {
-    case hex, rgb, hsl
+    case hex, rgb, hsl, swiftUI
 
     /// What the Colours module copies. `hex` is `#RRGGBB`; anything else comes back unchanged.
     public func text(hex: String, isUppercase: Bool, hasHash: Bool) -> String {
@@ -163,6 +163,11 @@ public enum ColourFormat: String, Sendable, CaseIterable {
         case .hsl:
             let hsl = HSL(red: red, green: green, blue: blue)
             return "hsl(\(hsl.hue), \(hsl.saturation)%, \(hsl.lightness)%)"
+        case .swiftUI:
+            func part(_ value: Int) -> String {
+                String(format: "%.2f", Double(value) / 255)
+            }
+            return "Color(red: \(part(red)), green: \(part(green)), blue: \(part(blue)))"
         }
     }
 }

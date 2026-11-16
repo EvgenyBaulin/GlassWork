@@ -90,6 +90,8 @@ struct TodoFilterTests {
         ]
         #expect(TodoFilter.all.apply(to: items, now: now).count == 3)
         #expect(TodoFilter.overdue.apply(to: items, now: now).map(\.id) == ["old"])
+        let counts = TodoFilter.counts(in: items, now: now)
+        #expect(counts[.all] == 3 && counts[.today] == 1 && counts[.overdue] == 1 && counts[.flagged] == 1)
         #expect(TodoFilter.today.apply(to: items, now: now).map(\.id) == ["today"])
         #expect(TodoFilter.flagged.apply(to: items, now: now).map(\.id) == ["flag"])
     }

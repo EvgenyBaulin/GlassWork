@@ -40,6 +40,21 @@ public struct CountdownTimer: Codable, Sendable, Equatable, Identifiable {
     }
 }
 
+/// A timer that ran out and waits to be dismissed.
+public struct FinishedTimer: Codable, Sendable, Equatable, Identifiable {
+    public var id: UUID
+    public var title: String
+    public var duration: TimeInterval
+    public var finishedAt: Date
+
+    public init(_ timer: CountdownTimer, finishedAt: Date) {
+        id = timer.id
+        title = timer.title
+        duration = timer.duration
+        self.finishedAt = finishedAt
+    }
+}
+
 /// A date to count down to.
 public struct ImportantDate: Codable, Sendable, Equatable, Identifiable {
     public var id = UUID()
@@ -107,7 +122,11 @@ public struct WorldCity: Codable, Sendable, Equatable, Identifiable {
 /// Everything the small everyday modules keep. Shared with widgets through the App Group.
 public struct EverydayData: Codable, Sendable, Equatable {
     public var note = ""
+    /// Running and paused timers only.
     public var timers: [CountdownTimer] = []
+    /// Timers that ran out, newest first, until dismissed. Saved data from before this existed has none.
+    public var finishedTimers: [FinishedTimer] = []
+    public static let finishedLimit = 10
     public var dates: [ImportantDate] = []
     public var stopwatch = Stopwatch()
     public var cities: [WorldCity] = []
@@ -116,6 +135,18 @@ public struct EverydayData: Codable, Sendable, Equatable {
     public var pomodoro: PomodoroSession?
 
     public init() {}
+
+    public init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        note = try values.decode(String.self, forKey: .note)
+        timers = try values.decode([CountdownTimer].self, forKey: .timers)
+        finishedTimers = try values.decodeIfPresent([FinishedTimer].self, forKey: .finishedTimers) ?? []
+        dates = try values.decode([ImportantDate].self, forKey: .dates)
+        stopwatch = try values.decode(Stopwatch.self, forKey: .stopwatch)
+        cities = try values.decode([WorldCity].self, forKey: .cities)
+        colors = try values.decode([String].self, forKey: .colors)
+        pomodoro = try values.decodeIfPresent(PomodoroSession.self, forKey: .pomodoro)
+    }
 
     public static let key = "everyday"
     public static let colorLimit = 12
