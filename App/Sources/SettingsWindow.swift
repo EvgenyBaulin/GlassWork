@@ -1,7 +1,6 @@
 import AppKit
 import GlassWorkCore
 import GlassWorkUI
-import ServiceManagement
 import SwiftUI
 import UserNotifications
 
@@ -364,18 +363,14 @@ struct ModulePane: View {
 
 struct GeneralPane: View {
     let store: SettingsStore
-    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var launchAtLogin = AppKeeper.launchesAtLogin
 
     var body: some View {
         Form {
             Section {
                 Toggle(loc("Launch at login"), isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { _, enabled in
-                        if enabled {
-                            try? SMAppService.mainApp.register()
-                        } else {
-                            try? SMAppService.mainApp.unregister()
-                        }
+                        AppKeeper.setLaunchesAtLogin(enabled)
                     }
             }
             Section {
@@ -563,7 +558,7 @@ struct WelcomeView: View {
 
     private func complete() {
         if launchAtLogin {
-            try? SMAppService.mainApp.register()
+            AppKeeper.setLaunchesAtLogin(true)
         }
         store.update { $0.welcomeCompleted = true }
         finish()

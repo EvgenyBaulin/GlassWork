@@ -34,6 +34,11 @@ targets:
           copyFiles:
             destination: wrapper
             subpath: Contents/Library/LaunchDaemons
+      - path: App/LaunchAgents/io.github.evgenybaulin.GlassWork.Keeper.plist
+        buildPhase:
+          copyFiles:
+            destination: wrapper
+            subpath: Contents/Library/LaunchAgents
     dependencies:
       - package: GlassWorkKit
         product: GlassWorkCore
