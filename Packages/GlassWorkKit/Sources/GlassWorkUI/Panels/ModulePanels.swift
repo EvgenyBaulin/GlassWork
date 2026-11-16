@@ -22,7 +22,7 @@ public struct ModulePanel: View {
         case .gpu: GPUPanel(monitor: monitor)
         case .sensors: SensorsPanel(monitor: monitor)
         case .fans: FansPanel(monitor: monitor)
-        case .uptime: UptimePanel()
+        case .uptime: UptimePanel(monitor: monitor)
         case .timers: TimersPanel(monitor: monitor)
         case .deviceBatteries: DeviceBatteriesPanel(monitor: monitor)
         case .calendar: CalendarPanel(monitor: monitor)
@@ -533,16 +533,6 @@ struct GPUPanelContent: View {
     /// A missing figure is not a quiet GPU, so it reads as such instead of 0%.
     private func share(_ value: Double?) -> String {
         value.map { Format.percent($0) } ?? loc("Not reported")
-    }
-}
-
-struct UptimePanel: View {
-    var body: some View {
-        let boot = SystemClock.bootTime() ?? .now
-        PanelFrame(module: .uptime, subtitle: "") {
-            BigFigure(text: CompactDuration.format(Date().timeIntervalSince(boot)))
-            InfoRow(title: loc("Started"), value: boot.formatted(date: .abbreviated, time: .shortened))
-        }
     }
 }
 

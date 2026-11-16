@@ -17,19 +17,29 @@ public extension SensorGroup {
     }
 }
 
-/// Every sensor this Mac exposes, grouped, with session minimum and maximum.
+/// Every sensor this Mac exposes, grouped, with a short history and the session minimum and maximum.
 struct SensorsPanel: View {
     let monitor: SystemMonitor
-    @State private var query = ""
-    @State private var extremes: [String: ClosedRange<Double>] = [:]
     @Environment(\.panelActions) private var actions
 
-    private var groups: [SensorGroup] {
-        SensorGroupOptions(options: actions.moduleOptions(.sensors)).shownGroups
+    var body: some View {
+        SensorsPanelContent(
+            sample: monitor.sensors,
+            tracker: monitor.sensorTracks,
+            groups: SensorGroupOptions(options: actions.moduleOptions(.sensors)).shownGroups
+        )
     }
+}
+
+struct SensorsPanelContent: View {
+    let sample: SensorSample?
+    let tracker: SensorTracker
+    let groups: [SensorGroup]
+    /// Starts a sparkline as if the cursor were on its newest point, for tests of the hover state.
+    var hoveredKey: String?
+    @State private var query = ""
 
     var body: some View {
-        let sample = monitor.sensors
         PanelFrame(module: .sensors, subtitle: loc("\(sample?.readings.count ?? 0) sensors")) {
             if let sample, !sample.readings.isEmpty {
                 averages(sample)
@@ -52,7 +62,6 @@ struct SensorsPanel: View {
                     .frame(maxWidth: .infinity, minHeight: 80)
             }
         }
-        .onChange(of: monitor.sensors) { _, new in track(new) }
     }
 
     private func averages(_ sample: SensorSample) -> some View {
@@ -92,33 +101,71 @@ struct SensorsPanel: View {
     }
 
     private func row(_ reading: SensorReading) -> some View {
-        let range = extremes[reading.key]
-        return HStack {
-            Text(reading.key).font(.system(size: 11, design: .monospaced)).foregroundStyle(.secondary)
-            Spacer()
-            if let range {
-                Text("\(Format.temperature(range.lowerBound)) – \(Format.temperature(range.upperBound))")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
-                    .monospacedDigit()
-            }
-            Text(Format.temperature(reading.celsius))
-                .font(.system(size: 12, weight: .medium))
-                .monospacedDigit()
-                .frame(width: 42, alignment: .trailing)
-        }
-    }
-
-    private func track(_ sample: SensorSample?) {
-        for reading in sample?.readings ?? [] {
-            let old = extremes[reading.key] ?? reading.celsius ... reading.celsius
-            extremes[reading.key] = min(old.lowerBound, reading.celsius) ... max(old.upperBound, reading.celsius)
-        }
+        SensorRow(
+            reading: reading,
+            track: tracker.track(for: reading.key),
+            hovered: hoveredKey == reading.key
+        )
     }
 
     private func copy(_ sample: SensorSample) {
         let text = sample.readings.map { "\($0.key)\t\(String(format: "%.1f", $0.celsius))" }.joined(separator: "\n")
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
+    }
+}
+
+/// One sensor: its name, session range, a sparkline of the latest readings and the current value.
+private struct SensorRow: View {
+    let reading: SensorReading
+    let track: SensorTrack?
+    let hovered: Bool
+    /// The row under the cursor goes above the next ones, so the sparkline's readout is not covered.
+    @State private var isOver = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(reading.key)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 0)
+            if let track {
+                Text("\(Format.temperature(track.minimum)) – \(Format.temperature(track.maximum))")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                sparkline(track)
+            }
+            Text(Format.temperature(reading.celsius))
+                .font(.system(size: 12, weight: .medium))
+                .monospacedDigit()
+                .frame(width: 42, alignment: .trailing)
+        }
+        .onHover { isOver = $0 }
+        .zIndex(isOver || hovered ? 1 : 0)
+    }
+
+    private func sparkline(_ track: SensorTrack) -> some View {
+        let points = track.points
+        let values = points.map(\.value)
+        // A flat sensor would fill the whole height, so the scale is at least four degrees wide.
+        let low = (values.min() ?? 0)
+        let high = max(values.max() ?? 0, low + 4)
+        return InteractiveChart(
+            series: [ChartSeries(
+                id: reading.key,
+                title: reading.key,
+                color: Palette.orange,
+                points: points,
+                format: Format.temperature
+            )],
+            domain: (low - 1) ... (high + 1),
+            height: 22,
+            tooltipDate: Date.FormatStyle(date: .omitted, time: .standard),
+            initialHover: hovered ? points.last?.date : nil
+        )
+        .frame(width: 64)
     }
 }

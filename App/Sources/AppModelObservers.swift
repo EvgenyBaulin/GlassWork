@@ -53,6 +53,7 @@ extension AppModel {
 
     /// Nothing is read while the Mac sleeps, the screen is off or locked, or another user is active.
     func observeSleep() {
+        monitor.sleeps.load()
         let center = NSWorkspace.shared.notificationCenter
         let pause: [Notification.Name] = [
             NSWorkspace.willSleepNotification,
@@ -68,11 +69,15 @@ extension AppModel {
         center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
+                self.monitor.sleeps.record(.sleep)
                 Task { await self.fans.willSleep() }
             }
         }
         center.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.fans.didWake() }
+            MainActor.assumeIsolated {
+                self?.monitor.sleeps.record(.wake)
+                self?.fans.didWake()
+            }
         }
         for name in pause {
             center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in

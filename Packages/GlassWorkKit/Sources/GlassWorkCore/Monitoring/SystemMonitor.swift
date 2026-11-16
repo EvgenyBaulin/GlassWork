@@ -72,6 +72,12 @@ public final class SystemMonitor {
     public private(set) var battery: BatterySample?
     public private(set) var gpus: [GPUSample] = []
     public private(set) var sensors: SensorSample?
+    /// Recent readings and session extremes of the sensors the panel lists.
+    public private(set) var sensorTracks = SensorTracker()
+    /// The sensor groups the panel lists; only their sensors are tracked.
+    public var trackedSensorGroups = Set(SensorGroup.allCases)
+    /// Sleeps and wakes since boot, for the Uptime panel.
+    public let sleeps = SleepLog()
     public private(set) var processes: [ProcessUsage] = []
     public private(set) var deviceBatteries: [DeviceBattery] = []
     public private(set) var timeMachine: TimeMachineStatus?
@@ -488,6 +494,7 @@ public final class SystemMonitor {
         }
         if let value = reading.sensors {
             sensors = value
+            sensorTracks.apply(value, groups: trackedSensorGroups, at: date)
             if let celsius = value.celsius(for: temperatureSource) {
                 record(.temperature, celsius, date)
             }
