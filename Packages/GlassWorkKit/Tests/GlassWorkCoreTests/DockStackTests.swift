@@ -47,6 +47,29 @@ struct DockArrangementTests {
         #expect(arrangement.dividers == [1, 2])
     }
 
+    @Test func theTrashGoesLastBesideTheStacks() {
+        let arrangement = DockArrangement(items: [apps[0], downloads], iconSize: 48, length: 1512, showsTrash: true)
+        #expect(arrangement.slots.last == .trash)
+        #expect(arrangement.dividers == [0])
+    }
+
+    @Test func withoutStacksTheTrashHasItsOwnDivider() {
+        let arrangement = DockArrangement(items: [apps[0], apps[1]], iconSize: 48, length: 1512, showsTrash: true)
+        #expect(arrangement.slots.map(\.id) == [apps[0].id, apps[1].id, "trash"])
+        #expect(arrangement.dividers == [1])
+    }
+
+    @Test func theTrashTakesRoomWhenIconsShrink() {
+        let full = DockArrangement(items: apps, iconSize: 48, length: room(apps.count))
+        let withTrash = DockArrangement(items: apps, iconSize: 48, length: room(apps.count), showsTrash: true)
+        #expect(withTrash.iconSize < full.iconSize)
+    }
+
+    @Test func oldSettingsShowTheTrash() throws {
+        let settings = try JSONDecoder().decode(DockSettings.self, from: Data("{}".utf8))
+        #expect(settings.showsTrash)
+    }
+
     @Test func aSingleGroupHasNoDivider() {
         #expect(DockArrangement(items: apps, iconSize: 48, length: 1512).dividers.isEmpty)
         #expect(DockArrangement(items: Array(widgets.prefix(2)), iconSize: 48, length: 1512).dividers.isEmpty)

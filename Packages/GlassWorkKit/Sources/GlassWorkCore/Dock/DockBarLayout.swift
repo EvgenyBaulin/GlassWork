@@ -259,6 +259,8 @@ public final class DockLiveState {
     public var page = 0
     /// The folder or stack open above the Dock, by item id.
     public var openCard: String?
+    /// The Trash has something in it. False when the Trash cannot be read.
+    public var trashIsFull = false
     /// What each stack holds, by folder path. Filled only for stacks in the Dock.
     public var files: [String: [DockFile]] = [:]
 
@@ -267,7 +269,13 @@ public final class DockLiveState {
     }
 
     public var arrangement: DockArrangement {
-        DockArrangement(items: settings.items, iconSize: settings.iconSize, length: available, page: page)
+        DockArrangement(
+            items: settings.items,
+            iconSize: settings.iconSize,
+            length: available,
+            page: page,
+            showsTrash: settings.showsTrash
+        )
     }
 
     /// The settings as shown: icons may have shrunk to fit the screen.

@@ -117,6 +117,27 @@ struct AppTile: View {
     }
 }
 
+/// The system's Trash icon, empty or full. Files dropped on it go to the Trash.
+struct TrashTile: View {
+    let isFull: Bool
+    let size: CGFloat
+    var position = DockPosition.bottom
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            DockIndicated(position: position, isLit: false) {
+                Image(nsImage: NSImage(named: isFull ? NSImage.trashFullName : NSImage.trashEmptyName) ?? NSImage())
+                    .resizable()
+                    .interpolation(.high)
+                    .frame(width: size, height: size)
+            }
+        }
+        .buttonStyle(.plain)
+        .help(loc("Trash"))
+    }
+}
+
 /// Glass square with a 3×3 grid of the folder's first apps.
 struct FolderTile: View {
     let folder: AppFolder

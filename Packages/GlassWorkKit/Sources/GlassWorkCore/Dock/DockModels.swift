@@ -105,6 +105,8 @@ public struct DockSettings: Codable, Sendable, Equatable {
     public var magnifiedSize = 80.0
     public var autoHides = false
     public var showsRecents = false
+    /// The Trash at the end of the Dock, after the stacks, as in the system Dock.
+    public var showsTrash = true
     public var items: [DockItem] = []
     /// Turning the Dock on hides the system one, so this is explained once before it happens.
     public var hasSeenIntro = false
@@ -129,7 +131,7 @@ public struct DockSettings: Codable, Sendable, Equatable {
 
 extension DockSettings {
     private enum CodingKeys: String, CodingKey {
-        case isEnabled, position, iconSize, magnifies, magnifiedSize, autoHides, showsRecents, items
+        case isEnabled, position, iconSize, magnifies, magnifiedSize, autoHides, showsRecents, showsTrash, items
         case hasSeenIntro, activePreset, presets
     }
 
@@ -153,6 +155,7 @@ extension DockSettings {
         magnifiedSize = try container.decodeIfPresent(Double.self, forKey: .magnifiedSize) ?? magnifiedSize
         autoHides = try container.decodeIfPresent(Bool.self, forKey: .autoHides) ?? autoHides
         showsRecents = try container.decodeIfPresent(Bool.self, forKey: .showsRecents) ?? showsRecents
+        showsTrash = try container.decodeIfPresent(Bool.self, forKey: .showsTrash) ?? showsTrash
         items = try container.decodeIfPresent([LossyItem].self, forKey: .items)?.compactMap(\.value) ?? items
         hasSeenIntro = try container.decodeIfPresent(Bool.self, forKey: .hasSeenIntro) ?? hasSeenIntro
         activePreset = try container.decodeIfPresent(String.self, forKey: .activePreset)

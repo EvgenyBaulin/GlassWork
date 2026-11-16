@@ -32,6 +32,12 @@ final class DockController {
     private var isRevealed = true
     private lazy var pointerWatcher = DockPointerWatcher { [weak self] in self?.updateReveal() }
     private var hiding: Task<Void, Never>?
+    private lazy var trash = DockTrash { [weak self] full in
+        if self?.state.trashIsFull != full {
+            self?.state.trashIsFull = full
+        }
+    }
+
     private var cardDismissal: TransientDismissal?
     private lazy var folders = DockFolders { [weak self] in self?.state.files = $0 }
 
@@ -103,6 +109,7 @@ final class DockController {
                 MainActor.assumeIsolated { self?.refreshRunning() }
             }
         }
+        trash.start()
     }
 
     /// Restores even with no window, so a Dock left hidden by a crash comes back once it is turned off.
@@ -111,6 +118,7 @@ final class DockController {
             model.closePanels()
         }
         shrink?.cancel()
+        trash.stop()
         watchPointer(false)
         folders.watch([])
         state.openCard = nil
@@ -169,35 +177,6 @@ final class DockController {
                 visible: screen.visibleFrame
             )
         }
-    }
-
-    private var actions: DockActions {
-        DockActions(
-            open: { [weak self] app in
-                self?.model.closePanels()
-                self?.launch(app)
-            },
-            clickWidget: { [weak self] in self?.click($0) },
-            holdWidget: { [weak self] in self?.toggleCard($0) },
-            update: { [weak self] change in
-                self?.model.store.update { $0.dock.items = change($0.dock.items) }
-            },
-            needsSpace: { [weak self] space in
-                self?.requested = space
-                self?.updateCardDismissal(isOpen: space == .folder)
-                self?.updateSpace()
-            },
-            commands: { [weak self] in self?.commands(for: $0) ?? [] },
-            perform: { [weak self] in self?.perform($0, on: $1) },
-            turnPage: { [weak self] in self?.turnPage(by: $0) },
-            openFile: { NSWorkspace.shared.open(URL(filePath: $0)) },
-            showFolder: { NSWorkspace.shared.open(URL(filePath: $0, directoryHint: .isDirectory)) },
-            change: { [weak self] change in self?.model.store.update { change(&$0.dock) } },
-            presets: { [weak self] in self?.presets ?? [] },
-            applyPreset: { [weak self] in self?.apply($0) },
-            savePreset: { [weak self] in self?.savePreset() },
-            openSettings: { [weak self] in self?.model.showMainWindow(.dock) }
-        )
     }
 
     private var presets: [DockPreset] {
@@ -463,6 +442,39 @@ final class DockController {
                 place(sliding: true)
             }
         }
+    }
+}
+
+extension DockController {
+    private var actions: DockActions {
+        var actions = DockActions(
+            open: { [weak self] app in
+                self?.model.closePanels()
+                self?.launch(app)
+            },
+            clickWidget: { [weak self] in self?.click($0) },
+            holdWidget: { [weak self] in self?.toggleCard($0) },
+            update: { [weak self] change in
+                self?.model.store.update { $0.dock.items = change($0.dock.items) }
+            },
+            needsSpace: { [weak self] space in
+                self?.requested = space
+                self?.updateCardDismissal(isOpen: space == .folder)
+                self?.updateSpace()
+            },
+            commands: { [weak self] in self?.commands(for: $0) ?? [] },
+            perform: { [weak self] in self?.perform($0, on: $1) },
+            turnPage: { [weak self] in self?.turnPage(by: $0) },
+            openFile: { NSWorkspace.shared.open(URL(filePath: $0)) },
+            showFolder: { NSWorkspace.shared.open(URL(filePath: $0, directoryHint: .isDirectory)) },
+            change: { [weak self] change in self?.model.store.update { change(&$0.dock) } },
+            presets: { [weak self] in self?.presets ?? [] },
+            applyPreset: { [weak self] in self?.apply($0) },
+            savePreset: { [weak self] in self?.savePreset() },
+            openSettings: { [weak self] in self?.model.showMainWindow(.dock) }
+        )
+        actions.trash = trash.actions
+        return actions
     }
 }
 
