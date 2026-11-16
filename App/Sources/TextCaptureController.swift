@@ -8,6 +8,7 @@ import SwiftUI
 final class TextCaptureController {
     private unowned let model: AppModel
     private var isCapturing = false
+    private var isWarm = false
     private var hud: GlassPanel?
     private var hideTask: Task<Void, Never>?
 
@@ -15,11 +16,6 @@ final class TextCaptureController {
         self.model = model
         model.shortcuts.bind(.textCapture) { [weak self] in self?.start() }
         model.shortcuts.setActive(.textCapture, true)
-        // Vision loads its model on the first read, which would be the user's. Do it early, out of the way.
-        Task.detached(priority: .utility) {
-            try? await Task.sleep(for: .seconds(3))
-            TextRecognizer.warmUp()
-        }
     }
 
     private func start() {
@@ -32,6 +28,12 @@ final class TextCaptureController {
             return
         }
         isCapturing = true
+        // Vision loads its model on the first read. Loading it while the user is still picking the area hides
+        // that wait, and an app that never captures text never holds the model in memory.
+        if !isWarm {
+            isWarm = true
+            Task.detached(priority: .userInitiated) { TextRecognizer.warmUp() }
+        }
         Task {
             // A picture Vision cannot open holds no text the user can get at.
             let result = await (try? ScreenTextCapture().run { [weak self] in self?.show(.reading) }) ?? .noText
