@@ -25,6 +25,16 @@ struct DockLayoutTests {
         #expect(result.last == .app(notes))
     }
 
+    @Test func theNewFolderKeepsTheGivenNameAndId() throws {
+        let named = AppFolder(name: "New Folder", apps: [])
+        let result = DockLayout.drop(mail, onto: safari, in: [.app(safari), .app(mail)], making: named)
+
+        let made = try #require(folder(result))
+        #expect(made.id == named.id)
+        #expect(made.name == "New Folder")
+        #expect(made.apps == [safari, mail])
+    }
+
     @Test func droppingAnAppOnItselfChangesNothing() {
         let items: [DockItem] = [.app(safari)]
         #expect(DockLayout.drop(safari, onto: safari, in: items) == items)

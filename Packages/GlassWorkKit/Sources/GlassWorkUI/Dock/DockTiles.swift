@@ -177,6 +177,7 @@ struct FolderCard: View {
     let close: () -> Void
     @State private var name: String
     @State private var query = ""
+    @FocusState private var isNaming: Bool
 
     init(folder: AppFolder, actions: DockActions, close: @escaping () -> Void) {
         self.folder = folder
@@ -195,7 +196,10 @@ struct FolderCard: View {
                 TextField(loc("Folder name"), text: $name)
                     .textFieldStyle(.plain)
                     .font(.system(size: 15, weight: .semibold))
+                    .focused($isNaming)
                     .onSubmit(rename)
+                    // A folder just made by a drop or from the menu opens ready to be named.
+                    .onAppear { isNaming = folder.name == loc("New Folder") }
                 Menu {
                     Button(loc("Ungroup")) {
                         actions.update { DockLayout.ungroup(folder, in: $0) }
@@ -235,6 +239,16 @@ struct FolderCard: View {
                 }
             }
             .frame(maxHeight: 300)
+            if folder.apps.isEmpty {
+                Text(loc("Drag apps here"))
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, minHeight: 72)
+                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(
+                        .secondary,
+                        style: StrokeStyle(lineWidth: 1, dash: [5])
+                    ))
+            }
         }
         .padding(16)
         .frame(width: 430)
@@ -293,5 +307,26 @@ struct WidgetTile: View {
                 press.left()
             }
         }
+    }
+}
+
+/// An app dragged over another app or a folder: the target grows a little and gets a ring, so it is clear that
+/// letting go makes a folder or adds to it.
+struct DockDropHighlight: ViewModifier {
+    let isTargeted: Bool
+    let size: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(isTargeted ? 1.08 : 1)
+            .overlay {
+                if isTargeted {
+                    RoundedRectangle(cornerRadius: size / 4.5 + 3)
+                        .strokeBorder(.white.opacity(0.85), lineWidth: 2)
+                        .padding(-3)
+                        .frame(width: size, height: size)
+                }
+            }
+            .animation(.easeOut(duration: 0.15), value: isTargeted)
     }
 }

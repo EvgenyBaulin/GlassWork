@@ -176,11 +176,19 @@ public extension DockSettings {
 
 /// Edits the Dock's contents. Pure, so every folder rule is testable.
 public enum DockLayout {
-    /// Dropping an app on another makes a folder in the target's place.
-    public static func drop(_ dragged: DockApp, onto target: DockApp, in items: [DockItem]) -> [DockItem] {
+    /// Dropping an app on another makes a folder in the target's place. The caller names it, so it can open
+    /// the new folder's card by its id.
+    public static func drop(
+        _ dragged: DockApp,
+        onto target: DockApp,
+        in items: [DockItem],
+        making folder: AppFolder? = nil
+    ) -> [DockItem] {
         guard dragged != target, let index = index(of: target, in: items) else { return items }
+        var made = folder ?? AppFolder(name: "Folder", apps: [])
+        made.apps = [target, dragged]
         var result = items
-        result[index] = .folder(AppFolder(name: "Folder", apps: [target, dragged]))
+        result[index] = .folder(made)
         return result.filter { $0 != .app(dragged) }
     }
 
