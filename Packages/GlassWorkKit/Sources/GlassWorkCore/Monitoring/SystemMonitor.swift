@@ -21,6 +21,8 @@ public struct MonitorDemand: Sendable, Equatable {
     /// A list of apps is on screen. Without it apps are still read, slowly, for their history.
     public var liveApps = false
     public var developer: Set<ModuleID> = []
+    /// A panel or the main window is open: developer modules read at the pace a panel shows, not the menu bar's.
+    public var developerLive = false
     public var devices = false
     public var timeMachine = false
     public var nowPlaying = false
@@ -352,7 +354,7 @@ public final class SystemMonitor {
         let reading = await sampler.read(demand, includeSlow: includeSlow, temperature: temperatureSource)
         apply(reading, at: now)
         everyday.tick(at: now, battery: battery)
-        developer.tick(at: now, demand: demand.developer)
+        developer.tick(at: now, demand: demand.developer, live: demand.developerLive)
         apps.tick(at: now, isLive: demand.liveApps)
         weather.tick(at: now)
         rates.tick(at: now)

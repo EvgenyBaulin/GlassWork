@@ -60,6 +60,7 @@ public extension MonitorDemand {
         both.slowProcesses = slowProcesses || other.slowProcesses
         both.liveApps = liveApps || other.liveApps
         both.developer = developer.union(other.developer)
+        both.developerLive = developerLive || other.developerLive
         both.devices = devices || other.devices
         both.timeMachine = timeMachine || other.timeMachine
         both.nowPlaying = nowPlaying || other.nowPlaying

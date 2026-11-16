@@ -283,6 +283,7 @@ final class AppModel {
             || modes.contains(.fans) || store.settings.alerts.isEnabled
         demand.sensorDetail = everything || isSettingsOpen ? .live : demand.sensorDetail
         demand.processes = everything
+        demand.developerLive = everything || visibleSection != nil
         demand.developer = store.settings.developerDemand(panelOpen: everything)
             .union(placed.compactMap(\.developerModule))
             .union(docked.intersection(ModuleID.developerCollected))

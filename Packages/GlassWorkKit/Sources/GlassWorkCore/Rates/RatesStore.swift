@@ -78,14 +78,16 @@ public final class RatesStore {
 
     @ObservationIgnored private let service: RateService
     @ObservationIgnored private let store: SnapshotStore
-    @ObservationIgnored private var schedule: RefreshSchedule
+    @ObservationIgnored private var schedules: [RateSource: RefreshSchedule]
 
     public init(fetcher: any HTTPFetching = URLSessionFetcher(), store: SnapshotStore = SnapshotStore()) {
         service = RateService(fetcher: fetcher)
         self.store = store
         let saved = store.read(RatesSnapshot.self, for: RatesSnapshot.key) ?? RatesSnapshot()
         snapshot = saved
-        schedule = RefreshSchedule(lastSuccess: saved.updatedAt)
+        schedules = Dictionary(uniqueKeysWithValues: RateSource.allCases.map {
+            ($0, RefreshSchedule(lastSuccess: saved.updatedAt, every: Self.interval(of: $0)))
+        })
     }
 
     /// No service could be reached, so everything on screen is the last known data.
@@ -106,27 +108,52 @@ public final class RatesStore {
         let pairsChanged = new.pairs != settings.pairs
         settings = new
         if pairsChanged {
-            schedule.expire()
+            expireAll()
+        }
+    }
+
+    /// Owner's table (2026-11-16): the central bank sets its rates once a day, crypto moves all the time.
+    nonisolated static func interval(of source: RateSource) -> TimeInterval {
+        switch source {
+        case .cbr: 60 * 60
+        case .coinGecko: 15 * 60
+        case .frankfurter: RefreshSchedule.interval
+        }
+    }
+
+    /// Sources with pairs on screen whose turn has come.
+    func dueSources(at date: Date) -> Set<RateSource> {
+        Set(settings.pairs.compactMap(\.source).filter { schedules[$0]?.isDue(at: date) ?? true })
+    }
+
+    private func expireAll() {
+        for source in schedules.keys {
+            schedules[source]?.expire()
         }
     }
 
     /// Called on every monitor read, which also pauses this during sleep.
     public func tick(at date: Date) {
-        guard isActive, status != .loading, !settings.pairs.isEmpty, schedule.isDue(at: date) else { return }
-        Task { await refresh(at: date) }
+        guard isActive, status != .loading, !settings.pairs.isEmpty else { return }
+        let due = dueSources(at: date)
+        guard !due.isEmpty else { return }
+        Task { await refresh(at: date, only: due) }
     }
 
     /// Clears the wait after a failure, for the Retry button.
     public func retry() async {
-        schedule.expire()
+        expireAll()
         await refresh()
     }
 
     /// Asks every service in parallel. One that fails leaves the others' results in place.
-    public func refresh(at date: Date = Date()) async {
+    public func refresh(at date: Date = Date(), only sources: Set<RateSource>? = nil) async {
         guard status != .loading else { return }
         status = .loading
-        let groups = Dictionary(grouping: settings.pairs.filter { $0.source != nil }) { $0.source ?? .cbr }
+        let pairs = settings.pairs.filter { pair in
+            pair.source.map { sources?.contains($0) ?? true } ?? false
+        }
+        let groups = Dictionary(grouping: pairs) { $0.source ?? .cbr }
         let outcomes = await fetch(groups, at: date)
         apply(outcomes, pairs: settings.pairs, at: date)
     }
@@ -178,8 +205,10 @@ public final class RatesStore {
             snapshot = new
             try? store.write(new, for: RatesSnapshot.key)
         }
-        failedSources = Set(failed.keys)
-        schedule.record(success: failed.isEmpty, at: date)
+        failedSources = failedSources.subtracting(outcomes.keys).union(failed.keys)
+        for source in outcomes.keys {
+            schedules[source]?.record(success: failed[source] == nil, at: date)
+        }
         status = Self.status(failed: failed.values.map(\.self), anySucceeded: anySucceeded)
     }
 
