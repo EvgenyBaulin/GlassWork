@@ -123,6 +123,11 @@ struct SensorPace {
 
     private var last = Date.distantPast
 
+    /// When sensors fall due next; nil for a list on screen, which reads on every tick.
+    func nextDue(_ detail: SensorDetail) -> Date? {
+        detail == .live ? nil : last.addingTimeInterval(Self.interval - Self.tolerance)
+    }
+
     mutating func isDue(_ detail: SensorDetail, at date: Date) -> Bool {
         guard detail == .live || date.timeIntervalSince(last) >= Self.interval - Self.tolerance else { return false }
         last = date
