@@ -5,11 +5,17 @@ import GlassWorkUI
 extension AppModel {
     func updateIsland() {
         guard store.settings.island.isEnabled else { return }
-        island.update(input: IslandInput(monitor: monitor, alerts: store.settings.alerts), now: Date())
+        var input = IslandInput(monitor: monitor, alerts: store.settings.alerts)
+        input.levels = islandFeeds.levels
+        input.downloads = islandFeeds.downloads
+        if let batteries = islandFeeds.deviceBatteries {
+            input.deviceBatteries = batteries
+        }
+        island.update(input: input, now: Date())
     }
 
     var islandActions: IslandActions {
-        IslandActions(
+        var actions = IslandActions(
             joinMeeting: { NSWorkspace.shared.open($0) },
             snooze: { [weak self] in
                 guard let self, island.queue.pages.indices.contains(self.island.page) else { return }
@@ -39,6 +45,10 @@ extension AppModel {
             next: { [weak self] in self?.monitor.nowPlaying.perform(.next) },
             previous: { [weak self] in self?.monitor.nowPlaying.perform(.previous) },
             seek: { [weak self] in self?.monitor.nowPlaying.perform(.seek($0)) },
+            setVolume: { [weak self] in
+                SystemLevelsReader.setVolume($0)
+                self?.islandFeeds.refreshLevels()
+            },
             extendKeepAwake: { [weak self] in
                 self?.monitor.everyday.extendKeepAwake(by: $0)
                 self?.updateIsland()
@@ -51,6 +61,14 @@ extension AppModel {
             dismiss: { [weak self] in self?.island.dismiss(id: $0) },
             openPage: { [weak self] in self?.island.showPage($0) }
         )
+        // The initializer has no brightness parameter; the slider stays hidden without a settable display.
+        if SystemLevelsReader.canSetBrightness {
+            actions.setBrightness = { [weak self] in
+                SystemLevelsReader.setBrightness($0)
+                self?.islandFeeds.refreshLevels()
+            }
+        }
+        return actions
     }
 
     /// The timer the card's buttons act on: one that already rang, else the next to ring.

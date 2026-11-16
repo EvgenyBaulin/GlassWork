@@ -30,6 +30,11 @@ public enum SystemLevelsReader {
         }
     }
 
+    /// Brightness alone, for a cheap check.
+    public static func readBrightness() -> Double? {
+        Brightness.get()
+    }
+
     public static var canSetBrightness: Bool {
         Brightness.set != nil && Brightness.get() != nil
     }
@@ -45,7 +50,7 @@ public enum SystemLevelsReader {
         AudioObjectPropertyAddress(mSelector: selector, mScope: scope, mElement: kAudioObjectPropertyElementMain)
     }
 
-    static func defaultOutput() -> AudioObjectID? {
+    public static func defaultOutput() -> AudioObjectID? {
         var device = AudioObjectID(kAudioObjectUnknown)
         var size = UInt32(MemoryLayout<AudioObjectID>.size)
         var address = property(kAudioHardwarePropertyDefaultOutputDevice, scope: kAudioObjectPropertyScopeGlobal)
