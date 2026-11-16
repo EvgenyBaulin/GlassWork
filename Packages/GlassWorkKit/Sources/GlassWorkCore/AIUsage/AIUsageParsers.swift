@@ -10,16 +10,19 @@ private struct ClaudeFile: Decodable {
     }
 }
 
+/// The status line writes `null` for both fields when Claude did not report that window.
 private struct ClaudeWindow: Decodable {
-    let usedPercentage: Double
+    let usedPercentage: Double?
     let resetsAt: Double?
 
     enum CodingKeys: String, CodingKey {
         case usedPercentage = "used_percentage", resetsAt = "resets_at"
     }
 
-    func window(_ kind: AIWindow.Kind) -> AIWindow {
-        AIWindow(kind: kind, used: usedPercentage / 100, resetsAt: resetsAt.map(Date.init(timeIntervalSince1970:)))
+    func window(_ kind: AIWindow.Kind) -> AIWindow? {
+        usedPercentage.map {
+            AIWindow(kind: kind, used: $0 / 100, resetsAt: resetsAt.map(Date.init(timeIntervalSince1970:)))
+        }
     }
 }
 

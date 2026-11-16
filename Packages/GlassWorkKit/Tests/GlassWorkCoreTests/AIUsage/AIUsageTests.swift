@@ -27,6 +27,15 @@ struct ClaudeUsageParserTests {
         #expect(usage.windows.map(\.kind) == [.week])
     }
 
+    @Test func aWindowWrittenAsNullIsLeftOut() throws {
+        let json = #"{"updated_at":1794853336,"five_hour":{"used_percentage":null,"resets_at":null},"#
+            + #""seven_day":{"used_percentage":12,"resets_at":1795435200}}"#
+        let usage = try #require(ClaudeUsageParser.usage(Data(json.utf8)))
+
+        #expect(usage.windows.map(\.kind) == [.week])
+        #expect(!usage.isUnreadable)
+    }
+
     @Test func notJSONIsNil() {
         #expect(ClaudeUsageParser.usage(Data("nope".utf8)) == nil)
     }
