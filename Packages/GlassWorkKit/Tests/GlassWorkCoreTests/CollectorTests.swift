@@ -307,4 +307,41 @@ struct DeviceBatteryTests {
     @Test func toleratesEmptyOutput() {
         #expect(DeviceBatteryReader.parseBluetooth(Data()).isEmpty)
     }
+
+    @Test func readsTheShapeSystemProfilerReallyWrites() {
+        // AirPods report left, right and case levels and no charging flag.
+        let json = #"""
+        {"SPBluetoothDataType": [{"device_connected": [
+            {"AirPods Pro": {"device_address": "54:2A:43:5C:89:E4", "device_batteryLevelCase": "100%",
+              "device_batteryLevelLeft": "80%", "device_batteryLevelRight": "78%", "device_minorType": "Headphones"}}
+        ]}]}
+        """#
+        let devices = DeviceBatteryReader.parseBluetooth(Data(json.utf8))
+
+        #expect(devices.count == 1)
+        #expect(devices.first?.charge == 0.8)
+        #expect(devices.first?.isCharging == false)
+    }
+
+    @Test func aRisingChargeMeansChargingUntilItDrops() {
+        func mouse(_ charge: Double) -> [DeviceBattery] {
+            [DeviceBattery(name: "Magic Mouse", kind: .mouse, charge: charge)]
+        }
+        let first = DeviceBatteryReader.marking(mouse(0.40), previous: [])
+        let rising = DeviceBatteryReader.marking(mouse(0.45), previous: first)
+        let flat = DeviceBatteryReader.marking(mouse(0.45), previous: rising)
+        let dropping = DeviceBatteryReader.marking(mouse(0.44), previous: flat)
+
+        #expect(first.first?.isCharging == false)
+        #expect(rising.first?.isCharging == true)
+        #expect(flat.first?.isCharging == true)
+        #expect(dropping.first?.isCharging == false)
+    }
+
+    @Test func oldSnapshotsWithoutTheFlagStillDecode() throws {
+        let json = #"{"name": "Magic Mouse", "kind": "mouse", "charge": 0.5}"#
+        let device = try JSONDecoder().decode(DeviceBattery.self, from: Data(json.utf8))
+
+        #expect(device.isCharging == false)
+    }
 }

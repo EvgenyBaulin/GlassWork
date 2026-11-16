@@ -259,46 +259,92 @@ struct WorldClocksPanel: View {
 }
 
 struct DatePanel: View {
+    let monitor: SystemMonitor
+    /// Set by tests, which need the same month on every run.
+    var moment: Date?
+    /// Set by tests in place of what the Calendar app has.
+    var eventDays: Set<Int>?
     @Environment(\.panelActions) private var actions
+    @State private var loadedDays: Set<Int> = []
 
     var body: some View {
-        let now = Date()
+        let now = moment ?? Date()
         PanelFrame(
             module: .date,
             subtitle: loc("Week \(DateItemText(options: actions.moduleOptions(.date)).week(of: now))")
         ) {
             Text(now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                 .font(.system(size: 18, weight: .semibold))
-            MonthGrid(month: now)
+            MonthGrid(month: now, eventDays: eventDays ?? loadedDays, showsWeeks: true)
         }
+        .task { loadedDays = monitor.agenda.eventDays(in: now) }
     }
 }
 
-/// One month with today marked.
+private struct MonthGridCell: Identifiable {
+    enum Content { case week(Int), day(Int?) }
+
+    let id: Int
+    let content: Content
+}
+
+/// One month with today marked. Panels can add ISO week numbers and a dot under days that have events.
 struct MonthGrid: View {
     let month: Date
+    var eventDays: Set<Int> = []
+    var showsWeeks = false
 
-    private var days: [Int?] {
-        let calendar = Calendar.current
-        guard let interval = calendar.dateInterval(of: .month, for: month),
-              let count = calendar.range(of: .day, in: .month, for: month)?.count
-        else { return [] }
-        let weekday = calendar.component(.weekday, from: interval.start)
-        let leading = (weekday - calendar.firstWeekday + 7) % 7
-        return Array(repeating: nil, count: leading) + (1 ... count).map(Optional.some)
+    private static let weekWidth: CGFloat = 20
+
+    private var columns: [GridItem] {
+        let days = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
+        return showsWeeks ? [GridItem(.fixed(Self.weekWidth), spacing: 2)] + days : days
     }
 
     var body: some View {
         let today = Calendar.current.component(.day, from: month)
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 7), spacing: 6) {
-            ForEach(Array(days.enumerated()), id: \.offset) { _, day in
-                Text(day.map(String.init) ?? "")
-                    .font(.system(size: 12, weight: day == today ? .bold : .regular))
-                    .monospacedDigit()
-                    .frame(width: 24, height: 24)
-                    .background(day == today ? Palette.red : .clear, in: Circle())
+        LazyVGrid(columns: columns, spacing: 6) {
+            ForEach(cells) { item in
+                switch item.content {
+                case let .week(number):
+                    Text("\(number)")
+                        .font(.system(size: 10))
+                        .monospacedDigit()
+                        .foregroundStyle(.tertiary)
+                        .frame(width: Self.weekWidth, height: 24)
+                case let .day(day):
+                    cell(day, isToday: day == today)
+                }
             }
         }
+    }
+
+    /// Week numbers and days in one flat list, so the grid sees plain cells with stable ids.
+    private var cells: [MonthGridCell] {
+        var items: [MonthGridCell.Content] = []
+        for row in MonthRows.rows(for: month) {
+            if showsWeeks {
+                items.append(.week(row.week))
+            }
+            items += row.days.map { .day($0) }
+        }
+        return items.enumerated().map { MonthGridCell(id: $0.offset, content: $0.element) }
+    }
+
+    private func cell(_ day: Int?, isToday: Bool) -> some View {
+        Text(day.map(String.init) ?? "")
+            .font(.system(size: 12, weight: isToday ? .bold : .regular))
+            .monospacedDigit()
+            .frame(width: 24, height: 24)
+            .background(isToday ? Palette.red : .clear, in: Circle())
+            .overlay(alignment: .bottom) {
+                if let day, eventDays.contains(day) {
+                    Circle()
+                        .fill(isToday ? Color.white : Palette.red)
+                        .frame(width: 3, height: 3)
+                        .padding(.bottom, 2)
+                }
+            }
     }
 }
 
@@ -435,20 +481,40 @@ struct DeviceBatteriesPanel: View {
 
     var body: some View {
         PanelFrame(module: .deviceBatteries, subtitle: "") {
-            if monitor.deviceBatteries.isEmpty {
-                Text(loc("No devices with a battery connected"))
-                    .foregroundStyle(.secondary)
-                    .font(.system(size: 12))
-            }
-            ForEach(monitor.deviceBatteries) { device in
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(device.name).font(.system(size: 13))
-                        Spacer()
-                        Text(Format.percent(device.charge)).monospacedDigit().font(.system(size: 13))
+            DeviceBatteryList(devices: monitor.deviceBatteries, hasRead: monitor.hasReadDevices)
+        }
+    }
+}
+
+/// Accessory batteries, or what is happening instead: the first read still running, or no devices.
+struct DeviceBatteryList: View {
+    let devices: [DeviceBattery]
+    let hasRead: Bool
+
+    var body: some View {
+        if !hasRead {
+            Text(loc("Looking for devices…"))
+                .foregroundStyle(.secondary)
+                .font(.system(size: 12))
+        } else if devices.isEmpty {
+            Text(loc("No devices with a battery connected"))
+                .foregroundStyle(.secondary)
+                .font(.system(size: 12))
+        }
+        ForEach(devices) { device in
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(device.name).font(.system(size: 13))
+                    Spacer()
+                    if device.isCharging {
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(Palette.green)
+                            .help(loc("Charging"))
                     }
-                    ThinBar(value: device.charge, tint: device.charge < 0.2 ? Palette.red : Palette.green)
+                    Text(Format.percent(device.charge)).monospacedDigit().font(.system(size: 13))
                 }
+                ThinBar(value: device.charge, tint: device.charge < 0.2 ? Palette.red : Palette.green)
             }
         }
     }

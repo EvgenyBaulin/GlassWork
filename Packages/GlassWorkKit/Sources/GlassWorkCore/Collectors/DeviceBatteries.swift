@@ -8,6 +8,29 @@ public struct DeviceBattery: Codable, Sendable, Equatable, Identifiable {
     public var name: String
     public var kind: Kind
     public var charge: Double
+    /// `system_profiler` reports no charging flag for accessories, so this is inferred from the charge
+    /// rising between two reads (see `DeviceBatteryReader.marking`).
+    public var isCharging = false
+
+    public init(name: String, kind: Kind, charge: Double, isCharging: Bool = false) {
+        self.name = name
+        self.kind = kind
+        self.charge = charge
+        self.isCharging = isCharging
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case name, kind, charge, isCharging
+    }
+
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        name = try values.decode(String.self, forKey: .name)
+        kind = try values.decode(Kind.self, forKey: .kind)
+        charge = try values.decode(Double.self, forKey: .charge)
+        // Snapshots written before the flag existed have no such key.
+        isCharging = try values.decodeIfPresent(Bool.self, forKey: .isCharging) ?? false
+    }
 
     public enum Kind: String, Codable, Sendable {
         case headphones, mouse, keyboard, trackpad, other
@@ -50,6 +73,17 @@ public enum DeviceBatteryReader {
             kind: DeviceBattery.Kind(minorType: info["device_minorType"] as? String, name: name),
             charge: percent / 100
         )
+    }
+
+    /// A device is charging when its charge rose since the last read, and stays so until it drops.
+    public static func marking(_ devices: [DeviceBattery], previous: [DeviceBattery]) -> [DeviceBattery] {
+        devices.map { device in
+            guard let before = previous.first(where: { $0.name == device.name }) else { return device }
+            var marked = device
+            marked.isCharging = device.charge > before.charge + 0.001
+                || (before.isCharging && device.charge >= before.charge - 0.001)
+            return marked
+        }
     }
 
     public static func sorted(_ devices: [DeviceBattery]) -> [DeviceBattery] {
