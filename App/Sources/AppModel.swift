@@ -59,6 +59,7 @@ final class AppModel {
         shortcuts.setActive(.hub, true)
         _ = textCapture
         Task { await monitor.clipboard.load() }
+        Task { await monitor.shelf.load() }
         Task { await monitor.apps.load() }
         _ = runningApps
         _ = quickQuit
@@ -260,6 +261,7 @@ final class AppModel {
         monitor.weather.apply(settings.weather)
         monitor.rates.apply(settings.rates)
         monitor.clipboard.apply(settings.clipboard)
+        monitor.shelf.apply(ShelfSettings(options: settings.module(.shelf)?.options ?? [:]))
         location.apply(isOn: settings.weather.useCurrentLocation && settings.module(.weather)?.mode != .off)
         clipboard.apply(settings.clipboard, isEnabled: settings.module(.clipboard)?.mode != .off)
     }

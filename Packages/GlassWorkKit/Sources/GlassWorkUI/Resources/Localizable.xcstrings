@@ -107,6 +107,22 @@
         }
       }
     },
+    "%lld files": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld files"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файлов: %lld"
+          }
+        }
+      }
+    },
     "%lld Performance · %lld Efficiency": {
       "localizations": {
         "ru": {
@@ -287,6 +303,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "+%@ к вчера"
+          }
+        }
+      }
+    },
+    "1 file": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 file"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 файл"
           }
         }
       }
@@ -735,6 +767,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "ЦБ РФ"
+          }
+        }
+      }
+    },
+    "Clear the shelf?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear the shelf?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить полку?"
+          }
+        }
+      }
+    },
+    "Copy files onto the shelf": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy files onto the shelf"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копировать файлы на полку"
           }
         }
       }
@@ -1219,6 +1283,38 @@
         }
       }
     },
+    "Drop files here": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop files here"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите файлы сюда"
+          }
+        }
+      }
+    },
+    "Drop files here to keep them for later": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drop files here to keep them for later"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите файлы сюда, чтобы оставить на потом"
+          }
+        }
+      }
+    },
     "ECB": {
       "localizations": {
         "ru": {
@@ -1395,6 +1491,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Файлы"
+          }
+        }
+      }
+    },
+    "Files stay where they are unless the shelf copied them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files stay where they are unless the shelf copied them."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файлы останутся на месте, если полка их не копировала."
           }
         }
       }
@@ -1925,6 +2037,22 @@
         }
       }
     },
+    "Keep them for later, then drag them out": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep them for later, then drag them out"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оставьте на потом и вытащите, когда нужно"
+          }
+        }
+      }
+    },
     "Keeps up to 500 items for %lld days": {
       "localizations": {
         "ru": {
@@ -2125,6 +2253,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Минимум"
+          }
+        }
+      }
+    },
+    "Max items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max items"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Макс. файлов"
           }
         }
       }
@@ -2723,6 +2867,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыть Дисковую утилиту"
+          }
+        }
+      }
+    },
+    "Open file": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open file"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть"
           }
         }
       }
@@ -3367,6 +3527,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Занято + своп"
+          }
+        }
+      }
+    },
+    "Shelf": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shelf"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полка"
+          }
+        }
+      }
+    },
+    "Show thumbnails": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show thumbnails"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать миниатюры"
           }
         }
       }

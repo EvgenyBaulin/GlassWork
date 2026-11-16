@@ -162,6 +162,12 @@ public enum SettingsIndex {
         ),
         ModuleSearchWords(module: .stopwatch, english: "Stopwatch", russian: "Секундомер", keywords: ["lap", "круг"]),
         ModuleSearchWords(
+            module: .shelf,
+            english: "Shelf",
+            russian: "Полка",
+            keywords: ["files", "drag", "drop", "файлы", "перетаскивание"]
+        ),
+        ModuleSearchWords(
             module: .colours,
             english: "Colours",
             russian: "Цвета",

@@ -60,6 +60,7 @@ public extension ModuleID {
         case .weather: loc("Weather")
         case .rates: loc("Rates")
         case .clipboard: loc("Clipboard")
+        case .shelf: loc("Shelf")
         default: rawValue
         }
     }
@@ -101,6 +102,7 @@ public extension ModuleID {
         case .weather: "cloud.sun"
         case .rates: "chart.line.uptrend.xyaxis"
         case .clipboard: "list.clipboard"
+        case .shelf: "tray"
         default: "square.dashed"
         }
     }
@@ -125,6 +127,7 @@ public extension ModuleID {
         case .weather: Palette.cyan
         case .rates: Palette.green
         case .clipboard: Palette.teal
+        case .shelf: Palette.purple
         default: Palette.gray
         }
     }
@@ -153,6 +156,7 @@ public extension ModuleID {
         case .rates: "FX"
         case .nowPlaying: "NOW"
         case .clipboard: "CLP"
+        case .shelf: "SHF"
         default: ""
         }
     }
@@ -170,7 +174,7 @@ public extension ModuleID {
         case .colours, .appearance, .eject, .sunMoon, .date: true
         case .aiUsage, .git, .devServers, .docker, .ping, .vpn, .wifi: true
         case .calendar, .endsIn, .todos, .deviceBatteries: true
-        case .weather, .rates, .clipboard, .nowPlaying: true
+        case .weather, .rates, .clipboard, .nowPlaying, .shelf: true
         case .fans: FanHardware.hasFans
         default: false
         }

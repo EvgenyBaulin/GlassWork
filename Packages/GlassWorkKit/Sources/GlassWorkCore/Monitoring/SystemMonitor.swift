@@ -129,6 +129,7 @@ public final class SystemMonitor {
     public let weather: WeatherStore
     public let rates: RatesStore
     public let clipboard: ClipboardStore
+    public let shelf: ShelfStore
     /// The adapter process runs only while `demand.nowPlaying` is set.
     public let nowPlaying: NowPlayingStore
 
@@ -167,6 +168,7 @@ public final class SystemMonitor {
         weather: WeatherStore = WeatherStore(),
         rates: RatesStore = RatesStore(),
         clipboard: ClipboardStore = ClipboardStore(),
+        shelf: ShelfStore = ShelfStore(),
         nowPlaying: NowPlayingStore = NowPlayingStore(),
         apps: AppUsageStore = AppUsageStore(),
         personal: PersonalWidgetStore = PersonalWidgetStore(),
@@ -178,9 +180,11 @@ public final class SystemMonitor {
         self.weather = weather
         self.rates = rates
         self.clipboard = clipboard
+        self.shelf = shelf
         self.nowPlaying = nowPlaying
         developer.onChange = { [weak self] in self?.onUpdate?() }
         nowPlaying.onUpdate = { [weak self] in self?.onUpdate?() }
+        shelf.onChange = { [weak self] in self?.onUpdate?() }
     }
 
     public var isRunning: Bool {
