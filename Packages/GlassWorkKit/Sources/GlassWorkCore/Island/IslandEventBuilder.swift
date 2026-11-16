@@ -6,6 +6,7 @@ public enum IslandEventBuilder {
     public static func events(current: IslandInput, previous: IslandInput?, now: Date) -> [IslandEvent] {
         var result = ongoing(current, now: now)
         guard let previous else { return enriched(result, input: current, now: now) }
+        result += downloads(current.downloads, previous: previous.downloads, now: now)
         result += network(current, previous: previous, now: now)
         result += developer(current, previous: previous, now: now)
         if previous.battery?.isOnAC == false, let battery = current.battery, battery.isOnAC {
@@ -96,6 +97,19 @@ public enum IslandEventBuilder {
             return .brightness
         }
         return nil
+    }
+
+    /// While anything downloads, the island shows it with the files that finished meanwhile; when the last one
+    /// finishes, they show as done for a moment.
+    private static func downloads(_ files: [DockFile], previous: [DockFile], now: Date) -> [IslandEvent] {
+        let wasDownloading = Set(previous.filter(\.isDownloading).map(\.path))
+        let active = files.filter(\.isDownloading)
+        let finished = files.filter { !$0.isDownloading && wasDownloading.contains($0.path) }
+        if !active.isEmpty {
+            return [IslandEvent(id: "downloads", kind: .downloads, since: now, detail: .downloads(active + finished))]
+        }
+        guard !finished.isEmpty else { return [] }
+        return [transient(id: "downloads", kind: .downloads, detail: .downloads(finished), now: now)]
     }
 
     private static func isBadPing(_ outcome: PingOutcome) -> Bool {

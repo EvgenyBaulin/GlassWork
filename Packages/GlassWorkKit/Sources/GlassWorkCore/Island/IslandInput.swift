@@ -30,6 +30,8 @@ public struct IslandInput: Sendable, Equatable {
     public var clipboardImageURL: URL?
     /// Filled by the host, which listens for changes; nil when it does not.
     public var levels: SystemLevels?
+    /// The Downloads folder's newest files, from the same reader as the Dock's stack.
+    public var downloads: [DockFile] = []
 
     public init() {}
 
