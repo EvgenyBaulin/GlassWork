@@ -135,4 +135,27 @@ struct ReadScheduleTests {
         sleeper.wake()
         await sleeping.value
     }
+
+    @Test func aStoppedLoopDoesNotSleep() async {
+        let sleeper = LoopSleeper()
+        let stopped = Task {
+            withUnsafeCurrentTask { $0?.cancel() }
+            await sleeper.sleep(for: 3600)
+        }
+        // Returns at once instead of holding the sleeper for an hour.
+        await stopped.value
+    }
+
+    @Test func anOldSleepDoesNotClearANewOne() async {
+        let sleeper = LoopSleeper()
+        let old = Task { await sleeper.sleep(for: 3600) }
+        await Task.yield()
+        old.cancel()
+        let current = Task { await sleeper.sleep(for: 3600) }
+        await old.value
+        await Task.yield()
+        // The new sleep still answers a wake.
+        sleeper.wake()
+        await current.value
+    }
 }

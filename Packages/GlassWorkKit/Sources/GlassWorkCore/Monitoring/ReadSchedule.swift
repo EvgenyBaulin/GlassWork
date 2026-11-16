@@ -61,6 +61,7 @@ final class LoopSleeper {
     private var isWoken = false
 
     func sleep(for seconds: TimeInterval) async {
+        guard !Task.isCancelled else { return }
         if isWoken {
             isWoken = false
             return
@@ -72,8 +73,11 @@ final class LoopSleeper {
         } onCancel: {
             task.cancel()
         }
-        sleeper = nil
-        isWoken = false
+        // Only this sleep's own task: a newer sleep may have replaced it meanwhile.
+        if sleeper == task {
+            sleeper = nil
+            isWoken = false
+        }
     }
 
     func wake() {

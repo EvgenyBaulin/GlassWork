@@ -159,7 +159,8 @@ public final class SystemMonitor {
     @ObservationIgnored public var onUpdate: (() -> Void)?
 
     @ObservationIgnored let sampler = Sampler()
-    @ObservationIgnored private var loop: Task<Void, Never>?
+    @ObservationIgnored var loop: Task<Void, Never>?
+    @ObservationIgnored var isWatchingStores = false
     @ObservationIgnored private var pausedLoop: Task<Void, Never>?
     /// How often timers and Keep Awake are looked at while nothing else is read.
     @ObservationIgnored var pausedInterval: TimeInterval = 5
@@ -212,10 +213,13 @@ public final class SystemMonitor {
         pausedLoop?.cancel()
         pausedLoop = nil
         sleeper.reset()
+        wakeWhenStoresNeedTicks()
         loop = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self else { return }
                 await tick()
+                // A loop stopped during its tick must not sleep on the sleeper the next loop uses.
+                guard !Task.isCancelled else { return }
                 await sleeper.sleep(for: waitUntilNextRead())
             }
         }

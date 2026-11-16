@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 
 extension SystemMonitor {
     /// How long the loop sleeps: until the earliest read falls due, a second at least and 30 s at most.
@@ -33,6 +34,27 @@ extension SystemMonitor {
     var storesNeedEveryTick: Bool {
         !everyday.data.timers.isEmpty || everyday.isKeepingAwake || demand.nowPlaying || nowPlaying.isRunning
             || demand.liveApps || !demand.developer.isEmpty
+    }
+
+    /// A timer started or Keep Awake switched on during a long sleep has to be looked at every tick from now on, so
+    /// the loop wakes as soon as that need appears.
+    func wakeWhenStoresNeedTicks() {
+        // One watch at a time, however often the loop stops and starts.
+        guard !isWatchingStores else { return }
+        isWatchingStores = true
+        // Only the stores: demand has its own wake, and it is set often with the same value.
+        let needed = withObservationTracking {
+            !everyday.data.timers.isEmpty || everyday.isKeepingAwake || nowPlaying.isRunning
+        } onChange: { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.isWatchingStores = false
+                guard self.loop != nil else { return }
+                self.sleeper.wake()
+                self.wakeWhenStoresNeedTicks()
+            }
+        }
+        _ = needed
     }
 
     /// A panel or the main window is open (the flag the developer modules use for it).
