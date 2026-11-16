@@ -19,6 +19,9 @@ public enum IslandEventBuilder {
         if let entry = current.clipboardEntry, entry.id != previous.clipboardEntry?.id {
             result.append(transient(id: "copied", kind: .copied, detail: .copied(entry), now: now))
         }
+        if let change = focusChange(current.focus, previous.focus) {
+            result.append(transient(id: "focus", kind: .focus, detail: .focus(change), now: now))
+        }
         if let headphones = headphones(current, previous: previous) {
             result.append(transient(id: "headphones", kind: .airPods, detail: headphones, now: now))
         } else if let changed = levelChange(current.levels, previous.levels), let levels = current.levels {
@@ -105,6 +108,19 @@ public enum IslandEventBuilder {
         let known = ["airpods", "beats", "headphones", "earbuds", "buds"]
         guard !batteries.isEmpty || known.contains(where: name.lowercased().contains) else { return nil }
         return .headphones(name: name, batteries: batteries)
+    }
+
+    /// A mode switched on or off, or another one taking over. The first reading, or one that stops coming, shows
+    /// nothing; an off event keeps the name and symbol of the mode that ended.
+    static func focusChange(_ current: FocusReading?, _ previous: FocusReading?) -> FocusReading? {
+        guard let current, let previous else { return nil }
+        if current.isOn, !previous.isOn || current.modeID != previous.modeID {
+            return current
+        }
+        if !current.isOn, previous.isOn {
+            return FocusReading(isOn: false, modeID: previous.modeID, name: previous.name, symbol: previous.symbol)
+        }
+        return nil
     }
 
     /// Only a change counts: the first reading, or one that stops coming, shows nothing.

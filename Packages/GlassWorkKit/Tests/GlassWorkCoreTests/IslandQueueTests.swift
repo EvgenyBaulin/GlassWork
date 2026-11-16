@@ -8,9 +8,9 @@ struct IslandQueueTests {
     @Test func importanceMatchesDeclaredOrder() {
         #expect(IslandEventKind.allCases.map(\.rawValue) == [
             "meeting", "inProgress", "timers", "systemAlert", "network", "build", "devServers", "charging",
-            "keepAwake", "nowPlaying", "weather", "copied", "downloads", "airPods", "volume", "agents",
+            "keepAwake", "focus", "nowPlaying", "weather", "copied", "downloads", "airPods", "volume", "agents",
         ])
-        #expect(IslandEventKind.allCases.map(\.importance) == Array(0 ..< 16))
+        #expect(IslandEventKind.allCases.map(\.importance) == Array(0 ..< 17))
     }
 
     @Test func ordersImportanceThenNewestAndAssignsWings() {

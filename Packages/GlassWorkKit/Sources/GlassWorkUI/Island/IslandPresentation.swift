@@ -25,6 +25,7 @@ struct IslandPresentation {
         case .levels(_, .volume): Palette.pink
         case .levels(_, .brightness): Palette.yellow
         case .headphones: Palette.green
+        case .focus: Palette.purple
         }
     }
 
@@ -52,6 +53,7 @@ struct IslandPresentation {
         case .levels(_, .brightness): "sun.max.fill"
         case .downloads: "arrow.down"
         case .headphones: "airpodspro"
+        case let .focus(reading): focusSymbol(reading)
         }
     }
 
@@ -76,6 +78,7 @@ struct IslandPresentation {
         case .copied: loc("Copied")
         case .weather: loc("Weather")
         case .levels, .headphones: ""
+        case let .focus(reading): reading.name ?? loc("Focus")
         case .downloads: ""
         }
     }
@@ -105,6 +108,7 @@ struct IslandPresentation {
         case .levels(_, .brightness): loc("Brightness")
         case let .downloads(files): downloadsTitle(files)
         case let .headphones(name, _): name
+        case let .focus(reading): focusTitle(reading)
         }
     }
 
@@ -134,6 +138,7 @@ struct IslandPresentation {
         case let .levels(levels, .brightness): Format.percent(levels.brightness ?? 0)
         case let .downloads(files): downloadsValue(files)
         case let .headphones(_, batteries): headphonesValue(batteries)
+        case let .focus(reading): focusValue(reading)
         }
     }
 
@@ -197,6 +202,31 @@ struct IslandPresentation {
         case .levels(_, .brightness): loc("Built-in display")
         case let .downloads(files): files.count == 1 ? files[0].name : ""
         case .headphones: loc("Connected")
+        case .focus: ""
+        }
+    }
+
+    /// The mode's own symbol when this system has it, else the moon of Do Not Disturb.
+    private func focusSymbol(_ reading: FocusReading) -> String {
+        if let symbol = reading.symbol, NSImage(systemSymbolName: symbol, accessibilityDescription: nil) != nil {
+            return symbol
+        }
+        return "moon.fill"
+    }
+
+    private func focusValue(_ reading: FocusReading) -> String {
+        if reading.isOn {
+            return loc("On")
+        }
+        return loc("Off")
+    }
+
+    private func focusTitle(_ reading: FocusReading) -> String {
+        switch (reading.name, reading.isOn) {
+        case let (name?, true): loc("\(name) on")
+        case let (name?, false): loc("\(name) off")
+        case (nil, true): loc("Focus on")
+        case (nil, false): loc("Focus off")
         }
     }
 

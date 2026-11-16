@@ -61,6 +61,38 @@
         }
       }
     },
+    "%@ off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ off"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ выключен"
+          }
+        }
+      }
+    },
+    "%@ on": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ on"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ включён"
+          }
+        }
+      }
+    },
     "%@ to full": {
       "localizations": {
         "ru": {
@@ -1697,6 +1729,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Фокус"
+          }
+        }
+      }
+    },
+    "Focus off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focus off"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фокус выключен"
+          }
+        }
+      }
+    },
+    "Focus on": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Focus on"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фокус включён"
           }
         }
       }

@@ -12,6 +12,7 @@ extension AppModel {
             input.deviceBatteries = batteries
         }
         input.build = buildWatcher.reading
+        input.focus = focusWatcher.reading
         island.update(input: input, now: Date())
     }
 
