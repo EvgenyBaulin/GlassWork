@@ -112,4 +112,10 @@ public struct LineBuffer: Sendable {
         }
         return lines
     }
+
+    /// Ends the stream: a last line without a newline still counts.
+    public mutating func finish() -> [String] {
+        defer { pending = Data() }
+        return pending.isEmpty ? [] : [String(decoding: pending, as: UTF8.self)]
+    }
 }
