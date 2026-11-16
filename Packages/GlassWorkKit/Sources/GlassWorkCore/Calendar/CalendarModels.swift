@@ -80,12 +80,19 @@ public enum CallLink {
         for text in texts.compactMap(\.self) {
             let range = NSRange(text.startIndex..., in: text)
             for match in detector?.matches(in: text, range: range) ?? [] {
-                if let url = match.url, let host = url.host(), hosts.contains(where: host.hasSuffix) {
+                if let url = match.url, isCall(url) {
                     return url
                 }
             }
         }
         return nil
+    }
+
+    /// Invitations come from other people, so a link opens only over the web and only on a known
+    /// service: `evilzoom.us` or a custom scheme pointing at `zoom.us` does not pass.
+    static func isCall(_ url: URL) -> Bool {
+        guard url.scheme?.lowercased() == "https", let host = url.host()?.lowercased() else { return false }
+        return hosts.contains { host == $0 || host.hasSuffix("." + $0) }
     }
 }
 

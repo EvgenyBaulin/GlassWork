@@ -164,7 +164,9 @@ func clipboardStore(isRecording: Bool = true, pinned: Bool = true) -> ClipboardS
 func assertPanel(_ view: some View, width: CGFloat = 340, height: CGFloat? = nil, dark: Bool, name: String) {
     let scheme: ColorScheme = dark ? .dark : .light
     let background = dark ? Color(red: 0.16, green: 0.15, blue: 0.24) : Color(white: 0.93)
-    let host = NSHostingView(rootView: view.environment(\.colorScheme, scheme).background(background))
+    // A mouse plugged in switches macOS to scroll bars that take room, which would narrow the content.
+    let root = view.environment(\.colorScheme, scheme).scrollIndicators(.never).background(background)
+    let host = NSHostingView(rootView: root)
     host.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
     host.frame = CGRect(x: 0, y: 0, width: width, height: height ?? 100)
     // A window that is never shown: a List loads its rows only once it is in one.
