@@ -15,6 +15,7 @@ final class AppModel {
         store: island, actions: islandActions,
         statusItemsMinX: { [weak self] in self?.statusBar.leftmostItemX(on: $0) }
     )
+    private(set) lazy var islandFeeds = IslandFeeds { [weak self] in self?.updateIsland() }
     private let diagnostics = DiagnosticsReporter()
     let monitor = SystemMonitor(
         nowPlaying: NowPlayingBridge.makeStore(),
@@ -124,6 +125,7 @@ final class AppModel {
     /// Gives the system Dock back when the app quits.
     func prepareToQuit() {
         islandController.stop()
+        islandFeeds.stop()
         dock.restoreSystemDock()
         monitor.apps.saveNow()
         monitor.nowPlaying.stop()
@@ -246,6 +248,10 @@ final class AppModel {
         dock.apply(store.settings.dock)
         windowTiles.apply(store.settings.windowTiles)
         islandController.apply(store.settings.island)
+        islandFeeds.apply(
+            isEnabled: store.settings.island.isEnabled,
+            downloadsPath: store.settings.dock.stacks.first(where: \.isDownloads)?.path
+        )
         updateIsland()
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
         applyPolling()
