@@ -79,7 +79,7 @@ struct IslandPresentation {
         case .charging, .keepAwake, .nowPlaying: ""
         case .copied: loc("Copied")
         case .shelfDrop: loc("Shelf")
-        case .weather: loc("Weather")
+        case .weather: loc("Rain")
         case .levels, .headphones: ""
         case let .focus(reading): reading.name ?? loc("Focus")
         case .downloads: ""
@@ -107,7 +107,7 @@ struct IslandPresentation {
         case let .nowPlaying(session): session.track.title
         case .copied: loc("Copied")
         case .shelfDrop: loc("Added to the Shelf")
-        case .weather: loc("Weather")
+        case let .weather(rain): rainTitle(rain)
         case .levels(_, .volume): loc("Volume")
         case .levels(_, .brightness): loc("Brightness")
         case let .downloads(files): downloadsTitle(files)
@@ -138,7 +138,7 @@ struct IslandPresentation {
         case let .nowPlaying(session): PlaybackTime.text(session.position(at: now))
         case let .copied(entry): clipboardKind(entry.kind)
         case let .shelfDrop(count): "+\(count)"
-        case let .weather(report): Format.temperature(report.current.temperature)
+        case let .weather(rain): clock(rain.phase.moment)
         case let .levels(levels, .volume): volumeText(levels)
         case let .levels(levels, .brightness): Format.percent(levels.brightness ?? 0)
         case let .downloads(files): downloadsValue(files)
@@ -202,7 +202,7 @@ struct IslandPresentation {
         case let .copied(entry):
             [entry.appName.map { loc("from \($0)") }, Format.size(Double(entry.byteCount))]
                 .compactMap(\.self).joined(separator: " · ")
-        case let .weather(report): report.place.name
+        case let .weather(rain): rainSubtitle(rain)
         case let .levels(levels, .volume): levels.outputName ?? ""
         case .levels(_, .brightness): loc("Built-in display")
         case let .downloads(files): files.count == 1 ? files[0].name : ""
@@ -297,6 +297,25 @@ struct IslandPresentation {
             return loc("1 file")
         }
         return loc("\(count) files")
+    }
+
+    private func rainTitle(_ rain: IslandRain) -> String {
+        switch rain.phase {
+        case let .starts(date): loc("Rain around \(clock(date))")
+        case let .stops(date): loc("Rain until \(clock(date))")
+        }
+    }
+
+    /// The interval of the spell and how hard it falls.
+    private func rainSubtitle(_ rain: IslandRain) -> String {
+        let intensity: String? = switch rain.intensity {
+        case .light: loc("Light rain")
+        case .moderate: loc("Moderate rain")
+        case .heavy: loc("Heavy rain")
+        case nil: nil
+        }
+        return ["\(clock(rain.start))–\(clock(rain.end))", intensity]
+            .compactMap(\.self).joined(separator: " · ")
     }
 
     /// The buds, not the case, which charges them.

@@ -104,6 +104,10 @@ public struct HourForecast: Codable, Sendable, Equatable, Identifiable {
     public var temperature: Double
     public var condition: WeatherCondition
     public var isDay: Bool
+    /// Millimetres in this hour; nil when the forecast did not say.
+    public var precipitation: Double?
+    /// Percent, 0 to 100; nil when the forecast did not say.
+    public var precipitationProbability: Double?
 
     public var id: Date {
         date

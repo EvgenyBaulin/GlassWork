@@ -74,7 +74,20 @@ struct IslandExpandedCard: View {
         case let .keepAwake(end): keepAwakeContent(end)
         case let .downloads(files): downloadsContent(files)
         case let .headphones(_, batteries): headphonesContent(batteries)
-        case .nowPlaying, .weather, .levels, .focus, .shelfDrop: EmptyView()
+        case let .weather(rain): rainContent(rain)
+        case .nowPlaying, .levels, .focus, .shelfDrop: EmptyView()
+        }
+    }
+
+    private func rainContent(_ rain: IslandRain) -> some View {
+        VStack(spacing: 4) {
+            IslandRainChart(rain: rain)
+            HStack {
+                Text(rain.hours.first.map { presentation.clock($0.date) } ?? "")
+                Spacer()
+                Text(rain.hours.last.map { presentation.clock($0.date.addingTimeInterval(3600)) } ?? "")
+            }
+            .font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary)
         }
     }
 

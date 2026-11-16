@@ -22,6 +22,9 @@ public enum IslandEventBuilder {
         if let change = focusChange(current.focus, previous.focus) {
             result.append(transient(id: "focus", kind: .focus, detail: .focus(change), now: now))
         }
+        if let rain = current.rain, rain.key != previous.rain?.key {
+            result.append(transient(id: "rain", kind: .weather, detail: .weather(rain), now: now))
+        }
         if let headphones = headphones(current, previous: previous) {
             result.append(transient(id: "headphones", kind: .airPods, detail: headphones, now: now))
         } else if let changed = levelChange(current.levels, previous.levels), let levels = current.levels {

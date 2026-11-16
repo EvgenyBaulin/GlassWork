@@ -15,7 +15,10 @@ public enum OpenMeteo {
                 value: "temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,"
                     + "weather_code,is_day,uv_index"
             ),
-            URLQueryItem(name: "hourly", value: "temperature_2m,weather_code,is_day"),
+            URLQueryItem(
+                name: "hourly",
+                value: "temperature_2m,weather_code,is_day,precipitation,precipitation_probability"
+            ),
             URLQueryItem(name: "daily", value: "weather_code,temperature_2m_max,temperature_2m_min"),
             URLQueryItem(name: "forecast_days", value: "7"),
             URLQueryItem(name: "timezone", value: "auto"),
@@ -84,7 +87,9 @@ public enum OpenMeteo {
                 date: date,
                 temperature: temperature,
                 condition: WeatherCondition(wmoCode: code),
-                isDay: hourly.isDay.value(at: index) != 0
+                isDay: hourly.isDay.value(at: index) != 0,
+                precipitation: hourly.precipitation?.value(at: index),
+                precipitationProbability: hourly.precipitationProbability?.value(at: index)
             )
         }
         // The hour that is under way stays: its entry is stamped at the start of the hour.
@@ -178,12 +183,17 @@ private struct ForecastHourly: Decodable {
     let temperature2m: [Double?]
     let weatherCode: [Int?]
     let isDay: [Int?]
+    /// Absent in answers cached or hand-made before the island needed them.
+    let precipitation: [Double?]?
+    let precipitationProbability: [Double?]?
 
     private enum CodingKeys: String, CodingKey {
         case time
         case temperature2m = "temperature_2m"
         case weatherCode = "weather_code"
         case isDay = "is_day"
+        case precipitation
+        case precipitationProbability = "precipitation_probability"
     }
 }
 
