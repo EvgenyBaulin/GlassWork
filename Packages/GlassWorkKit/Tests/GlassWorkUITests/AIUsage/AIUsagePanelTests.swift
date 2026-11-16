@@ -56,6 +56,24 @@ struct AIUsagePanelSnapshotTests {
         snapshotPanel(AIUsagePanel(reading: reading, refreshMinutes: 5, now: now), name: "ai-usage-spend", dark: dark)
     }
 
+    /// A plan's monthly limit sits above the spend, and its reset weeks away shows as a date.
+    @Test(arguments: [true, false])
+    func monthlyLimitWithSpend(dark: Bool) {
+        let copilot = AIToolUsage(
+            tool: .copilotCLI,
+            windows: [AIWindow(kind: .month, used: 0.19, resetsAt: now.addingTimeInterval(15 * 86400))],
+            updatedAt: now.addingTimeInterval(-60),
+            source: .tool,
+            spend: AISpend(
+                today: AISpendTotals(aiCredits: 12.4),
+                last7Days: AISpendTotals(aiCredits: 48),
+                month: AISpendTotals(aiCredits: 86.5)
+            )
+        )
+        let reading = AIUsageReading(tools: [copilot], readAt: now)
+        snapshotPanel(AIUsagePanel(reading: reading, refreshMinutes: 5, now: now), name: "ai-usage-month", dark: dark)
+    }
+
     @Test func unreadable() {
         let reading = AIUsageReading(tools: [AIToolUsage(tool: .codex, isUnreadable: true)], readAt: now)
         snapshotPanel(AIUsagePanel(reading: reading, refreshMinutes: 5, now: now), name: "ai-usage-error")

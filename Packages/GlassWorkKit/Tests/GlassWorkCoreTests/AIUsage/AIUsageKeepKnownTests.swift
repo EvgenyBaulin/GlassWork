@@ -54,6 +54,25 @@ struct AIUsageKeepKnownTests {
         #expect(fresh.keepingKnown(from: previous).tools.first?.spend == spend)
     }
 
+    @Test func aMissingPartIsKeptAndANewPartWins() {
+        let spend = AISpend(today: AISpendTotals(aiCredits: 2), last7Days: AISpendTotals(), month: AISpendTotals())
+        let month = AIWindow(kind: .month, used: 0.2, resetsAt: nil)
+        let previous = AIUsageReading(
+            tools: [AIToolUsage(tool: .copilotCLI, windows: [month], updatedAt: earlier, spend: spend)],
+            readAt: earlier
+        )
+        let newSpend = AISpend(today: AISpendTotals(aiCredits: 3), last7Days: AISpendTotals(), month: AISpendTotals())
+        let fresh = AIUsageReading(
+            tools: [AIToolUsage(tool: .copilotCLI, updatedAt: now, spend: newSpend)],
+            readAt: now
+        )
+
+        let shown = fresh.keepingKnown(from: previous).tools.first
+
+        #expect(shown?.windows == [month])
+        #expect(shown?.spend == newSpend)
+    }
+
     @Test func aToolThatWentAwayIsNotBroughtBack() {
         let previous = AIUsageReading(
             tools: [limits(.codex, used: 0.34), limits(.claudeCode, used: 0.1)],

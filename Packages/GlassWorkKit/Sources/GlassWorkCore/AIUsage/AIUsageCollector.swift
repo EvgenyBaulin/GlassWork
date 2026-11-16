@@ -67,7 +67,7 @@ public struct AIUsageCollector: Sendable {
         switch tool {
         case .claudeCode: claudeUsage()
         case .codex: await codexUsage()
-        case .copilotCLI: CopilotUsageReader.read(home: home, at: date, calendar: calendar)
+        case .copilotCLI: await copilotUsage(at: date, calendar: calendar)
         default: AIToolUsage(tool: tool)
         }
     }
@@ -78,6 +78,25 @@ public struct AIUsageCollector: Sendable {
         guard let data = try? Data(contentsOf: file), let usage = ClaudeUsageParser.usage(data) else {
             return AIToolUsage(tool: .claudeCode, isUnreadable: true)
         }
+        return usage
+    }
+
+    /// Spend from this Mac's session files, plus the plan's monthly limit when `gh` is signed in.
+    private func copilotUsage(at date: Date, calendar: Calendar) async -> AIToolUsage {
+        var usage = CopilotUsageReader.read(home: home, at: date, calendar: calendar)
+        guard let github = locate("gh"),
+              let output = try? await runner.run(
+                  github,
+                  arguments: CopilotQuota.arguments,
+                  timeout: CopilotQuota.timeout
+              ),
+              output.status == 0,
+              let window = CopilotQuota.window(from: output.stdout)
+        else { return usage }
+        usage.windows = [window]
+        usage.isUnreadable = false
+        usage.updatedAt = date
+        usage.source = .tool
         return usage
     }
 

@@ -102,6 +102,9 @@ struct AIUsagePanel: View {
                 ForEach(usage.windows, id: \.kind) { window in
                     windowRow(window)
                 }
+                if let spend = usage.spend {
+                    AISpendView(spend: spend)
+                }
             }
         }
     }
@@ -111,7 +114,7 @@ struct AIUsagePanel: View {
         let tint = share >= reading?.warnLevel ?? AIUsageReading.alertShare ? Palette.orange : Palette.green
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text(window.kind == .fiveHour ? loc("5-hour window") : loc("This week")).font(.system(size: 12))
+                Text(AIWindowText.title(window.kind)).font(.system(size: 12))
                 Spacer()
                 Text(Format.percent(share))
                     .font(.system(size: 12, weight: .semibold))
@@ -132,6 +135,24 @@ struct AIUsagePanel: View {
             let time = reset.formatted(date: .omitted, time: .shortened)
             return loc("Resets in \(CompactDuration.format(left)) · \(time)")
         }
-        return loc("Resets \(reset.formatted(.dateTime.weekday(.abbreviated).hour().minute()))")
+        return loc("Resets \(AIWindowText.resetDay(reset, from: now))")
+    }
+}
+
+/// Words shared by the panel and the widget.
+enum AIWindowText {
+    static func title(_ kind: AIWindow.Kind) -> String {
+        switch kind {
+        case .fiveHour: loc("5-hour window")
+        case .week: loc("This week")
+        case .month: loc("This month")
+        }
+    }
+
+    /// A weekday within the week, a date further out (a monthly plan resets weeks away).
+    static func resetDay(_ date: Date, from now: Date) -> String {
+        date.timeIntervalSince(now) < 6 * 86400
+            ? date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
+            : date.formatted(.dateTime.month(.abbreviated).day())
     }
 }
