@@ -99,3 +99,56 @@ struct AstronomyTests {
         #expect(times.sunrise == nil)
     }
 }
+
+@MainActor
+struct FinishedTimerTests {
+    private let start = Date(timeIntervalSince1970: 1_800_000_000)
+
+    private func makeStore() -> (EverydayStore, URL) {
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        return (EverydayStore(store: SnapshotStore(directory: folder)), folder)
+    }
+
+    @Test func finishedTimerMovesToItsOwnListAndStaysUntilDismissed() {
+        let (store, folder) = makeStore()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        var reported: [String] = []
+        store.onTimerFinished = { reported.append($0.title) }
+        store.update { $0.timers = [
+            CountdownTimer(title: "Tea", duration: 60, start: start),
+            CountdownTimer(title: "Egg", duration: 600, start: start),
+        ] }
+        store.tick(at: start.addingTimeInterval(90))
+        #expect(store.data.timers.map(\.title) == ["Egg"])
+        #expect(store.data.finishedTimers.map(\.title) == ["Tea"])
+        #expect(store.data.finishedTimers.first?.finishedAt == start.addingTimeInterval(60))
+        #expect(reported == ["Tea"])
+        store.tick(at: start.addingTimeInterval(120))
+        #expect(store.data.finishedTimers.count == 1)
+        store.dismissFinishedTimer(store.data.finishedTimers[0].id)
+        #expect(store.data.finishedTimers.isEmpty)
+    }
+
+    @Test func listKeepsTheNewestFirstAndIsLimited() {
+        let (store, folder) = makeStore()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        for index in 0 ..< EverydayData.finishedLimit + 2 {
+            store.update { $0.timers = [CountdownTimer(title: "T\(index)", duration: 1, start: start)] }
+            store.tick(at: start.addingTimeInterval(Double(index) + 5))
+        }
+        #expect(store.data.finishedTimers.count == EverydayData.finishedLimit)
+        #expect(store.data.finishedTimers.first?.title == "T\(EverydayData.finishedLimit + 1)")
+    }
+
+    @Test func dataSavedBeforeFinishedTimersStillLoads() throws {
+        var data = EverydayData()
+        data.note = "hi"
+        let encoded = try JSONEncoder().encode(data)
+        var object = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        #expect(object["finishedTimers"] != nil)
+        object["finishedTimers"] = nil
+        let loaded = try JSONDecoder().decode(EverydayData.self, from: JSONSerialization.data(withJSONObject: object))
+        #expect(loaded.finishedTimers.isEmpty)
+        #expect(loaded.note == "hi")
+    }
+}

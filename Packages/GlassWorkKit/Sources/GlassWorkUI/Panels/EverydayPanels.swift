@@ -14,8 +14,11 @@ struct TimersPanel: View {
     var body: some View {
         let store = monitor.everyday
         PanelFrame(module: .timers, subtitle: loc("\(store.data.timers.count) running")) {
+            ForEach(store.data.finishedTimers) { timer in
+                FinishedTimerRow(timer: timer) { store.dismissFinishedTimer(timer.id) }
+            }
             ForEach(store.data.timers) { timer in row(timer, store: store) }
-            if store.data.timers.isEmpty {
+            if store.data.timers.isEmpty, store.data.finishedTimers.isEmpty {
                 Text(loc("No timers running")).foregroundStyle(.secondary).font(.system(size: 12))
             }
             Divider()
@@ -93,6 +96,29 @@ struct TimersPanel: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// A timer that ran out. It stays until it is dismissed.
+struct FinishedTimerRow: View {
+    let timer: FinishedTimer
+    let dismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 20))
+                .foregroundStyle(Palette.green)
+                .frame(width: 24, height: 24)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(loc("Done")).font(.system(size: 15, weight: .semibold, design: .rounded))
+                Text("\(timer.title) · \(timer.finishedAt.formatted(date: .omitted, time: .shortened))")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button(loc("Dismiss"), action: dismiss).controlSize(.small)
         }
     }
 }
@@ -318,10 +344,19 @@ struct ColoursPanel: View {
         actions.moduleOptions(.colours)
     }
 
+    private var format: ColourFormat {
+        options.choice(ItemOption.colourFormat, default: ColourFormat.hex)
+    }
+
     var body: some View {
         let store = monitor.everyday
         PanelFrame(module: .colours, subtitle: "") {
             Button(loc("Pick a colour")) { pick(store) }
+            ColourFormatPicker(format: format) { value in
+                actions.updateSettings { settings in
+                    settings.update(.colours) { $0.options[ItemOption.colourFormat] = value.rawValue }
+                }
+            }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 6) {
                 ForEach(store.data.colors, id: \.self) { hex in
                     Button {
@@ -352,12 +387,29 @@ struct ColoursPanel: View {
 
     private func copy(_ hex: String) {
         NSPasteboard.general.clearContents()
-        let text = options.choice(ItemOption.colourFormat, default: ColourFormat.hex).text(
+        let text = format.text(
             hex: hex,
             isUppercase: options.flag(ItemOption.colourUppercase, default: true),
             hasHash: options.flag(ItemOption.colourHash, default: true)
         )
         NSPasteboard.general.setString(text, forType: .string)
+    }
+}
+
+/// What a click on a colour copies. The choice is the same one as in Settings.
+struct ColourFormatPicker: View {
+    let format: ColourFormat
+    let select: (ColourFormat) -> Void
+
+    var body: some View {
+        Picker(loc("Copy as"), selection: Binding(get: { format }, set: select)) {
+            Text("HEX").tag(ColourFormat.hex)
+            Text("RGB").tag(ColourFormat.rgb)
+            Text("HSL").tag(ColourFormat.hsl)
+            Text("SwiftUI").tag(ColourFormat.swiftUI)
+        }
+        .pickerStyle(.segmented)
+        .controlSize(.small)
     }
 }
 

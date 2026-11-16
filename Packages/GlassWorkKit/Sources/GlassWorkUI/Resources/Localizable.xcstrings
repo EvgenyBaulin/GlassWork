@@ -653,6 +653,22 @@
         }
       }
     },
+    "All %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все %lld"
+          }
+        }
+      }
+    },
     "All clear": {
       "localizations": {
         "en": {
@@ -1023,6 +1039,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Очистить полку?"
+          }
+        }
+      }
+    },
+    "Completed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выполнено"
           }
         }
       }
@@ -1857,6 +1889,22 @@
         }
       }
     },
+    "Flagged %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flagged %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С флажком %lld"
+          }
+        }
+      }
+    },
     "Flip Clock": {
       "localizations": {
         "ru": {
@@ -2563,6 +2611,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Средняя нагрузка  %@"
+          }
+        }
+      }
+    },
+    "Loading…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузка…"
           }
         }
       }
@@ -3457,6 +3521,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Просрочено"
+          }
+        }
+      }
+    },
+    "Overdue %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overdue %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Просрочено %lld"
           }
         }
       }
@@ -4763,6 +4843,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сегодня"
+          }
+        }
+      }
+    },
+    "Today %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня %lld"
           }
         }
       }
