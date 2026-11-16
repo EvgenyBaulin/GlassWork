@@ -10,6 +10,11 @@ import WidgetKit
 @MainActor
 final class AppModel {
     let store = SettingsStore()
+    let island = IslandStore()
+    private lazy var islandController = IslandController(
+        store: island, actions: islandActions,
+        statusItemsMinX: { [weak self] in self?.statusBar.leftmostItemX(on: $0) }
+    )
     private let diagnostics = DiagnosticsReporter()
     let monitor = SystemMonitor(
         nowPlaying: NowPlayingBridge.makeStore(),
@@ -71,6 +76,7 @@ final class AppModel {
         monitor.onUpdate = { [weak self] in
             self?.statusBar.refreshItems()
             self?.checkAlerts()
+            self?.updateIsland()
         }
         monitor.start()
         observeWidgetCommands()
@@ -116,6 +122,7 @@ final class AppModel {
 
     /// Gives the system Dock back when the app quits.
     func prepareToQuit() {
+        islandController.stop()
         dock.restoreSystemDock()
         monitor.apps.saveNow()
         monitor.nowPlaying.stop()
@@ -237,6 +244,8 @@ final class AppModel {
         monitor.developer.options = DeveloperOptions(settings: store.settings)
         dock.apply(store.settings.dock)
         windowTiles.apply(store.settings.windowTiles)
+        islandController.apply(store.settings.island)
+        updateIsland()
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
         applyPolling()
         diagnostics.apply(keepsLog: store.settings.keepsDiagnosticLog, hasSettingsProblem: store.lastError != nil)
@@ -532,6 +541,7 @@ private extension AppModel {
 
     /// Only what is on screen counts, so the adapter process does not run for nothing.
     var wantsNowPlaying: Bool {
+        // The island shows music only when Now Playing already runs for something else.
         isWanted(.nowPlaying) || nowPlaying.hasSystemWidget
     }
 

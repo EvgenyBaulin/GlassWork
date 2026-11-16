@@ -6,6 +6,36 @@ import Testing
 struct IslandStoreTests {
     private let now = IslandFixtures.now
 
+    @Test func meetingSnoozeSurvivesStartAndExpiresAtFiveMinutes() {
+        let store = IslandStore()
+        var input = IslandInput()
+        input.calendarEvents = [IslandFixtures.event(startsIn: 10, endsIn: 1000)]
+        store.update(input: input, now: now)
+        store.snoozeMeeting(id: "meeting:event", now: now)
+        #expect(store.queue.events.isEmpty)
+        store.update(input: input, now: now.addingTimeInterval(9))
+        #expect(store.queue.events.isEmpty)
+        store.update(input: input, now: now.addingTimeInterval(299))
+        #expect(store.queue.events.isEmpty)
+        store.update(input: input, now: now.addingTimeInterval(300))
+        #expect(store.queue.events.first?.id == "inProgress:event")
+    }
+
+    @Test func resetDropsOldTransitionsAndStartsWithFreshInput() {
+        let store = IslandStore(hoverToExpand: true)
+        var input = IslandInput()
+        input.wifi = IslandFixtures.wifi
+        store.update(input: input, now: now)
+        input.wifi = .off
+        store.update(input: input, now: now.addingTimeInterval(1))
+        #expect(!store.queue.events.isEmpty)
+        store.reset()
+        store.update(input: input, now: now.addingTimeInterval(2))
+        #expect(store.queue.events.isEmpty)
+        #expect(store.lifecycle.phase == .idle)
+        #expect(store.lifecycle.hoverToExpand)
+    }
+
     @Test func ongoingPayloadIsReplacedWithoutChangingSince() {
         let store = IslandStore()
         var input = IslandInput()

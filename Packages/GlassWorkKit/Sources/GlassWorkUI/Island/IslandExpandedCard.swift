@@ -137,7 +137,9 @@ struct IslandExpandedCard: View {
                 IslandCapsule(title: loc("Join"), tint: Palette.green) { actions.joinMeeting(url) }
             }
             IslandCapsule(title: loc("Snooze 5 min"), action: actions.snooze)
-            IslandCapsule(title: loc("Running late…"), action: actions.runningLate)
+            if let runningLate = actions.runningLate {
+                IslandCapsule(title: loc("Running late…"), action: runningLate)
+            }
         }
     }
 
@@ -244,8 +246,8 @@ struct IslandExpandedCard: View {
                 )
             }
             HStack(spacing: 8) {
-                if event.context.vpn?.isConfigured == true {
-                    IslandCapsule(title: loc("Reconnect VPN"), tint: Palette.blue, action: actions.reconnectVPN)
+                if event.context.vpn?.isConfigured == true, let reconnect = actions.reconnectVPN {
+                    IslandCapsule(title: loc("Reconnect VPN"), tint: Palette.blue, action: reconnect)
                 }
                 IslandCapsule(title: loc("Network settings"), action: actions.openNetworkSettings)
             }
@@ -299,10 +301,14 @@ struct IslandExpandedCard: View {
             }
             HStack(spacing: 8) {
                 if case let .containerExited(container) = detail {
-                    IslandCapsule(title: loc("Restart \(container.name)"), tint: Palette.red) {
-                        actions.restartContainer(container.name)
+                    if let restart = actions.restartContainer {
+                        IslandCapsule(title: loc("Restart \(container.name)"), tint: Palette.red) {
+                            restart(container.name)
+                        }
                     }
-                    IslandCapsule(title: loc("Logs")) { actions.containerLogs(container.name) }
+                    if let logs = actions.containerLogs {
+                        IslandCapsule(title: loc("Logs")) { logs(container.name) }
+                    }
                 }
                 if let server = openableServer(detail), let url = server.url {
                     IslandCapsule(title: loc("Open :\(String(server.port))")) { actions.openURL(url) }
