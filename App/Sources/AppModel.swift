@@ -12,6 +12,7 @@ final class AppModel {
     let store = SettingsStore()
     let island = IslandStore()
     let buildWatcher = BuildWatcher()
+    let focusWatcher = FocusWatcher()
     private lazy var islandController = IslandController(
         store: island, actions: islandActions,
         statusItemsMinX: { [weak self] in self?.statusBar.leftmostItemX(on: $0) }
@@ -128,6 +129,7 @@ final class AppModel {
     func prepareToQuit() {
         islandController.stop()
         islandFeeds.stop()
+        focusWatcher.stop()
         dock.restoreSystemDock()
         monitor.apps.saveNow()
         monitor.nowPlaying.stop()
@@ -255,6 +257,7 @@ final class AppModel {
             downloadsPath: store.settings.dock.stacks.first(where: \.isDownloads)?.path
         )
         buildWatcher.setEnabled(store.settings.island.isEnabled)
+        focusWatcher.setEnabled(store.settings.island.isEnabled) { [weak self] in self?.updateIsland() }
         updateIsland()
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
         applyPolling()

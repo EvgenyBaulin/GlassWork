@@ -74,7 +74,7 @@ struct IslandExpandedCard: View {
         case let .keepAwake(end): keepAwakeContent(end)
         case let .downloads(files): downloadsContent(files)
         case let .headphones(_, batteries): headphonesContent(batteries)
-        case .nowPlaying, .weather, .levels: EmptyView()
+        case .nowPlaying, .weather, .levels, .focus: EmptyView()
         }
     }
 

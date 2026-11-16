@@ -35,6 +35,8 @@ public struct IslandInput: Sendable, Equatable {
     public var downloads: [DockFile] = []
     /// Connected accessories, read every few minutes; matched to headphones by name.
     public var deviceBatteries: [DeviceBattery] = []
+    /// Filled by the host, which watches the system's Focus files; nil when it cannot read them.
+    public var focus: FocusReading?
 
     public init() {}
 

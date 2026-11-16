@@ -10,6 +10,7 @@ private enum IslandSample: String, CaseIterable {
     case meeting, timers, copied, charging, systemAlert, network, devServers, nowPlaying, keepAwake, inProgress
     case levels, headphones
     case downloads, buildRunning, buildFailed, buildSucceeded
+    case focusOn, focusOff
 }
 
 @MainActor
@@ -78,7 +79,7 @@ private enum IslandSamples {
             input.keepAwakeIncludesDisplay = true
             input.isKeepingAwake = true
             input.keepAwakeEnds = islandNow.addingTimeInterval(84)
-        case .levels, .headphones: input = levelsInput(sample)
+        case .levels, .headphones, .focusOn, .focusOff: input = levelsInput(sample)
         case .downloads, .buildRunning, .buildFailed, .buildSucceeded: input = progressInput(sample)
         }
         return input
@@ -104,6 +105,10 @@ private enum IslandSamples {
         ))
     }
 
+    static let sleep = FocusReading(
+        isOn: true, modeID: "com.apple.sleep.sleep-mode", name: "Sleep", symbol: "bed.double.fill"
+    )
+
     static let downloads = [
         DockFile(path: "/d/Assets.zip", name: "Assets.zip", added: islandNow, isDownloading: true, progress: 0.68),
         DockFile(path: "/d/Logo.svg", name: "Logo.svg", added: islandNow),
@@ -111,6 +116,10 @@ private enum IslandSamples {
 
     static func levelsInput(_ sample: IslandSample) -> IslandInput {
         var input = IslandInput()
+        if sample == .focusOn || sample == .focusOff {
+            input.focus = sample == .focusOn ? sleep : FocusReading(isOn: false)
+            return input
+        }
         guard sample == .headphones else {
             input.levels = SystemLevels(volume: 0.62, outputName: "MacBook Pro Speakers", brightness: 0.7)
             return input
@@ -242,6 +251,8 @@ private enum IslandSamples {
             .map { var file = $0; file.isDownloading = true; return file }
         case .headphones: previous.levels?.outputName = "MacBook Pro Speakers"
         case .buildFailed, .buildSucceeded: previous.build = .running(BuildRun(name: "Pocket", started: islandNow))
+        case .focusOn: previous.focus = FocusReading(isOn: false)
+        case .focusOff: previous.focus = sleep
         default: break
         }
         store.update(input: previous, now: islandNow.addingTimeInterval(-120))
