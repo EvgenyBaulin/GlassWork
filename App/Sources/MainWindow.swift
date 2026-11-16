@@ -9,6 +9,7 @@ final class MainWindowController {
     private unowned let model: AppModel
     private let navigation = MainNavigation()
     private var window: NSWindow?
+    private var observers: [any NSObjectProtocol] = []
 
     init(model: AppModel) {
         self.model = model
@@ -50,11 +51,29 @@ final class MainWindowController {
     /// Hidden behind other windows, minimized or closed all count as not showing.
     private func observe(_ window: NSWindow) {
         let names: [Notification.Name] = [NSWindow.didChangeOcclusionStateNotification, NSWindow.willCloseNotification]
-        for name in names {
+        observers = names.map { name in
             NotificationCenter.default.addObserver(forName: name, object: window, queue: .main) { [weak self] note in
                 let isClosing = note.name == NSWindow.willCloseNotification
-                MainActor.assumeIsolated { self?.reportVisibleSection(isClosing: isClosing) }
+                MainActor.assumeIsolated {
+                    self?.reportVisibleSection(isClosing: isClosing)
+                    if isClosing {
+                        self?.release()
+                    }
+                }
             }
+        }
+    }
+
+    /// A closed window's SwiftUI tree, charts and backing store hold tens of MB; the next `show()` builds it again.
+    /// Its size and place are kept by the autosave name.
+    private func release() {
+        observers.forEach(NotificationCenter.default.removeObserver)
+        observers = []
+        // After the close finishes, so AppKit is done with the window.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let window, !window.isVisible else { return }
+            window.contentViewController = nil
+            self.window = nil
         }
     }
 
