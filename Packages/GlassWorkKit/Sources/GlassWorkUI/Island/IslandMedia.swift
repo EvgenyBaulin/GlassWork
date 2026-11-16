@@ -42,7 +42,8 @@ struct IslandClipboardPreview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             preview
-                .frame(maxWidth: .infinity, minHeight: 90, maxHeight: 120)
+                .frame(maxWidth: .infinity)
+                .frame(height: 120)
                 .background(Color(white: 0.075), in: .rect(cornerRadius: 12))
                 .clipShape(.rect(cornerRadius: 12))
             Text(caption).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(2)

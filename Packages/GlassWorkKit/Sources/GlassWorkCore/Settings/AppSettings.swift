@@ -88,6 +88,19 @@ public struct AlertSettings: Codable, Sendable, Equatable {
     public init() {}
 }
 
+public struct IslandSettings: Codable, Sendable, Equatable {
+    public var isEnabled = true
+    public var expandsOnHover = false
+
+    public init() {}
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
+        expandsOnHover = try container.decodeIfPresent(Bool.self, forKey: .expandsOnHover) ?? false
+    }
+}
+
 public struct AppSettings: Codable, Sendable, Equatable {
     public var version = 1
     public var modules: [ModuleSettings]
@@ -105,6 +118,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var fans = FanSettings()
     public var windowTiles = WindowTilesSettings()
     public var hub = HubSettings()
+    public var island = IslandSettings()
     /// Off unless the user turns it on. See `DiagnosticLog`.
     public var keepsDiagnosticLog = false
     public var shortcuts = ShortcutSettings()
@@ -146,7 +160,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
         case version, modules, numberStyle, hiding, alerts, widgets, dock, weather, rates, clipboard, welcomeCompleted
-        case fans, windowTiles, personalWidgets, hub, keepsDiagnosticLog, shortcuts
+        case fans, windowTiles, personalWidgets, hub, keepsDiagnosticLog, shortcuts, island
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -173,6 +187,7 @@ extension AppSettings {
         hub = (try? container.decodeIfPresent(HubSettings.self, forKey: .hub)) ?? HubSettings()
         keepsDiagnosticLog = try container.decodeIfPresent(Bool.self, forKey: .keepsDiagnosticLog) ?? false
         shortcuts = (try? container.decodeIfPresent(ShortcutSettings.self, forKey: .shortcuts)) ?? ShortcutSettings()
+        island = (try? container.decodeIfPresent(IslandSettings.self, forKey: .island)) ?? IslandSettings()
         normalize()
     }
 

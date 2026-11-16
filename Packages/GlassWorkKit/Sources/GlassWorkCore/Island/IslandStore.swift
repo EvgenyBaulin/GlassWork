@@ -11,16 +11,19 @@ public final class IslandStore {
     @ObservationIgnored private var previous: IslandInput?
     @ObservationIgnored private var dismissedOngoing: Set<String> = []
 
+    @ObservationIgnored private var snoozedUntil: [String: Date] = [:]
+
     public init(hoverToExpand: Bool = false) {
         lifecycle = IslandLifecycle(hoverToExpand: hoverToExpand)
     }
 
     public func update(input: IslandInput, now: Date) {
+        snoozedUntil = snoozedUntil.filter { $0.value > now }
         let built = IslandEventBuilder.events(current: input, previous: previous, now: now)
         let active = Set(built.filter { !$0.isTransition }.map(\.id))
         dismissedOngoing.formIntersection(active)
         var merged = queue.events.filter { $0.isTransition && survives($0, input: input) }
-        for var event in built where !dismissedOngoing.contains(event.id) {
+        for var event in built where !dismissedOngoing.contains(event.id) && snoozedUntil[event.id] == nil {
             // Refresh payloads without changing how long a continuous event has been present.
             if !event.isTransition, let old = queue.events.first(where: { $0.id == event.id }) {
                 event.since = old.since
@@ -43,14 +46,26 @@ public final class IslandStore {
             return event
         }
         previous = input
-        queue.events = merged
+        // Observers redraw on every assignment, so an unchanged queue is not assigned: the surface stays
+        // still while nothing happens.
+        if merged != queue.events {
+            queue.events = merged
+        }
         tick(now: now)
     }
 
     public func tick(now: Date) {
-        queue.removeExpired(at: now)
+        var next = queue
+        next.removeExpired(at: now)
+        if next != queue {
+            queue = next
+        }
         synchronize()
-        lifecycle.tick(at: now)
+        var state = lifecycle
+        state.tick(at: now)
+        if state != lifecycle {
+            lifecycle = state
+        }
     }
 
     public func dismiss(id: String) {
@@ -61,12 +76,40 @@ public final class IslandStore {
         synchronize()
     }
 
+    /// Suppresses this meeting, including its in-progress card, for five minutes.
+    public func snoozeMeeting(id: String, now: Date) {
+        guard let event = queue.events.first(where: { $0.id == id }),
+              case let .meeting(meeting) = event.detail else { return }
+        let until = now.addingTimeInterval(300)
+        snoozedUntil["meeting:\(meeting.id)"] = until
+        snoozedUntil["inProgress:\(meeting.id)"] = until
+        queue.dismiss(id: id)
+        synchronize()
+    }
+
+    /// Starts fresh after disabling the surface; old transitions must not replay on re-enable.
+    public func reset() {
+        previous = nil
+        queue = IslandQueue()
+        lifecycle = IslandLifecycle(hoverToExpand: lifecycle.hoverToExpand)
+        page = 0
+        dismissedOngoing = []
+        snoozedUntil = [:]
+    }
+
     public func showPage(_ index: Int) {
-        page = min(max(index, 0), max(queue.events.count - 1, 0))
+        let clamped = min(max(index, 0), max(queue.events.count - 1, 0))
+        if clamped != page {
+            page = clamped
+        }
     }
 
     private func synchronize() {
-        lifecycle.eventsChanged(hasEvents: !queue.events.isEmpty)
+        var state = lifecycle
+        state.eventsChanged(hasEvents: !queue.events.isEmpty)
+        if state != lifecycle {
+            lifecycle = state
+        }
         showPage(page)
     }
 

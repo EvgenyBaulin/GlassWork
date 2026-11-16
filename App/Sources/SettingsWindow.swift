@@ -361,6 +361,22 @@ struct GeneralPane: View {
                         }
                     }
             }
+            Section {
+                Toggle(isOn: Binding(
+                    get: { store.settings.island.isEnabled },
+                    set: { value in store.update { $0.island.isEnabled = value } }
+                )) {
+                    VStack(alignment: .leading) {
+                        Text(loc("Island"))
+                        Text(loc("Shows what is happening around the camera notch"))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Toggle(loc("Open the island on hover"), isOn: Binding(
+                    get: { store.settings.island.expandsOnHover },
+                    set: { value in store.update { $0.island.expandsOnHover = value } }
+                ))
+            }
             Section(loc("Numbers")) {
                 Picker(loc("Menu bar figures"), selection: Binding(
                     get: { store.settings.numberStyle },

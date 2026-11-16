@@ -9,6 +9,38 @@ struct SettingsTests {
             .appending(path: "GlassWorkSettings-\(UUID().uuidString)/settings.json"))
     }
 
+    @Test func islandDefaultsInOldAndPartialSettings() throws {
+        for json in ["{}", #"{"island":{}}"#] {
+            let settings = try JSONDecoder().decode(AppSettings.self, from: Data(json.utf8))
+            #expect(settings.island.isEnabled)
+            #expect(!settings.island.expandsOnHover)
+        }
+        let settings = try JSONDecoder().decode(
+            AppSettings.self, from: Data(#"{"island":{"isEnabled":false,"expandsOnHover":true}}"#.utf8)
+        )
+        #expect(!settings.island.isEnabled)
+        #expect(settings.island.expandsOnHover)
+        #expect(try JSONDecoder().decode(AppSettings.self, from: JSONEncoder().encode(settings)) == settings)
+    }
+
+    @Test func islandPreservesUnknownNestedSettingsOnSave() throws {
+        let file = temporaryFile()
+        defer { try? FileManager.default.removeItem(at: file.url.deletingLastPathComponent()) }
+        try FileManager.default.createDirectory(
+            at: file.url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data(#"{"island":{"futureOption":42,"expandsOnHover":true}}"#.utf8).write(to: file.url)
+        var settings = try #require(try file.load())
+        settings.island.isEnabled = false
+        try file.save(settings)
+        let object = try #require(JSONSerialization.jsonObject(with: Data(contentsOf: file.url)) as? [String: Any])
+        let island = try #require(object["island"] as? [String: Any])
+        #expect(island["futureOption"] as? Int == 42)
+        #expect(island["isEnabled"] as? Bool == false)
+        #expect(island["expandsOnHover"] as? Bool == true)
+    }
+
     @Test func defaultsPutThreeModulesInTheMenuBar() {
         let enabled = AppSettings().modules.filter { $0.mode == .menuBar }.map(\.id)
         #expect(enabled == [.overview, .cpu, .memory])
