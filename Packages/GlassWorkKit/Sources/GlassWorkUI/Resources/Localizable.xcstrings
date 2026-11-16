@@ -1563,6 +1563,22 @@
         }
       }
     },
+    "GPU memory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GPU memory"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Память GPU"
+          }
+        }
+      }
+    },
     "Graph": {
       "localizations": {
         "ru": {
@@ -2453,6 +2469,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пока мало данных"
+          }
+        }
+      }
+    },
+    "Not reported": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not reported"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет данных"
           }
         }
       }
@@ -3955,6 +3987,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Введите для поиска…"
+          }
+        }
+      }
+    },
+    "Utilization": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilization"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загрузка"
           }
         }
       }

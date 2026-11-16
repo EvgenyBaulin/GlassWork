@@ -431,8 +431,9 @@ public final class SystemMonitor {
         }
         if let value = reading.gpus {
             gpus = value.startingWith(gpuName)
-            if let first = gpus.first {
-                record(.gpu, first.device, date)
+            // A GPU that reports no figure leaves no false 0% in the history.
+            if let utilization = gpus.first?.utilization {
+                record(.gpu, utilization, date)
             }
         }
         if let value = reading.sensors {

@@ -91,7 +91,7 @@ public struct ItemContent {
         case .overview: overview(monitor, options: options)
         case .cpu: cpu(monitor, style: style, options: options)
         case .memory: memory(monitor.memory, style: style, options: options)
-        case .gpu: percent(monitor.gpus.first?.device, metric: .gpu, style: style)
+        case .gpu: percent(monitor.gpus.first?.utilization, metric: .gpu, style: style)
         case .disk: disk(monitor, style: style, options: options)
         case .network: network(monitor.network, style: style, options: options)
         case .battery: battery(monitor.battery, style: style, options: options)

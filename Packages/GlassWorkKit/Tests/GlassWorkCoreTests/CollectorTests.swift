@@ -195,7 +195,34 @@ struct GPUTests {
         ]))
         #expect(sample.name == "Apple M3 Pro")
         #expect(sample.device == 0.43)
+        #expect(sample.utilization == 0.43)
+        #expect(sample.renderer == 0.42)
+        #expect(sample.tiler == 0.41)
         #expect(GPUReader.parse([:]) == nil)
+    }
+
+    @Test func missingStatisticsAreNotZeroPercent() throws {
+        let sample = try #require(GPUReader.parse([
+            "model": "Virtual GPU",
+            "PerformanceStatistics": ["In use system memory": 1024],
+        ]))
+        #expect(sample.utilization == nil)
+        #expect(sample.isReported == false)
+        #expect(sample.renderer == nil)
+        #expect(sample.tiler == nil)
+        #expect(sample.memoryInUse == 1024)
+    }
+
+    @Test func reportedZeroStaysZero() throws {
+        let sample = try #require(GPUReader.parse(["PerformanceStatistics": ["Device Utilization %": 0]]))
+        #expect(sample.utilization == 0)
+    }
+
+    @Test func oldSnapshotsStillDecode() throws {
+        let json = #"{"name":"M3","device":0.5,"renderer":0.4,"tiler":0.3,"memoryInUse":10}"#
+        let sample = try JSONDecoder().decode(GPUSample.self, from: Data(json.utf8))
+        #expect(sample.utilization == 0.5)
+        #expect(sample.renderer == 0.4)
     }
 }
 
