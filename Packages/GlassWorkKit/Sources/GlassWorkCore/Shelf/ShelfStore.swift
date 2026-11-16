@@ -78,6 +78,8 @@ public final class ShelfStore {
     @ObservationIgnored public let folder: URL
     @ObservationIgnored private let disk: ShelfDisk
     @ObservationIgnored private var saveTask: Task<Void, Never>?
+    /// Copies being deleted, one batch after another.
+    @ObservationIgnored private var deleteTask: Task<Void, Never>?
     /// Called after the list changed, so the menu bar count follows at once.
     @ObservationIgnored public var onChange: (() -> Void)?
 
@@ -178,9 +180,10 @@ public final class ShelfStore {
         onChange?()
     }
 
-    /// Writes are finished, for tests that read the folder back.
+    /// Writes and deletions are finished, for tests that read the folder back.
     func flush() async {
         await saveTask?.value
+        await deleteTask?.value
     }
 
     /// Cuts the list to the limit and returns the ids of copies that went with it.
@@ -193,7 +196,11 @@ public final class ShelfStore {
 
     private func discard(_ ids: [UUID]) {
         guard !ids.isEmpty else { return }
-        Task { [disk] in await disk.deleteCopies(of: ids) }
+        let previous = deleteTask
+        deleteTask = Task { [disk] in
+            await previous?.value
+            await disk.deleteCopies(of: ids)
+        }
     }
 
     private func save() {

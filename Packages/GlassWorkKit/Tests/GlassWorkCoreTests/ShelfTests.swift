@@ -116,7 +116,7 @@ struct ShelfTests {
         let old = try space.file("old.txt")
         await store.add([old], at: now)
         try await store.add([space.file("new.txt")], at: now)
-        try await Task.sleep(for: .milliseconds(200))
+        await store.flush()
         #expect(space.copies().count == 1)
         #expect(FileManager.default.fileExists(atPath: old.path(percentEncoded: false)))
     }
@@ -144,7 +144,7 @@ struct ShelfTests {
         try await store.add([space.file("copied.txt")], at: now)
         #expect(space.copies().count == 1)
         store.clearAll()
-        try await Task.sleep(for: .milliseconds(200))
+        await store.flush()
         #expect(store.items.isEmpty)
         #expect(space.copies().isEmpty)
         #expect(FileManager.default.fileExists(atPath: reference.path(percentEncoded: false)))
