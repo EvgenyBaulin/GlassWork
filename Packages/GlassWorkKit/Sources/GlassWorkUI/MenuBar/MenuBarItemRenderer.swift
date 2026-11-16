@@ -45,6 +45,11 @@ public final class MenuBarItemRenderer {
     public func image(size: CGSize, force: Bool = false) -> NSImage? {
         guard size.width > 0 else { return nil }
         let content = ItemContent.content(module, monitor: monitor, style: numbers, options: options)
+        return image(content: content, size: size, force: force)
+    }
+
+    func image(content: ItemContent, size: CGSize, force: Bool = false) -> NSImage? {
+        guard size.width > 0 else { return nil }
         if content.spin > 0, style == .symbol || style == .figure || style == .graph {
             spinAngle = (spinAngle + 20 + 40 * content.spin).truncatingRemainder(dividingBy: 360)
         }

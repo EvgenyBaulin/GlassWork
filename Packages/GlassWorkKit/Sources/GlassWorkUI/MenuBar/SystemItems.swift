@@ -44,6 +44,19 @@ extension ItemContent {
         var item = switch options.choice(ItemOption.memoryFigure, default: MemoryFigure.share) {
         case .share:
             percent(sample?.usedShare, metric: .memory, style: style)
+        case .shareAndSwap:
+            ItemContent(
+                figure: sample.map {
+                    loc(
+                        "\(Format.percent($0.usedShare, style: style)) · swap \(Format.bytes(Double($0.swapUsed), style: style))"
+                    )
+                } ?? "—",
+                metric: .memory,
+                domain: 0 ... 1,
+                template: loc(
+                    "\(style == .compact ? "100%" : "100.0%") · swap \(style == .compact ? "999G" : "999.9 GB")"
+                )
+            )
         case .gigabytes:
             ItemContent(
                 figure: sample.map { Format.bytes(Double($0.used), style: style) } ?? "—",
@@ -77,14 +90,25 @@ extension ItemContent {
         }
     }
 
-    static func disk(_ monitor: SystemMonitor, style: NumberStyle, options: [String: String]) -> ItemContent {
-        let volume = monitor.volumes.first
+    static func disk(
+        _ volume: DiskVolume?,
+        activity: DiskActivity?,
+        style: NumberStyle,
+        options: [String: String]
+    ) -> ItemContent {
         let free = volume.map { Format.bytes(Double($0.free), style: style) } ?? "—"
-        let read = "↓ \(Format.rate(monitor.diskActivity?.read ?? 0, style: style))"
-        let written = "↑ \(Format.rate(monitor.diskActivity?.write ?? 0, style: style))"
+        let read = "↓ \(Format.rate(activity?.read ?? 0, style: style))"
+        let written = "↑ \(Format.rate(activity?.write ?? 0, style: style))"
         let wide = style == .compact ? "↓ 999M/s" : "↓ 999.9 MB/s"
         let isLow = (volume?.freeShare ?? 1) < 0.1
         return switch options.choice(ItemOption.diskFigure, default: DiskFigure.free) {
+        case .freePercent:
+            ItemContent(
+                figure: volume.map { Format.percent($0.freeShare, style: style) } ?? "—",
+                metric: .diskRead,
+                alert: isLow ? Palette.orange : nil,
+                template: style == .compact ? "100%" : "100.0%"
+            )
         case .free:
             ItemContent(
                 figure: free,
@@ -106,15 +130,21 @@ extension ItemContent {
     }
 
     static func network(_ sample: NetworkSample?, style: NumberStyle, options: [String: String]) -> ItemContent {
+        let template = style == .compact ? "↓ 999M/s" : "↓ 999.9 Mbit/s"
+        guard let sample, !sample.interfaces.isEmpty else {
+            var item = ItemContent(figure: sample == nil ? "—" : loc("Offline"), template: template)
+            item.isDimmed = true
+            item.glyph = .symbol
+            return item
+        }
         let isBits = options.choice(ItemOption.rateUnit, default: RateUnit.bytes) == .bits
         let threshold = Double(options.number(ItemOption.hideBelow, default: 0))
         func text(_ value: Double) -> String {
             guard value >= threshold else { return "—" }
             return isBits ? Format.bitRate(value, style: style) : Format.rate(value, style: style)
         }
-        let download = "↓ \(text(sample?.download ?? 0))"
-        let upload = "↑ \(text(sample?.upload ?? 0))"
-        let template = style == .compact ? "↓ 999M/s" : "↓ 999.9 Mbit/s"
+        let download = "↓ \(text(sample.download))"
+        let upload = "↑ \(text(sample.upload))"
         return switch options.choice(ItemOption.networkDirection, default: NetworkDirection.both) {
         case .both: ItemContent(figure: download, secondLine: upload, metric: .download, template: template)
         case .download: ItemContent(figure: download, metric: .download, template: template)

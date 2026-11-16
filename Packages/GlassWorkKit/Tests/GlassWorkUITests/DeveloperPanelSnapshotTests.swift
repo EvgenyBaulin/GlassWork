@@ -251,9 +251,9 @@ struct DeveloperItemTests {
         #expect(item.isDimmed)
     }
 
-    @Test func devServersCount() {
+    @Test func aSingleDevServerShowsItsPort() {
         let server = DevServer(port: 3000, pid: 1, process: "node", project: "x", kind: .web)
-        #expect(ItemContent.devServers(.servers([server])).figure == "1")
+        #expect(ItemContent.devServers(.servers([server])).figure == ":3000")
     }
 
     private func gitReading(_ change: (inout GitStatus) -> Void) -> GitReading {
