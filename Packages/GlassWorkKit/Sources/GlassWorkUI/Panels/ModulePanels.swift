@@ -474,29 +474,64 @@ struct BatteryPanel: View {
 
 struct GPUPanel: View {
     let monitor: SystemMonitor
+
+    var body: some View {
+        GPUPanelContent(gpus: monitor.gpus, points: { monitor.points(.gpu, in: $0) })
+    }
+}
+
+/// The GPU panel for a list of GPUs. The history is the first GPU's, the one the module shows.
+struct GPUPanelContent: View {
+    let gpus: [GPUSample]
+    let points: (TieredHistory.Range) -> [History<Double>.Point]
     @State private var range = TieredHistory.Range.minute
 
     var body: some View {
-        let gpu = monitor.gpus.first
-        PanelFrame(module: .gpu, subtitle: gpu?.name ?? "") {
-            BigFigure(text: Format.percent(gpu?.device ?? 0))
-            RangePicker(range: $range)
-            InteractiveChart(
-                series: [ChartSeries(
-                    id: "gpu",
-                    title: loc("GPU"),
-                    color: Palette.purple,
-                    points: monitor.points(.gpu, in: range),
-                    format: { Format.percent($0, style: .precise) }
-                )],
-                domain: 0 ... 1
-            )
-            if let gpu {
+        let first = gpus.first
+        PanelFrame(module: .gpu, subtitle: first?.name ?? "") {
+            BigFigure(text: first?.utilization.map { Format.percent($0) } ?? "—")
+            if first?.isReported == true {
+                RangePicker(range: $range)
+                InteractiveChart(
+                    series: [ChartSeries(
+                        id: "gpu",
+                        title: loc("GPU"),
+                        color: Palette.purple,
+                        points: points(range),
+                        format: { Format.percent($0, style: .precise) }
+                    )],
+                    domain: 0 ... 1
+                )
+            }
+            ForEach(gpus) { gpu in
                 Divider()
-                InfoRow(title: loc("Renderer"), value: Format.percent(gpu.renderer))
-                InfoRow(title: loc("Tiler"), value: Format.percent(gpu.tiler))
+                block(gpu)
             }
         }
+    }
+
+    private func block(_ gpu: GPUSample) -> some View {
+        VStack(spacing: 6) {
+            if gpus.count > 1 {
+                Text(gpu.name)
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if gpus.count > 1 || !gpu.isReported {
+                InfoRow(title: loc("Utilization"), value: share(gpu.utilization))
+            }
+            InfoRow(title: loc("Renderer"), value: share(gpu.renderer))
+            InfoRow(title: loc("Tiler"), value: share(gpu.tiler))
+            InfoRow(
+                title: loc("GPU memory"),
+                value: gpu.memoryInUse > 0 ? Format.bytes(Double(gpu.memoryInUse), style: .precise) : "—"
+            )
+        }
+    }
+
+    /// A missing figure is not a quiet GPU, so it reads as such instead of 0%.
+    private func share(_ value: Double?) -> String {
+        value.map { Format.percent($0) } ?? loc("Not reported")
     }
 }
 
