@@ -263,6 +263,34 @@ public enum TimerPresets {
     }
 }
 
+/// A duration typed by hand: `25` is minutes, `1:30` is minutes and seconds, `1:02:03` adds hours.
+public enum TimerDuration {
+    public static let maximum: TimeInterval = 86400
+
+    /// Seconds, or nil for anything that is not a duration from one second to a day.
+    public static func parse(_ text: String) -> TimeInterval? {
+        let parts = text.trimmingCharacters(in: .whitespaces).split(separator: ":", omittingEmptySubsequences: false)
+        guard (1 ... 3).contains(parts.count),
+              parts.allSatisfy({ !$0.isEmpty && $0.count <= 5 && $0.allSatisfy { $0.isASCII && $0.isNumber } })
+        else { return nil }
+        let numbers = parts.compactMap { Int($0) }
+        guard numbers.count == parts.count else { return nil }
+        let seconds: Int
+        switch numbers.count {
+        case 1:
+            seconds = numbers[0] * 60
+        case 2:
+            guard numbers[1] < 60 else { return nil }
+            seconds = numbers[0] * 60 + numbers[1]
+        default:
+            guard numbers[1] < 60, numbers[2] < 60 else { return nil }
+            seconds = numbers[0] * 3600 + numbers[1] * 60 + numbers[2]
+        }
+        let value = TimeInterval(seconds)
+        return value >= 1 && value <= maximum ? value : nil
+    }
+}
+
 /// The next event worth showing in the Calendar module.
 public enum CalendarItem {
     public static func next(

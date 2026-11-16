@@ -4,6 +4,7 @@ import SwiftUI
 struct TimersPanel: View {
     let monitor: SystemMonitor
     @State private var minutes = 10.0
+    @State private var typed = ""
     @Environment(\.panelActions) private var actions
 
     private var presets: [Int] {
@@ -32,10 +33,22 @@ struct TimersPanel: View {
                 Stepper(value: $minutes, in: 1 ... 600) {
                     Text(loc("Custom: \(Int(minutes)) min")).font(.system(size: 12))
                 }
-                Button(loc("Start")) {
-                    store.startTimer(title: loc("\(Int(minutes)) min"), duration: minutes * 60)
-                }
+                TextField(loc("Or type min or mm:ss"), text: $typed)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 12))
+                    .onSubmit { startCustom(store) }
+                Button(loc("Start")) { startCustom(store) }
+                    .disabled(!typed.isEmpty && TimerDuration.parse(typed) == nil)
             }
+        }
+    }
+
+    private func startCustom(_ store: EverydayStore) {
+        if typed.isEmpty {
+            store.startTimer(title: loc("\(Int(minutes)) min"), duration: minutes * 60)
+        } else if let seconds = TimerDuration.parse(typed) {
+            store.startTimer(title: seconds.clockText, duration: seconds)
+            typed = ""
         }
     }
 

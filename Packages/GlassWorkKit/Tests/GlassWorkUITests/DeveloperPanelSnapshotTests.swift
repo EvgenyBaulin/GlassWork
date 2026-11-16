@@ -304,3 +304,25 @@ struct DeveloperItemTests {
         #expect(ItemContent.ping(log).values?.count == 40)
     }
 }
+
+@MainActor
+@Suite(.enabled(if: ProcessInfo.processInfo.environment["GW_SKIP_SNAPSHOTS"] == nil))
+struct AgendaPanelStateSnapshotTests {
+    @Test(arguments: [true, false])
+    func deniedAccessOffersPrivacySettings(dark: Bool) {
+        let view = AccessRequest(
+            title: "See your events here",
+            access: .denied,
+            request: {},
+            openSettings: {}
+        )
+        .frame(width: 300)
+        .padding()
+        snapshotPanel(view, name: "denied", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func noOpenTodosShowsAllClear(dark: Bool) {
+        snapshotPanel(AllClear().frame(width: 300).padding(), name: "all-clear", dark: dark)
+    }
+}
