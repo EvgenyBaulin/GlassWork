@@ -611,6 +611,22 @@
         }
       }
     },
+    "AirDrop": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirDrop"
+          }
+        }
+      }
+    },
     "All": {
       "localizations": {
         "ru": {
@@ -1471,6 +1487,22 @@
         }
       }
     },
+    "Drag items out": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag items out"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите файлы наружу"
+          }
+        }
+      }
+    },
     "Drag to reorder · the first one shows in the menu bar": {
       "localizations": {
         "ru": {
@@ -1595,6 +1627,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Прошло"
+          }
+        }
+      }
+    },
+    "Empty": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пусто"
           }
         }
       }

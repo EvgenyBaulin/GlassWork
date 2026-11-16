@@ -75,7 +75,7 @@ final class PanelController {
         closeTransient()
         guard !wasOpen else { return }
         anchor = window
-        show(.module(module), from: nil, view: AnyView(ModulePanel(module: module, monitor: model.monitor)))
+        show(.module(module), from: nil, view: AnyView(DockWidgetCard(module: module, monitor: model.monitor)))
         guard let panel else { return }
         panel.setFrame(place(panel.frame.size), display: false)
         // The edge to keep has just moved.
