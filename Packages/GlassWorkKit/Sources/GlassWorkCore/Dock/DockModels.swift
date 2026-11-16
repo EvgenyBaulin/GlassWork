@@ -114,6 +114,9 @@ public struct DockSettings: Codable, Sendable, Equatable {
     public var activePreset: String?
     /// Built-ins the owner has changed, and presets of the owner's own.
     public var presets: [DockPreset] = []
+    /// Switch presets by the rules below.
+    public var followsSchedule = false
+    public var schedule: [DockPresetRule] = []
 
     public init() {}
 
@@ -132,7 +135,7 @@ public struct DockSettings: Codable, Sendable, Equatable {
 extension DockSettings {
     private enum CodingKeys: String, CodingKey {
         case isEnabled, position, iconSize, magnifies, magnifiedSize, autoHides, showsRecents, showsTrash, items
-        case hasSeenIntro, activePreset, presets
+        case hasSeenIntro, activePreset, presets, followsSchedule, schedule
     }
 
     /// An item this version cannot read is skipped, so the rest of the Dock survives it.
@@ -160,6 +163,8 @@ extension DockSettings {
         hasSeenIntro = try container.decodeIfPresent(Bool.self, forKey: .hasSeenIntro) ?? hasSeenIntro
         activePreset = try container.decodeIfPresent(String.self, forKey: .activePreset)
         presets = try container.decodeIfPresent([DockPreset].self, forKey: .presets) ?? presets
+        followsSchedule = try container.decodeIfPresent(Bool.self, forKey: .followsSchedule) ?? followsSchedule
+        schedule = (try? container.decodeIfPresent([DockPresetRule].self, forKey: .schedule)) ?? schedule
     }
 }
 

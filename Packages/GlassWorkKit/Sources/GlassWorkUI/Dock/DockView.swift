@@ -74,6 +74,8 @@ public struct DockActions {
     public var openSettings: () -> Void
     /// Set by the app; without it the Trash only shows.
     public var trash: DockTrashActions?
+    /// Leaves presets: their widgets and folders go. Set by the app.
+    public var turnOffPreset: (() -> Void)?
     /// The item under the pointer, for its name label. Set by the app; without it there is no label.
     public var hover: ((DockHover) -> Void)?
 

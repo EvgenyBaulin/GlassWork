@@ -134,10 +134,16 @@ struct DockBackgroundMenu: View {
 
     private var presets: some View {
         Menu(loc("Presets")) {
+            Toggle(loc("No Preset"), isOn: Binding(
+                get: { settings.activePreset == nil },
+                set: { _ in actions.turnOffPreset?() }
+            ))
+            Divider()
             ForEach(actions.presets()) { preset in
+                // Choosing the preset in use again turns presets off.
                 Toggle(preset.title, isOn: Binding(
                     get: { settings.activePreset == preset.id },
-                    set: { _ in actions.applyPreset(preset) }
+                    set: { isOn in isOn ? actions.applyPreset(preset) : actions.turnOffPreset?() }
                 ))
             }
             Divider()

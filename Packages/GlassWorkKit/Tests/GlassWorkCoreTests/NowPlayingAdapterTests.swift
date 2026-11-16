@@ -69,7 +69,7 @@ struct NowPlayingAdapterTests {
         // Both the line and the exit: a failure then says whether Perl hung or its output was lost.
         try await wait { !collector.received.isEmpty && collector.exitStatus != nil }
         #expect(collector.exitStatus == 0)
-        #expect(collector.received == ["LANG,PATH"])
+        #expect(collector.received == ["LANG,PATH"], "lines: \(collector.received)")
         // The output handler holds the adapter weakly, so it must outlive the read.
         adapter.stop()
     }

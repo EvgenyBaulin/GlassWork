@@ -17172,6 +17172,134 @@
           }
         }
       }
+    },
+    "No Preset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Preset"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без пресета"
+          }
+        }
+      }
+    },
+    "Switch presets on a schedule": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch presets on a schedule"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Менять пресеты по расписанию"
+          }
+        }
+      }
+    },
+    "Add Rule": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Rule"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить правило"
+          }
+        }
+      }
+    },
+    "Schedule": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schedule"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расписание"
+          }
+        }
+      }
+    },
+    "Preset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preset"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пресет"
+          }
+        }
+      }
+    },
+    "From": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С"
+          }
+        }
+      }
+    },
+    "Turn Off Presets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn Off Presets"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отключить пресеты"
+          }
+        }
+      }
+    },
+    "Rules switch the Dock at their time and days. A preset picked by hand stays until the next rule.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rules switch the Dock at their time and days. A preset picked by hand stays until the next rule."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Правила переключают Dock в своё время по своим дням. Пресет, выбранный вручную, держится до следующего правила."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
