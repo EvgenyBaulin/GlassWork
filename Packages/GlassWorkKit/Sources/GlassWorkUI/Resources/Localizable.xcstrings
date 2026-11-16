@@ -17044,6 +17044,134 @@
           }
         }
       }
+    },
+    "Drag apps here": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag apps here"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите сюда приложения"
+          }
+        }
+      }
+    },
+    "Show Trash": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Trash"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать Корзину"
+          }
+        }
+      }
+    },
+    "Widgets in the Dock are as big as app icons: this size sets both.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Widgets in the Dock are as big as app icons: this size sets both."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виджеты в Dock размером со значки приложений: этот ползунок меняет и то и другое."
+          }
+        }
+      }
+    },
+    "Drag one app onto another in the Dock to make a folder, or drop an app on a folder to add it.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag one app onto another in the Dock to make a folder, or drop an app on a folder to add it."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетащите одно приложение на другое прямо в Dock — получится папка. Приложение, брошенное на папку, добавится в неё."
+          }
+        }
+      }
+    },
+    "Folders": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folders"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Папки"
+          }
+        }
+      }
+    },
+    "Open Card": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Card"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть карточку"
+          }
+        }
+      }
+    },
+    "Change Size…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Size…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменить размер…"
+          }
+        }
+      }
+    },
+    "Right-click an empty part of the Dock → New Folder, or an app → Options → Add to Folder.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Right-click an empty part of the Dock → New Folder, or an app → Options → Add to Folder."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Или правый клик по пустому месту Dock → «Новая папка», по приложению → «Параметры» → «Добавить в папку»."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -119,6 +119,8 @@ public struct DockView: View {
     private let actions: DockActions
     /// Distance from the middle of the Dock, which stays put however wide the bar gets.
     @State private var pointer: Double?
+    /// The app or folder an app is being dragged over.
+    @State private var dropTarget: String?
 
     private static let canvas = "dock"
     /// Quick enough to feel attached to the pointer, long enough not to pop.
@@ -355,8 +357,11 @@ public struct DockView: View {
                 }
                 .draggable(app.path)
                 .dropDestination(for: String.self) { paths, _ in
-                    drop(paths) { dragged, items in DockLayout.drop(dragged, onto: app, in: items) }
+                    makeFolder(dropping: paths, onto: app)
+                } isTargeted: { targeted in
+                    dropTarget = targeted ? item.id : (dropTarget == item.id ? nil : dropTarget)
                 }
+                .modifier(DockDropHighlight(isTargeted: dropTarget == item.id, size: size))
         case let .folder(folder):
             FolderTile(
                 folder: folder,
@@ -367,19 +372,12 @@ public struct DockView: View {
             ) { toggleCard(item) }
                 .dropDestination(for: String.self) { paths, _ in
                     drop(paths) { dragged, items in DockLayout.drop(dragged, into: folder, in: items) }
+                } isTargeted: { targeted in
+                    dropTarget = targeted ? item.id : (dropTarget == item.id ? nil : dropTarget)
                 }
+                .modifier(DockDropHighlight(isTargeted: dropTarget == item.id, size: size))
         case let .widget(module):
-            WidgetTile(
-                module: module,
-                size: size,
-                monitor: monitor,
-                position: position,
-                click: { actions.clickWidget(module) },
-                hold: { actions.holdWidget(module) }
-            )
-            .contextMenu {
-                Button(loc("Remove from Dock")) { actions.update { DockLayout.removing(item, from: $0) } }
-            }
+            widgetTile(module, item: item, size: size)
         case let .stack(stack):
             StackTile(stack: stack, files: state.files[stack.path] ?? [], size: size, position: position) {
                 toggleCard(item)
@@ -387,9 +385,35 @@ public struct DockView: View {
             .contextMenu { StackMenu(stack: stack, actions: actions) }
         }
     }
+
+    private func widgetTile(_ module: ModuleID, item: DockItem, size: CGFloat) -> some View {
+        WidgetTile(
+            module: module,
+            size: size,
+            monitor: monitor,
+            position: position,
+            click: { actions.clickWidget(module) },
+            hold: { actions.holdWidget(module) }
+        )
+        .contextMenu {
+            Button(loc("Open Card")) { actions.holdWidget(module) }
+            Button(loc("Change Size…")) { actions.openSettings() }
+            Divider()
+            Button(loc("Remove from Dock")) { actions.update { DockLayout.removing(item, from: $0) } }
+        }
+    }
 }
 
 private extension DockView {
+    /// An app dropped on another makes a folder named New Folder, whose card opens with the name ready to change.
+    func makeFolder(dropping paths: [String], onto target: DockApp) -> Bool {
+        guard let path = paths.first, let dragged = app(at: path), dragged != target else { return false }
+        let folder = AppFolder(name: loc("New Folder"), apps: [])
+        actions.update { DockLayout.drop(dragged, onto: target, in: $0, making: folder) }
+        state.openCard = DockItem.folder(folder).id
+        return true
+    }
+
     /// Applies a drop of an app already in the Dock.
     func drop(_ paths: [String], change: @escaping (DockApp, [DockItem]) -> [DockItem]) -> Bool {
         guard let path = paths.first, let dragged = app(at: path) else { return false }

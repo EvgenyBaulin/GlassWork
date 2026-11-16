@@ -74,11 +74,31 @@ struct DockPane: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
-            Section(loc("Size")) {
+            Section {
                 Slider(value: dock.iconSize, in: 32 ... 96) { Text(loc("Icon size")) }
                 Toggle(loc("Magnification"), isOn: dock.magnifies)
                 Slider(value: dock.magnifiedSize, in: 48 ... 128) { Text(loc("Magnified size")) }
+                Toggle(loc("Show Trash"), isOn: dock.showsTrash)
+            } header: {
+                Text(loc("Size"))
+            } footer: {
+                Text(loc("Widgets in the Dock are as big as app icons: this size sets both."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
+            Section {
+                Text(
+                    loc("Drag one app onto another in the Dock to make a folder, or drop an app on a folder to add it.")
+                )
+                Text(
+                    loc(
+                        "Right-click an empty part of the Dock → New Folder, or an app → Options → Add to Folder."
+                    )
+                )
+            } header: {
+                Text(loc("Folders"))
+            }
+            .font(.callout)
             Section(loc("Position")) {
                 Picker(loc("Position on screen"), selection: dock.position) {
                     ForEach(DockPosition.allCases, id: \.self) { Text($0.title).tag($0) }
@@ -275,5 +295,9 @@ struct AppSettingsBinding {
 
     var autoHides: Binding<Bool> {
         Binding(get: { store.settings.dock.autoHides }, set: { value in store.update { $0.dock.autoHides = value } })
+    }
+
+    var showsTrash: Binding<Bool> {
+        Binding(get: { store.settings.dock.showsTrash }, set: { value in store.update { $0.dock.showsTrash = value } })
     }
 }
