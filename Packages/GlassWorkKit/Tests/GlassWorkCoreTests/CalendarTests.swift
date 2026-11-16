@@ -63,6 +63,19 @@ struct CallLinkTests {
     @Test func ignoresOtherLinks() {
         #expect(CallLink.find(in: ["https://example.com/agenda"]) == nil)
     }
+
+    @Test func ignoresLookalikeHostsAndOtherSchemes() throws {
+        #expect(CallLink.find(in: ["https://evilzoom.us/j/1"]) == nil)
+        #expect(CallLink.find(in: ["http://zoom.us/j/1"]) == nil)
+        let verdicts = try [
+            "ftp://zoom.us/j/1",
+            "file://zoom.us/etc/hosts",
+            "https://zoom.us/j/1",
+            "https://MEET.google.com/abc",
+        ]
+        .map { try CallLink.isCall(#require(URL(string: $0))) }
+        #expect(verdicts == [false, false, true, true])
+    }
 }
 
 struct TodoFilterTests {
