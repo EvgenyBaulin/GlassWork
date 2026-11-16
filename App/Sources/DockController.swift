@@ -30,6 +30,10 @@ final class DockController {
     private var shrink: Task<Void, Never>?
     /// False while a Dock that hides itself is out of sight.
     private var isRevealed = true
+    /// The front app is in full screen on the Dock's screen: the Dock then hides as if auto-hide were on, and the
+    /// pointer at the edge still brings it back, as the system Dock does.
+    private var isFullScreenFront = false
+    private lazy var fullScreen = DockFullScreenWatcher { [weak self] in self?.fullScreenChanged($0) }
     private lazy var pointerWatcher = DockPointerWatcher { [weak self] in self?.updateReveal() }
     private var hiding: Task<Void, Never>?
     private let tooltip = DockTooltip()
@@ -60,7 +64,7 @@ final class DockController {
             open()
         }
         state.settings = settings
-        watchPointer(settings.autoHides)
+        watchPointer(settings.autoHides || isFullScreenFront)
         folders.watch(settings.foldersToRead)
         refreshRunning()
         place()
@@ -82,7 +86,7 @@ final class DockController {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.level = .dock
-        panel.collectionBehavior = [.canJoinAllSpaces, .stationary]
+        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
         panel.isReleasedWhenClosed = false
         panel.becomesKeyOnlyIfNeeded = true
         // Hide Others in any app counts this app too now that it has a Dock icon.
@@ -111,6 +115,7 @@ final class DockController {
             }
         }
         trash.start()
+        fullScreen.start()
     }
 
     /// Restores even with no window, so a Dock left hidden by a crash comes back once it is turned off.
@@ -121,6 +126,8 @@ final class DockController {
         shrink?.cancel()
         trash.stop()
         tooltip.hide()
+        fullScreen.stop()
+        isFullScreenFront = false
         watchPointer(false)
         folders.watch([])
         state.openCard = nil
@@ -398,6 +405,24 @@ final class DockController {
             window?.orderOut(nil)
         }
     }
+}
+
+/// Showing and hiding: auto-hide and an app in full screen.
+extension DockController {
+    private func fullScreenChanged(_ covered: Bool) {
+        guard covered != isFullScreenFront else { return }
+        isFullScreenFront = covered
+        watchPointer(state.settings.autoHides || covered)
+        if covered {
+            hiding?.cancel()
+            hiding = nil
+            isRevealed = false
+            place()
+        } else {
+            updateReveal()
+            place()
+        }
+    }
 
     private func watchPointer(_ wanted: Bool) {
         guard wanted != pointerWatcher.isWatching else { return }
@@ -417,7 +442,7 @@ final class DockController {
         let settings = state.settings
         let point = NSEvent.mouseLocation
         let wanted = DockAutoHide.isRevealed(
-            autoHides: settings.autoHides,
+            autoHides: settings.autoHides || isFullScreenFront,
             wasRevealed: isRevealed,
             isOverDock: DockAutoHide.isOver(point, frame: window.frame),
             touchesEdge: DockAutoHide.touchesEdge(
