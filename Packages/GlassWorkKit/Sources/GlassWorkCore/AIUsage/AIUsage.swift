@@ -171,3 +171,29 @@ public struct AIUsageReading: Codable, Sendable, Equatable {
         return candidates.max { $0.window.used(at: date) < $1.window.used(at: date) } ?? peak(at: date)
     }
 }
+
+public extension AIToolUsage {
+    /// Limits or spend to show, as opposed to "can't read" or "no usage yet".
+    var hasNumbers: Bool {
+        !windows.isEmpty || spend != nil
+    }
+}
+
+public extension AIUsageReading {
+    /// A read that found nothing keeps a tool's last numbers, so a file caught mid-write or a log that
+    /// failed to open does not blank the row. The row still says how old they are, and the next read
+    /// tries again as usual.
+    func keepingKnown(from previous: AIUsageReading?) -> AIUsageReading {
+        guard let previous else { return self }
+        let merged = tools.map { usage in
+            guard !usage.hasNumbers,
+                  let known = previous.tools.first(where: { $0.tool == usage.tool }),
+                  known.hasNumbers
+            else { return usage }
+            return known
+        }
+        var reading = AIUsageReading(tools: merged, readAt: readAt)
+        reading.warnShare = warnShare
+        return reading
+    }
+}

@@ -58,6 +58,7 @@ final class AppModel {
         _ = runningApps
         _ = quickQuit
         applySettings()
+        monitor.developer.restore(aiUsage: SnapshotStore().read(WidgetSnapshot.self, for: WidgetSnapshot.key)?.aiUsage)
         checkSystemWidgets()
         fans.onFailsafe = { celsius in
             FanNotifications.failsafe(
