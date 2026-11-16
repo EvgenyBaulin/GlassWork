@@ -13,13 +13,21 @@ public struct IslandInput: Sendable, Equatable {
     public var wifi: WiFiReading?
     public var vpn: VPNReading?
     public var ping: PingOutcome?
+    public var previousPing: PingOutcome?
+    public var pingHost: String?
     public var docker: DockerReading?
     public var devServers: DevServerReading?
     public var battery: BatterySample?
     public var isKeepingAwake = false
     public var keepAwakeEnds: Date?
+    public var keepAwakeIncludesDisplay: Bool?
     public var nowPlaying: NowPlayingSession?
     public var clipboardEntry: ClipboardEntry?
+    public var artwork: Data?
+    public var outputDevice: String?
+    /// The caller supplies a thumbnail; building events never reads the history folder.
+    public var clipboardPreview: Data?
+    public var clipboardImageURL: URL?
 
     public init() {}
 
@@ -35,12 +43,18 @@ public struct IslandInput: Sendable, Equatable {
         wifi = monitor.developer.wifi
         vpn = monitor.developer.vpn
         ping = monitor.developer.ping.latest?.outcome
+        previousPing = monitor.developer.ping.samples.dropLast().last?.outcome
+        pingHost = monitor.developer.options.pingHost
         docker = monitor.developer.docker
         devServers = monitor.developer.devServers
         battery = monitor.battery
         isKeepingAwake = monitor.everyday.isKeepingAwake
         keepAwakeEnds = monitor.everyday.keepAwakeEnds
+        keepAwakeIncludesDisplay = !monitor.everyday.letsDisplaySleep
         nowPlaying = monitor.nowPlaying.session
+        artwork = monitor.nowPlaying.artwork
+        outputDevice = monitor.nowPlaying.outputDevice
         clipboardEntry = monitor.clipboard.history.entries.first
+        clipboardImageURL = clipboardEntry.flatMap { monitor.clipboard.imageURL(for: $0) }
     }
 }

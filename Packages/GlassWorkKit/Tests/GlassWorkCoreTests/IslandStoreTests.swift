@@ -200,3 +200,74 @@ struct IslandStoreTests {
         #expect(store.queue.events.isEmpty)
     }
 }
+
+@MainActor
+struct IslandContextTests {
+    private let now = IslandFixtures.now
+
+    @Test func firstSnapshotCarriesRelatedReadings() {
+        var input = IslandInput()
+        input.calendarEvents = [
+            IslandFixtures.event("current", startsIn: -100, endsIn: 100),
+            IslandFixtures.event("next", startsIn: 3600, endsIn: 7200),
+        ]
+        input.sensors = SensorSample(readings: [], fans: [
+            FanReading(id: 0, rpm: 5600, minimum: 1000, maximum: 6000),
+        ])
+        input.artwork = Data([1, 2, 3])
+        input.outputDevice = "Speakers"
+        input.keepAwakeIncludesDisplay = true
+        let context = IslandEventBuilder.events(current: input, previous: nil, now: now).first?.context
+        #expect(context?.nextEvent?.id == "next")
+        #expect(context?.fanRPM == 5600)
+        #expect(context?.artwork == input.artwork)
+        #expect(context?.outputDevice == "Speakers")
+        #expect(context?.keepAwakeIncludesDisplay == true)
+    }
+
+    @Test func persistentAlertRefreshesContextWithoutRestartingItsLifetime() {
+        let store = IslandStore()
+        var input = IslandInput()
+        input.wifi = IslandFixtures.wifi
+        store.update(input: input, now: now)
+        input.wifi = .notConnected
+        input.ping = .timeout
+        store.update(input: input, now: now.addingTimeInterval(1))
+        input.ping = .reply(milliseconds: 18)
+        input.previousPing = .timeout
+        input.vpn = IslandFixtures.vpnOff
+        store.update(input: input, now: now.addingTimeInterval(2))
+        let event = store.queue.events.first { $0.id == "wifi" }
+        #expect(event?.since == now.addingTimeInterval(1))
+        #expect(event?.context.ping == .reply(milliseconds: 18))
+        #expect(event?.context.previousPing == .timeout)
+        #expect(event?.context.vpn == input.vpn)
+    }
+
+    @Test func pinningRefreshesTheCopyWithoutExtendingItsExpiry() {
+        let store = IslandStore()
+        store.update(input: IslandInput(), now: now)
+        var input = IslandInput()
+        input.clipboardEntry = IslandFixtures.clipboard()
+        store.update(input: input, now: now)
+        input.clipboardEntry?.isPinned = true
+        store.update(input: input, now: now.addingTimeInterval(1))
+        #expect(store.queue.events.first?.detail == input.clipboardEntry.map(IslandDetail.copied))
+        #expect(store.queue.events.first?.expires == now.addingTimeInterval(4))
+    }
+
+    @Test func clipboardPreviewSurvivesAnUnavailableReadingUntilExpiry() {
+        let store = IslandStore()
+        store.update(input: IslandInput(), now: now)
+        var input = IslandInput()
+        input.clipboardEntry = IslandFixtures.clipboard()
+        input.clipboardPreview = Data([1, 2, 3])
+        input.clipboardImageURL = URL(fileURLWithPath: "/tmp/example.png")
+        store.update(input: input, now: now)
+        store.update(input: IslandInput(), now: now.addingTimeInterval(1))
+        #expect(store.queue.events.first?.context.clipboardPreview == input.clipboardPreview)
+        #expect(store.queue.events.first?.context.clipboardImageURL == input.clipboardImageURL)
+        store.tick(now: now.addingTimeInterval(4))
+        #expect(store.queue.events.isEmpty)
+    }
+}
