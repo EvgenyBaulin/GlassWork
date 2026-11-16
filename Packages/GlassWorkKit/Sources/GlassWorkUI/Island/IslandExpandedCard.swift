@@ -16,6 +16,9 @@ struct IslandExpandedCard: View {
         VStack(alignment: .leading, spacing: 12) {
             if case let .nowPlaying(session) = event.detail {
                 IslandNowPlaying(presentation: presentation, session: session, actions: actions)
+            } else if case let .levels(levels, _) = event.detail {
+                // Both rows carry their own titles, as in the design.
+                levelsContent(levels)
             } else {
                 header
                 content
@@ -68,7 +71,33 @@ struct IslandExpandedCard: View {
         case let .network(detail): networkContent(detail)
         case let .devServers(detail): developerContent(detail)
         case let .keepAwake(end): keepAwakeContent(end)
-        case .nowPlaying, .weather: EmptyView()
+        case .nowPlaying, .weather, .levels: EmptyView()
+        }
+    }
+
+    /// Both levels, as in the design, each with its bar; the bars move the level when the host can set it.
+    private func levelsContent(_ levels: SystemLevels) -> some View {
+        VStack(spacing: 14) {
+            if let volume = levels.volume {
+                IslandLevelRow(
+                    symbol: levels.isSilent ? "speaker.slash.fill" : "music.note",
+                    title: loc("Volume"),
+                    subtitle: levels.outputName ?? "",
+                    value: levels.isMuted ? 0 : volume,
+                    tint: Palette.pink,
+                    set: actions.setVolume
+                )
+            }
+            if let brightness = levels.brightness {
+                IslandLevelRow(
+                    symbol: "sun.max.fill",
+                    title: loc("Brightness"),
+                    subtitle: loc("Built-in display"),
+                    value: brightness,
+                    tint: Palette.yellow,
+                    set: actions.setBrightness
+                )
+            }
         }
     }
 

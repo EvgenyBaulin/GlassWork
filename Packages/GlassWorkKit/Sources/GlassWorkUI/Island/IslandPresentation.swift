@@ -21,6 +21,8 @@ struct IslandPresentation {
         case .nowPlaying: artworkTint
         case .copied: Palette.teal
         case .weather: Palette.blue
+        case .levels(_, .volume): Palette.pink
+        case .levels(_, .brightness): Palette.yellow
         }
     }
 
@@ -43,6 +45,8 @@ struct IslandPresentation {
         case .nowPlaying: "music.note"
         case .copied: "doc.on.clipboard"
         case .weather: "cloud.rain"
+        case let .levels(levels, .volume): levels.isSilent ? "speaker.slash.fill" : "speaker.wave.2.fill"
+        case .levels(_, .brightness): "sun.max.fill"
         }
     }
 
@@ -65,6 +69,7 @@ struct IslandPresentation {
         case .charging, .keepAwake, .nowPlaying: ""
         case .copied: loc("Copied")
         case .weather: loc("Weather")
+        case .levels: ""
         }
     }
 
@@ -88,6 +93,8 @@ struct IslandPresentation {
         case let .nowPlaying(session): session.track.title
         case .copied: loc("Copied")
         case .weather: loc("Weather")
+        case .levels(_, .volume): loc("Volume")
+        case .levels(_, .brightness): loc("Brightness")
         }
     }
 
@@ -112,6 +119,8 @@ struct IslandPresentation {
         case let .nowPlaying(session): PlaybackTime.text(session.position(at: now))
         case let .copied(entry): clipboardKind(entry.kind)
         case let .weather(report): Format.temperature(report.current.temperature)
+        case let .levels(levels, .volume): volumeText(levels)
+        case let .levels(levels, .brightness): Format.percent(levels.brightness ?? 0)
         }
     }
 
@@ -169,7 +178,16 @@ struct IslandPresentation {
             [entry.appName.map { loc("from \($0)") }, Format.size(Double(entry.byteCount))]
                 .compactMap(\.self).joined(separator: " · ")
         case let .weather(report): report.place.name
+        case let .levels(levels, .volume): levels.outputName ?? ""
+        case .levels(_, .brightness): loc("Built-in display")
         }
+    }
+
+    private func volumeText(_ levels: SystemLevels) -> String {
+        if levels.isMuted {
+            return loc("Muted")
+        }
+        return Format.percent(levels.volume ?? 0)
     }
 
     func clock(_ date: Date) -> String {

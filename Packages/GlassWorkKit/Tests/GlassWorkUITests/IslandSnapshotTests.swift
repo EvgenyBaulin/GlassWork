@@ -8,6 +8,7 @@ private let islandNow = Date(timeIntervalSince1970: 1_794_831_360)
 
 private enum IslandSample: String, CaseIterable {
     case meeting, timers, copied, charging, systemAlert, network, devServers, nowPlaying, keepAwake, inProgress
+    case levels
 }
 
 @MainActor
@@ -76,6 +77,8 @@ private enum IslandSamples {
             input.keepAwakeIncludesDisplay = true
             input.isKeepingAwake = true
             input.keepAwakeEnds = islandNow.addingTimeInterval(84)
+        case .levels:
+            input.levels = SystemLevels(volume: 0.62, outputName: "MacBook Pro Speakers", brightness: 0.7)
         }
         return input
     }
@@ -194,6 +197,7 @@ private enum IslandSamples {
                 phyCode: 6
             ))
         case .devServers: previous.docker = .containers([container(running: true)], context: "pocket-api")
+        case .levels: previous.levels?.volume = 0.5
         default: break
         }
         store.update(input: previous, now: islandNow.addingTimeInterval(-120))
