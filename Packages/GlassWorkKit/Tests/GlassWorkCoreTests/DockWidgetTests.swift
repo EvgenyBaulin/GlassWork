@@ -89,7 +89,7 @@ struct DockWidgetClickTests {
     }
 
     @Test func modulesWithNothingToShowAreNotOffered() {
-        #expect(!ModuleID.dockWidgets.contains(.shelf))
+        #expect(ModuleID.dockWidgets.contains(.shelf))
         #expect(!ModuleID.dockWidgets.contains(.appearance))
         #expect(ModuleID.dockWidgets.contains(.timers))
     }

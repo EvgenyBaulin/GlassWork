@@ -397,6 +397,13 @@ public struct DockView: View {
             click: { actions.clickWidget(module) },
             hold: { actions.holdWidget(module) }
         )
+        .dropDestination(for: URL.self) { urls, _ in
+            module == .shelf && ShelfDrop.add(urls, to: monitor.shelf)
+        } isTargeted: { targeted in
+            guard module == .shelf else { return }
+            dropTarget = targeted ? item.id : (dropTarget == item.id ? nil : dropTarget)
+        }
+        .modifier(DockDropHighlight(isTargeted: dropTarget == item.id, size: size))
         .contextMenu {
             Button(loc("Open Card")) { actions.holdWidget(module) }
             Button(loc("Change Size…")) { actions.openSettings() }

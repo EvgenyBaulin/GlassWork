@@ -277,6 +277,15 @@ struct WidgetTile: View {
     let hold: () -> Void
     @State private var press = DockPress()
 
+    /// "3 files": the shelf says what it holds in words, as there is room for them.
+    static func shelfCaption(_ count: Int) -> String {
+        switch count {
+        case 0: loc("Empty")
+        case 1: loc("1 file")
+        default: loc("\(count) files")
+        }
+    }
+
     var body: some View {
         let content = ItemContent.content(module, monitor: monitor, style: .compact)
         Button {
@@ -287,8 +296,12 @@ struct WidgetTile: View {
             DockIndicated(position: position, isLit: false) {
                 VStack(spacing: 1) {
                     Image(systemName: module.symbol).font(.system(size: size * 0.28)).foregroundStyle(module.tint)
-                    Text(content.figure)
-                        .font(.system(size: size * 0.2, weight: .semibold, design: .rounded))
+                    Text(module == .shelf ? Self.shelfCaption(monitor.shelf.items.count) : content.figure)
+                        .font(.system(
+                            size: size * (module == .shelf ? 0.15 : 0.2),
+                            weight: .semibold,
+                            design: .rounded
+                        ))
                         .monospacedDigit()
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)

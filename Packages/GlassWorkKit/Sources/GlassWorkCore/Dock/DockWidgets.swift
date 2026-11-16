@@ -4,7 +4,7 @@ public extension ModuleID {
     /// What can stand in the Dock as a widget. Left out: modules with nothing to show yet, and devices, whose
     /// read may raise a Bluetooth prompt and so stays a choice made in the menu bar.
     static var dockWidgets: [ModuleID] {
-        allCases.filter { ![.shelf, .appearance, .deviceBatteries].contains($0) }
+        allCases.filter { ![.appearance, .deviceBatteries].contains($0) }
     }
 
     /// Whether holding the tile has a card to open. These two are switches with no panel behind them.
