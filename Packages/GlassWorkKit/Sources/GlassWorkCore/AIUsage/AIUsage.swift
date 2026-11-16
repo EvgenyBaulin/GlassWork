@@ -72,19 +72,22 @@ public struct AIToolUsage: Codable, Sendable, Equatable, Identifiable {
     public var isUnreadable: Bool
     /// nil = read from the tool's files, as in snapshots saved before the tools were asked directly.
     public var source: AIUsageSource?
+    public var spend: AISpend?
 
     public init(
         tool: AITool,
         windows: [AIWindow] = [],
         updatedAt: Date? = nil,
         isUnreadable: Bool = false,
-        source: AIUsageSource? = nil
+        source: AIUsageSource? = nil,
+        spend: AISpend? = nil
     ) {
         self.tool = tool
         self.windows = windows
         self.updatedAt = updatedAt
         self.isUnreadable = isUnreadable
         self.source = source
+        self.spend = spend
     }
 
     public var id: AITool {

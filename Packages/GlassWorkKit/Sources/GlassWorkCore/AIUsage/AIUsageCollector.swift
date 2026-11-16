@@ -41,10 +41,10 @@ public struct AIUsageCollector: Sendable {
         self.locate = locate
     }
 
-    public func read(at date: Date = Date()) async -> AIUsageReading {
+    public func read(at date: Date = Date(), calendar: Calendar = .current) async -> AIUsageReading {
         var tools: [AIToolUsage] = []
         for tool in AITool.allCases where isInstalled(tool) {
-            await tools.append(limits.refined(usage(of: tool)))
+            await tools.append(limits.refined(usage(of: tool, at: date, calendar: calendar)))
         }
         return AIUsageReading(tools: tools, readAt: date)
     }
@@ -63,10 +63,11 @@ public struct AIUsageCollector: Sendable {
         return exists || locate(command) != nil
     }
 
-    private func usage(of tool: AITool) async -> AIToolUsage {
+    private func usage(of tool: AITool, at date: Date, calendar: Calendar) async -> AIToolUsage {
         switch tool {
         case .claudeCode: claudeUsage()
         case .codex: await codexUsage()
+        case .copilotCLI: CopilotUsageReader.read(home: home, at: date, calendar: calendar)
         default: AIToolUsage(tool: tool)
         }
     }

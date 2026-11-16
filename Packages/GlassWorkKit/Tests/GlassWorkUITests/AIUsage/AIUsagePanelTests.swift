@@ -43,6 +43,19 @@ struct AIUsagePanelSnapshotTests {
         snapshotPanel(AIUsagePanel(reading: reading, refreshMinutes: 5, now: now), name: "ai-usage-none")
     }
 
+    /// A tool with no limits of its own still shows what this Mac's sessions spent.
+    @Test(arguments: [true, false])
+    func spendWithoutLimits(dark: Bool) {
+        var copilot = AIToolUsage(tool: .copilotCLI, updatedAt: now.addingTimeInterval(-300))
+        copilot.spend = AISpend(
+            today: AISpendTotals(aiCredits: 12.4),
+            last7Days: AISpendTotals(aiCredits: 48),
+            month: AISpendTotals(aiCredits: 86.5)
+        )
+        let reading = AIUsageReading(tools: [sample.tools[0], copilot], readAt: now)
+        snapshotPanel(AIUsagePanel(reading: reading, refreshMinutes: 5, now: now), name: "ai-usage-spend", dark: dark)
+    }
+
     @Test func unreadable() {
         let reading = AIUsageReading(tools: [AIToolUsage(tool: .codex, isUnreadable: true)], readAt: now)
         snapshotPanel(AIUsagePanel(reading: reading, refreshMinutes: 5, now: now), name: "ai-usage-error")
