@@ -27,6 +27,24 @@ struct NowPlayingAdapterTests {
         }
     }
 
+    private final class LockedValue<Value: Sendable>: @unchecked Sendable {
+        // Why unchecked: the lock guards the value.
+        private let lock = NSLock()
+        private var value: Value
+
+        init(_ value: Value) {
+            self.value = value
+        }
+
+        func set(_ new: Value) {
+            lock.withLock { value = new }
+        }
+
+        func get() -> Value {
+            lock.withLock { value }
+        }
+    }
+
     private func wait(_ condition: () -> Bool) async throws {
         for _ in 0 ..< 3000 where !condition() { // 30 s: right after a build, Perl can take seconds to start
             try await Task.sleep(for: .milliseconds(10))
@@ -72,6 +90,36 @@ struct NowPlayingAdapterTests {
         #expect(collector.received == ["LANG,PATH"], "lines: \(collector.received)")
         // The output handler holds the adapter weakly, so it must outlive the read.
         adapter.stop()
+    }
+
+    @Test func everyLineArrivesBeforeTheExitIsReported() async {
+        // Many short-lived children at once: the exit often races the last read of the output.
+        let runs = 60
+        let results = await withTaskGroup(of: Bool.self) { group in
+            for index in 0 ..< runs {
+                group.addTask {
+                    let adapter = NowPlayingAdapter(executable: "/bin/sh", arguments: ["-c", "echo line-\(index)"])
+                    let collector = Collector()
+                    let linesAtExit = LockedValue<[String]>([])
+                    do {
+                        try adapter.start(
+                            onLine: collector.add,
+                            onExit: { status in
+                                linesAtExit.set(collector.received)
+                                collector.finish(status)
+                            }
+                        )
+                    } catch {
+                        return false
+                    }
+                    try? await wait { collector.exitStatus != nil }
+                    adapter.stop()
+                    return collector.exitStatus == 0 && linesAtExit.get() == ["line-\(index)"]
+                }
+            }
+            return await group.reduce(into: 0) { $0 += $1 ? 1 : 0 }
+        }
+        #expect(results == runs, "complete runs: \(results) of \(runs)")
     }
 
     @Test func theScriptCompiles() async throws {

@@ -56,18 +56,26 @@ public final class NowPlayingAdapter: NowPlayingSource, @unchecked Sendable {
         // A write after the script died must fail, not kill the app with SIGPIPE.
         _ = fcntl(commands.fileHandleForWriting.fileDescriptor, F_SETNOSIGPIPE, 1)
 
+        let exit = ExitGate(onExit: onExit)
+        // The closure holds `output` until the end of the stream: `Process` lets go of its pipes once the
+        // child is gone, and a pipe that is freed closes its read end with the last lines still unread.
         output.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
-            guard !data.isEmpty, let self else {
+            guard !data.isEmpty else {
+                // End of the stream: nothing more can arrive, so the exit may be reported.
                 handle.readabilityHandler = nil
+                _ = output
+                self?.flushRest(onLine)
+                exit.streamEnded()
                 return
             }
+            guard let self else { return }
             let lines = lock.withLock { buffer.append(data) }
             lines.forEach(onLine)
         }
         child.terminationHandler = { [weak self] finished in
             self?.forget(finished)
-            onExit(finished.terminationStatus)
+            exit.processEnded(finished.terminationStatus)
         }
         try lock.withLock {
             buffer = LineBuffer()
@@ -101,12 +109,60 @@ public final class NowPlayingAdapter: NowPlayingSource, @unchecked Sendable {
         }
     }
 
+    /// A last line that the script left without a newline.
+    private func flushRest(_ onLine: @Sendable (String) -> Void) {
+        lock.withLock { buffer.finish() }.forEach(onLine)
+    }
+
     private func forget(_ finished: Process) {
         lock.withLock {
             guard process === finished else { return }
             process = nil
             try? input?.close()
             input = nil
+        }
+    }
+}
+
+/// Reports the exit once the child has ended and its output has been read to the end,
+/// so `onExit` never overtakes the last lines.
+private final class ExitGate: @unchecked Sendable {
+    // Why unchecked: the lock guards every field.
+    private let lock = NSLock()
+    private var status: Int32?
+    private var streamDone = false
+    private var reported = false
+    private let onExit: @Sendable (Int32) -> Void
+
+    /// A grandchild that inherited the pipe could keep it open forever, so the wait for the end is bounded.
+    private static let streamGrace: TimeInterval = 2
+
+    init(onExit: @escaping @Sendable (Int32) -> Void) {
+        self.onExit = onExit
+    }
+
+    func processEnded(_ value: Int32) {
+        lock.withLock { status = value }
+        report()
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + Self.streamGrace) { [self] in
+            lock.withLock { streamDone = true }
+            report()
+        }
+    }
+
+    func streamEnded() {
+        lock.withLock { streamDone = true }
+        report()
+    }
+
+    private func report() {
+        let value: Int32? = lock.withLock {
+            guard !reported, streamDone, let status else { return nil }
+            reported = true
+            return status
+        }
+        if let value {
+            onExit(value)
         }
     }
 }

@@ -132,6 +132,13 @@ struct LineBufferTests {
         #expect(buffer.append(bytes.prefix(3)).isEmpty)
         #expect(buffer.append(bytes.dropFirst(3)) == ["Тест"])
     }
+
+    @Test func finishGivesTheLastLineWithoutANewline() {
+        var buffer = LineBuffer()
+        #expect(buffer.append(Data("a\nb".utf8)) == ["a"])
+        #expect(buffer.finish() == ["b"])
+        #expect(buffer.finish().isEmpty)
+    }
 }
 
 struct NowPlayingSessionTests {
