@@ -217,6 +217,40 @@ public struct SensorsMenuBarSection: View {
     }
 }
 
+/// Settings › Sensors: which groups the Sensors panel lists.
+public struct SensorGroupsSection: View {
+    private let store: SettingsStore
+
+    public init(store: SettingsStore) {
+        self.store = store
+    }
+
+    public var body: some View {
+        let options = SensorGroupOptions(options: store.settings.module(.sensors)?.options ?? [:])
+        SensorGroupsList(options: options, change: change)
+    }
+
+    private func change(_ group: SensorGroup, _ isShown: Bool) {
+        store.update { settings in
+            settings.update(.sensors) { SensorGroupOptions.set(group, isShown: isShown, in: &$0.options) }
+        }
+    }
+}
+
+struct SensorGroupsList: View {
+    let options: SensorGroupOptions
+    let change: (SensorGroup, Bool) -> Void
+
+    var body: some View {
+        Section(loc("Sensor groups in the panel")) {
+            ForEach(SensorGroup.allCases, id: \.self) { group in
+                Toggle(group.title, isOn: Binding(get: { options.shows(group) }, set: { change(group, $0) }))
+                    .toggleStyle(.checkbox)
+            }
+        }
+    }
+}
+
 /// Settings › Fans module: what the menu bar item shows.
 public struct FansMenuBarSection: View {
     private let showsEachFan: Binding<Bool>

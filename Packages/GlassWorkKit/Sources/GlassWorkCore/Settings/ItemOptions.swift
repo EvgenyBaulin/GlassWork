@@ -43,6 +43,7 @@ public enum ItemOption {
     public static let gpuName = "gpu"
     public static let volumePath = "volume"
     public static let showsUnknownSensors = "unknownSensors"
+    public static let hiddenSensorGroups = "hiddenSensorGroups"
     public static let uptimeFormat = "uptimeFormat"
     public static let hiddenCalendars = "hiddenCalendars"
     public static let calendarWindowHours = "windowHours"

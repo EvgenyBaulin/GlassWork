@@ -236,10 +236,6 @@ public extension ModuleOptionSpec {
             ),
             lowBattery,
             option(.sensors, Key.warnAbove, "Warn above", "Предупреждать выше", temperature, fallback: "95"),
-            toggle(
-                .sensors, Key.showsUnknownSensors, "Include unknown sensors (Other)",
-                "Показывать неизвестные датчики (Прочие)", fallback: true, isAdvanced: true
-            ),
             notifyTemperature,
             option(
                 .uptime, Key.uptimeFormat, "Format", "Формат",

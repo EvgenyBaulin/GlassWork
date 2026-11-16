@@ -25,8 +25,7 @@ struct SensorsPanel: View {
     @Environment(\.panelActions) private var actions
 
     private var groups: [SensorGroup] {
-        let showsUnknown = actions.moduleOptions(.sensors).flag(ItemOption.showsUnknownSensors, default: true)
-        return SensorGroup.allCases.filter { showsUnknown || $0 != .other }
+        SensorGroupOptions(options: actions.moduleOptions(.sensors)).shownGroups
     }
 
     var body: some View {
