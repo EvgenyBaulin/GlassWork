@@ -72,7 +72,24 @@ struct IslandExpandedCard: View {
         case let .devServers(detail): developerContent(detail)
         case let .keepAwake(end): keepAwakeContent(end)
         case let .downloads(files): downloadsContent(files)
+        case let .headphones(_, batteries): headphonesContent(batteries)
         case .nowPlaying, .weather, .levels: EmptyView()
+        }
+    }
+
+    /// Each bud and the case, as the system reports them.
+    private func headphonesContent(_ batteries: [DeviceBattery]) -> some View {
+        VStack(spacing: 10) {
+            ForEach(batteries) { battery in
+                VStack(spacing: 5) {
+                    HStack {
+                        Text(battery.name).font(.system(size: 12)).lineLimit(1)
+                        Spacer()
+                        Text(Format.percent(battery.charge)).font(.system(size: 11, design: .monospaced))
+                    }
+                    ThinBar(value: battery.charge, tint: battery.charge < 0.2 ? Palette.red : Palette.green)
+                }
+            }
         }
     }
 

@@ -32,6 +32,8 @@ public struct IslandInput: Sendable, Equatable {
     public var levels: SystemLevels?
     /// The Downloads folder's newest files, from the same reader as the Dock's stack.
     public var downloads: [DockFile] = []
+    /// Connected accessories, read every few minutes; matched to headphones by name.
+    public var deviceBatteries: [DeviceBattery] = []
 
     public init() {}
 
@@ -59,6 +61,7 @@ public struct IslandInput: Sendable, Equatable {
         artwork = monitor.nowPlaying.artwork
         outputDevice = monitor.nowPlaying.outputDevice
         clipboardEntry = monitor.clipboard.history.entries.first
+        deviceBatteries = monitor.deviceBatteries
         clipboardImageURL = clipboardEntry.flatMap { monitor.clipboard.imageURL(for: $0) }
     }
 }

@@ -76,6 +76,8 @@ public enum IslandDetail: Sendable, Equatable {
     case levels(SystemLevels, changed: IslandLevel)
     /// Files being downloaded, and those that finished meanwhile.
     case downloads([DockFile])
+    /// Sound moved to headphones; their batteries, when known.
+    case headphones(name: String, batteries: [DeviceBattery])
 }
 
 public struct IslandEvent: Identifiable, Equatable, Sendable {
@@ -97,7 +99,7 @@ public struct IslandEvent: Identifiable, Equatable, Sendable {
     /// Transition alerts survive subsequent snapshots until expiry, recovery or dismissal.
     var isTransition: Bool {
         switch detail {
-        case .network, .devServers, .charging, .copied, .levels: true
+        case .network, .devServers, .charging, .copied, .levels, .headphones: true
         // Finished downloads stay for their moment; ones in progress follow each reading.
         case .downloads: expires != nil
         default: false
