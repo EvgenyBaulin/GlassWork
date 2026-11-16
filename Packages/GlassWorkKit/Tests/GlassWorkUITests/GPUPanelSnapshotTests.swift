@@ -5,6 +5,7 @@ import Testing
 
 /// The GPU panel with one GPU, with two, and with a driver that reports no utilization.
 @MainActor
+@Suite(.enabled(if: ProcessInfo.processInfo.environment["GW_SKIP_SNAPSHOTS"] == nil))
 struct GPUPanelSnapshotTests {
     private static let gib: UInt64 = 1 << 30
 
