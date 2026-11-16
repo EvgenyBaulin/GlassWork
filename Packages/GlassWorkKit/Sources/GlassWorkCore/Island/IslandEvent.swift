@@ -72,7 +72,8 @@ public enum IslandDetail: Sendable, Equatable {
     /// Only GlassWork's own mode, with its scheduled end.
     case keepAwake(endsAt: Date)
     case nowPlaying(NowPlayingSession)
-    case weather(WeatherReport)
+    /// Rain coming or under way, from the hourly forecast.
+    case weather(IslandRain)
     case copied(ClipboardEntry)
     /// Volume or brightness just changed: the one that did leads.
     case levels(SystemLevels, changed: IslandLevel)
@@ -105,7 +106,7 @@ public struct IslandEvent: Identifiable, Equatable, Sendable {
     /// Transition alerts survive subsequent snapshots until expiry, recovery or dismissal.
     var isTransition: Bool {
         switch detail {
-        case .network, .devServers, .charging, .copied, .levels, .headphones, .focus, .shelfDrop: true
+        case .network, .devServers, .charging, .copied, .levels, .headphones, .focus, .shelfDrop, .weather: true
         case .build: expires != nil
         // Finished downloads stay for their moment; ones in progress follow each reading.
         case .downloads: expires != nil

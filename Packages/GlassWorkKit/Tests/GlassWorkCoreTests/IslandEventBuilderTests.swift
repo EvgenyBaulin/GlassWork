@@ -257,7 +257,7 @@ struct IslandEventBuilderTests {
 
     @Test func reservedAndUnsupportedKindsAreNotProduced() {
         let events = build(IslandInput(), previous: IslandInput())
-        let unsupported: Set<IslandEventKind> = [.weather, .downloads, .airPods, .volume, .agents]
+        let unsupported: Set<IslandEventKind> = [.downloads, .airPods, .volume, .agents]
         #expect(events.allSatisfy { !unsupported.contains($0.kind) })
     }
 

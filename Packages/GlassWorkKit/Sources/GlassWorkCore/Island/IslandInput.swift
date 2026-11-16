@@ -37,6 +37,9 @@ public struct IslandInput: Sendable, Equatable {
     public var deviceBatteries: [DeviceBattery] = []
     /// Filled by the host, which watches the system's Focus files; nil when it cannot read them.
     public var focus: FocusReading?
+    /// Rain coming or under way at the first Weather place; nil when none, or when the module is off or has no
+    /// place. Read when the snapshot is taken, so two snapshots compare what was true at their own moments.
+    public var rain: IslandRain?
 
     public init() {}
 
@@ -65,6 +68,7 @@ public struct IslandInput: Sendable, Equatable {
         outputDevice = monitor.nowPlaying.outputDevice
         clipboardEntry = monitor.clipboard.history.entries.first
         deviceBatteries = monitor.deviceBatteries
+        rain = monitor.weather.isActive ? IslandRain.reading(from: monitor.weather.primaryReport, now: Date()) : nil
         clipboardImageURL = clipboardEntry.flatMap { monitor.clipboard.imageURL(for: $0) }
     }
 }

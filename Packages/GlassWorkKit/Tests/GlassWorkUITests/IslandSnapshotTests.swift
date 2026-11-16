@@ -9,7 +9,7 @@ private let islandNow = Date(timeIntervalSince1970: 1_794_831_360)
 private enum IslandSample: String, CaseIterable {
     case meeting, timers, copied, charging, systemAlert, network, devServers, nowPlaying, keepAwake, inProgress
     case levels, headphones
-    case downloads, buildRunning, buildFailed, buildSucceeded
+    case downloads, buildRunning, buildFailed, buildSucceeded, rain
     case focusOn, focusOff
 }
 
@@ -81,6 +81,7 @@ private enum IslandSamples {
             input.keepAwakeEnds = islandNow.addingTimeInterval(84)
         case .levels, .headphones, .focusOn, .focusOff: input = levelsInput(sample)
         case .downloads, .buildRunning, .buildFailed, .buildSucceeded: input = progressInput(sample)
+        case .rain: input = laterInput(sample)
         }
         return input
     }
@@ -109,10 +110,41 @@ private enum IslandSamples {
         isOn: true, modeID: "com.apple.sleep.sleep-mode", name: "Sleep", symbol: "bed.double.fill"
     )
 
+    /// Dry in the hour under way, then three wet hours.
+    static var rainReport: WeatherReport {
+        let amounts = [0, 0, 0.6, 1.8, 0.9, 0]
+        let hourStart = floor(islandNow.timeIntervalSince1970 / 3600) * 3600
+        let hours = amounts.enumerated().map { index, amount in
+            HourForecast(
+                date: Date(timeIntervalSince1970: hourStart + Double(index) * 3600), temperature: 9,
+                condition: amount > 0 ? .rain : .cloudy, isDay: false, precipitation: amount,
+                precipitationProbability: 80
+            )
+        }
+        return WeatherReport(
+            place: WeatherPlace(id: 1, name: "Moscow", country: "RU", latitude: 55.7, longitude: 37.6),
+            timeZone: "Europe/Moscow", fetchedAt: islandNow,
+            current: CurrentWeather(
+                temperature: 9, feelsLike: 7, humidity: 80, windSpeed: 3, uvIndex: 0, condition: .cloudy, isDay: false
+            ),
+            hours: hours, days: []
+        )
+    }
+
     static let downloads = [
         DockFile(path: "/d/Assets.zip", name: "Assets.zip", added: islandNow, isDownloading: true, progress: 0.68),
         DockFile(path: "/d/Logo.svg", name: "Logo.svg", added: islandNow),
     ]
+
+    static func laterInput(_ sample: IslandSample) -> IslandInput {
+        var input = IslandInput()
+        if sample == .rain {
+            input.rain = IslandRain.reading(from: rainReport, now: islandNow)
+        } else {
+            input.downloads = downloads
+        }
+        return input
+    }
 
     static func levelsInput(_ sample: IslandSample) -> IslandInput {
         var input = IslandInput()
@@ -253,6 +285,7 @@ private enum IslandSamples {
         case .buildFailed, .buildSucceeded: previous.build = .running(BuildRun(name: "Pocket", started: islandNow))
         case .focusOn: previous.focus = FocusReading(isOn: false)
         case .focusOff: previous.focus = sleep
+        case .rain: previous.rain = nil
         default: break
         }
         store.update(input: previous, now: islandNow.addingTimeInterval(-120))
@@ -428,6 +461,19 @@ struct IslandSnapshotTests {
             store.update(input: input, now: islandNow)
             store.lifecycle.clicked()
             render(store, name: "disk-warning", dark: dark, height: 330)
+        }
+    }
+
+    @Test func rainChartHover() throws {
+        let rain = try #require(IslandRain.reading(from: IslandSamples.rainReport, now: islandNow))
+        for dark in [true, false] {
+            let view = try IslandRainChart(rain: rain, initialHover: rain.hours[3].date)
+                .padding(16).frame(width: 320, height: 110)
+                .background(dark ? Color.black : Color.white)
+                .environment(\.locale, Locale(identifier: "en_US"))
+                .environment(\.timeZone, #require(TimeZone(secondsFromGMT: 3 * 3600)))
+                .transaction { $0.animation = nil; $0.disablesAnimations = true }
+            snapshotPanel(view, name: "rain-chart-hover", dark: dark, testName: "island")
         }
     }
 

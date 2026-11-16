@@ -41,6 +41,22 @@
         }
       }
     },
+    "%@ mm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ mm"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ мм"
+          }
+        }
+      }
+    },
     "%@ of %@": {
       "localizations": {
         "ru": {
@@ -1539,6 +1555,22 @@
         }
       }
     },
+    "dry": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dry"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "сухо"
+          }
+        }
+      }
+    },
     "ECB": {
       "localizations": {
         "ru": {
@@ -2051,6 +2083,22 @@
         }
       }
     },
+    "Heavy rain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heavy rain"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сильный дождь"
+          }
+        }
+      }
+    },
     "Hide again after %lld s": {
       "localizations": {
         "ru": {
@@ -2415,6 +2463,22 @@
         }
       }
     },
+    "Light rain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light rain"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Небольшой дождь"
+          }
+        }
+      }
+    },
     "Links": {
       "localizations": {
         "ru": {
@@ -2677,6 +2741,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Умеренное"
+          }
+        }
+      }
+    },
+    "Moderate rain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderate rain"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Умеренный дождь"
           }
         }
       }
@@ -3589,6 +3669,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Дождь"
+          }
+        }
+      }
+    },
+    "rain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rain"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "дождь"
+          }
+        }
+      }
+    },
+    "Rain around %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain around %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дождь около %@"
+          }
+        }
+      }
+    },
+    "Rain until %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain until %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дождь до %@"
           }
         }
       }
