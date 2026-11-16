@@ -113,12 +113,11 @@ public final class AgendaStore {
         for event in store.events(matching: predicate) {
             guard let start = event.startDate, let end = event.endDate else { continue }
             // Events end at the start of the next day when they fill the day, so the last moment counts.
-            let last = max(end.addingTimeInterval(-1), start)
-            var day = calendar.startOfDay(for: start)
+            // Only the days inside the month are walked, however long the event runs.
+            let last = min(max(end.addingTimeInterval(-1), start), interval.end.addingTimeInterval(-1))
+            var day = calendar.startOfDay(for: max(start, interval.start))
             while day <= last {
-                if day >= interval.start, day < interval.end {
-                    days.insert(calendar.component(.day, from: day))
-                }
+                days.insert(calendar.component(.day, from: day))
                 guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
                 day = next
             }
