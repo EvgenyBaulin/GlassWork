@@ -62,6 +62,10 @@ struct TextRecognizerTests {
         #expect(text.components(separatedBy: "\n").count == 2)
     }
 
+    @Test func warmingUpDoesNotThrow() {
+        TextRecognizer.warmUp()
+    }
+
     @Test func findsNothingInABlankImage() throws {
         #expect(try TextRecognizer.recognize(renderedPNG(lines: [])).isEmpty)
     }
@@ -102,6 +106,14 @@ struct ScreenTextCaptureTests {
         let result = try await capture(StubSelection(picture: Data([1]))).run()
         #expect(result == .text("Hello"))
         #expect(leftovers().isEmpty)
+    }
+
+    @Test func tellsWhenReadingStartsAndNotWhenCancelled() async throws {
+        let counter = Counter()
+        _ = try await capture(StubSelection(picture: Data([1]))).run { counter.add() }
+        #expect(counter.value == 1)
+        _ = try await capture(StubSelection(picture: nil)).run { counter.add() }
+        #expect(counter.value == 1)
     }
 
     @Test func escapeCopiesNothing() async throws {
@@ -156,5 +168,19 @@ private final class Seen: Sendable {
 
     func set(_ tool: String, _ arguments: [String]) {
         lock.withLock { stored = (tool, arguments) }
+    }
+}
+
+/// Counts calls. A lock, because the callback and the test run on different actors.
+private final class Counter: Sendable {
+    private let lock = NSLock()
+    private nonisolated(unsafe) var count = 0
+
+    var value: Int {
+        lock.withLock { count }
+    }
+
+    func add() {
+        lock.withLock { count += 1 }
     }
 }

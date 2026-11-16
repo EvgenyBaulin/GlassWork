@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Vision
 
@@ -14,6 +15,39 @@ public enum TextRecognizer {
         try VNImageRequestHandler(data: image).perform([request])
         let lines = request.results?.compactMap { $0.topCandidates(1).first?.string } ?? []
         return lines.joined(separator: "\n")
+    }
+
+    /// Reads a tiny picture so Vision loads its model now, not on the first real selection.
+    /// Blocks for as long as the model takes to load, so call it off the main actor.
+    public static func warmUp() {
+        guard let image = warmUpImage() else { return }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = languages
+        request.usesLanguageCorrection = true
+        try? VNImageRequestHandler(cgImage: image).perform([request])
+    }
+
+    private static func warmUpImage() -> CGImage? {
+        let width = 160
+        let height = 48
+        guard let context = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return nil }
+        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        context.setFillColor(CGColor(gray: 0, alpha: 1))
+        // Bars of about the height of text: enough for the model to run, nothing to read.
+        for index in 0 ..< 6 {
+            context.fill(CGRect(x: 12 + index * 24, y: 14, width: 10, height: 20))
+        }
+        return context.makeImage()
     }
 }
 
@@ -44,9 +78,14 @@ public struct ScreenTextCapture: Sendable {
         self.recognize = recognize
     }
 
-    public func run() async throws -> ScreenTextResult {
+    /// - Parameter onRecognizing: Called once the area is picked, before the text is read.
+    public func run(onRecognizing: @MainActor @Sendable () -> Void = {}) async throws -> ScreenTextResult {
         guard let image = try await selectArea() else { return .cancelled }
-        let text = try recognize(image).trimmingCharacters(in: .whitespacesAndNewlines)
+        await onRecognizing()
+        // Reading takes a moment and must not hold up the interface, whatever this is called from.
+        let recognize = recognize
+        let read = try await Task.detached(priority: .userInitiated) { try recognize(image) }.value
+        let text = read.trimmingCharacters(in: .whitespacesAndNewlines)
         return text.isEmpty ? .noText : .text(text)
     }
 

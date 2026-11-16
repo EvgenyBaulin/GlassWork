@@ -3169,6 +3169,22 @@
         }
       }
     },
+    "Reading text…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading text…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Распознаю текст…"
+          }
+        }
+      }
+    },
     "Ready": {
       "localizations": {
         "ru": {

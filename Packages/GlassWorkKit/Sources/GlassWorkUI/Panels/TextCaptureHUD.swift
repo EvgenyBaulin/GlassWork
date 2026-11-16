@@ -3,18 +3,25 @@ import SwiftUI
 
 /// What text capture has to say when it is done.
 public enum TextCaptureNotice: Equatable, Sendable {
+    /// The area is picked and the text is being read.
+    case reading
     case copied(characters: Int)
     case noText
     case needsScreenRecording
 
     /// Instructions need time to be read.
     public var duration: Duration {
-        self == .needsScreenRecording ? .seconds(7) : .seconds(2)
+        switch self {
+        case .needsScreenRecording: .seconds(7)
+        // Replaced by the result; this only keeps a stuck one from staying.
+        case .reading: .seconds(30)
+        default: .seconds(2)
+        }
     }
 
     var symbol: String {
         switch self {
-        case .copied: "text.viewfinder"
+        case .reading, .copied: "text.viewfinder"
         case .noText: "text.magnifyingglass"
         case .needsScreenRecording: "lock.shield"
         }
@@ -22,6 +29,7 @@ public enum TextCaptureNotice: Equatable, Sendable {
 
     var title: String {
         switch self {
+        case .reading: loc("Reading text…")
         case let .copied(characters): loc("\(characters) characters copied")
         case .noText: loc("No text found")
         case .needsScreenRecording: loc("GlassWork needs Screen Recording")
