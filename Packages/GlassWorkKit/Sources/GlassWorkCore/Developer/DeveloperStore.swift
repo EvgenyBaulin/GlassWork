@@ -125,8 +125,14 @@ public final class DeveloperStore {
         load(.aiUsage) {
             await collector.read(at: date)
         } apply: { store, value in
-            store.aiUsage = value.warning(at: store.options.usageWarnShare)
+            store.aiUsage = value.keepingKnown(from: store.aiUsage).warning(at: store.options.usageWarnShare)
         }
+    }
+
+    /// The reading saved before the app last quit, so a first read that finds nothing still has numbers to keep.
+    public func restore(aiUsage saved: AIUsageReading?) {
+        guard aiUsage == nil, let saved else { return }
+        aiUsage = saved.warning(at: options.usageWarnShare)
     }
 
     private func readGit() {
