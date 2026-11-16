@@ -224,7 +224,7 @@ struct AIUsageWidget: View {
     }
 
     private func windowTitle(_ window: AIWindow) -> String {
-        window.kind == .fiveHour ? loc("5-hour window") : loc("This week")
+        AIWindowText.title(window.kind)
     }
 
     private func resetText(_ window: AIWindow) -> String? {
@@ -236,7 +236,7 @@ struct AIUsageWidget: View {
     private func resetTime(_ date: Date) -> String {
         date.timeIntervalSince(now) < 86400
             ? date.formatted(date: .omitted, time: .shortened)
-            : date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
+            : AIWindowText.resetDay(date, from: now)
     }
 
     private func tint(_ share: Double) -> Color {

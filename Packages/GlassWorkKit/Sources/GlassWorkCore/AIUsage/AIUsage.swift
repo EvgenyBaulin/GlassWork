@@ -34,6 +34,8 @@ public enum AITool: String, Codable, CaseIterable, Sendable, Identifiable {
 public struct AIWindow: Codable, Sendable, Equatable {
     public enum Kind: Codable, Sendable, Equatable {
         case fiveHour, week
+        /// A plan's monthly allowance, such as Copilot's.
+        case month
     }
 
     public let kind: Kind
@@ -180,17 +182,24 @@ public extension AIToolUsage {
 }
 
 public extension AIUsageReading {
-    /// A read that found nothing keeps a tool's last numbers, so a file caught mid-write or a log that
-    /// failed to open does not blank the row. The row still says how old they are, and the next read
-    /// tries again as usual.
+    /// A read that misses something keeps the tool's last limits or spend, so a file caught mid-write or a
+    /// request that failed does not blank the row. The row still says how old the numbers are, and the next
+    /// read tries again as usual.
     func keepingKnown(from previous: AIUsageReading?) -> AIUsageReading {
         guard let previous else { return self }
         let merged = tools.map { usage in
-            guard !usage.hasNumbers,
-                  let known = previous.tools.first(where: { $0.tool == usage.tool }),
-                  known.hasNumbers
-            else { return usage }
-            return known
+            guard let known = previous.tools.first(where: { $0.tool == usage.tool }), known.hasNumbers else {
+                return usage
+            }
+            guard usage.hasNumbers else { return known }
+            var kept = usage
+            if kept.windows.isEmpty {
+                kept.windows = known.windows
+            }
+            if kept.spend == nil {
+                kept.spend = known.spend
+            }
+            return kept
         }
         var reading = AIUsageReading(tools: merged, readAt: readAt)
         reading.warnShare = warnShare
