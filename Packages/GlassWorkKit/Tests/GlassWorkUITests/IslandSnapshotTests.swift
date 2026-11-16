@@ -337,6 +337,27 @@ struct IslandSnapshotTests {
         }
     }
 
+    @Test func shelfDropZone() {
+        for dark in [true, false] {
+            let store = IslandStore()
+            store.beginDrop(IslandDropPreview(names: ["invoice-oct.pdf", "notes.md"], onShelf: 3))
+            render(store, name: "shelf-drop-zone", dark: dark, height: 260)
+            store.beginDrop(IslandDropPreview(names: ["photo.png"], onShelf: 0))
+            render(store, name: "shelf-drop-zone-one", dark: dark, height: 260)
+        }
+    }
+
+    @Test func shelfDropAdded() {
+        for dark in [true, false] {
+            let store = IslandStore()
+            store.update(input: IslandInput(), now: islandNow)
+            store.showShelfDrop(count: 2, now: islandNow)
+            render(store, name: "compact-shelf-drop", dark: dark)
+            store.lifecycle.clicked()
+            render(store, name: "expanded-shelf-drop", dark: dark, height: 160)
+        }
+    }
+
     @Test func lifecycle() {
         for dark in [true, false] {
             let store = IslandStore()

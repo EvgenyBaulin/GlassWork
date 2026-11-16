@@ -49,6 +49,12 @@ public struct IslandGeometry: Sendable, Equatable {
         CGRect(x: notch.minX - 6, y: notch.minY - 4, width: notch.width + 12, height: notch.height + 4)
     }
 
+    /// Where a file drag opens the drop zone: the notch with a margin at the sides and a little below, small
+    /// enough that dragging along the menu bar does not trigger it.
+    public var dropTriggerFrame: CGRect {
+        CGRect(x: notch.minX - 40, y: notch.minY - 10, width: notch.width + 80, height: notch.height + 10)
+    }
+
     public func compactFrame(leftWing: CGFloat, rightWing: CGFloat) -> CGRect {
         CGRect(
             x: notch.minX - max(leftWing, 0), y: notch.minY,

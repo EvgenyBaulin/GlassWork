@@ -15,7 +15,14 @@ final class AppModel {
     let focusWatcher = FocusWatcher()
     private lazy var islandController = IslandController(
         store: island, actions: islandActions,
-        statusItemsMinX: { [weak self] in self?.statusBar.leftmostItemX(on: $0) }
+        statusItemsMinX: { [weak self] in self?.statusBar.leftmostItemX(on: $0) },
+        shelfItemCount: { [weak self] in self?.monitor.shelf.items.count ?? 0 },
+        dropOnShelf: { [weak self] urls in
+            Task { @MainActor in
+                await self?.monitor.shelf.add(urls)
+                self?.updateIsland()
+            }
+        }
     )
     private(set) lazy var islandFeeds = IslandFeeds { [weak self] in self?.updateIsland() }
     private let diagnostics = DiagnosticsReporter()
@@ -251,6 +258,7 @@ final class AppModel {
         monitor.developer.options = DeveloperOptions(settings: store.settings)
         dock.apply(store.settings.dock)
         windowTiles.apply(store.settings.windowTiles)
+        islandController.acceptsShelfDrops = store.settings.module(.shelf).map { $0.mode != .off } ?? false
         islandController.apply(store.settings.island)
         islandFeeds.apply(
             isEnabled: store.settings.island.isEnabled,

@@ -21,6 +21,7 @@ struct IslandPresentation {
         case .charging, .keepAwake: Palette.green
         case .nowPlaying: artworkTint
         case .copied: Palette.teal
+        case .shelfDrop: Palette.purple
         case .weather, .downloads: Palette.blue
         case .levels(_, .volume): Palette.pink
         case .levels(_, .brightness): Palette.yellow
@@ -48,6 +49,7 @@ struct IslandPresentation {
         case .keepAwake: "cup.and.heat.waves.fill"
         case .nowPlaying: "music.note"
         case .copied: "doc.on.clipboard"
+        case .shelfDrop: "tray"
         case .weather: "cloud.rain"
         case let .levels(levels, .volume): levels.isSilent ? "speaker.slash.fill" : "speaker.wave.2.fill"
         case .levels(_, .brightness): "sun.max.fill"
@@ -76,6 +78,7 @@ struct IslandPresentation {
         case let .devServers(.serverAppeared(server)): server.tool ?? server.process
         case .charging, .keepAwake, .nowPlaying: ""
         case .copied: loc("Copied")
+        case .shelfDrop: loc("Shelf")
         case .weather: loc("Weather")
         case .levels, .headphones: ""
         case let .focus(reading): reading.name ?? loc("Focus")
@@ -103,6 +106,7 @@ struct IslandPresentation {
         case .keepAwake: loc("Keep Awake")
         case let .nowPlaying(session): session.track.title
         case .copied: loc("Copied")
+        case .shelfDrop: loc("Added to the Shelf")
         case .weather: loc("Weather")
         case .levels(_, .volume): loc("Volume")
         case .levels(_, .brightness): loc("Brightness")
@@ -133,6 +137,7 @@ struct IslandPresentation {
         case let .keepAwake(end): PlaybackTime.text(end.timeIntervalSince(now))
         case let .nowPlaying(session): PlaybackTime.text(session.position(at: now))
         case let .copied(entry): clipboardKind(entry.kind)
+        case let .shelfDrop(count): "+\(count)"
         case let .weather(report): Format.temperature(report.current.temperature)
         case let .levels(levels, .volume): volumeText(levels)
         case let .levels(levels, .brightness): Format.percent(levels.brightness ?? 0)
@@ -201,6 +206,7 @@ struct IslandPresentation {
         case let .levels(levels, .volume): levels.outputName ?? ""
         case .levels(_, .brightness): loc("Built-in display")
         case let .downloads(files): files.count == 1 ? files[0].name : ""
+        case let .shelfDrop(count): filesText(count)
         case .headphones: loc("Connected")
         case .focus: ""
         }
@@ -284,6 +290,13 @@ struct IslandPresentation {
             result.warnings > 0 ? loc("\(result.warnings) warnings") : nil,
             loc("took \(PlaybackTime.text(result.duration))"),
         ].compactMap(\.self).joined(separator: " · ")
+    }
+
+    private func filesText(_ count: Int) -> String {
+        if count == 1 {
+            return loc("1 file")
+        }
+        return loc("\(count) files")
     }
 
     /// The buds, not the case, which charges them.

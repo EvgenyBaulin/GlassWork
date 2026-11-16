@@ -2,7 +2,7 @@ import Foundation
 
 public enum IslandEventKind: String, CaseIterable, Sendable {
     case meeting, inProgress, timers, systemAlert, network, build, devServers, charging
-    case keepAwake, focus, nowPlaying, weather, copied
+    case keepAwake, focus, nowPlaying, weather, copied, shelfDrop
     case downloads, airPods, volume, agents
 
     public var importance: Int {
@@ -82,6 +82,8 @@ public enum IslandDetail: Sendable, Equatable {
     case headphones(name: String, batteries: [DeviceBattery])
     /// A Focus mode turned on or off; an off event names the mode that ended.
     case focus(FocusReading)
+    /// Files just dropped on the shelf at the notch; drops that follow each other add up.
+    case shelfDrop(count: Int)
 }
 
 public struct IslandEvent: Identifiable, Equatable, Sendable {
@@ -103,7 +105,7 @@ public struct IslandEvent: Identifiable, Equatable, Sendable {
     /// Transition alerts survive subsequent snapshots until expiry, recovery or dismissal.
     var isTransition: Bool {
         switch detail {
-        case .network, .devServers, .charging, .copied, .levels, .headphones, .focus: true
+        case .network, .devServers, .charging, .copied, .levels, .headphones, .focus, .shelfDrop: true
         case .build: expires != nil
         // Finished downloads stay for their moment; ones in progress follow each reading.
         case .downloads: expires != nil

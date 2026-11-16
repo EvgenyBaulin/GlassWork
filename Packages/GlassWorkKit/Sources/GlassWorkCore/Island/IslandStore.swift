@@ -7,6 +7,8 @@ public final class IslandStore {
     public private(set) var queue = IslandQueue()
     public var lifecycle: IslandLifecycle
     public private(set) var page = 0
+    /// Files being dragged over the notch; the island shows the drop zone while this is set.
+    public private(set) var dropPreview: IslandDropPreview?
 
     @ObservationIgnored private var previous: IslandInput?
     @ObservationIgnored private var dismissedOngoing: Set<String> = []
@@ -87,12 +89,39 @@ public final class IslandStore {
         synchronize()
     }
 
+    public func beginDrop(_ preview: IslandDropPreview) {
+        if preview != dropPreview {
+            dropPreview = preview
+        }
+    }
+
+    public func endDrop() {
+        if dropPreview != nil {
+            dropPreview = nil
+        }
+    }
+
+    /// Shows how many files just went onto the shelf. Drops within a few seconds add up.
+    public func showShelfDrop(count: Int, now: Date) {
+        guard count > 0 else { return }
+        var total = count
+        if let old = queue.events.first(where: { $0.id == "shelfDrop" }),
+           case let .shelfDrop(earlier) = old.detail, old.expires.map({ $0 > now }) ?? false
+        {
+            total += earlier
+        }
+        queue.events.removeAll { $0.id == "shelfDrop" }
+        queue.events.append(IslandEventBuilder.shelfDrop(count: total, now: now))
+        synchronize()
+    }
+
     /// Starts fresh after disabling the surface; old transitions must not replay on re-enable.
     public func reset() {
         previous = nil
         queue = IslandQueue()
         lifecycle = IslandLifecycle(hoverToExpand: lifecycle.hoverToExpand)
         page = 0
+        dropPreview = nil
         dismissedOngoing = []
         snoozedUntil = [:]
     }
