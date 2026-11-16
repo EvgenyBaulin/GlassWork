@@ -49,14 +49,15 @@ extension ItemContent {
 
     static func devServers(_ reading: DevServerReading?, options: [String: String] = [:]) -> ItemContent {
         guard case let .servers(found) = reading else {
-            var item = ItemContent(figure: "—", template: "99")
+            var item = ItemContent(figure: "—", template: ":65535")
             item.isDimmed = true
             return item
         }
         // Databases stay in the panel either way, they just stop counting.
         let countsServices = options.flag(ItemOption.countsServices, default: true)
         let servers = countsServices ? found : found.filter { $0.kind == .web }
-        var item = ItemContent(figure: "\(servers.count)", template: "99")
+        let figure = servers.count == 1 ? ":\(servers[0].port)" : "\(servers.count)"
+        var item = ItemContent(figure: figure, template: ":65535")
         item.glyph = .dots(filled: servers.count, faint: 0)
         item.detail = servers.prefix(5).map { ":\($0.port) \($0.process)" }.joined(separator: " · ")
         return item

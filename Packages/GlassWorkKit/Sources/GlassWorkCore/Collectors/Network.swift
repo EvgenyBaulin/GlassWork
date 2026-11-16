@@ -7,11 +7,13 @@ public struct InterfaceCounters: Sendable, Equatable {
     public var name: String
     public var received: UInt64
     public var sent: UInt64
+    public var isActive: Bool
 
-    public init(name: String, received: UInt64, sent: UInt64) {
+    public init(name: String, received: UInt64, sent: UInt64, isActive: Bool = true) {
         self.name = name
         self.received = received
         self.sent = sent
+        self.isActive = isActive
     }
 }
 
@@ -25,6 +27,7 @@ public struct NetworkSample: Codable, Sendable, Equatable {
     /// Bytes per second.
     public var download: Double
     public var upload: Double
+    /// Active physical interfaces, including ones with no traffic during this interval.
     public var interfaces: [Interface]
     public var sessionReceived: UInt64
     public var sessionSent: UInt64
@@ -46,20 +49,18 @@ public struct NetworkSample: Codable, Sendable, Equatable {
         var interfaces: [Interface] = []
         var received: UInt64 = 0
         var sent: UInt64 = 0
-        for counters in current where isPhysical(counters.name) {
-            guard let before = old[counters.name] else { continue }
+        for counters in current where isPhysical(counters.name) && counters.isActive {
+            let before = old[counters.name].flatMap { $0.isActive ? $0 : nil } ?? counters
             // Counters restart when an interface comes back up; that interval reads as zero.
             let inBytes = counters.received >= before.received ? counters.received - before.received : 0
             let outBytes = counters.sent >= before.sent ? counters.sent - before.sent : 0
             received += inBytes
             sent += outBytes
-            if inBytes > 0 || outBytes > 0 {
-                interfaces.append(Interface(
-                    name: counters.name,
-                    download: Double(inBytes) / max(seconds, 0.001),
-                    upload: Double(outBytes) / max(seconds, 0.001)
-                ))
-            }
+            interfaces.append(Interface(
+                name: counters.name,
+                download: Double(inBytes) / max(seconds, 0.001),
+                upload: Double(outBytes) / max(seconds, 0.001)
+            ))
         }
         return NetworkSample(
             download: Double(received) / max(seconds, 0.001),
@@ -146,6 +147,8 @@ public enum NetworkReader {
         var buffer = [UInt8](repeating: 0, count: length)
         guard sysctl(&mib, 6, &buffer, &length, nil, 0) == 0 else { return [] }
 
+        let links = SCDynamicStoreCopyMultiple(nil, nil, ["State:/Network/Interface/.*/Link"] as CFArray)
+            as? [String: [String: Any]] ?? [:]
         var result: [InterfaceCounters] = []
         buffer.withUnsafeBytes { raw in
             var offset = 0
@@ -156,13 +159,23 @@ public enum NetworkReader {
                 let message = raw.loadUnaligned(fromByteOffset: offset, as: if_msghdr2.self)
                 var name = [CChar](repeating: 0, count: Int(IF_NAMESIZE))
                 guard if_indextoname(UInt32(message.ifm_index), &name) != nil else { continue }
+                let interfaceName = String(cString: name)
+                let linkActive =
+                    links["State:/Network/Interface/\(interfaceName)/Link"]?[kSCPropNetLinkActive as String]
+                        as? Bool
                 result.append(InterfaceCounters(
-                    name: String(cString: name),
+                    name: interfaceName,
                     received: message.ifm_data.ifi_ibytes,
-                    sent: message.ifm_data.ifi_obytes
+                    sent: message.ifm_data.ifi_obytes,
+                    isActive: isActive(flags: message.ifm_flags, linkActive: linkActive)
                 ))
             }
         }
         return result
+    }
+
+    /// A disconnected Wi-Fi interface may still have resources allocated (`IFF_RUNNING`).
+    static func isActive(flags: Int32, linkActive: Bool?) -> Bool {
+        flags & (IFF_UP | IFF_RUNNING) == (IFF_UP | IFF_RUNNING) && linkActive != false
     }
 }
