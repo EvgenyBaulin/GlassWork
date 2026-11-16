@@ -44,6 +44,9 @@ public final class DeveloperStore {
     @ObservationIgnored private let gitWatcher = GitWatcher()
     @ObservationIgnored private var changedRepositories: Set<String> = []
     @ObservationIgnored private var lastChangeRead = Date.distantPast
+    @ObservationIgnored private var isLive = true
+    @ObservationIgnored private var lastDemand: Set<ModuleID> = []
+    @ObservationIgnored private var networkWatcher: NetworkPathWatcher?
 
     /// Builds touch files for minutes on end; one `git status` per repository in this time is plenty.
     private static let gitChangeInterval: TimeInterval = 5
@@ -58,8 +61,12 @@ public final class DeveloperStore {
         self.locateGit = locateGit
     }
 
-    /// Reads every module in `demand` that is due.
-    public func tick(at date: Date = Date(), demand: Set<ModuleID>) {
+    /// Reads every module in `demand` that is due. `live` is set while a panel shows the modules, which then read at
+    /// their quicker pace.
+    public func tick(at date: Date = Date(), demand: Set<ModuleID>, live: Bool = true) {
+        isLive = live
+        lastDemand = demand
+        watchNetwork(demand.contains(.vpn) || demand.contains(.wifi))
         for module in demand where isDue(module, at: date) {
             lastRead[module] = date
             read(module, at: date)
@@ -78,6 +85,18 @@ public final class DeveloperStore {
         read(module, at: date)
     }
 
+    /// A VPN coming up or a Wi-Fi network changing shows at once instead of on the next slow read.
+    private func watchNetwork(_ wanted: Bool) {
+        guard wanted != (networkWatcher != nil) else { return }
+        networkWatcher = wanted ? NetworkPathWatcher { [weak self] in self?.networkChanged() } : nil
+    }
+
+    func networkChanged(at date: Date = Date()) {
+        for module in [ModuleID.vpn, .wifi] where lastDemand.contains(module) {
+            refresh(module, at: date)
+        }
+    }
+
     /// Paths FSEvents reported. They wait for the next tick, so nothing is read during sleep.
     func repositoriesChanged(_ paths: [String]) {
         let known = git?.repositories.map(\.path) ?? []
@@ -94,11 +113,12 @@ public final class DeveloperStore {
         return date.timeIntervalSince(last) >= interval(of: module)
     }
 
-    private func interval(of module: ModuleID) -> TimeInterval {
+    func interval(of module: ModuleID) -> TimeInterval {
         switch module {
         case .aiUsage: TimeInterval(options.aiRefreshMinutes * 60)
-        case .wifi: 5
-        case .vpn: 10
+        // Owner's table (2026-11-16): slower while only the menu bar shows them; a change of network reads at once.
+        case .wifi: isLive ? 5 : 10
+        case .vpn: isLive ? 10 : 30
         case .ping: TimeInterval(options.pingIntervalSeconds)
         case .devServers: TimeInterval(options.devServerSeconds)
         // FSEvents covers changes, so this pass only picks up new repositories.

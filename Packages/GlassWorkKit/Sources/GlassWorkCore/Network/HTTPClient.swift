@@ -52,14 +52,16 @@ public struct RefreshSchedule: Sendable, Equatable {
 
     private var lastAttempt: Date?
     private var lastFailed = false
+    private let every: TimeInterval
 
-    public init(lastSuccess: Date? = nil) {
+    public init(lastSuccess: Date? = nil, every: TimeInterval = Self.interval) {
         lastAttempt = lastSuccess
+        self.every = every
     }
 
     public func isDue(at date: Date) -> Bool {
         guard let lastAttempt else { return true }
-        return date.timeIntervalSince(lastAttempt) >= (lastFailed ? Self.retryInterval : Self.interval)
+        return date.timeIntervalSince(lastAttempt) >= (lastFailed ? min(Self.retryInterval, every) : every)
     }
 
     public mutating func record(success: Bool, at date: Date) {
