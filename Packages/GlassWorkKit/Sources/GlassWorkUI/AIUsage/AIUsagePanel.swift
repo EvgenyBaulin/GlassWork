@@ -9,6 +9,13 @@ extension ItemContent {
     ) -> ItemContent {
         let choice = options.choice(AIUsageOption.window, default: AIUsageWindowChoice.highest)
         guard let peak = reading?.peak(at: date, choice: choice) else {
+            if let usage = reading?.tools.first(where: { $0.windows.isEmpty && $0.spend != nil && !$0.isUnreadable }),
+               let spend = usage.spend
+            {
+                var item = ItemContent(figure: AISpendText.today(spend), template: "100.0")
+                item.detail = "\(usage.tool.title) · \(AISpendText.summary(spend)) · \(loc("This Mac's sessions"))"
+                return item
+            }
             var item = ItemContent(figure: "—", template: "100%")
             item.isDimmed = true
             return item
@@ -87,6 +94,8 @@ struct AIUsagePanel: View {
                 Text(loc("Can't read \(usage.tool.title) usage"))
                     .font(.system(size: 12))
                     .foregroundStyle(Palette.orange)
+            } else if usage.windows.isEmpty, let spend = usage.spend {
+                AISpendView(spend: spend)
             } else if usage.windows.isEmpty {
                 Text(loc("No usage yet")).font(.system(size: 12)).foregroundStyle(.secondary)
             } else {

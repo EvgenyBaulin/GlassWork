@@ -39,7 +39,8 @@ struct AIUsageWidget: View {
     /// Tools with numbers first, so a tool that was only detected never pushes a real one out of the widget.
     private var tools: [AIToolUsage] {
         let usage = context.snapshot.aiUsage?.tools ?? []
-        return usage.filter { !$0.windows.isEmpty } + usage.filter(\.windows.isEmpty)
+        return usage.filter { !$0.windows.isEmpty || $0.spend != nil }
+            + usage.filter { $0.windows.isEmpty && $0.spend == nil }
     }
 
     private var header: some View {
@@ -99,10 +100,20 @@ struct AIUsageWidget: View {
                 AIToolBadge(tool: usage.tool, size: 16)
                 Text(usage.tool.title).font(.system(size: 12, weight: .semibold)).lineLimit(1)
             }
-            Text(Format.percent(share)).font(.widgetFigure(30)).foregroundStyle(tint(share)).widgetAccentable()
-            Text(window.map(windowTitle) ?? loc("No usage yet")).font(.system(size: 11)).foregroundStyle(.secondary)
+            // A tool without limits but with its own spend shows that instead of an empty bar.
+            let spend = window == nil && !usage.isUnreadable ? usage.spend : nil
+            if let spend {
+                Text(AISpendText.today(spend)).font(.widgetFigure(30)).widgetAccentable()
+                Text(AISpendText.unit(spend)).font(.system(size: 11)).foregroundStyle(.secondary)
+                AISpendView(spend: spend, fontSize: 10)
+            } else {
+                Text(Format.percent(share)).font(.widgetFigure(30)).foregroundStyle(tint(share)).widgetAccentable()
+                Text(window.map(windowTitle) ?? loc("No usage yet")).font(.system(size: 11)).foregroundStyle(.secondary)
+            }
             Spacer(minLength: 0)
-            ThinBar(value: share, tint: tint(share))
+            if spend == nil {
+                ThinBar(value: share, tint: tint(share))
+            }
             if let window, let reset = resetText(window) {
                 Text(reset).font(.system(size: 10)).foregroundStyle(.tertiary).lineLimit(1)
             }
@@ -144,6 +155,8 @@ struct AIUsageWidget: View {
                 .font(.system(size: 11))
                 .foregroundStyle(Palette.orange)
                 .lineLimit(1)
+        } else if usage.windows.isEmpty, let spend = usage.spend {
+            AISpendView(spend: spend, fontSize: 11)
         } else if usage.windows.isEmpty {
             Text(loc("No usage yet")).font(.system(size: 11)).foregroundStyle(.secondary)
         } else {

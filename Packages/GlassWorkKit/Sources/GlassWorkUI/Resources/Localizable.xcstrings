@@ -16804,6 +16804,86 @@
           }
         }
       }
+    },
+    "%@ AI credits today · %@ this month": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ AI credits today · %@ this month"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ AI-кредиты сегодня · %@ за месяц"
+          }
+        }
+      }
+    },
+    "%@ requests today · %@ this month": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ requests today · %@ this month"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ запросов сегодня · %@ за месяц"
+          }
+        }
+      }
+    },
+    "This Mac's sessions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac's sessions"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сессии этого Mac"
+          }
+        }
+      }
+    },
+    "AI credits today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI credits today"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI-кредиты сегодня"
+          }
+        }
+      }
+    },
+    "requests today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "requests today"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "запросов сегодня"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
