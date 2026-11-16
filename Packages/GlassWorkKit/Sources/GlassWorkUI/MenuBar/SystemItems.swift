@@ -195,18 +195,110 @@ extension ItemContent {
         return ItemContent(figure: remaining?.clockText ?? "—", template: "88:88")
     }
 
+    /// How many volumes can go. Nothing to eject hides the item or dims it; a running eject and a refusal show too.
+    static func eject(_ volumes: [DiskVolume], activity: EjectActivity, options: [String: String]) -> ItemContent {
+        eject(volumes, ejecting: activity.ejecting, failures: activity.failures, options: options)
+    }
+
+    static func eject(
+        _ volumes: [DiskVolume],
+        ejecting: Set<String>,
+        failures: [String: String],
+        options: [String: String]
+    ) -> ItemContent {
+        let isEjecting = volumes.contains { ejecting.contains($0.path) }
+        let failed = volumes.filter { failures[$0.path] != nil && !ejecting.contains($0.path) }
+        var item = ItemContent(figure: "\(volumes.count)", template: isEjecting ? loc("Ejecting…") : "88")
+        if volumes.isEmpty {
+            item.figure = "—"
+            item.isHidden = options.flag(ItemOption.ejectHidesWhenEmpty, default: true)
+            item.isDimmed = true
+        } else if isEjecting {
+            item.figure = loc("Ejecting…")
+            item.symbol = "eject.circle"
+        } else if !failed.isEmpty {
+            item.alert = Palette.orange
+            item.symbol = "exclamationmark.triangle"
+            item.detail = failed.compactMap { volume in failures[volume.path].map { "\(volume.name): \($0)" } }
+                .joined(separator: " · ")
+        }
+        return item
+    }
+
+    /// The first city's time, or the first two when the option asks for them.
+    static func worldClocks(_ cities: [WorldCity], at now: Date, options: [String: String]) -> ItemContent {
+        let count = options.flag(ItemOption.showsTwoCities, default: false) ? 2 : 1
+        let shown = Array(cities.prefix(count))
+        let time: (WorldCity) -> String = { city in
+            var style = Date.FormatStyle(date: .omitted, time: .shortened)
+            style.timeZone = city.localOrZone
+            return now.formatted(style)
+        }
+        var item = ItemContent(
+            figure: shown.isEmpty ? "—" : shown.map(time).joined(separator: " · "),
+            template: Array(repeating: "88:88 PM", count: count).joined(separator: " · ")
+        )
+        item.detail = shown.map { "\($0.name) \(time($0))" }.joined(separator: " · ")
+        return item
+    }
+
+    /// The soonest running timer, with how many there are when several do. Paused timers dim the item.
+    static func timers(_ timers: [CountdownTimer], at now: Date, options: [String: String]) -> ItemContent {
+        let byRemaining: (CountdownTimer, CountdownTimer) -> Bool = { $0.remaining(at: now) < $1.remaining(at: now) }
+        let running = timers.filter { !$0.isPaused }.min(by: byRemaining)
+        let shown = running ?? timers.min(by: byRemaining)
+        var item = Self.timers(shown?.remaining(at: now), options: options)
+        if timers.count >= 2 {
+            item.figure = "\(timers.count) · \(item.figure)"
+            item.template = "\(timers.count) · \(item.template)"
+        }
+        if let shown, shown.isPaused {
+            item.isDimmed = true
+            item.symbol = "pause.circle"
+        }
+        item.detail = timers.isEmpty ? nil : loc("\(timers.count) timers")
+        return item
+    }
+
     static func calendar(_ events: [AgendaEvent], at now: Date, options: [String: String]) -> ItemContent {
-        let next = CalendarItem.next(
+        let state = CalendarItem.state(
             in: events,
             at: now,
             windowHours: options.number(ItemOption.calendarWindowHours, default: 4),
             skipsAllDay: options.flag(ItemOption.skipsAllDay, default: true)
         )
         let limit = options.number(ItemOption.titleLength, default: 20)
-        return ItemContent(
-            figure: next.map { CalendarItem.title($0.title, limit: limit) } ?? "—",
-            template: String(repeating: "n", count: limit)
-        )
+        let widest = String(repeating: "n", count: limit)
+        // The longest of the three forms, so the item keeps one width as the state changes.
+        let template = [
+            calendarText(
+                .upcoming(AgendaEvent(id: "", title: widest, start: now, end: now), startsIn: 59 * 60),
+                limit: limit
+            ),
+            calendarText(
+                .current(AgendaEvent(id: "", title: widest, start: now, end: now), endsIn: 59 * 60),
+                limit: limit
+            ),
+            calendarText(.callSoon(AgendaEvent(id: "", title: widest, start: now, end: now)), limit: limit),
+        ].max { $0.count < $1.count } ?? widest
+        return ItemContent(figure: state.map { calendarText($0, limit: limit) } ?? "—", template: template)
+    }
+
+    static func calendarText(_ state: CalendarItemState, limit: Int) -> String {
+        switch state {
+        case let .upcoming(event, startsIn):
+            loc("in \(span(startsIn)) · \(CalendarItem.title(event.title, limit: limit))")
+        case let .current(event, endsIn):
+            loc("now · \(CalendarItem.title(event.title, limit: limit)), \(span(endsIn)) left")
+        case let .callSoon(event):
+            loc("Join · \(CalendarItem.title(event.title, limit: limit))")
+        }
+    }
+
+    /// `25 min`, or whole hours from an hour on. Minutes round up, so "0 min" never shows.
+    static func span(_ seconds: TimeInterval) -> String {
+        let minutes = max(Int((seconds / 60).rounded(.up)), 1)
+        return minutes < 60 ? loc("\(minutes) min") : loc("\(minutes / 60) h")
     }
 
     static func endsIn(_ events: [AgendaEvent], at now: Date, options: [String: String]) -> ItemContent {
@@ -272,7 +364,7 @@ extension SystemMonitor {
 public extension ModuleID {
     /// Items that can leave the menu bar by themselves, so their width is measured again on every read.
     var canHideItself: Bool {
-        [.nowPlaying, .battery, .todos, .vpn, .endsIn].contains(self)
+        [.nowPlaying, .battery, .todos, .vpn, .endsIn, .timers, .eject].contains(self)
     }
 }
 

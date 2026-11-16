@@ -56,6 +56,7 @@ public enum ItemOption {
     public static let warnMinutes = "warnMinutes"
     public static let showsFree = "showFree"
     public static let showsSeconds = "showSeconds"
+    public static let showsTwoCities = "showTwoCities"
     public static let timerPresets = "presets"
     public static let letsDisplaySleep = "letDisplaySleep"
     public static let keepAwakeMinutes = "defaultMinutes"
@@ -66,6 +67,7 @@ public enum ItemOption {
     public static let ejectIncludesImages = "includeDiskImages"
     public static let ejectIncludesNetwork = "includeNetworkVolumes"
     public static let ejectNever = "neverEject"
+    public static let ejectHidesWhenEmpty = "hideWhenNothing"
     public static let countsServices = "countServices"
     public static let todoSort = "sort"
     public static let todoCompleted = "completed"
@@ -300,6 +302,12 @@ public enum TimerDuration {
     }
 }
 
+public enum CalendarItemState: Equatable, Sendable {
+    case upcoming(AgendaEvent, startsIn: TimeInterval)
+    case current(AgendaEvent, endsIn: TimeInterval)
+    case callSoon(AgendaEvent)
+}
+
 /// The next event worth showing in the Calendar module.
 public enum CalendarItem {
     public static func next(
@@ -312,6 +320,30 @@ public enum CalendarItem {
         let limit = date.addingTimeInterval(TimeInterval(windowHours) * 3600)
         return windowHours > 0 && next.start > limit ? nil : next
     }
+
+    /// What the Calendar item says now. A call that starts within five minutes comes first, then an event in
+    /// progress, then the next one. Only the upcoming event is limited by the window.
+    public static func state(
+        in events: [AgendaEvent],
+        at date: Date,
+        windowHours: Int,
+        skipsAllDay: Bool
+    ) -> CalendarItemState? {
+        let situation = EndsInState(events: events, at: date, includeAllDay: !skipsAllDay)
+        if let next = situation.next, next.callURL != nil, next.start.timeIntervalSince(date) <= callLead {
+            return .callSoon(next)
+        }
+        if let current = situation.current.first {
+            return .current(current, endsIn: current.end.timeIntervalSince(date))
+        }
+        if let next = next(in: events, at: date, windowHours: windowHours, skipsAllDay: skipsAllDay) {
+            return .upcoming(next, startsIn: next.start.timeIntervalSince(date))
+        }
+        return nil
+    }
+
+    /// How early a call counts as about to begin.
+    public static let callLead: TimeInterval = 300
 
     /// Cut to `limit` characters, the last of them an ellipsis.
     public static func title(_ text: String, limit: Int) -> String {

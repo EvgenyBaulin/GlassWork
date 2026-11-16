@@ -4,19 +4,26 @@ import SwiftUI
 
 struct EjectPanel: View {
     let monitor: SystemMonitor
+    private let activity = EjectActivity.shared
 
     var body: some View {
         let volumes = monitor.ejectableVolumes
         PanelFrame(module: .eject, subtitle: loc("\(volumes.count) volumes")) {
-            EjectList(volumes: volumes, asksFirst: monitor.ejectOptions.asksFirst, eject: eject)
+            EjectList(
+                volumes: volumes,
+                asksFirst: monitor.ejectOptions.asksFirst,
+                ejecting: activity.ejecting,
+                failures: activity.failures,
+                eject: eject
+            )
         }
     }
 
     private func eject(_ volumes: [DiskVolume]) {
-        for volume in volumes {
-            try? NSWorkspace.shared.unmountAndEjectDevice(at: URL(filePath: volume.path))
+        activity.eject(volumes) {
+            monitor.refresh(includingSlow: true)
+            activity.forget(except: monitor.ejectableVolumes)
         }
-        monitor.refresh(includingSlow: true)
     }
 }
 
@@ -24,6 +31,9 @@ struct EjectPanel: View {
 struct EjectList: View {
     let volumes: [DiskVolume]
     let asksFirst: Bool
+    /// Paths of volumes being ejected, and why the ones that would not go are still here.
+    let ejecting: Set<String>
+    let failures: [String: String]
     let eject: ([DiskVolume]) -> Void
     @State private var isConfirming: Bool
 
@@ -31,21 +41,35 @@ struct EjectList: View {
         volumes: [DiskVolume],
         asksFirst: Bool,
         startsConfirming: Bool = false,
+        ejecting: Set<String> = [],
+        failures: [String: String] = [:],
         eject: @escaping ([DiskVolume]) -> Void
     ) {
         self.volumes = volumes
         self.asksFirst = asksFirst
+        self.ejecting = ejecting
+        self.failures = failures
         self.eject = eject
         _isConfirming = State(initialValue: startsConfirming)
     }
 
     var body: some View {
         ForEach(volumes) { volume in
-            HStack {
-                Image(systemName: "externaldrive").foregroundStyle(.secondary)
-                Text(volume.name).font(.system(size: 13))
-                Spacer()
-                Button(loc("Eject")) { eject([volume]) }.controlSize(.small)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Image(systemName: "externaldrive").foregroundStyle(.secondary)
+                    Text(volume.name).font(.system(size: 13))
+                    Spacer()
+                    if ejecting.contains(volume.path) {
+                        ProgressView().controlSize(.small)
+                        Text(loc("Ejecting…")).font(.system(size: 12)).foregroundStyle(.secondary)
+                    } else {
+                        Button(loc("Eject")) { eject([volume]) }.controlSize(.small)
+                    }
+                }
+                if let reason = failures[volume.path], !ejecting.contains(volume.path) {
+                    Text(reason).font(.system(size: 11)).foregroundStyle(Palette.orange)
+                }
             }
         }
         if volumes.isEmpty {

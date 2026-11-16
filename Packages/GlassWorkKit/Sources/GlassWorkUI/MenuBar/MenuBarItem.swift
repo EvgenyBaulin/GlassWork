@@ -104,6 +104,8 @@ public struct ItemContent {
         case .calendar: calendar(monitor.agenda.events, at: Date(), options: options)
         case .endsIn: endsIn(monitor.agenda.events, at: Date(), options: options)
         case .todos: todos(monitor.agenda, at: Date(), options: options)
+        case .eject:
+            eject(monitor.ejectableVolumes, activity: EjectActivity.shared, options: options)
         case .deviceBatteries: deviceBatteries(monitor.deviceBatteries, options: options)
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
         case .notes: notes(monitor.everyday.data.note)
@@ -199,26 +201,19 @@ public struct ItemContent {
         let now = Date()
         switch module {
         case .timers:
-            return timers(store.data.timers.map { $0.remaining(at: now) }.min(), options: options)
+            return timers(store.data.timers, at: now, options: options)
         case .stopwatch:
             return ItemContent(figure: store.data.stopwatch.elapsed(at: now).clockText, template: "88:88:88")
         case .countdown:
             let next = store.data.sortedDates(from: now).first
             return ItemContent(figure: next.map { loc("\($0.daysLeft(from: now)) d") } ?? "—", template: "888 d")
         case .worldClocks:
-            return ItemContent(figure: firstCityTime(store), template: "88:88 PM")
+            return worldClocks(store.data.cities, at: now, options: options)
         default:
             let date = DateItemText(options: options)
             let template = date.showsWeek ? "Wed, 28 Sep · W52" : "Wed, 28 Sep"
             return ItemContent(figure: date.text(for: now), template: template)
         }
-    }
-
-    private static func firstCityTime(_ store: EverydayStore) -> String {
-        guard let city = store.data.cities.first else { return "—" }
-        var style = Date.FormatStyle(date: .omitted, time: .shortened)
-        style.timeZone = TimeZone(identifier: city.timeZone) ?? .current
-        return Date().formatted(style)
     }
 }
 

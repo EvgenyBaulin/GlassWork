@@ -186,6 +186,12 @@ final class AppModel {
         }
     }
 
+    /// Press and hold on the Stopwatch item.
+    func resetStopwatch() {
+        panels.closeTransient()
+        monitor.everyday.update { $0.stopwatch.reset() }
+    }
+
     func showPanel(_ module: ModuleID, beside frame: CGRect) {
         panels.show(module, beside: frame)
     }

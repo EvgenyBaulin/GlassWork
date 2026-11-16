@@ -21,6 +21,22 @@
         }
       }
     },
+    "%@ h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ h"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ч"
+          }
+        }
+      }
+    },
     "%@ is not responding": {
       "localizations": {
         "ru": {
@@ -199,6 +215,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Файлов: %lld"
+          }
+        }
+      }
+    },
+    "%lld h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld h"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ч"
           }
         }
       }
@@ -1075,6 +1107,22 @@
         }
       }
     },
+    "Could not eject": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not eject"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось извлечь"
+          }
+        }
+      }
+    },
     "CPU": {
       "localizations": {
         "ru": {
@@ -1685,6 +1733,22 @@
         }
       }
     },
+    "Ejecting…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ejecting…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Извлекаю…"
+          }
+        }
+      }
+    },
     "Elapsed": {
       "localizations": {
         "ru": {
@@ -2215,6 +2279,22 @@
         }
       }
     },
+    "Hide when nothing to eject": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide when nothing to eject"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрывать, если нечего извлекать"
+          }
+        }
+      }
+    },
     "Hiding": {
       "localizations": {
         "ru": {
@@ -2345,6 +2425,22 @@
         }
       }
     },
+    "in %@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in %@ · %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "через %@ · %@"
+          }
+        }
+      }
+    },
     "In bar": {
       "localizations": {
         "ru": {
@@ -2375,6 +2471,22 @@
         }
       }
     },
+    "In use by %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In use by %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Занят: %@"
+          }
+        }
+      }
+    },
     "Interfaces": {
       "localizations": {
         "ru": {
@@ -2401,6 +2513,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Подключиться"
+          }
+        }
+      }
+    },
+    "Join · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join · %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Войти · %@"
           }
         }
       }
@@ -2733,6 +2861,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Макс. файлов"
+          }
+        }
+      }
+    },
+    "Merge": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Merge"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слияние"
           }
         }
       }
@@ -3267,6 +3411,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сейчас"
+          }
+        }
+      }
+    },
+    "now · %@, %@ left": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "now · %@, %@ left"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "сейчас · %@, осталось %@"
           }
         }
       }
@@ -3915,6 +4075,22 @@
         }
       }
     },
+    "Rebase": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rebase"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ребейз"
+          }
+        }
+      }
+    },
     "Recent": {
       "localizations": {
         "ru": {
@@ -4107,6 +4283,22 @@
         }
       }
     },
+    "Same time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Same time"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Одно время"
+          }
+        }
+      }
+    },
     "Sensor groups in the panel": {
       "localizations": {
         "en": {
@@ -4167,6 +4359,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показывать миниатюры"
+          }
+        }
+      }
+    },
+    "Show two cities in the menu bar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show two cities in the menu bar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать два города в строке меню"
           }
         }
       }

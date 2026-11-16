@@ -122,10 +122,13 @@ struct GitPanel: View {
     @ViewBuilder
     private func badges(_ status: GitStatus?) -> some View {
         if let status {
-            if status.isClean, status.ahead == 0, status.behind == 0 {
+            if status.isClean, status.ahead == 0, status.behind == 0, status.operation == nil {
                 Text(loc("Up to date")).font(.system(size: 11, weight: .semibold)).foregroundStyle(Palette.green)
             } else {
                 HStack(spacing: 4) {
+                    if let operation = status.operation {
+                        badge(operation.title)
+                    }
                     if status.conflicted > 0 {
                         badge("⚠ \(status.conflicted)")
                     }
