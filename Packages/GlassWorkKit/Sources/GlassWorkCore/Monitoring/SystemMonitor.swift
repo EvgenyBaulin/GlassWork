@@ -26,8 +26,36 @@ public struct MonitorDemand: Sendable, Equatable {
     public var devices = false
     public var timeMachine = false
     public var nowPlaying = false
+    /// Metrics that only the menu bar shows read at their own pace, in seconds. A metric missing here reads on
+    /// every tick: widgets with charts, the main window, Settings and open panels never set one.
+    public var paces: [SampleKind: TimeInterval] = [:]
 
     public init() {}
+}
+
+/// Metrics that can read slower than the loop.
+public enum SampleKind: Hashable, Sendable, CaseIterable {
+    case cpu, memory, gpu, diskActivity, sensors
+
+    /// Owner's table (2026-11-16) for a module shown only in the menu bar.
+    public static func menuBarPaces(for modules: Set<ModuleID>) -> [SampleKind: TimeInterval] {
+        var paces: [SampleKind: TimeInterval] = [:]
+        if !modules.contains(.cpu) {
+            paces[.cpu] = 5
+        }
+        paces[.memory] = modules.contains(.overview) ? 5 : 10
+        paces[.gpu] = 5
+        paces[.diskActivity] = 5
+        paces[.sensors] = modules.contains(.fans) ? 5 : 10
+        return paces
+    }
+
+    /// True when a metric last read at `last` is due again. Half a second of slack keeps a 5 s pace from
+    /// slipping to the tick after next.
+    static func isDue(last: Date?, pace: TimeInterval?, at date: Date) -> Bool {
+        guard let pace, let last else { return true }
+        return date.timeIntervalSince(last) >= pace - 0.5 || last > date
+    }
 }
 
 /// Latest readings and in-memory history of every system metric.
@@ -477,26 +505,37 @@ actor Sampler {
     private var diskDate = Date()
     private lazy var sensorReader = SensorReader()
     private var sensorPace = SensorPace()
+    private var lastRead: [SampleKind: Date] = [:]
+
+    /// Whether a metric is wanted and due, noting the read when it is.
+    private func takes(_ kind: SampleKind, wanted: Bool, demand: MonitorDemand, at date: Date) -> Bool {
+        guard wanted, SampleKind.isDue(last: lastRead[kind], pace: demand.paces[kind], at: date) else { return false }
+        lastRead[kind] = date
+        return true
+    }
 
     /// - Parameter temperature: What the temperature graph records, which the summary has to include.
     func read(_ demand: MonitorDemand, includeSlow: Bool, temperature: SensorChoice) async -> Reading {
         var reading = Reading()
-        if demand.cpu {
+        let now = Date()
+        if takes(.cpu, wanted: demand.cpu, demand: demand, at: now) {
             readCPU(into: &reading)
         }
-        if demand.memory {
+        if takes(.memory, wanted: demand.memory, demand: demand, at: now) {
             reading.memory = MemoryReader.sample()
         }
         if demand.network {
             reading.network = readNetwork()
         }
-        if demand.disk {
+        if takes(.diskActivity, wanted: demand.disk, demand: demand, at: now) {
             reading.diskActivity = readDisk()
         }
-        if demand.gpu {
+        if takes(.gpu, wanted: demand.gpu, demand: demand, at: now) {
             reading.gpus = GPUReader.samples()
         }
-        if demand.sensors, sensorPace.isDue(demand.sensorDetail, at: Date()) {
+        if demand.sensors, sensorPace.isDue(demand.sensorDetail, at: now),
+           takes(.sensors, wanted: true, demand: demand, at: now)
+        {
             // Alerts watch the average CPU temperature, whatever the graph shows.
             let summary: Set<SensorChoice> = [temperature, .averageCPU]
             reading.sensors = sensorReader?.sample(showing: demand.sensorDetail == .summary ? summary : nil)
