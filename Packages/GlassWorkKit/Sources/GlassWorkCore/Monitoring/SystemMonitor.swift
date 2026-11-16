@@ -133,7 +133,15 @@ public final class SystemMonitor {
     /// The adapter process runs only while `demand.nowPlaying` is set.
     public let nowPlaying: NowPlayingStore
 
-    public var demand = MonitorDemand()
+    public var demand = MonitorDemand() {
+        didSet {
+            // A panel that opens or a module that appears should not wait out a long sleep.
+            if demand != oldValue {
+                sleeper.wake()
+            }
+        }
+    }
+
     public var interval: TimeInterval = 2
     public var slowInterval: TimeInterval = 30
     /// Reads half as often on battery and a quarter as often in Low Power Mode.
@@ -150,19 +158,28 @@ public final class SystemMonitor {
     /// Called after each read. Menu bar items redraw from here, without SwiftUI's update machinery.
     @ObservationIgnored public var onUpdate: (() -> Void)?
 
-    @ObservationIgnored private let sampler = Sampler()
-    @ObservationIgnored private var loop: Task<Void, Never>?
+    @ObservationIgnored let sampler = Sampler()
+    @ObservationIgnored var loop: Task<Void, Never>?
+    @ObservationIgnored var isWatchingStores = false
     @ObservationIgnored private var pausedLoop: Task<Void, Never>?
     /// How often timers and Keep Awake are looked at while nothing else is read.
     @ObservationIgnored var pausedInterval: TimeInterval = 5
-    @ObservationIgnored private var lastSlow = Date.distantPast
-    @ObservationIgnored private var lastDevices = Date.distantPast
-    @ObservationIgnored private var lastTimeMachine = Date.distantPast
+    @ObservationIgnored let sleeper = LoopSleeper()
+    @ObservationIgnored var powerWatcher: PowerSourceWatcher?
+    @ObservationIgnored var volumeWatcher: VolumeWatcher?
+    /// A power or volume event came in and the next tick reads the thing it is about.
+    @ObservationIgnored var batteryEvent = false
+    @ObservationIgnored var volumesEvent = false
+    @ObservationIgnored var lastBattery: Date?
+    @ObservationIgnored var lastVolumes: Date?
+    @ObservationIgnored var lastSlow = Date.distantPast
+    @ObservationIgnored var lastDevices = Date.distantPast
+    @ObservationIgnored var lastTimeMachine = Date.distantPast
     /// An empty list before the first answer would read as "no devices".
     @ObservationIgnored private var hasReadDevices = false
 
     /// `system_profiler` takes seconds and batteries drain slowly, and backups run hourly at most.
-    private static let occasionalInterval: TimeInterval = 300
+    static let occasionalInterval: TimeInterval = 300
 
     public init(
         weather: WeatherStore = WeatherStore(),
@@ -195,11 +212,15 @@ public final class SystemMonitor {
         guard loop == nil else { return }
         pausedLoop?.cancel()
         pausedLoop = nil
+        sleeper.reset()
+        wakeWhenStoresNeedTicks()
         loop = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self else { return }
                 await tick()
-                try? await Task.sleep(for: .seconds(effectiveInterval))
+                // A loop stopped during its tick must not sleep on the sleeper the next loop uses.
+                guard !Task.isCancelled else { return }
+                await sleeper.sleep(for: waitUntilNextRead())
             }
         }
     }
@@ -208,6 +229,8 @@ public final class SystemMonitor {
     public func stop() {
         loop?.cancel()
         loop = nil
+        powerWatcher = nil
+        volumeWatcher = nil
         nowPlaying.stop()
         keepTimeWhilePaused()
     }
@@ -233,7 +256,10 @@ public final class SystemMonitor {
         guard isRunning, extra.readsSamples else { return }
         // Once a minute is rare enough, and a widget must not wait for the monitor's own pace.
         extra.sensorDetail = .live
-        await apply(sampler.read(extra, includeSlow: true, temperature: temperatureSource), at: Date())
+        await apply(
+            sampler.read(extra, includeSlow: true, events: .all, temperature: temperatureSource),
+            at: Date()
+        )
     }
 
     /// What `kinds` show, from the latest readings. Nothing is read here, so calling it often costs little.
@@ -356,6 +382,8 @@ public final class SystemMonitor {
     public func refresh(includingSlow: Bool = false) {
         if includingSlow {
             lastSlow = .distantPast
+            lastBattery = nil
+            lastVolumes = nil
         }
         Task { await tick() }
     }
@@ -369,7 +397,7 @@ public final class SystemMonitor {
     }
 
     /// Battery power halves the polling rate and Low Power Mode quarters it.
-    private var effectiveInterval: TimeInterval {
+    var effectiveInterval: TimeInterval {
         guard slowsOnBattery else { return interval }
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
             return interval * 4
@@ -379,11 +407,29 @@ public final class SystemMonitor {
 
     private func tick() async {
         let now = Date()
+        watchEvents()
         let includeSlow = now.timeIntervalSince(lastSlow) >= slowInterval
         if includeSlow {
             lastSlow = now
         }
-        let reading = await sampler.read(demand, includeSlow: includeSlow, temperature: temperatureSource)
+        var events: EventReads = []
+        if demand.battery, ReadSchedule.isDue(
+            last: lastBattery, interval: eventDrivenInterval, event: batteryEvent, at: now
+        ) {
+            events.insert(.battery)
+            lastBattery = now
+            batteryEvent = false
+        }
+        if demand.disk, ReadSchedule.isDue(
+            last: lastVolumes, interval: eventDrivenInterval, event: volumesEvent, at: now
+        ) {
+            events.insert(.volumes)
+            lastVolumes = now
+            volumesEvent = false
+        }
+        let reading = await sampler.read(
+            demand, includeSlow: includeSlow, events: events, temperature: temperatureSource
+        )
         apply(reading, at: now)
         everyday.tick(at: now, battery: battery)
         developer.tick(at: now, demand: demand.developer, live: demand.developerLive)
@@ -482,118 +528,5 @@ extension Array where Element: Identifiable, Element.ID == String {
         var ordered = self
         ordered.insert(ordered.remove(at: index), at: 0)
         return ordered
-    }
-}
-
-/// Holds counters between reads and keeps all system calls off the main thread.
-actor Sampler {
-    struct Reading: Sendable {
-        var cpu: CPUSample?
-        var loadAverage: [Double] = []
-        var memory: MemorySample?
-        var network: NetworkSample?
-        var diskActivity: DiskActivity?
-        var volumes: [DiskVolume]?
-        var battery: BatterySample?
-        var gpus: [GPUSample]?
-        var sensors: SensorSample?
-        var processes: [ProcessUsage]?
-        var devices: [DeviceBattery]?
-    }
-
-    private var ticks: [CPUTicks] = []
-    private var interfaces: [InterfaceCounters] = []
-    private var interfacesDate = Date()
-    private var sessionReceived: UInt64 = 0
-    private var sessionSent: UInt64 = 0
-    private var disk: DiskCounters?
-    private var diskDate = Date()
-    private lazy var sensorReader = SensorReader()
-    private var sensorPace = SensorPace()
-    private var lastRead: [SampleKind: Date] = [:]
-
-    /// Whether a metric is wanted and due, noting the read when it is.
-    private func takes(_ kind: SampleKind, wanted: Bool, demand: MonitorDemand, at date: Date) -> Bool {
-        guard wanted, SampleKind.isDue(last: lastRead[kind], pace: demand.paces[kind], at: date) else { return false }
-        lastRead[kind] = date
-        return true
-    }
-
-    /// - Parameter temperature: What the temperature graph records, which the summary has to include.
-    func read(_ demand: MonitorDemand, includeSlow: Bool, temperature: SensorChoice) async -> Reading {
-        var reading = Reading()
-        let now = Date()
-        if takes(.cpu, wanted: demand.cpu, demand: demand, at: now) {
-            readCPU(into: &reading)
-        }
-        if takes(.memory, wanted: demand.memory, demand: demand, at: now) {
-            reading.memory = MemoryReader.sample()
-        }
-        if demand.network {
-            reading.network = readNetwork()
-        }
-        if takes(.diskActivity, wanted: demand.disk, demand: demand, at: now) {
-            reading.diskActivity = readDisk()
-        }
-        if takes(.gpu, wanted: demand.gpu, demand: demand, at: now) {
-            reading.gpus = GPUReader.samples()
-        }
-        if demand.sensors, sensorPace.isDue(demand.sensorDetail, at: now),
-           takes(.sensors, wanted: true, demand: demand, at: now)
-        {
-            // Alerts watch the average CPU temperature, whatever the graph shows.
-            let summary: Set<SensorChoice> = [temperature, .averageCPU]
-            reading.sensors = sensorReader?.sample(showing: demand.sensorDetail == .summary ? summary : nil)
-        }
-        if demand.processes || (includeSlow && demand.slowProcesses) {
-            reading.processes = await ProcessList.read()
-        }
-        if includeSlow {
-            if demand.disk {
-                reading.volumes = DiskReader.volumes()
-            }
-            if demand.battery {
-                reading.battery = BatteryReader.sample()
-            }
-        }
-        return reading
-    }
-
-    private func readCPU(into reading: inout Reading) {
-        let current = CPUReader.ticks()
-        reading.cpu = CPUSample.between(ticks, current)
-        reading.loadAverage = CPUReader.loadAverage()
-        ticks = current
-    }
-
-    private func readNetwork() -> NetworkSample? {
-        let current = NetworkReader.counters()
-        let now = Date()
-        defer {
-            interfaces = current
-            interfacesDate = now
-        }
-        guard !interfaces.isEmpty else { return nil }
-        let sample = NetworkSample.between(
-            interfaces,
-            current,
-            seconds: now.timeIntervalSince(interfacesDate),
-            sessionReceived: sessionReceived,
-            sessionSent: sessionSent
-        )
-        sessionReceived = sample.sessionReceived
-        sessionSent = sample.sessionSent
-        return sample
-    }
-
-    private func readDisk() -> DiskActivity? {
-        let current = DiskReader.counters()
-        let now = Date()
-        defer {
-            disk = current
-            diskDate = now
-        }
-        guard let disk else { return nil }
-        return DiskActivity.between(disk, current, seconds: now.timeIntervalSince(diskDate))
     }
 }
