@@ -63,6 +63,10 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var everyday = EverydayData()
     public var events: [AgendaEvent] = []
     public var todos: [TodoItem] = []
+    /// How many reminders there are in all, since `todos` is capped. Nil in snapshots from earlier versions.
+    public var todoSummary: WidgetTodoSummary?
+    /// Nil in snapshots from earlier versions, which the widgets read as granted.
+    public var remindersAccess: DataAccess?
     public var bootTime: Date?
     public var screenTime = ScreenTimeLog()
     public var commands: [UserCommand] = []
@@ -127,4 +131,32 @@ public struct WidgetSettings: Codable, Sendable, Equatable {
     public var endpoints: [Endpoint] = []
 
     public init() {}
+}
+
+/// Reminder counts that stay right when the list in a snapshot is cut short.
+public struct WidgetTodoSummary: Codable, Sendable, Equatable {
+    public static let openLimit = 40
+    public static let doneLimit = 10
+
+    public var open: Int
+    public var done: Int
+
+    public init(open: Int, done: Int) {
+        self.open = open
+        self.done = done
+    }
+
+    public var total: Int {
+        open + done
+    }
+
+    /// Open items first, each kind cut to its limit, so a long list cannot grow the snapshot file.
+    public static func capped(_ items: [TodoItem]) -> (items: [TodoItem], summary: WidgetTodoSummary) {
+        let open = items.filter { !$0.isCompleted }
+        let done = items.filter(\.isCompleted)
+        return (
+            Array(open.prefix(openLimit)) + Array(done.prefix(doneLimit)),
+            WidgetTodoSummary(open: open.count, done: done.count)
+        )
+    }
 }

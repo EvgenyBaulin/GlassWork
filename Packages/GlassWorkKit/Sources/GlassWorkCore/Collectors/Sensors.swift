@@ -72,6 +72,20 @@ public struct SensorSample: Codable, Sendable, Equatable {
         self.fans = fans
     }
 
+    /// Most sensors a widget snapshot carries. A Mac can expose more than 200, and the widgets show a few dozen.
+    public static let widgetLimit = 120
+
+    /// Grouped in the order of `SensorGroup`, so the CPU, GPU and SoC readings the averages come from outlast
+    /// the long tail of unnamed keys when the list is cut.
+    public func cappedForWidgets(limit: Int = widgetLimit) -> SensorSample {
+        let order = Dictionary(uniqueKeysWithValues: SensorGroup.allCases.enumerated().map { ($1, $0) })
+        let sorted = readings.sorted { first, second in
+            let (left, right) = (order[first.group] ?? 0, order[second.group] ?? 0)
+            return left == right ? first.key < second.key : left < right
+        }
+        return SensorSample(readings: Array(sorted.prefix(limit)), fans: fans)
+    }
+
     public func average(of groups: Set<SensorGroup>) -> Double? {
         let values = readings.filter { groups.contains($0.group) }.map(\.celsius)
         return values.isEmpty ? nil : values.reduce(0, +) / Double(values.count)

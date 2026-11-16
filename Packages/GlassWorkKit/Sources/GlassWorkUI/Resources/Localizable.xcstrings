@@ -125,6 +125,22 @@
         }
       }
     },
+    "%@ rpm avg": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ rpm avg"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "в среднем %@ об/мин"
+          }
+        }
+      }
+    },
     "%@ to full": {
       "localizations": {
         "ru": {
@@ -247,6 +263,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Уже на полке: %lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of %lld done"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "выполнено %lld из %lld"
           }
         }
       }
@@ -447,6 +479,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "+%@ к вчера"
+          }
+        }
+      }
+    },
+    "+%lld more sensors in the app": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld more sensors in the app"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ещё %lld датчиков в приложении"
           }
         }
       }
@@ -797,6 +845,22 @@
         }
       }
     },
+    "Allow it in System Settings › Privacy & Security › Reminders.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow it in System Settings › Privacy & Security › Reminders."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите его в Системных настройках › Конфиденциальность и безопасность › Напоминания."
+          }
+        }
+      }
+    },
     "Allow Location": {
       "localizations": {
         "ru": {
@@ -813,6 +877,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Разрешите вставку"
+          }
+        }
+      }
+    },
+    "Allow Reminders access": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Reminders access"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите доступ к напоминаниям"
           }
         }
       }
@@ -3481,6 +3561,22 @@
         }
       }
     },
+    "open": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "open"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "открыто"
+          }
+        }
+      }
+    },
     "Open Activity Monitor": {
       "localizations": {
         "ru": {
@@ -3523,6 +3619,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открыть"
+          }
+        }
+      }
+    },
+    "Open GlassWork and choose Allow in the To-Dos panel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open GlassWork and choose Allow in the To-Dos panel."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте GlassWork и нажмите «Разрешить» в панели задач."
           }
         }
       }
@@ -4129,6 +4241,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Отпустите, чтобы добавить файл"
+          }
+        }
+      }
+    },
+    "Reminders": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Напоминания"
+          }
+        }
+      }
+    },
+    "Reminders access is off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reminders access is off"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Доступ к напоминаниям выключен"
           }
         }
       }
