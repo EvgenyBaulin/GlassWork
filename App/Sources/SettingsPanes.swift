@@ -109,6 +109,7 @@ struct DockPane: View {
             widgetsSection
             stacksSection
             presetsSection
+            DockScheduleSection(store: store)
         }
         .formStyle(.grouped)
         .sheet(isPresented: $isExplaining) {
@@ -207,6 +208,11 @@ private extension DockPane {
     var presetsSection: some View {
         Section {
             ForEach(presets) { presetRow($0) }
+            if let active = presets.first(where: { $0.id == store.settings.dock.activePreset }) {
+                Button(loc("Turn Off Presets")) {
+                    store.update { DockPresets.turnOff(current: active, in: &$0.dock) }
+                }
+            }
         } header: {
             Text(loc("Presets"))
         } footer: {

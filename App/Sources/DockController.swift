@@ -37,6 +37,7 @@ final class DockController {
     private lazy var pointerWatcher = DockPointerWatcher { [weak self] in self?.updateReveal() }
     private var hiding: Task<Void, Never>?
     private let tooltip = DockTooltip()
+    private lazy var scheduler = DockPresetScheduler { [weak self] in self?.applyScheduled($0) }
     private lazy var trash = DockTrash { [weak self] full in
         if self?.state.trashIsFull != full {
             self?.state.trashIsFull = full
@@ -54,6 +55,7 @@ final class DockController {
     }
 
     func apply(_ settings: DockSettings) {
+        scheduler.follow(settings)
         guard settings.isEnabled else {
             close()
             return
@@ -505,6 +507,7 @@ extension DockController {
             openSettings: { [weak self] in self?.model.showMainWindow(.dock) }
         )
         actions.trash = trash.actions
+        actions.turnOffPreset = { [weak self] in self?.turnOffPreset() }
         actions.hover = { [weak self] hover in
             guard let self else { return }
             if state.openCard != nil {
@@ -514,6 +517,25 @@ extension DockController {
             }
         }
         return actions
+    }
+}
+
+/// Presets by hand and on a schedule.
+extension DockController {
+    private func turnOffPreset() {
+        let current = presets.first { $0.id == state.settings.activePreset }
+        model.store.update { DockPresets.turnOff(current: current, in: &$0.dock) }
+    }
+
+    private func applyScheduled(_ rule: DockPresetRule) {
+        guard state.settings.activePreset != rule.presetID else { return }
+        if let id = rule.presetID {
+            if let preset = presets.first(where: { $0.id == id }) {
+                apply(preset)
+            }
+        } else {
+            turnOffPreset()
+        }
     }
 }
 
