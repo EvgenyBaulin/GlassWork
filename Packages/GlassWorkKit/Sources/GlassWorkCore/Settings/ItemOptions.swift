@@ -87,11 +87,11 @@ public enum ItemOption {
 }
 
 public enum MemoryFigure: String, Sendable, CaseIterable {
-    case share, gigabytes, pressure
+    case share, gigabytes, pressure, shareAndSwap
 }
 
 public enum DiskFigure: String, Sendable, CaseIterable {
-    case free, activity, both
+    case free, activity, both, freePercent
 }
 
 public enum RateUnit: String, Sendable, CaseIterable {

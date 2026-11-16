@@ -92,7 +92,7 @@ public struct ItemContent {
         case .cpu: cpu(monitor, style: style, options: options)
         case .memory: memory(monitor.memory, style: style, options: options)
         case .gpu: percent(monitor.gpus.first?.utilization, metric: .gpu, style: style)
-        case .disk: disk(monitor, style: style, options: options)
+        case .disk: disk(monitor.volumes.first, activity: monitor.diskActivity, style: style, options: options)
         case .network: network(monitor.network, style: style, options: options)
         case .battery: battery(monitor.battery, style: style, options: options)
         case .sensors, .fans: thermal(module, monitor, options: options)
@@ -106,6 +106,7 @@ public struct ItemContent {
         case .todos: todos(monitor.agenda, at: Date(), options: options)
         case .deviceBatteries: deviceBatteries(monitor.deviceBatteries, options: options)
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
+        case .notes: notes(monitor.everyday.data.note)
         case _ where ModuleID.developerCollected.contains(module):
             developer(module, monitor.developer, options: options)
         case .weather: weather(monitor.weather)
@@ -130,6 +131,21 @@ public struct ItemContent {
         self.domain = domain
         self.alert = alert
         self.template = template
+    }
+
+    static func notes(_ note: String) -> ItemContent {
+        let firstLine = note.trimmingCharacters(in: .whitespacesAndNewlines)
+            .split(whereSeparator: \.isNewline).first.map(String.init)?
+            .trimmingCharacters(in: .whitespaces) ?? ""
+        var item = ItemContent(
+            figure: firstLine.isEmpty ? loc("No note") : CalendarItem.title(firstLine, limit: 20),
+            template: String(repeating: "m", count: 20)
+        )
+        item.isDimmed = firstLine.isEmpty
+        item.glyph = .symbol
+        item.figureWidth = 120
+        item.detail = firstLine.isEmpty ? nil : firstLine
+        return item
     }
 
     private static func thermal(

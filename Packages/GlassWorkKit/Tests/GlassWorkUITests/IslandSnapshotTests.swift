@@ -8,7 +8,7 @@ private let islandNow = Date(timeIntervalSince1970: 1_794_831_360)
 
 private enum IslandSample: String, CaseIterable {
     case meeting, timers, copied, charging, systemAlert, network, devServers, nowPlaying, keepAwake, inProgress
-    case levels
+    case levels, headphones
     case downloads
 }
 
@@ -78,7 +78,7 @@ private enum IslandSamples {
             input.keepAwakeIncludesDisplay = true
             input.isKeepingAwake = true
             input.keepAwakeEnds = islandNow.addingTimeInterval(84)
-        case .levels: input = levelsInput()
+        case .levels, .headphones: input = levelsInput(sample)
         case .downloads: input.downloads = downloads
         }
         return input
@@ -89,9 +89,17 @@ private enum IslandSamples {
         DockFile(path: "/d/Logo.svg", name: "Logo.svg", added: islandNow),
     ]
 
-    static func levelsInput() -> IslandInput {
+    static func levelsInput(_ sample: IslandSample) -> IslandInput {
         var input = IslandInput()
-        input.levels = SystemLevels(volume: 0.62, outputName: "MacBook Pro Speakers", brightness: 0.7)
+        guard sample == .headphones else {
+            input.levels = SystemLevels(volume: 0.62, outputName: "MacBook Pro Speakers", brightness: 0.7)
+            return input
+        }
+        input.levels = SystemLevels(volume: 0.4, outputName: "AirPods Pro")
+        input.deviceBatteries = [
+            DeviceBattery(name: "AirPods Pro", kind: .headphones, charge: 0.9),
+            DeviceBattery(name: "AirPods Pro Case", kind: .headphones, charge: 0.62),
+        ]
         return input
     }
 
@@ -212,6 +220,7 @@ private enum IslandSamples {
         case .levels: previous.levels?.volume = 0.5
         case .downloads: previous.downloads = previous.downloads
             .map { var file = $0; file.isDownloading = true; return file }
+        case .headphones: previous.levels?.outputName = "MacBook Pro Speakers"
         default: break
         }
         store.update(input: previous, now: islandNow.addingTimeInterval(-120))

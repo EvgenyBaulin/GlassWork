@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 @testable import GlassWorkCore
 import Testing
@@ -54,6 +55,49 @@ struct MemoryTests {
 }
 
 struct NetworkTests {
+    @Test func aDisconnectedLinkIsOfflineEvenWithRunningResources() {
+        #expect(!NetworkReader.isActive(flags: IFF_UP | IFF_RUNNING, linkActive: false))
+        #expect(NetworkReader.isActive(flags: IFF_UP | IFF_RUNNING, linkActive: true))
+        #expect(NetworkReader.isActive(flags: IFF_UP | IFF_RUNNING, linkActive: nil))
+        #expect(!NetworkReader.isActive(flags: IFF_UP, linkActive: true))
+        #expect(!NetworkReader.isActive(flags: 0, linkActive: true))
+    }
+
+    @Test func anIdleInterfaceStaysActive() {
+        let counters = [InterfaceCounters(name: "en0", received: 1000, sent: 100)]
+        let sample = NetworkSample.between(counters, counters, seconds: 2)
+        #expect(sample.download == 0)
+        #expect(sample.upload == 0)
+        #expect(sample.interfaces.map(\.name) == ["en0"])
+    }
+
+    @Test func anInactiveInterfaceDoesNotCount() {
+        let old = [InterfaceCounters(name: "en0", received: 1000, sent: 100)]
+        let current = [InterfaceCounters(name: "en0", received: 2000, sent: 200, isActive: false)]
+        let sample = NetworkSample.between(old, current, seconds: 2, sessionReceived: 50, sessionSent: 5)
+        #expect(sample.interfaces.isEmpty)
+        #expect(sample.download == 0)
+        #expect(sample.upload == 0)
+        #expect(sample.sessionReceived == 50)
+        #expect(sample.sessionSent == 5)
+    }
+
+    @Test func aNewInterfaceIsActiveBeforeItHasARate() {
+        let current = [InterfaceCounters(name: "en5", received: 1000, sent: 100)]
+        let sample = NetworkSample.between([], current, seconds: 2)
+        #expect(sample.interfaces.map(\.name) == ["en5"])
+        #expect(sample.download == 0)
+    }
+
+    @Test func reconnectingDoesNotCountTrafficFromBeforeTheConnection() {
+        let old = [InterfaceCounters(name: "en0", received: 1000, sent: 100, isActive: false)]
+        let current = [InterfaceCounters(name: "en0", received: 5000, sent: 500)]
+        let sample = NetworkSample.between(old, current, seconds: 2)
+        #expect(sample.interfaces.map(\.name) == ["en0"])
+        #expect(sample.download == 0)
+        #expect(sample.upload == 0)
+    }
+
     @Test func sumsPhysicalInterfacesOnly() {
         let old = [
             InterfaceCounters(name: "en0", received: 1000, sent: 100),

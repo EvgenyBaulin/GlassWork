@@ -23,6 +23,7 @@ struct IslandPresentation {
         case .weather, .downloads: Palette.blue
         case .levels(_, .volume): Palette.pink
         case .levels(_, .brightness): Palette.yellow
+        case .headphones: Palette.green
         }
     }
 
@@ -48,6 +49,7 @@ struct IslandPresentation {
         case let .levels(levels, .volume): levels.isSilent ? "speaker.slash.fill" : "speaker.wave.2.fill"
         case .levels(_, .brightness): "sun.max.fill"
         case .downloads: "arrow.down"
+        case .headphones: "airpodspro"
         }
     }
 
@@ -70,7 +72,7 @@ struct IslandPresentation {
         case .charging, .keepAwake, .nowPlaying: ""
         case .copied: loc("Copied")
         case .weather: loc("Weather")
-        case .levels: ""
+        case .levels, .headphones: ""
         case .downloads: ""
         }
     }
@@ -98,6 +100,7 @@ struct IslandPresentation {
         case .levels(_, .volume): loc("Volume")
         case .levels(_, .brightness): loc("Brightness")
         case let .downloads(files): downloadsTitle(files)
+        case let .headphones(name, _): name
         }
     }
 
@@ -125,6 +128,7 @@ struct IslandPresentation {
         case let .levels(levels, .volume): volumeText(levels)
         case let .levels(levels, .brightness): Format.percent(levels.brightness ?? 0)
         case let .downloads(files): downloadsValue(files)
+        case let .headphones(_, batteries): headphonesValue(batteries)
         }
     }
 
@@ -185,7 +189,14 @@ struct IslandPresentation {
         case let .levels(levels, .volume): levels.outputName ?? ""
         case .levels(_, .brightness): loc("Built-in display")
         case let .downloads(files): files.count == 1 ? files[0].name : ""
+        case .headphones: loc("Connected")
         }
+    }
+
+    /// The buds, not the case, which charges them.
+    private func headphonesValue(_ batteries: [DeviceBattery]) -> String {
+        let buds = batteries.filter { !$0.name.lowercased().hasSuffix("case") }
+        return (buds.isEmpty ? batteries : buds).map(\.charge).min().map { Format.percent($0) } ?? ""
     }
 
     private func volumeText(_ levels: SystemLevels) -> String {
