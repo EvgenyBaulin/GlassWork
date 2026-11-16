@@ -264,8 +264,10 @@ final class AppModel {
     private func updateDemand() {
         // Charts sample on every tick; other widgets read once a minute.
         let placed = systemWidgetKinds
-        var demand = MonitorDemand(widgets: placed.filter(\.keepsHistory))
+        // What reads on every tick whatever the menu bar shows: charts on the desktop and the main window.
+        let base = MonitorDemand(widgets: placed.filter(\.keepsHistory))
             .adding(visibleSection?.monitorDemand ?? MonitorDemand())
+        var demand = base
         // A widget in the Dock shows a live figure, just as a menu bar item does.
         let docked = store.settings.dock.shownWidgets
         let modes = store.settings.modules.filter { $0.mode == .menuBar }.map(\.id) + docked
@@ -283,6 +285,10 @@ final class AppModel {
             || modes.contains(.fans) || store.settings.alerts.isEnabled
         demand.sensorDetail = everything || isSettingsOpen ? .live : demand.sensorDetail
         demand.processes = everything
+        // Only the menu bar and the Dock: slower metrics read at their own pace (owner's table, 2026-11-16).
+        if !(everything || isSettingsOpen) {
+            demand.paces = SampleKind.menuBarPaces(for: Set(modes)).filter { kind, _ in !base.wants(kind) }
+        }
         demand.developerLive = everything || visibleSection != nil
         demand.developer = store.settings.developerDemand(panelOpen: everything)
             .union(placed.compactMap(\.developerModule))

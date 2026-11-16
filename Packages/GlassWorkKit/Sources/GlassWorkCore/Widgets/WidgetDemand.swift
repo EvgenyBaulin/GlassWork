@@ -64,7 +64,31 @@ public extension MonitorDemand {
         both.devices = devices || other.devices
         both.timeMachine = timeMachine || other.timeMachine
         both.nowPlaying = nowPlaying || other.nowPlaying
+        both.paces = Dictionary(uniqueKeysWithValues: SampleKind.allCases.compactMap { kind in
+            Self.pace(kind, of: self, other).map { (kind, $0) }
+        })
         return both
+    }
+
+    /// The quicker of two paces for a metric. A side that does not read it has no say; one that reads it on every
+    /// tick wins.
+    private static func pace(_ kind: SampleKind, of one: MonitorDemand, _ two: MonitorDemand) -> TimeInterval? {
+        func each(_ demand: MonitorDemand) -> TimeInterval {
+            guard demand.wants(kind) else { return .infinity }
+            return demand.paces[kind] ?? 0
+        }
+        let quickest = min(each(one), each(two))
+        return quickest == 0 || quickest == .infinity ? nil : quickest
+    }
+
+    func wants(_ kind: SampleKind) -> Bool {
+        switch kind {
+        case .cpu: cpu
+        case .memory: memory
+        case .gpu: gpu
+        case .diskActivity: disk
+        case .sensors: sensors
+        }
     }
 
     /// What this asks for that `other` does not read already.
