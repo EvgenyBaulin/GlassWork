@@ -3339,6 +3339,22 @@
         }
       }
     },
+    "Sensor groups in the panel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensor groups in the panel"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Группы датчиков в панели"
+          }
+        }
+      }
+    },
     "Share + swap": {
       "localizations": {
         "en": {
