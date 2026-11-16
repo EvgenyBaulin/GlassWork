@@ -43,6 +43,7 @@ public enum ItemOption {
     public static let gpuName = "gpu"
     public static let volumePath = "volume"
     public static let showsUnknownSensors = "unknownSensors"
+    public static let hiddenSensorGroups = "hiddenSensorGroups"
     public static let uptimeFormat = "uptimeFormat"
     public static let hiddenCalendars = "hiddenCalendars"
     public static let calendarWindowHours = "windowHours"
@@ -87,11 +88,11 @@ public enum ItemOption {
 }
 
 public enum MemoryFigure: String, Sendable, CaseIterable {
-    case share, gigabytes, pressure
+    case share, gigabytes, pressure, shareAndSwap
 }
 
 public enum DiskFigure: String, Sendable, CaseIterable {
-    case free, activity, both
+    case free, activity, both, freePercent
 }
 
 public enum RateUnit: String, Sendable, CaseIterable {

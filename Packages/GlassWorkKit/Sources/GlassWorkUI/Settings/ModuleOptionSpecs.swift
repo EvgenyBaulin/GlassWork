@@ -176,6 +176,7 @@ public extension ModuleOptionSpec {
                     OptionChoice(MemoryFigure.share.rawValue, "Share"),
                     OptionChoice(MemoryFigure.gigabytes.rawValue, "GB"),
                     OptionChoice(MemoryFigure.pressure.rawValue, "Pressure"),
+                    OptionChoice(MemoryFigure.shareAndSwap.rawValue, "Share + swap"),
                 ]),
                 fallback: MemoryFigure.share.rawValue
             ),
@@ -185,6 +186,7 @@ public extension ModuleOptionSpec {
                 .disk, Key.diskFigure, "Show", "Показывать",
                 .choice([
                     OptionChoice(DiskFigure.free.rawValue, "Free space"),
+                    OptionChoice(DiskFigure.freePercent.rawValue, "Free space %"),
                     OptionChoice(DiskFigure.activity.rawValue, "Read / write"),
                     OptionChoice(DiskFigure.both.rawValue, "Both"),
                 ]),
@@ -234,10 +236,6 @@ public extension ModuleOptionSpec {
             ),
             lowBattery,
             option(.sensors, Key.warnAbove, "Warn above", "Предупреждать выше", temperature, fallback: "95"),
-            toggle(
-                .sensors, Key.showsUnknownSensors, "Include unknown sensors (Other)",
-                "Показывать неизвестные датчики (Прочие)", fallback: true, isAdvanced: true
-            ),
             notifyTemperature,
             option(
                 .uptime, Key.uptimeFormat, "Format", "Формат",

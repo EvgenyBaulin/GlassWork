@@ -91,6 +91,22 @@
         }
       }
     },
+    "%@ · swap %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · swap %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · своп %@"
+          }
+        }
+      }
+    },
     "%lld Performance · %lld Efficiency": {
       "localizations": {
         "ru": {
@@ -1483,6 +1499,22 @@
         }
       }
     },
+    "Free space %": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free space %"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свободно, %"
+          }
+        }
+      }
+    },
     "Free until %@": {
       "localizations": {
         "ru": {
@@ -2413,6 +2445,22 @@
         }
       }
     },
+    "No note": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No note"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет заметки"
+          }
+        }
+      }
+    },
     "No note yet": {
       "localizations": {
         "ru": {
@@ -3287,6 +3335,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Всё работает"
+          }
+        }
+      }
+    },
+    "Sensor groups in the panel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensor groups in the panel"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Группы датчиков в панели"
+          }
+        }
+      }
+    },
+    "Share + swap": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share + swap"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Занято + своп"
           }
         }
       }

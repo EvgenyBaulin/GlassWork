@@ -314,6 +314,7 @@ struct ModulePane: View {
             ModuleOptionRows(module: module, store: store)
             if module == .sensors {
                 SensorsMenuBarSection(selection: sensor, sample: monitor.sensors)
+                SensorGroupsSection(store: store)
             }
             if module == .fans {
                 FansMenuBarSection(showsEachFan: showsEachFan)

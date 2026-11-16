@@ -15,7 +15,9 @@ public enum IslandEventBuilder {
         if let entry = current.clipboardEntry, entry.id != previous.clipboardEntry?.id {
             result.append(transient(id: "copied", kind: .copied, detail: .copied(entry), now: now))
         }
-        if let changed = levelChange(current.levels, previous.levels), let levels = current.levels {
+        if let headphones = headphones(current, previous: previous) {
+            result.append(transient(id: "headphones", kind: .airPods, detail: headphones, now: now))
+        } else if let changed = levelChange(current.levels, previous.levels), let levels = current.levels {
             result.append(transient(id: "levels", kind: .volume, detail: .levels(levels, changed: changed), now: now))
         }
         return enriched(result, input: current, now: now)
@@ -85,6 +87,17 @@ public enum IslandEventBuilder {
             result.append(transient(id: "ping", kind: .network, detail: .network(.pingRecovered(ping)), now: now))
         }
         return result
+    }
+
+    /// Sound moving to headphones, known by name or by a headphone battery of the same name.
+    static func headphones(_ current: IslandInput, previous: IslandInput) -> IslandDetail? {
+        guard let name = current.levels?.outputName, let old = previous.levels,
+              old.outputName != name
+        else { return nil }
+        let batteries = current.deviceBatteries.filter { $0.kind == .headphones && $0.name.hasPrefix(name) }
+        let known = ["airpods", "beats", "headphones", "earbuds", "buds"]
+        guard !batteries.isEmpty || known.contains(where: name.lowercased().contains) else { return nil }
+        return .headphones(name: name, batteries: batteries)
     }
 
     /// Only a change counts: the first reading, or one that stops coming, shows nothing.

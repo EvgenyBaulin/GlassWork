@@ -277,13 +277,23 @@ struct FanHelperCard: View {
         }
     }
 
+    private var cancelButton: some View {
+        Button(loc("Cancel")) { Task { await control.cancelInstall() } }.buttonStyle(.bordered)
+    }
+
     @ViewBuilder
     private var action: some View {
         switch control.helperState {
         case .needsApproval:
-            Button(loc("Open Login Items")) { control.openApproval() }.buttonStyle(.borderedProminent)
+            HStack {
+                Button(loc("Open Login Items")) { control.openApproval() }.buttonStyle(.borderedProminent)
+                cancelButton
+            }
         case .installing:
-            ProgressView().controlSize(.small)
+            HStack {
+                ProgressView().controlSize(.small)
+                cancelButton
+            }
         case .installed:
             Button(loc("Enable fan control")) { control.setControlEnabled(true) }.buttonStyle(.borderedProminent)
         case .notInstalled, .failed:

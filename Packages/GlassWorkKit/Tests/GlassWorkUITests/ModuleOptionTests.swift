@@ -97,6 +97,7 @@ struct OptionTableTests {
         "Down (speed)": "Загрузка",
         "Exact": "Точно",
         "Free space": "Свободное место",
+        "Free space %": "Свободно, %",
         "GB": "ГБ",
         "Large": "Большой",
         "Medium (size)": "Средний",
@@ -109,6 +110,7 @@ struct OptionTableTests {
         "Read / write": "Чтение и запись",
         "Running (containers)": "Запущенные",
         "Share": "Доля",
+        "Share + swap": "Занято + своп",
         "Small": "Маленький",
         "Sunrise": "Восход",
         "Sunset": "Закат",
@@ -209,7 +211,7 @@ struct ItemOptionTests {
         let sample = NetworkSample(
             download: 2_000_000,
             upload: 500_000,
-            interfaces: [],
+            interfaces: [.init(name: "en0", download: 2_000_000, upload: 500_000)],
             sessionReceived: 0,
             sessionSent: 0
         )
@@ -222,13 +224,19 @@ struct ItemOptionTests {
     }
 
     @Test func networkCanCountInBits() {
-        let sample = NetworkSample(download: 1_000_000, upload: 0, interfaces: [], sessionReceived: 0, sessionSent: 0)
+        let sample = NetworkSample(
+            download: 1_000_000, upload: 0,
+            interfaces: [.init(name: "en0", download: 1_000_000, upload: 0)], sessionReceived: 0, sessionSent: 0
+        )
         let item = ItemContent.network(sample, style: .compact, options: [ItemOption.rateUnit: "bits"])
         #expect(item.figure == "↓ 8Mb/s")
     }
 
     @Test func aSpeedBelowTheLimitReadsAsADash() {
-        let sample = NetworkSample(download: 5000, upload: 50000, interfaces: [], sessionReceived: 0, sessionSent: 0)
+        let sample = NetworkSample(
+            download: 5000, upload: 50000,
+            interfaces: [.init(name: "en0", download: 5000, upload: 50000)], sessionReceived: 0, sessionSent: 0
+        )
         let item = ItemContent.network(sample, style: .compact, options: [ItemOption.hideBelow: "10000"])
         #expect(item.figure == "↓ —")
         #expect(item.secondLine == "↑ 50K/s")
@@ -350,6 +358,30 @@ struct ModuleOptionSnapshotTests {
         .formStyle(.grouped)
         .frame(width: 620, height: height)
         snapshotPanel(view, name: name, dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func memoryShareAndSwap(dark: Bool) {
+        let store = store()
+        store.update { $0.update(.memory) { $0.options[ItemOption.memoryFigure] = MemoryFigure.shareAndSwap.rawValue } }
+        let view = Form {
+            ModuleOptionRows(module: .memory, store: store, showsAdvanced: true)
+        }
+        .formStyle(.grouped)
+        .frame(width: 620, height: 240)
+        snapshotPanel(view, name: "memory-share-swap", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func diskFreePercent(dark: Bool) {
+        let store = store()
+        store.update { $0.update(.disk) { $0.options[ItemOption.diskFigure] = DiskFigure.freePercent.rawValue } }
+        let view = Form {
+            ModuleOptionRows(module: .disk, store: store, showsAdvanced: true)
+        }
+        .formStyle(.grouped)
+        .frame(width: 620, height: 200)
+        snapshotPanel(view, name: "disk-free-percent", dark: dark)
     }
 
     @Test(arguments: [true, false])
