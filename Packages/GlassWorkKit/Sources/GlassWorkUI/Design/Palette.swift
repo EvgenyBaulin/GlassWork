@@ -1,5 +1,6 @@
 import GlassWorkCore
 import SwiftUI
+import WidgetKit
 
 /// Accent colors shared by panels, tiles, charts and widgets.
 public enum Palette {
@@ -192,6 +193,7 @@ public extension ModuleGroup {
 public struct ModuleIcon: View {
     private let module: ModuleID
     private let size: CGFloat
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     public init(_ module: ModuleID, size: CGFloat = 28) {
         self.module = module
@@ -203,6 +205,11 @@ public struct ModuleIcon: View {
             .font(.system(size: size * 0.52, weight: .semibold))
             .foregroundStyle(.white)
             .frame(width: size, height: size)
-            .background(module.tint.gradient, in: .rect(cornerRadius: size / 4))
+            .background(background, in: .rect(cornerRadius: size / 4))
+    }
+
+    /// A tinted or clear desktop paints everything in one colour, so a solid tile would hide its symbol.
+    private var background: AnyShapeStyle {
+        renderingMode == .fullColor ? AnyShapeStyle(module.tint.gradient) : AnyShapeStyle(.white.opacity(0.18))
     }
 }
