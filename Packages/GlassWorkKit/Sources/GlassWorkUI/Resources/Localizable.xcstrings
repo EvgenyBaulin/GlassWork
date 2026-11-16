@@ -16884,6 +16884,102 @@
           }
         }
       }
+    },
+    "Trash": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trash"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Корзина"
+          }
+        }
+      }
+    },
+    "Open Trash": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Trash"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть Корзину"
+          }
+        }
+      }
+    },
+    "Empty Trash…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty Trash…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить Корзину…"
+          }
+        }
+      }
+    },
+    "Empty the Trash?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty the Trash?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить Корзину?"
+          }
+        }
+      }
+    },
+    "Items in the Trash will be deleted for good. This can’t be undone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Items in the Trash will be deleted for good. This can’t be undone."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Объекты в Корзине будут удалены навсегда. Это нельзя отменить."
+          }
+        }
+      }
+    },
+    "Empty Trash": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty Trash"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистить Корзину"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

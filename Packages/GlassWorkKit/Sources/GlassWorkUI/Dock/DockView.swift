@@ -27,7 +27,25 @@ public extension ModuleID {
 }
 
 /// What the Dock can ask the app to do.
+/// What the Trash at the end of the Dock can do.
 @MainActor
+public struct DockTrashActions {
+    public var open: () -> Void
+    /// Asks first: emptying cannot be undone.
+    public var empty: () -> Void
+    public var moveToTrash: ([URL]) -> Void
+
+    public init(
+        open: @escaping () -> Void = {},
+        empty: @escaping () -> Void = {},
+        moveToTrash: @escaping ([URL]) -> Void = { _ in }
+    ) {
+        self.open = open
+        self.empty = empty
+        self.moveToTrash = moveToTrash
+    }
+}
+
 public struct DockActions {
     public var open: (DockApp) -> Void
     /// A click on a widget runs its quick action.
@@ -54,6 +72,8 @@ public struct DockActions {
     /// Asks for a name and saves the Dock as a preset.
     public var savePreset: () -> Void
     public var openSettings: () -> Void
+    /// Set by the app; without it the Trash only shows.
+    public var trash: DockTrashActions?
 
     public init(
         open: @escaping (DockApp) -> Void,
@@ -288,6 +308,18 @@ public struct DockView: View {
             DockPagerTile(direction: .next, size: size, arrangement: arrangement, position: position) {
                 actions.turnPage(1)
             }
+        case .trash:
+            TrashTile(isFull: state.trashIsFull, size: size, position: position) { actions.trash?.open() }
+                .contextMenu {
+                    Button(loc("Open Trash")) { actions.trash?.open() }
+                    Button(loc("Empty Trash…")) { actions.trash?.empty() }.disabled(!state.trashIsFull)
+                }
+                .dropDestination(for: URL.self) { urls, _ in
+                    let files = urls.filter(\.isFileURL)
+                    guard !files.isEmpty, let trash = actions.trash else { return false }
+                    trash.moveToTrash(files)
+                    return true
+                }
         }
     }
 

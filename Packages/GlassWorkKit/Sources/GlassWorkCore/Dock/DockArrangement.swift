@@ -5,12 +5,14 @@ public enum DockSlot: Sendable, Equatable, Identifiable {
     case item(DockItem)
     case previousPage
     case nextPage
+    case trash
 
     public var id: String {
         switch self {
         case let .item(item): item.id
         case .previousPage: "previous-page"
         case .nextPage: "next-page"
+        case .trash: "trash"
         }
     }
 }
@@ -36,17 +38,19 @@ public struct DockArrangement: Sendable, Equatable {
 
     /// - Parameter length: The room along the screen's edge.
     /// - Parameter page: The set of widgets wanted. A page that no longer exists falls back to the last one.
-    public init(items: [DockItem], iconSize: Double, length: Double, page: Int = 0) {
+    /// - Parameter showsTrash: The Trash goes last, after the stacks.
+    public init(items: [DockItem], iconSize: Double, length: Double, page: Int = 0, showsTrash: Bool = false) {
         let apps = items.filter(\.isAppLike)
         let widgets = items.filter(\.isWidget)
         let stacks = items.filter(\.isStack)
-        let fixed = apps.count + stacks.count
+        let trash = showsTrash ? 1 : 0
+        let fixed = apps.count + stacks.count + trash
 
         var size = iconSize
         var set = widgets
         var current = 0
         var count = 1
-        if DockBarLayout.restWidth(count: items.count, base: iconSize) > length {
+        if DockBarLayout.restWidth(count: items.count + trash, base: iconSize) > length {
             let needsPager = !widgets.isEmpty
             let least = fixed + (needsPager ? 1 + Self.pagerSlots : 0)
             size = min(iconSize, Self.iconSize(toFit: least, in: length))
@@ -75,9 +79,11 @@ public struct DockArrangement: Sendable, Equatable {
                 slots.append(.nextPage)
             }
         }
-        if !stacks.isEmpty {
+        // The Trash sits with the stacks, without a divider of its own, as in the system Dock.
+        let tail = stacks.map(DockSlot.item) + (showsTrash ? [.trash] : [])
+        if !tail.isEmpty {
             close()
-            slots += stacks.map(DockSlot.item)
+            slots += tail
         }
         self.slots = slots
         self.dividers = dividers
