@@ -74,6 +74,8 @@ public enum IslandDetail: Sendable, Equatable {
     case copied(ClipboardEntry)
     /// Volume or brightness just changed: the one that did leads.
     case levels(SystemLevels, changed: IslandLevel)
+    /// Files being downloaded, and those that finished meanwhile.
+    case downloads([DockFile])
 }
 
 public struct IslandEvent: Identifiable, Equatable, Sendable {
@@ -96,6 +98,8 @@ public struct IslandEvent: Identifiable, Equatable, Sendable {
     var isTransition: Bool {
         switch detail {
         case .network, .devServers, .charging, .copied, .levels: true
+        // Finished downloads stay for their moment; ones in progress follow each reading.
+        case .downloads: expires != nil
         default: false
         }
     }

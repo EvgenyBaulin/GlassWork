@@ -9,6 +9,7 @@ private let islandNow = Date(timeIntervalSince1970: 1_794_831_360)
 private enum IslandSample: String, CaseIterable {
     case meeting, timers, copied, charging, systemAlert, network, devServers, nowPlaying, keepAwake, inProgress
     case levels
+    case downloads
 }
 
 @MainActor
@@ -77,9 +78,20 @@ private enum IslandSamples {
             input.keepAwakeIncludesDisplay = true
             input.isKeepingAwake = true
             input.keepAwakeEnds = islandNow.addingTimeInterval(84)
-        case .levels:
-            input.levels = SystemLevels(volume: 0.62, outputName: "MacBook Pro Speakers", brightness: 0.7)
+        case .levels: input = levelsInput()
+        case .downloads: input.downloads = downloads
         }
+        return input
+    }
+
+    static let downloads = [
+        DockFile(path: "/d/Assets.zip", name: "Assets.zip", added: islandNow, isDownloading: true, progress: 0.68),
+        DockFile(path: "/d/Logo.svg", name: "Logo.svg", added: islandNow),
+    ]
+
+    static func levelsInput() -> IslandInput {
+        var input = IslandInput()
+        input.levels = SystemLevels(volume: 0.62, outputName: "MacBook Pro Speakers", brightness: 0.7)
         return input
     }
 
@@ -198,6 +210,8 @@ private enum IslandSamples {
             ))
         case .devServers: previous.docker = .containers([container(running: true)], context: "pocket-api")
         case .levels: previous.levels?.volume = 0.5
+        case .downloads: previous.downloads = previous.downloads
+            .map { var file = $0; file.isDownloading = true; return file }
         default: break
         }
         store.update(input: previous, now: islandNow.addingTimeInterval(-120))

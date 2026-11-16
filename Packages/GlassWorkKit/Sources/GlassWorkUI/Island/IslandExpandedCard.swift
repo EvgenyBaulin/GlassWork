@@ -71,6 +71,7 @@ struct IslandExpandedCard: View {
         case let .network(detail): networkContent(detail)
         case let .devServers(detail): developerContent(detail)
         case let .keepAwake(end): keepAwakeContent(end)
+        case let .downloads(files): downloadsContent(files)
         case .nowPlaying, .weather, .levels: EmptyView()
         }
     }
@@ -97,6 +98,26 @@ struct IslandExpandedCard: View {
                     tint: Palette.yellow,
                     set: actions.setBrightness
                 )
+            }
+        }
+    }
+
+    private func downloadsContent(_ files: [DockFile]) -> some View {
+        VStack(spacing: 10) {
+            ForEach(files.prefix(4)) { file in
+                VStack(spacing: 5) {
+                    HStack {
+                        Text(file.name).font(.system(size: 12)).lineLimit(1).truncationMode(.middle)
+                        Spacer()
+                        Text(file.isDownloading ? file.progress.map { Format.percent($0) } ?? "…" : loc("done"))
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+                    ThinBar(
+                        value: file.isDownloading ? file.progress ?? 0 : 1,
+                        tint: file.isDownloading ? Palette.blue : Palette.green
+                    )
+                }
             }
         }
     }

@@ -20,7 +20,7 @@ struct IslandPresentation {
         case .charging, .keepAwake: Palette.green
         case .nowPlaying: artworkTint
         case .copied: Palette.teal
-        case .weather: Palette.blue
+        case .weather, .downloads: Palette.blue
         case .levels(_, .volume): Palette.pink
         case .levels(_, .brightness): Palette.yellow
         }
@@ -47,6 +47,7 @@ struct IslandPresentation {
         case .weather: "cloud.rain"
         case let .levels(levels, .volume): levels.isSilent ? "speaker.slash.fill" : "speaker.wave.2.fill"
         case .levels(_, .brightness): "sun.max.fill"
+        case .downloads: "arrow.down"
         }
     }
 
@@ -70,6 +71,7 @@ struct IslandPresentation {
         case .copied: loc("Copied")
         case .weather: loc("Weather")
         case .levels: ""
+        case .downloads: ""
         }
     }
 
@@ -95,6 +97,7 @@ struct IslandPresentation {
         case .weather: loc("Weather")
         case .levels(_, .volume): loc("Volume")
         case .levels(_, .brightness): loc("Brightness")
+        case let .downloads(files): downloadsTitle(files)
         }
     }
 
@@ -121,6 +124,7 @@ struct IslandPresentation {
         case let .weather(report): Format.temperature(report.current.temperature)
         case let .levels(levels, .volume): volumeText(levels)
         case let .levels(levels, .brightness): Format.percent(levels.brightness ?? 0)
+        case let .downloads(files): downloadsValue(files)
         }
     }
 
@@ -180,6 +184,7 @@ struct IslandPresentation {
         case let .weather(report): report.place.name
         case let .levels(levels, .volume): levels.outputName ?? ""
         case .levels(_, .brightness): loc("Built-in display")
+        case let .downloads(files): files.count == 1 ? files[0].name : ""
         }
     }
 
@@ -188,6 +193,19 @@ struct IslandPresentation {
             return loc("Muted")
         }
         return Format.percent(levels.volume ?? 0)
+    }
+
+    private func downloadsTitle(_ files: [DockFile]) -> String {
+        let active = files.filter(\.isDownloading).count
+        if active == 0 {
+            return files.count == 1 ? loc("Downloaded") : loc("Downloaded \(files.count) files")
+        }
+        return active == 1 ? loc("Downloading") : loc("Downloading \(active) files")
+    }
+
+    private func downloadsValue(_ files: [DockFile]) -> String {
+        guard files.contains(where: \.isDownloading) else { return loc("done") }
+        return DockFiles.overallProgress(files).map { Format.percent($0) } ?? "…"
     }
 
     func clock(_ date: Date) -> String {
