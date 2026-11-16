@@ -13,6 +13,7 @@ final class IslandController {
     private var panel: IslandPanel?
     private var hosting: IslandHostingView?
     private var surface: IslandView?
+    private var currentGeometry: IslandGeometry?
     private var surfaceFrame = CGRect.zero
     private var targetFrame = CGRect.zero
     private var shrinkTask: Task<Void, Never>?
@@ -33,7 +34,10 @@ final class IslandController {
     }
 
     func apply(_ settings: IslandSettings) {
-        store.lifecycle.hoverToExpand = settings.expandsOnHover
+        // Every assignment redraws the island, so only a real change is written.
+        if store.lifecycle.hoverToExpand != settings.expandsOnHover {
+            store.lifecycle.hoverToExpand = settings.expandsOnHover
+        }
         guard settings.isEnabled else {
             stop()
             return
@@ -111,11 +115,16 @@ final class IslandController {
     private func refresh() {
         guard isEnabled else { return }
         defer { observeStore() }
-        guard let screen = NSScreen.screens.first(where: { $0.safeAreaInsets.top > 0 }) ?? NSScreen.main else {
+        // Without a notch, the screen with the menu bar: `NSScreen.main` follows keyboard focus.
+        guard let screen = NSScreen.screens.first(where: { $0.safeAreaInsets.top > 0 }) ?? NSScreen.screens.first
+        else {
             panel?.orderOut(nil)
+            store.lifecycle.clickedOutside()
+            updateDismissalMonitors()
             return
         }
         let geometry = Self.geometry(screen)
+        currentGeometry = geometry
         // Public APIs do not expose the front app's menu bounds. Assume room on the left; never use
         // NSApp.mainMenu, which describes only our own menus. The collision input remains pluggable.
         let view = IslandView(
@@ -130,16 +139,7 @@ final class IslandController {
             panel?.orderOut(nil)
             return
         }
-        if panel == nil {
-            let window = IslandPanel()
-            let host = IslandHostingView(rootView: AnyView(EmptyView()))
-            host.onPointer = { [weak self] in self?.updatePointer() }
-            host.sizingOptions = []
-            window.contentView = host
-            hosting = host
-            panel = window
-        }
-        guard let panel else { return }
+        guard let panel = makePanelIfNeeded() else { return }
         // The outline's top ears extend ten points beyond the geometry's rectangle.
         let next = surfaceFrame.insetBy(dx: -10, dy: 0)
         if next != targetFrame {
@@ -152,8 +152,9 @@ final class IslandController {
             place(view, geometry: geometry, frame: envelope)
             shrinkTask = Task { [weak self] in
                 try? await Task.sleep(for: .milliseconds(400))
-                guard let self, !Task.isCancelled, isEnabled else { return }
-                place(view, geometry: geometry, frame: next)
+                // The newest view, not the one captured here: a refresh may have come in between.
+                guard let self, !Task.isCancelled, isEnabled, let surface, let currentGeometry else { return }
+                place(surface, geometry: currentGeometry, frame: next)
                 updatePointer()
                 shrinkTask = nil
             }
@@ -162,6 +163,19 @@ final class IslandController {
         }
         panel.orderFrontRegardless()
         updatePointer()
+    }
+
+    private func makePanelIfNeeded() -> IslandPanel? {
+        if panel == nil {
+            let window = IslandPanel()
+            let host = IslandHostingView(rootView: AnyView(EmptyView()))
+            host.onPointer = { [weak self] in self?.updatePointer() }
+            host.sizingOptions = []
+            window.contentView = host
+            hosting = host
+            panel = window
+        }
+        return panel
     }
 
     private func place(_ view: IslandView, geometry: IslandGeometry, frame: CGRect) {

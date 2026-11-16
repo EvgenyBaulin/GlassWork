@@ -15,7 +15,7 @@ public struct IslandActions {
     public var fansToMax: () -> Void
     public var openActivityMonitor: () -> Void
     public var showTop: () -> Void
-    public var reconnectVPN: () -> Void
+    public var reconnectVPN: (() -> Void)?
     public var openNetworkSettings: () -> Void
     public var restartContainer: ((String) -> Void)?
     public var containerLogs: ((String) -> Void)?
@@ -42,7 +42,7 @@ public struct IslandActions {
         fansToMax: @escaping () -> Void = {},
         openActivityMonitor: @escaping () -> Void = {},
         showTop: @escaping () -> Void = {},
-        reconnectVPN: @escaping () -> Void = {},
+        reconnectVPN: (() -> Void)? = nil,
         openNetworkSettings: @escaping () -> Void = {},
         restartContainer: ((String) -> Void)? = nil,
         containerLogs: ((String) -> Void)? = nil,

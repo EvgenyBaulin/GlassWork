@@ -30,7 +30,8 @@ extension AppModel {
             fansToMax: { [weak self] in self?.fans.select(.max) },
             openActivityMonitor: Self.openActivityMonitor,
             showTop: Self.openActivityMonitor,
-            reconnectVPN: Self.openNetworkSettings,
+            // No public API reconnects a VPN, so the card offers Network settings only.
+            reconnectVPN: nil,
             openNetworkSettings: Self.openNetworkSettings,
             // DeveloperStore exposes readings only. Optional restart/log buttons stay hidden.
             openURL: { NSWorkspace.shared.open($0) },

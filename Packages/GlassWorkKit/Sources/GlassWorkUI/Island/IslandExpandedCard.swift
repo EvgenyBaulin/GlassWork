@@ -196,8 +196,8 @@ struct IslandExpandedCard: View {
                 )
             }
             HStack(spacing: 8) {
-                if event.context.vpn?.isConfigured == true {
-                    IslandCapsule(title: loc("Reconnect VPN"), tint: Palette.blue, action: actions.reconnectVPN)
+                if event.context.vpn?.isConfigured == true, let reconnect = actions.reconnectVPN {
+                    IslandCapsule(title: loc("Reconnect VPN"), tint: Palette.blue, action: reconnect)
                 }
                 IslandCapsule(title: loc("Network settings"), action: actions.openNetworkSettings)
             }

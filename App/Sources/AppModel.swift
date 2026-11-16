@@ -533,8 +533,8 @@ private extension AppModel {
 
     /// Only what is on screen counts, so the adapter process does not run for nothing.
     var wantsNowPlaying: Bool {
-        (store.settings.island.isEnabled && store.settings.module(.nowPlaying)?.mode != .off)
-            || isWanted(.nowPlaying) || nowPlaying.hasSystemWidget
+        // The island shows music only when Now Playing already runs for something else.
+        isWanted(.nowPlaying) || nowPlaying.hasSystemWidget
     }
 
     var wantsLyrics: Bool {

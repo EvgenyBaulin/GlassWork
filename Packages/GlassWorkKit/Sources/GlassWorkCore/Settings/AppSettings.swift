@@ -187,7 +187,7 @@ extension AppSettings {
         hub = (try? container.decodeIfPresent(HubSettings.self, forKey: .hub)) ?? HubSettings()
         keepsDiagnosticLog = try container.decodeIfPresent(Bool.self, forKey: .keepsDiagnosticLog) ?? false
         shortcuts = (try? container.decodeIfPresent(ShortcutSettings.self, forKey: .shortcuts)) ?? ShortcutSettings()
-        island = try container.decodeIfPresent(IslandSettings.self, forKey: .island) ?? IslandSettings()
+        island = (try? container.decodeIfPresent(IslandSettings.self, forKey: .island)) ?? IslandSettings()
         normalize()
     }
 
