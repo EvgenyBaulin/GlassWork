@@ -43,6 +43,7 @@ struct IslandFeedRulesTests {
 
     @Test func brightnessChangesNeedARealStep() {
         #expect(!IslandFeedRules.brightnessChanged(from: 0.5, to: 0.51))
+        #expect(!IslandFeedRules.brightnessChanged(from: 0.5, to: 0.53))
         #expect(IslandFeedRules.brightnessChanged(from: 0.5, to: 0.5625))
         #expect(!IslandFeedRules.brightnessChanged(from: nil, to: nil))
         #expect(IslandFeedRules.brightnessChanged(from: nil, to: 0.5))
