@@ -9,6 +9,11 @@ struct TextCaptureNoticeTests {
         #expect(TextCaptureNotice.copied(characters: 42).title.contains("42"))
     }
 
+    @Test func readingHasNoDetailAndOutlastsTheResults() {
+        #expect(TextCaptureNotice.reading.detail(shortcut: "⇧⌘2") == nil)
+        #expect(TextCaptureNotice.reading.duration > TextCaptureNotice.copied(characters: 1).duration)
+    }
+
     @Test func onlyThePermissionMessageExplainsAnything() {
         #expect(TextCaptureNotice.noText.detail(shortcut: "⇧⌘2") == nil)
         #expect(TextCaptureNotice.needsScreenRecording.detail(shortcut: "⇧⌘2") != nil)
@@ -20,6 +25,11 @@ struct TextCaptureNoticeTests {
 @MainActor
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["GW_SKIP_SNAPSHOTS"] == nil))
 struct TextCaptureHUDSnapshotTests {
+    @Test(arguments: [true, false])
+    func reading(dark: Bool) {
+        snapshotPanel(TextCaptureHUD(notice: .reading), name: "reading", dark: dark)
+    }
+
     @Test(arguments: [true, false])
     func copied(dark: Bool) {
         snapshotPanel(TextCaptureHUD(notice: .copied(characters: 42)), name: "copied", dark: dark)
