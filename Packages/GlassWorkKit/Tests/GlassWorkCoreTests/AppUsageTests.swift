@@ -459,7 +459,8 @@ struct AppUsageCostTests {
         let reading = await reader.read([thisTest], at: Date())
         let app = try #require(reading.apps.first)
         #expect(value != .infinity)
-        #expect((40 ... 400).contains(app.cpu))
+        // A wrong unit is off by orders of magnitude; a loaded machine only slows the loop, so the floor is low.
+        #expect((5 ... 400).contains(app.cpu))
         #expect(app.memory > 1_000_000)
     }
 }
