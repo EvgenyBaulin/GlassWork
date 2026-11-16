@@ -6,7 +6,7 @@ import GlassWorkCore
 public struct IslandActions {
     public var joinMeeting: (URL) -> Void
     public var snooze: () -> Void
-    public var runningLate: () -> Void
+    public var runningLate: (() -> Void)?
     public var addMinute: () -> Void
     public var stopTimers: () -> Void
     public var addTimer: () -> Void
@@ -17,14 +17,14 @@ public struct IslandActions {
     public var showTop: () -> Void
     public var reconnectVPN: () -> Void
     public var openNetworkSettings: () -> Void
-    public var restartContainer: (String) -> Void
-    public var containerLogs: (String) -> Void
+    public var restartContainer: ((String) -> Void)?
+    public var containerLogs: ((String) -> Void)?
     public var openURL: (URL) -> Void
     public var playPause: () -> Void
     public var next: () -> Void
     public var previous: () -> Void
     public var seek: (TimeInterval) -> Void
-    public var setVolume: (Double) -> Void
+    public var setVolume: ((Double) -> Void)?
     public var extendKeepAwake: (TimeInterval) -> Void
     public var stopKeepAwake: () -> Void
     public var dismiss: (String) -> Void
@@ -33,7 +33,7 @@ public struct IslandActions {
     public init(
         joinMeeting: @escaping (URL) -> Void = { _ in },
         snooze: @escaping () -> Void = {},
-        runningLate: @escaping () -> Void = {},
+        runningLate: (() -> Void)? = nil,
         addMinute: @escaping () -> Void = {},
         stopTimers: @escaping () -> Void = {},
         addTimer: @escaping () -> Void = {},
@@ -44,14 +44,14 @@ public struct IslandActions {
         showTop: @escaping () -> Void = {},
         reconnectVPN: @escaping () -> Void = {},
         openNetworkSettings: @escaping () -> Void = {},
-        restartContainer: @escaping (String) -> Void = { _ in },
-        containerLogs: @escaping (String) -> Void = { _ in },
+        restartContainer: ((String) -> Void)? = nil,
+        containerLogs: ((String) -> Void)? = nil,
         openURL: @escaping (URL) -> Void = { _ in },
         playPause: @escaping () -> Void = {},
         next: @escaping () -> Void = {},
         previous: @escaping () -> Void = {},
         seek: @escaping (TimeInterval) -> Void = { _ in },
-        setVolume: @escaping (Double) -> Void = { _ in },
+        setVolume: ((Double) -> Void)? = nil,
         extendKeepAwake: @escaping (TimeInterval) -> Void = { _ in },
         stopKeepAwake: @escaping () -> Void = {},
         dismiss: @escaping (String) -> Void = { _ in },

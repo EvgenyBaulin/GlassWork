@@ -70,6 +70,19 @@ public final class EverydayStore {
         }
     }
 
+    /// Extends both the visible deadline and the system assertion's timeout.
+    public func extendKeepAwake(by interval: TimeInterval, at date: Date = Date()) {
+        guard isKeepingAwake, let end = keepAwakeEnds, interval > 0 else { return }
+        let extended = max(end, date).addingTimeInterval(interval)
+        let status = IOPMAssertionSetProperty(
+            assertion, kIOPMAssertionTimeoutKey as CFString,
+            NSNumber(value: extended.timeIntervalSince(date))
+        )
+        if status == kIOReturnSuccess {
+            keepAwakeEnds = extended
+        }
+    }
+
     /// The system lets go by itself at the end, because no tick runs while the Mac sleeps.
     private func assertionProperties() -> [String: Any] {
         let type = letsDisplaySleep

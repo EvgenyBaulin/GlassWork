@@ -83,6 +83,16 @@ final class StatusBarController: NSObject {
         items.values.forEach { $0.refresh() }
     }
 
+    /// Only our visible status items on the island's display can constrain its right wing.
+    func leftmostItemX(on screen: NSScreen) -> CGFloat? {
+        let windows = [hub.button?.window, separator.button?.window] + items.values.map(\.window)
+        return windows.compactMap { window -> CGFloat? in
+            guard let window, window.isVisible, window.screen == screen,
+                  window.frame.minX >= screen.frame.midX, window.frame.width < screen.frame.width else { return nil }
+            return window.frame.minX
+        }.min()
+    }
+
     func owns(_ window: NSWindow) -> Bool {
         window === hub.button?.window || window === separator.button?.window
             || items.values.contains { $0.window === window }

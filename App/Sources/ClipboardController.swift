@@ -218,7 +218,8 @@ final class ClipboardController {
         }
     }
 
-    private func showQuickPaste() {
+    func showQuickPaste() {
+        guard quickPanel == nil else { return }
         model.closePanels()
         model.closeQuickQuit()
         let view = QuickPasteView(

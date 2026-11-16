@@ -1745,6 +1745,16 @@
         }
       }
     },
+    "Island": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Островок"
+          }
+        }
+      }
+    },
     "Join": {
       "localizations": {
         "ru": {
@@ -2623,6 +2633,16 @@
         }
       }
     },
+    "Open the island on hover": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открывать островок при наведении"
+          }
+        }
+      }
+    },
     "Open the Hub": {
       "localizations": {
         "ru": {
@@ -3329,6 +3349,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Похожие: %@"
+          }
+        }
+      }
+    },
+    "Shows what is happening around the camera notch": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывает события вокруг выреза камеры"
           }
         }
       }
