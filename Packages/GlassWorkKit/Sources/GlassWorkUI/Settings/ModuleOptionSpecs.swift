@@ -135,7 +135,8 @@ private func hub(
 // swiftlint:enable function_parameter_count
 
 public extension ModuleOptionSpec {
-    static let all: [ModuleOptionSpec] = system + hardware + everyday + dayToDay + developer + toolRows + usageRows
+    static let all: [ModuleOptionSpec] = system + hardware + everyday + dayToDay + developer + toolRows + shelfRows +
+        usageRows
         + hubRows
 
     static func rows(for module: ModuleID) -> [ModuleOptionSpec] {

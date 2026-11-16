@@ -112,6 +112,7 @@ public struct ItemContent {
         case .weather: weather(monitor.weather)
         case .rates: rates(monitor.rates)
         case .clipboard: clipboard(monitor.clipboard)
+        case .shelf: shelf(monitor.shelf)
         case .nowPlaying: nowPlaying(monitor.nowPlaying, options: options)
         default: ItemContent(figure: "—", template: "—")
         }
