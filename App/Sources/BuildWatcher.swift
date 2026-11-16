@@ -39,7 +39,8 @@ final class BuildWatcher {
     }
 
     private func poll() async {
-        let processes = await ProcessList.read(using: runner)
+        // In-process: a `ps` every two seconds would cost more than the rest of the island.
+        let processes = ProcessNames.running()
         guard !Task.isCancelled else { return }
         let isBuilding = BuildProcesses.isBuilding(processes)
         if isBuilding, run == nil {

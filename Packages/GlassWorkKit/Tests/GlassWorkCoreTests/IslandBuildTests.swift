@@ -166,3 +166,10 @@ struct IslandBuildTests {
         #expect(store.queue.events.map(\.detail) == [.build(.running(run))])
     }
 }
+
+struct ProcessNamesTests {
+    @Test func listsThisProcess() {
+        let own = ProcessInfo.processInfo.processIdentifier
+        #expect(ProcessNames.running().contains { $0.pid == own && !$0.name.isEmpty })
+    }
+}
