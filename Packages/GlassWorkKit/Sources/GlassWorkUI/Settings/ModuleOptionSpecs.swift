@@ -285,6 +285,10 @@ public extension ModuleOptionSpec {
             ),
             toggle(.endsIn, Key.showsFree, "Show “Free” when no event is on", "Показывать «Свободно»", fallback: true),
             toggle(.timers, Key.showsSeconds, "Show seconds", "Показывать секунды", fallback: true),
+            toggle(
+                .worldClocks, Key.showsTwoCities, "Show two cities in the menu bar",
+                "Показывать два города в строке меню", fallback: false
+            ),
             option(
                 .timers, Key.timerPresets, "Preset lengths, in minutes", "Длительности, в минутах",
                 .text(placeholder: "1, 5, 10, 25, 60"), fallback: ""

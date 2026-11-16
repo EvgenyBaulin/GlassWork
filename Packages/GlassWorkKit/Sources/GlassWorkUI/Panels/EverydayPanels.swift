@@ -185,8 +185,21 @@ struct CountdownPanel: View {
     }
 }
 
+/// How far a city is from local time.
+enum WorldClockOffset {
+    /// `+3 h`, `−8 h`, `+5:30 h`; nothing to say when it is the same time.
+    static func text(_ seconds: Int) -> String {
+        guard seconds != 0 else { return loc("Same time") }
+        let minutes = abs(seconds) / 60
+        let clock = minutes % 60 == 0 ? "\(minutes / 60)" : "\(minutes / 60):" + String(format: "%02d", minutes % 60)
+        return loc("\(seconds < 0 ? "−" : "+")\(clock) h")
+    }
+}
+
 struct WorldClocksPanel: View {
     let monitor: SystemMonitor
+    /// Fixed by tests; the panel reads the clock itself.
+    var fixedNow: Date?
     @State private var query = ""
 
     private var matches: [String] {
@@ -217,19 +230,23 @@ struct WorldClocksPanel: View {
     }
 
     private func row(_ city: WorldCity, store: EverydayStore) -> some View {
-        let zone = TimeZone(identifier: city.timeZone) ?? .current
+        let zone = city.localOrZone
+        let now = fixedNow ?? Date()
         var style = Date.FormatStyle(date: .omitted, time: .shortened)
         style.timeZone = zone
         var calendar = Calendar.current
         calendar.timeZone = zone
-        let hour = calendar.component(.hour, from: Date())
+        let hour = calendar.component(.hour, from: now)
         return HStack {
             Image(systemName: (7 ..< 20).contains(hour) ? "sun.max" : "moon")
                 .foregroundStyle(.secondary)
                 .frame(width: 18)
             Text(city.name).font(.system(size: 13))
+            Text(WorldClockOffset.text(city.offset(at: now)))
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
             Spacer()
-            Text(Date().formatted(style)).font(.system(size: 15, weight: .semibold, design: .rounded)).monospacedDigit()
+            Text(now.formatted(style)).font(.system(size: 15, weight: .semibold, design: .rounded)).monospacedDigit()
             Button {
                 store.update { $0.cities.removeAll { $0.id == city.id } }
             } label: {

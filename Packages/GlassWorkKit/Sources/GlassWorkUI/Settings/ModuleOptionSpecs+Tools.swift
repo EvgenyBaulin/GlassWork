@@ -14,6 +14,10 @@ extension ModuleOptionSpec {
                 .eject, Key.ejectIncludesNetwork, "Include network volumes", "Показывать сетевые диски",
                 fallback: false
             ),
+            toggle(
+                .eject, Key.ejectHidesWhenEmpty, "Hide when nothing to eject", "Скрывать, если нечего извлекать",
+                fallback: true
+            ),
             option(
                 .eject, Key.ejectNever, "Never eject", "Никогда не извлекать",
                 .text(placeholder: "Time Machine, Backup"), fallback: ""

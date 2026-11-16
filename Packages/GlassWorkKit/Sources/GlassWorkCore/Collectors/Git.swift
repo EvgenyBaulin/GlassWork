@@ -10,6 +10,8 @@ public struct GitStatus: Codable, Sendable, Equatable {
     public var behind = 0
     public var changed = 0
     public var conflicted = 0
+    /// A merge or rebase that is still open, even when no file conflicts.
+    public var operation: GitOperation?
 
     public init() {}
 
@@ -20,6 +22,39 @@ public struct GitStatus: Codable, Sendable, Equatable {
     /// The branch, or the short hash on a detached HEAD.
     public var head: String {
         branch ?? commit.map { String($0.prefix(7)) } ?? "—"
+    }
+}
+
+public enum GitOperation: String, Codable, Sendable, Equatable {
+    case merge
+    case rebase
+}
+
+/// Reads whether a merge or rebase is open from the files git leaves in its folder. No command is run.
+public enum GitOperationReader {
+    public static func read(repository path: String) -> GitOperation? {
+        guard let folder = gitFolder(of: path) else { return nil }
+        let files = FileManager.default
+        if files.fileExists(atPath: folder + "/rebase-merge") || files.fileExists(atPath: folder + "/rebase-apply") {
+            return .rebase
+        }
+        return files.fileExists(atPath: folder + "/MERGE_HEAD") ? .merge : nil
+    }
+
+    /// `.git` is a folder, or in a linked worktree and a submodule a file saying `gitdir: <path>`.
+    static func gitFolder(of path: String) -> String? {
+        let dot = path + "/.git"
+        var isFolder: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: dot, isDirectory: &isFolder) else { return nil }
+        if isFolder.boolValue {
+            return dot
+        }
+        guard let text = try? String(contentsOfFile: dot, encoding: .utf8),
+              let line = text.split(whereSeparator: \.isNewline).first(where: { $0.hasPrefix("gitdir:") })
+        else { return nil }
+        let target = line.dropFirst("gitdir:".count).trimmingCharacters(in: .whitespaces)
+        return target.hasPrefix("/") ? target : URL(filePath: path).appending(path: target).standardized
+            .path(percentEncoded: false)
     }
 }
 
@@ -304,9 +339,11 @@ public struct GitCollector: Sendable {
             return GitRepository(path: path, problem: problem, isManual: isManual)
         }
         let log = try? await runner.run(git, arguments: Self.arguments(path, "log", "-1", "--format=%ct"), timeout: 5)
+        var parsed = GitStatusParser.parse(status.stdout)
+        parsed.operation = GitOperationReader.read(repository: path)
         return GitRepository(
             path: path,
-            status: GitStatusParser.parse(status.stdout),
+            status: parsed,
             lastCommit: log.flatMap { GitStatusParser.commitDate($0.stdout) },
             isManual: isManual
         )

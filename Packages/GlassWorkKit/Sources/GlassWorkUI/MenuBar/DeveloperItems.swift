@@ -17,7 +17,7 @@ extension ItemContent {
     }
 
     static func git(_ reading: GitReading?, selected: String?) -> ItemContent {
-        let template = "feature/ab…cd ±99 ↑9 ↓9"
+        let template = "feature/ab…cd ±99 ↑9 ↓9 \(GitOperation.rebase.title)"
         guard let repository = reading?.selected(path: selected), let status = repository.status else {
             var item = ItemContent(figure: "—", template: template)
             item.isDimmed = true
@@ -25,14 +25,17 @@ extension ItemContent {
         }
         var item = ItemContent(figure: gitFigure(status), template: template)
         item.glyph = .dots(filled: status.changed + status.conflicted, faint: 0)
-        item.symbol = status.conflicted > 0 ? "exclamationmark.triangle" : nil
-        item.detail = repository.name
+        item.symbol = status.conflicted > 0 || status.operation != nil ? "exclamationmark.triangle" : nil
+        item.detail = [repository.name, status.operation.map(\.title)].compactMap(\.self).joined(separator: " · ")
         return item
     }
 
     private static func gitFigure(_ status: GitStatus) -> String {
         var parts = [DeveloperText.middleTruncated(status.head, to: 13)]
-        if status.isClean, status.ahead == 0, status.behind == 0 {
+        if let operation = status.operation {
+            parts.append(operation.title)
+        }
+        if status.isClean, status.ahead == 0, status.behind == 0, status.operation == nil {
             parts.append("✓")
         }
         if status.changed > 0 {
@@ -161,5 +164,15 @@ enum DeveloperText {
     /// With a true minus sign, as in `−58 dBm`.
     static func decibels(_ value: Int) -> String {
         loc("\(value < 0 ? "−" : "")\(abs(value)) dBm")
+    }
+}
+
+extension GitOperation {
+    /// Short enough for the menu bar item and the badge in the panel.
+    var title: String {
+        switch self {
+        case .merge: loc("Merge")
+        case .rebase: loc("Rebase")
+        }
     }
 }

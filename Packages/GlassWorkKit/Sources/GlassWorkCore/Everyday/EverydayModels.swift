@@ -113,6 +113,16 @@ public struct WorldCity: Codable, Sendable, Equatable, Identifiable {
     public var name: String
     public var timeZone: String
 
+    /// The city's zone. An identifier that is no longer known reads as the local zone.
+    public var localOrZone: TimeZone {
+        TimeZone(identifier: timeZone) ?? .current
+    }
+
+    /// Seconds the city is ahead of `reference`, negative when behind. Daylight saving counts, as of `date`.
+    public func offset(from reference: TimeZone = .current, at date: Date) -> Int {
+        localOrZone.secondsFromGMT(for: date) - reference.secondsFromGMT(for: date)
+    }
+
     public init(name: String, timeZone: String) {
         self.name = name
         self.timeZone = timeZone

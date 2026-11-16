@@ -234,6 +234,8 @@ final class ModuleItem: NSObject {
     private let renderer: MenuBarItemRenderer
     private var width: CGFloat = 0
     private var visibility: NSKeyValueObservation?
+    /// When the mouse went down on the Stopwatch item.
+    private var pressedAt: Date?
 
     var window: NSWindow? {
         item.button?.window
@@ -258,6 +260,10 @@ final class ModuleItem: NSObject {
         item.behavior = .removalAllowed
         item.button?.target = self
         item.button?.action = #selector(clicked)
+        if module == .stopwatch {
+            // A hold is told from a click by the time between the press and the release.
+            item.button?.sendAction(on: [.leftMouseDown, .leftMouseUp])
+        }
         render()
         observeRemoval()
     }
@@ -325,6 +331,24 @@ final class ModuleItem: NSObject {
 
     @objc private func clicked() {
         guard let button = item.button else { return }
+        if module == .stopwatch, let event = NSApp.currentEvent {
+            switch event.type {
+            case .leftMouseDown:
+                pressedAt = Date()
+            case .leftMouseUp:
+                let outcome = PressHold.outcome(down: pressedAt, released: Date())
+                pressedAt = nil
+                if outcome == .hold {
+                    model.resetStopwatch()
+                } else {
+                    model.performClickAction(module)
+                }
+                refresh()
+            default:
+                break
+            }
+            return
+        }
         if module.isClickAction {
             model.performClickAction(module)
             refresh()
