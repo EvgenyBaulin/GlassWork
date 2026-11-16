@@ -38,6 +38,19 @@ struct LineSessionRunnerTests {
         }
     }
 
+    /// A child that ends at once used to close stdin before the requests went out, which crashed the run.
+    @Test func manyQuickExitsDoNotCrash() async {
+        for _ in 0 ..< 40 {
+            _ = try? await runner.exchange(
+                "/usr/bin/true",
+                arguments: [],
+                send: ["x"],
+                until: { _ in true },
+                timeout: 5
+            )
+        }
+    }
+
     @Test func aMissingToolIsNotFound() async {
         await #expect(throws: ProcessRunnerError.notFound("/no/such/tool")) {
             try await runner.exchange("/no/such/tool", arguments: [], send: [], until: { _ in true }, timeout: 1)

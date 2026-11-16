@@ -46,6 +46,9 @@ private final class Session: @unchecked Sendable {
     private let isAnswer: @Sendable (String) -> Bool
     private var buffer = Data()
     private var continuation: CheckedContinuation<String, Error>?
+    /// Set once `finish` has closed stdin. A child that ends at once can get there before the requests are
+    /// written, and touching a closed handle raises an exception that ends the app.
+    private var isInputClosed = false
 
     init(executable: String, arguments: [String], isAnswer: @escaping @Sendable (String) -> Bool) {
         self.executable = executable
@@ -84,10 +87,13 @@ private final class Session: @unchecked Sendable {
         DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { [self] in
             finish(.failure(ProcessRunnerError.timedOut(executable)))
         }
-        // A child that quits early must cost an error, not a SIGPIPE that would end GlassWork.
-        _ = fcntl(input.fileHandleForWriting.fileDescriptor, F_SETNOSIGPIPE, 1)
-        let payload = lines.map { $0 + "\n" }.joined()
-        try? input.fileHandleForWriting.write(contentsOf: Data(payload.utf8))
+        let payload = Data(lines.map { $0 + "\n" }.joined().utf8)
+        lock.withLock {
+            guard !isInputClosed else { return }
+            // A child that quits early must cost an error, not a SIGPIPE that would end GlassWork.
+            _ = fcntl(input.fileHandleForWriting.fileDescriptor, F_SETNOSIGPIPE, 1)
+            try? input.fileHandleForWriting.write(contentsOf: payload)
+        }
     }
 
     private func received(_ data: Data) {
@@ -114,7 +120,10 @@ private final class Session: @unchecked Sendable {
         guard let waiting else { return }
         output.fileHandleForReading.readabilityHandler = nil
         errors.fileHandleForReading.readabilityHandler = nil
-        try? input.fileHandleForWriting.close()
+        lock.withLock {
+            isInputClosed = true
+            try? input.fileHandleForWriting.close()
+        }
         if process.isRunning {
             process.terminate()
             let pid = process.processIdentifier
