@@ -5,7 +5,7 @@ public enum IslandEventBuilder {
 
     public static func events(current: IslandInput, previous: IslandInput?, now: Date) -> [IslandEvent] {
         var result = ongoing(current, now: now)
-        guard let previous else { return result }
+        guard let previous else { return enriched(result, input: current, now: now) }
         result += network(current, previous: previous, now: now)
         result += developer(current, previous: previous, now: now)
         if previous.battery?.isOnAC == false, let battery = current.battery, battery.isOnAC {
@@ -14,7 +14,16 @@ public enum IslandEventBuilder {
         if let entry = current.clipboardEntry, entry.id != previous.clipboardEntry?.id {
             result.append(transient(id: "copied", kind: .copied, detail: .copied(entry), now: now))
         }
-        return result
+        return enriched(result, input: current, now: now)
+    }
+
+    private static func enriched(_ events: [IslandEvent], input: IslandInput, now: Date) -> [IslandEvent] {
+        let context = IslandContext(input: input, now: now)
+        return events.map { event in
+            var event = event
+            event.context = context
+            return event
+        }
     }
 
     private static func ongoing(_ input: IslandInput, now: Date) -> [IslandEvent] {

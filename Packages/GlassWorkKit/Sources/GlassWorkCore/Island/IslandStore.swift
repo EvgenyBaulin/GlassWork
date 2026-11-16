@@ -28,6 +28,20 @@ public final class IslandStore {
             merged.removeAll { $0.id == event.id }
             merged.append(event)
         }
+        let context = IslandContext(input: input, now: now)
+        merged = merged.map { event in
+            var event = event
+            var refreshed = context
+            if case let .copied(entry) = event.detail, let current = input.clipboardEntry, current.id == entry.id {
+                event.detail = .copied(current)
+            }
+            if case let .copied(entry) = event.detail, input.clipboardEntry?.id != entry.id {
+                refreshed.clipboardPreview = event.context.clipboardPreview
+                refreshed.clipboardImageURL = event.context.clipboardImageURL
+            }
+            event.context = refreshed
+            return event
+        }
         previous = input
         queue.events = merged
         tick(now: now)

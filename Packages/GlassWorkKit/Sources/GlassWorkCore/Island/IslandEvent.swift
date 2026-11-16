@@ -54,6 +54,7 @@ public struct IslandEvent: Identifiable, Equatable, Sendable {
     public var kind: IslandEventKind
     public var since: Date
     public var expires: Date?
+    public var context = IslandContext()
     public var detail: IslandDetail
 
     public init(id: String, kind: IslandEventKind, since: Date, expires: Date? = nil, detail: IslandDetail) {
