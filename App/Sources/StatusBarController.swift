@@ -14,6 +14,11 @@ final class StatusBarController: NSObject {
     private var collapsed = false
     private var hideTask: Task<Void, Never>?
     private var hiding = HidingSettings()
+    private lazy var seconds = SecondTicker { [weak self] modules in
+        for module in modules {
+            self?.items[module]?.refresh()
+        }
+    }
 
     private static let separatorLength: CGFloat = 16
     /// Wider than any screen, so everything left of the separator moves off-screen.
@@ -77,6 +82,7 @@ final class StatusBarController: NSObject {
         if turnedOn {
             setCollapsed(true)
         }
+        seconds.follow(Set(wanted.map(\.id)))
     }
 
     func refreshItems() {
