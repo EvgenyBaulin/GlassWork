@@ -7,11 +7,12 @@ extension ModuleOptionSpec {
             option(
                 .aiUsage, AIUsageOption.window, "Window", "Период",
                 .choice([
+                    OptionChoice(AIUsageWindowChoice.both.rawValue, "Both"),
                     OptionChoice(AIUsageWindowChoice.highest.rawValue, "Highest"),
                     OptionChoice(AIUsageWindowChoice.fiveHour.rawValue, "5 hours"),
                     OptionChoice(AIUsageWindowChoice.week.rawValue, "This week"),
                 ]),
-                fallback: AIUsageWindowChoice.highest.rawValue
+                fallback: AIUsageWindowChoice.both.rawValue
             ),
             option(
                 .aiUsage, AIUsageOption.warnPercent, "Warn at (share)", "Предупреждать от",

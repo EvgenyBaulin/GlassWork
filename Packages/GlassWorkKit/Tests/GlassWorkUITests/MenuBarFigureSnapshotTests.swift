@@ -82,4 +82,17 @@ struct MenuBarFigureSnapshotTests {
             try snapshot(ItemContent.notes(note), module: .notes, name: name, dark: dark)
         }
     }
+
+    @Test(arguments: [true, false])
+    func aiUsageBothWindows(dark: Bool) throws {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let reading = AIUsageReading(
+            tools: [AIToolUsage(tool: .codex, windows: [
+                AIWindow(kind: .fiveHour, used: 0.42, resetsAt: now.addingTimeInterval(3600)),
+                AIWindow(kind: .week, used: 0.17, resetsAt: now.addingTimeInterval(86400)),
+            ])],
+            readAt: now
+        )
+        try snapshot(ItemContent.aiUsage(reading, at: now), module: .aiUsage, name: "ai-usage-both", dark: dark)
+    }
 }
