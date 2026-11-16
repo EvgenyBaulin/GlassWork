@@ -80,18 +80,17 @@ private enum IslandSamples {
             input.isKeepingAwake = true
             input.keepAwakeEnds = islandNow.addingTimeInterval(84)
         case .levels, .headphones, .focusOn, .focusOff: input = levelsInput(sample)
-        case .downloads, .buildRunning, .buildFailed, .buildSucceeded: input = progressInput(sample)
-        case .rain: input = laterInput(sample)
+        case .downloads, .buildRunning, .buildFailed, .buildSucceeded, .rain: input = progressInput(sample)
         }
         return input
     }
 
     static func progressInput(_ sample: IslandSample) -> IslandInput {
         var input = IslandInput()
-        if sample == .downloads {
-            input.downloads = downloads
-        } else {
-            input.build = build(sample)
+        switch sample {
+        case .downloads: input.downloads = downloads
+        case .rain: input.rain = IslandRain.reading(from: rainReport, now: islandNow)
+        default: input.build = build(sample)
         }
         return input
     }
@@ -135,16 +134,6 @@ private enum IslandSamples {
         DockFile(path: "/d/Assets.zip", name: "Assets.zip", added: islandNow, isDownloading: true, progress: 0.68),
         DockFile(path: "/d/Logo.svg", name: "Logo.svg", added: islandNow),
     ]
-
-    static func laterInput(_ sample: IslandSample) -> IslandInput {
-        var input = IslandInput()
-        if sample == .rain {
-            input.rain = IslandRain.reading(from: rainReport, now: islandNow)
-        } else {
-            input.downloads = downloads
-        }
-        return input
-    }
 
     static func levelsInput(_ sample: IslandSample) -> IslandInput {
         var input = IslandInput()
