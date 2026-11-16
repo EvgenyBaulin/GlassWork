@@ -10,6 +10,7 @@ import UserNotifications
 final class SettingsWindowController {
     private unowned let model: AppModel
     private var window: NSWindow?
+    private var closeObserver: (any NSObjectProtocol)?
     private var welcome: NSWindow?
     private let navigation = SettingsNavigation()
 
@@ -47,17 +48,33 @@ final class SettingsWindowController {
             created.setFrameAutosaveName("GlassWorkSettings")
             created.isReleasedWhenClosed = false
             window = created
-            NotificationCenter.default.addObserver(
+            closeObserver = NotificationCenter.default.addObserver(
                 forName: NSWindow.willCloseNotification,
                 object: created,
                 queue: .main
             ) { [weak self] _ in
-                MainActor.assumeIsolated { self?.model.settingsChanged(isOpen: false) }
+                MainActor.assumeIsolated {
+                    self?.model.settingsChanged(isOpen: false)
+                    self?.releaseWindow()
+                }
             }
         }
         model.settingsChanged(isOpen: true)
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
+    }
+
+    /// A closed Settings window keeps its whole SwiftUI tree; the next open builds a fresh one.
+    private func releaseWindow() {
+        if let closeObserver {
+            NotificationCenter.default.removeObserver(closeObserver)
+        }
+        closeObserver = nil
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let window, !window.isVisible else { return }
+            window.contentViewController = nil
+            self.window = nil
+        }
     }
 
     func showWelcome() {
