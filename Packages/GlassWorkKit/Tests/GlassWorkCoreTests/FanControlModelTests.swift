@@ -401,6 +401,28 @@ struct FanControlModelTests {
         #expect(model.helperState == .needsApproval)
     }
 
+    @Test func cancellingWhileWaitingForApprovalRemovesTheRegistration() async {
+        let installer = FakeInstaller()
+        installer.stateAfterInstall = .needsApproval
+        let store = makeStore { $0.fans.isControlEnabled = true }
+        let model = makeModel(installer: installer, store: store)
+        model.install()
+        #expect(model.helperState == .needsApproval)
+        await model.cancelInstall()
+        #expect(installer.uninstalls == 1)
+        #expect(model.helperState == .notInstalled)
+        #expect(!store.settings.fans.isControlEnabled)
+    }
+
+    @Test func cancellingDoesNothingOnceInstalled() async {
+        let installer = installed()
+        let model = makeModel(installer: installer)
+        model.refreshHelperState()
+        await model.cancelInstall()
+        #expect(installer.uninstalls == 0)
+        #expect(model.helperState == .installed)
+    }
+
     @Test func aFailedInstallIsShown() {
         let installer = FakeInstaller()
         installer.failure = Failure()

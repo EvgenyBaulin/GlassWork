@@ -170,6 +170,19 @@ public final class FanControlModel {
         installer?.openApproval()
     }
 
+    /// Stops waiting for approval. The registration made by `install()` is removed again, so no half-installed
+    /// helper stays behind, and the panel goes back to the not-installed state.
+    public func cancelInstall() async {
+        guard helperState == .needsApproval || helperState == .installing else { return }
+        // The helper never ran, so there is nothing to hand back; a failed removal only leaves it unapproved.
+        try? await installer?.uninstall()
+        store.update { $0.fans.isControlEnabled = false }
+        helperState = installer?.state ?? .notInstalled
+        if helperState == .needsApproval || helperState == .installing {
+            helperState = .notInstalled
+        }
+    }
+
     public func uninstall() async {
         engine.select(.auto)
         publish()
