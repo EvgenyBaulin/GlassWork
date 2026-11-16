@@ -1,6 +1,7 @@
 import AppKit
 import GlassWorkCore
 import SwiftUI
+import WidgetKit
 
 /// How a transport button acts. WidgetKit needs an App Intent, the app calls the store directly,
 /// and the intent type has to live in the extension, so the host supplies the button.
@@ -56,7 +57,12 @@ struct ArtworkTile: View {
         let corner = radius ?? size * 0.14
         Group {
             if let data, let image = NSImage(data: data) {
-                Image(nsImage: image).resizable().interpolation(.high).scaledToFill()
+                // A tinted or clear desktop draws images as a flat white shape unless told otherwise.
+                Image(nsImage: image)
+                    .resizable()
+                    .interpolation(.high)
+                    .widgetAccentedRenderingMode(.fullColor)
+                    .scaledToFill()
             } else {
                 ZStack {
                     Rectangle().fill(.quaternary)
