@@ -6,6 +6,8 @@ struct AccessRequest: View {
     let title: String
     let access: DataAccess
     let request: () -> Void
+    /// Opens the matching Privacy & Security page; shown only once access was denied.
+    var openSettings: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 8) {
@@ -15,12 +17,21 @@ struct AccessRequest: View {
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                if let openSettings {
+                    Button(loc("Open Privacy Settings"), action: openSettings)
+                }
             } else {
                 Button(loc("Allow Access"), action: request)
             }
         }
         .frame(maxWidth: .infinity, minHeight: 90)
     }
+}
+
+/// The Privacy & Security pages the agenda panels send a denied user to.
+enum AgendaPrivacy {
+    static let calendars = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars")
+    static let reminders = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Reminders")
 }
 
 struct AgendaRow: View {
@@ -76,9 +87,12 @@ struct CalendarPanel: View {
                     }
                 }
             } else {
-                AccessRequest(title: loc("See your events here"), access: agenda.eventsAccess) {
-                    Task { await agenda.requestEventsAccess() }
-                }
+                AccessRequest(
+                    title: loc("See your events here"),
+                    access: agenda.eventsAccess,
+                    request: { Task { await agenda.requestEventsAccess() } },
+                    openSettings: { AgendaPrivacy.calendars.map(actions.openURL) }
+                )
             }
         }
     }
@@ -99,9 +113,12 @@ struct EndsInPanel: View {
         let state = EndsInState(events: agenda.events, at: now, includeAllDay: includeAllDay)
         PanelFrame(module: .endsIn, subtitle: loc("\(state.current.count) now")) {
             if agenda.eventsAccess != .granted {
-                AccessRequest(title: loc("See your events here"), access: agenda.eventsAccess) {
-                    Task { await agenda.requestEventsAccess() }
-                }
+                AccessRequest(
+                    title: loc("See your events here"),
+                    access: agenda.eventsAccess,
+                    request: { Task { await agenda.requestEventsAccess() } },
+                    openSettings: { AgendaPrivacy.calendars.map(actions.openURL) }
+                )
             } else if state.current.isEmpty {
                 Text(freeText(state)).font(.system(size: 15, weight: .semibold))
                 if let next = state.next {
@@ -168,6 +185,9 @@ struct TodosPanel: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .controlSize(.small)
+                if items.isEmpty {
+                    AllClear()
+                }
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(items) { row($0, agenda: agenda) }
@@ -186,15 +206,25 @@ struct TodosPanel: View {
                         draft = ""
                     }
             } else {
-                AccessRequest(title: loc("See your reminders here"), access: agenda.remindersAccess) {
-                    Task { await agenda.requestRemindersAccess() }
-                }
+                AccessRequest(
+                    title: loc("See your reminders here"),
+                    access: agenda.remindersAccess,
+                    request: { Task { await agenda.requestRemindersAccess() } },
+                    openSettings: { AgendaPrivacy.reminders.map(actions.openURL) }
+                )
             }
         }
     }
 
     private func row(_ item: TodoItem, agenda: AgendaStore) -> some View {
         TodoRow(item: item) { agenda.setCompleted(item, !item.isCompleted) }
+    }
+}
+
+/// Shown when no reminder is open.
+struct AllClear: View {
+    var body: some View {
+        PanelMessage(symbol: "checkmark.circle", title: loc("All clear"), tint: Palette.green)
     }
 }
 

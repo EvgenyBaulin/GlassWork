@@ -445,6 +445,22 @@
         }
       }
     },
+    "All clear": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All clear"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё сделано"
+          }
+        }
+      }
+    },
     "All day": {
       "localizations": {
         "ru": {
@@ -2641,6 +2657,22 @@
         }
       }
     },
+    "Open Privacy Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Privacy Settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть настройки"
+          }
+        }
+      }
+    },
     "Open Reminders": {
       "localizations": {
         "ru": {
@@ -2687,6 +2719,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Open-Meteo не отвечает"
+          }
+        }
+      }
+    },
+    "Or type min or mm:ss": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or type min or mm:ss"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Или введите мин или мм:сс"
           }
         }
       }

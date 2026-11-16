@@ -272,3 +272,22 @@ struct GitDiscoveryOptionTests {
         #expect(DeveloperOptions().gitSearchDepth == 2)
     }
 }
+
+struct TimerDurationTests {
+    @Test func aBareNumberIsMinutes() {
+        #expect(TimerDuration.parse("25") == 1500)
+        #expect(TimerDuration.parse(" 5 ") == 300)
+    }
+
+    @Test func colonsMeanMinutesSecondsAndHours() {
+        #expect(TimerDuration.parse("1:30") == 90)
+        #expect(TimerDuration.parse("0:45") == 45)
+        #expect(TimerDuration.parse("1:02:03") == 3723)
+    }
+
+    @Test func refusesWhatIsNotADuration() {
+        for text in ["", "0", "tea", "1:60", "1:", ":30", "1:2:3:4", "-5", "1.5", "1441", "24:00:01"] {
+            #expect(TimerDuration.parse(text) == nil, "\(text)")
+        }
+    }
+}
