@@ -9,7 +9,11 @@ struct DeveloperPanel: View {
     var body: some View {
         switch module {
         case .aiUsage:
-            AIUsagePanel(reading: store.aiUsage, refreshMinutes: store.options.aiRefreshMinutes) {
+            AIUsagePanel(
+                reading: store.aiUsage,
+                refreshMinutes: store.options.aiRefreshMinutes,
+                isUpdating: store.isUpdating(.aiUsage)
+            ) {
                 store.refresh(.aiUsage)
             }
         case .git:

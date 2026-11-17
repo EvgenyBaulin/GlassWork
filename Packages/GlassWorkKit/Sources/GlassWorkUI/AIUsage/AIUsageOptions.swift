@@ -19,6 +19,16 @@ extension ModuleOptionSpec {
                 .number(50 ... 100, step: 5, unit: "%"),
                 fallback: String(AIUsageOption.defaultWarnPercent)
             ),
-        ]
+            option(
+                .aiUsage, AIUsageOption.menuBarTool, "Menu bar tool", "Инструмент в строке меню",
+                .choice(
+                    [OptionChoice(AIUsageOption.highestTool, "Highest")]
+                        + AITool.allCases.map { OptionChoice($0.rawValue, $0.title) }
+                ),
+                fallback: AIUsageOption.highestTool
+            ),
+        ] + AITool.allCases.map { tool in
+            toggle(.aiUsage, AIUsageOption.enabledKey(tool), tool.title, tool.title, fallback: true)
+        }
     }
 }

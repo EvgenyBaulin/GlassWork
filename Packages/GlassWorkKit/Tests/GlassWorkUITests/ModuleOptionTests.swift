@@ -24,6 +24,9 @@ struct OptionTableTests {
         }
     }()
 
+    /// Names of products are not translated, so they have no catalog entry.
+    private static let productNames = Set(AITool.allCases.map(\.title))
+
     private func russian(_ key: String) -> String? {
         Self.catalog[key]
     }
@@ -35,7 +38,7 @@ struct OptionTableTests {
 
     @Test func everyTitleIsInTheCatalogWithTheSameRussian() {
         #expect(!Self.catalog.isEmpty)
-        for spec in ModuleOptionSpec.all {
+        for spec in ModuleOptionSpec.all where !Self.productNames.contains(spec.title) {
             #expect(russian(spec.title) == spec.russian, "\(spec.id)")
         }
     }
@@ -126,7 +129,9 @@ struct OptionTableTests {
     @Test func everyChoiceSaysWhatItMeans() {
         for spec in ModuleOptionSpec.all {
             guard case let .choice(choices) = spec.kind else { continue }
-            for choice in choices where !["ISO 8601", "HEX", "RGB", "HSL", "76:12"].contains(choice.title) {
+            for choice in choices where !["ISO 8601", "HEX", "RGB", "HSL", "76:12"].contains(choice.title)
+                && !Self.productNames.contains(choice.title)
+            {
                 #expect(russian(choice.title) == Self.choiceRussian[choice.title], "\(spec.id): \(choice.title)")
             }
         }

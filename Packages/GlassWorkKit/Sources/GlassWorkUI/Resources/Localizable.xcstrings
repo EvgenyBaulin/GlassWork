@@ -3121,6 +3121,22 @@
         }
       }
     },
+    "Menu bar tool": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menu bar tool"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Инструмент в строке меню"
+          }
+        }
+      }
+    },
     "Merge": {
       "localizations": {
         "en": {
@@ -4635,6 +4651,22 @@
         }
       }
     },
+    "Scan again": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan again"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Искать снова"
+          }
+        }
+      }
+    },
     "Sensor groups in the panel": {
       "localizations": {
         "en": {
@@ -5521,6 +5553,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Введите для поиска…"
+          }
+        }
+      }
+    },
+    "Updating…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updating…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновляю…"
           }
         }
       }

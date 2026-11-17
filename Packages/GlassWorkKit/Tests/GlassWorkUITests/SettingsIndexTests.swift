@@ -34,7 +34,9 @@ struct SettingsIndexTests {
 
     @Test func everyTitleMatchesTheCatalog() {
         #expect(!Self.catalog.isEmpty)
-        for result in SettingsIndex.all {
+        // Names of products are not translated, so they have no catalog entry.
+        let names = Set(AITool.allCases.map(\.title))
+        for result in SettingsIndex.all where !names.contains(result.setting.english) {
             #expect(Self.catalog[result.setting.english] == result.setting.russian, "\(result.id)")
         }
     }

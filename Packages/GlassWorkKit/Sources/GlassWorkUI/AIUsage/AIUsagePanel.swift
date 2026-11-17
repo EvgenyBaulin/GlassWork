@@ -8,6 +8,7 @@ extension ItemContent {
         options: [String: String] = [:]
     ) -> ItemContent {
         let choice = options.choice(AIUsageOption.window, default: AIUsageWindowChoice.both)
+        let reading = AIUsageOption.chosenTool(options).map { reading?.only($0) } ?? reading
         guard let peak = reading?.peak(at: date, choice: choice) else {
             if let usage = reading?.tools.first(where: { $0.windows.isEmpty && $0.spend != nil && !$0.isUnreadable }),
                let spend = usage.spend
@@ -69,6 +70,8 @@ struct AIUsagePanel: View {
     let reading: AIUsageReading?
     let refreshMinutes: Int
     var now = Date()
+    /// A read is in flight: the footer says so and the refresh button spins.
+    var isUpdating = false
     var onRefresh: () -> Void = {}
 
     var body: some View {
@@ -80,6 +83,7 @@ struct AIUsagePanel: View {
                         title: loc("No AI coding tools found"),
                         detail: loc("Tools show up here once they are installed.")
                     )
+                    scanButton
                 } else {
                     ForEach(reading.tools) { usage in
                         toolSection(usage)
@@ -98,11 +102,30 @@ struct AIUsagePanel: View {
         }
     }
 
+    private var scanButton: some View {
+        Button(action: onRefresh) {
+            HStack(spacing: 6) {
+                if isUpdating {
+                    ProgressView().controlSize(.small)
+                }
+                Text(isUpdating ? loc("Updating…") : loc("Scan again"))
+            }
+        }
+        .disabled(isUpdating)
+        .frame(maxWidth: .infinity)
+    }
+
     private func footer(_ reading: AIUsageReading) -> some View {
         HStack {
-            Text(footerText(reading)).font(.system(size: 11)).foregroundStyle(.secondary)
+            Text(isUpdating ? loc("Updating…") : footerText(reading))
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
             Spacer()
-            RowIconButton(symbol: "arrow.clockwise", help: loc("Refresh now"), action: onRefresh)
+            if isUpdating {
+                ProgressView().controlSize(.small).frame(width: 24, height: 24)
+            } else {
+                RowIconButton(symbol: "arrow.clockwise", help: loc("Refresh now"), action: onRefresh)
+            }
         }
     }
 

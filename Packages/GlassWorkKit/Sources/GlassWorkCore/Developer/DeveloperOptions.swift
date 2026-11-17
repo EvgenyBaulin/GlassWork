@@ -24,6 +24,8 @@ public struct DeveloperOptions: Sendable, Equatable {
     /// The share of a limit that counts as nearly used up.
     public var usageWarnShare = AIUsageReading.alertShare
     public var aiRefreshMinutes = 5
+    /// Tools of the usage module switched off in Settings.
+    public var aiDisabledTools: Set<AITool> = []
     /// The repository shown in the menu bar.
     public var gitRepository: String?
     /// Repositories added by hand, on top of those found in `~/Developer`.
@@ -45,6 +47,7 @@ public struct DeveloperOptions: Sendable, Equatable {
         let servers = settings.module(.devServers)?.options ?? [:]
         devServerSeconds = min(max(servers.number(Key.devServerSeconds, default: 30), 5), 600)
         devServerRule = DevServerRule(range: servers[Key.devServerPorts], ignored: servers[Key.devServerIgnore])
+        aiDisabledTools = AIUsageOption.disabledTools(settings.module(.aiUsage)?.options ?? [:])
         usageWarnShare = AIUsageOption.warnShare(settings.module(.aiUsage)?.options ?? [:])
         if let minutes = settings.module(.aiUsage)?.options[Key.refreshMinutes].flatMap({ Int($0) }),
            (1 ... 1440).contains(minutes)
