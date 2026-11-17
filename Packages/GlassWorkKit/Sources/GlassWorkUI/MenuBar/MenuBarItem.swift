@@ -10,6 +10,8 @@ public enum ItemGlyph: Equatable {
     case symbol
     /// Level meter bars, each from 0 to 1.
     case bars([Double])
+    /// A thin horizontal bar filled from 0 to 1, for items that measure progress instead of keeping a history.
+    case progress(Double)
 }
 
 /// Keys in `ModuleSettings.options`.
@@ -206,7 +208,9 @@ public struct ItemContent {
             return ItemContent(figure: store.data.stopwatch.elapsed(at: now).clockText, template: "88:88:88")
         case .countdown:
             let next = store.data.sortedDates(from: now).first
-            return ItemContent(figure: next.map { loc("\($0.daysLeft(from: now)) d") } ?? "—", template: "888 d")
+            var item = ItemContent(figure: next.map { loc("\($0.daysLeft(from: now)) d") } ?? "—", template: "888 d")
+            item.glyph = .progress(ItemProgress.countdown(store.data.dates, at: now))
+            return item
         case .worldClocks:
             return worldClocks(store.data.cities, at: now, options: options)
         default:
@@ -331,6 +335,12 @@ public struct MenuBarItemView: View {
             if style == .graphAndFigure {
                 symbol(content)
             }
+        case let .progress(value):
+            ZStack(alignment: .leading) {
+                Capsule().opacity(0.25)
+                Capsule().frame(width: Self.graphWidth * ItemProgress.clamp(value))
+            }
+            .frame(width: Self.graphWidth, height: 4)
         case let .bars(levels):
             HStack(alignment: .bottom, spacing: 2) {
                 ForEach(Array(levels.enumerated()), id: \.offset) { _, level in

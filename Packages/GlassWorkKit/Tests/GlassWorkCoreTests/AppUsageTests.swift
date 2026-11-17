@@ -446,21 +446,34 @@ struct AppUsageCostTests {
         #expect(perRead < 0.05)
     }
 
-    /// Ticks would read far too small here if they were taken for nanoseconds.
+    /// Ticks would read far too small here if they were taken for nanoseconds (24 times on Apple silicon). The
+    /// reading is compared with what the system itself says this process used, so a loaded machine does not matter.
     @Test
     func aBusyProcessReadsAsOneBusyCore() async throws {
         let reader = AppUsageReader()
         let start = Date()
+        let usedBefore = Self.cpuSeconds()
         _ = await reader.read([thisTest], at: start)
         var value = 0.0
         while Date().timeIntervalSince(start) < 0.4 {
             value += sin(value + 1)
         }
-        let reading = await reader.read([thisTest], at: Date())
+        let end = Date()
+        let reading = await reader.read([thisTest], at: end)
+        let expected = (Self.cpuSeconds() - usedBefore) / end.timeIntervalSince(start) * 100
         let app = try #require(reading.apps.first)
         #expect(value != .infinity)
-        // A wrong unit is off by orders of magnitude; a loaded machine only slows the loop, so the floor is low.
-        #expect((5 ... 400).contains(app.cpu))
+        #expect(app.cpu > expected / 3 && app.cpu < expected * 3, "read \(app.cpu)%, the system says \(expected)%")
         #expect(app.memory > 1_000_000)
+    }
+
+    /// User and system CPU time of this process so far.
+    private static func cpuSeconds() -> Double {
+        var usage = rusage()
+        getrusage(RUSAGE_SELF, &usage)
+        func seconds(_ time: timeval) -> Double {
+            Double(time.tv_sec) + Double(time.tv_usec) / 1_000_000
+        }
+        return seconds(usage.ru_utime) + seconds(usage.ru_stime)
     }
 }
