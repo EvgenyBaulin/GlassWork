@@ -10,6 +10,15 @@ struct GitPanel: View {
     @Environment(\.panelActions) private var actions
     @State private var hovered: String?
 
+    /// `hoveredRow` draws a row as if the pointer were over it, for snapshots.
+    init(reading: GitReading?, selected: String?, manual: [String], now: Date = Date(), hoveredRow: String? = nil) {
+        self.reading = reading
+        self.selected = selected
+        self.manual = manual
+        self.now = now
+        _hovered = State(initialValue: hoveredRow)
+    }
+
     private static let privacySettings = URL(
         string: "x-apple.systempreferences:com.apple.preference.security?Privacy_FilesAndFolders"
     )
@@ -163,6 +172,11 @@ struct GitPanel: View {
             RowIconButton(symbol: "folder", help: loc("Reveal in Finder")) {
                 actions.openURL(URL(filePath: repository.path))
             }
+            if repository.isManual {
+                RowIconButton(symbol: "minus.circle", help: loc("Remove from List")) {
+                    setManual(GitRepositoryList.removing(repository.path, from: manual))
+                }
+            }
         }
     }
 
@@ -203,7 +217,7 @@ struct GitPanel: View {
     private func problemButtons(_ repository: GitRepository, @ViewBuilder extra: () -> some View) -> some View {
         HStack {
             if repository.isManual {
-                Button(loc("Remove from List")) { setManual(manual.filter { $0 != repository.path }) }
+                Button(loc("Remove from List")) { setManual(GitRepositoryList.removing(repository.path, from: manual)) }
             }
             extra()
         }

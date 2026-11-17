@@ -14,6 +14,9 @@ public struct DeveloperOptions: Sendable, Equatable {
         public static let repositories = "repositories"
         public static let autoDiscover = "autoDiscover"
         public static let searchDepth = "searchDepth"
+        /// Bundle identifier of the app that opens a dev server; missing means the default browser.
+        public static let openIn = "openIn"
+        public static let dockerPath = "dockerPath"
     }
 
     public var pingHost = PingHost.fallback
@@ -34,6 +37,10 @@ public struct DeveloperOptions: Sendable, Equatable {
     public var gitAutoDiscover = true
     /// How many levels below `~/Developer` to look.
     public var gitSearchDepth = 2
+    /// Bundle identifier of the browser that opens a dev server; nil is the default browser.
+    public var devServerOpener: String?
+    /// The docker binary picked by hand; nil looks in the usual folders.
+    public var dockerPath: String?
 
     public init() {}
 
@@ -46,6 +53,7 @@ public struct DeveloperOptions: Sendable, Equatable {
         pingTimeoutSeconds = min(max(ping.number(Key.pingTimeout, default: 2), 1), 10)
         let servers = settings.module(.devServers)?.options ?? [:]
         devServerSeconds = min(max(servers.number(Key.devServerSeconds, default: 30), 5), 600)
+        devServerOpener = servers[Key.openIn].flatMap { $0.isEmpty ? nil : $0 }
         devServerRule = DevServerRule(range: servers[Key.devServerPorts], ignored: servers[Key.devServerIgnore])
         aiDisabledTools = AIUsageOption.disabledTools(settings.module(.aiUsage)?.options ?? [:])
         usageWarnShare = AIUsageOption.warnShare(settings.module(.aiUsage)?.options ?? [:])
@@ -54,6 +62,7 @@ public struct DeveloperOptions: Sendable, Equatable {
         {
             aiRefreshMinutes = minutes
         }
+        dockerPath = settings.module(.docker)?.options[Key.dockerPath].flatMap { $0.isEmpty ? nil : $0 }
         let git = settings.module(.git)?.options
         gitRepository = git?[Key.repository]
         gitRepositories = Self.decode(git?[Key.repositories])

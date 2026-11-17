@@ -28,8 +28,64 @@ struct RowIconButton: View {
     }
 }
 
+/// A browser the user can pick to open dev servers in.
+struct BrowserApp: Identifiable, Equatable {
+    let bundleID: String
+    let name: String
+
+    var id: String {
+        bundleID
+    }
+
+    /// Apps that open an http link, found the way the system's own "Open With" finds them.
+    @MainActor
+    static func installed() -> [BrowserApp] {
+        guard let sample = URL(string: "https://localhost") else { return [] }
+        var seen = Set<String>()
+        let found = NSWorkspace.shared.urlsForApplications(toOpen: sample).compactMap { url -> BrowserApp? in
+            guard let bundleID = Bundle(url: url)?.bundleIdentifier, seen.insert(bundleID).inserted else { return nil }
+            return BrowserApp(
+                bundleID: bundleID,
+                name: FileManager.default.displayName(atPath: url.path)
+                    .replacing(".app", with: "")
+            )
+        }
+        return found.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    /// Opens `url` in the chosen app, or in the default browser when none is chosen or it is gone.
+    @MainActor
+    static func open(_ url: URL, in bundleID: String?, fallback: (URL) -> Void) {
+        guard let bundleID, let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
+            fallback(url)
+            return
+        }
+        NSWorkspace.shared.open([url], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
+    }
+}
+
+/// "Default browser" or one of the installed browsers.
+struct BrowserPicker: View {
+    let selection: String?
+    let onChange: (String?) -> Void
+
+    var body: some View {
+        let browsers = BrowserApp.installed()
+        Picker(loc("Open in"), selection: Binding(get: { selection }, set: onChange)) {
+            Text(loc("Default browser")).tag(String?.none)
+            ForEach(browsers) { browser in
+                Text(browser.name).tag(String?.some(browser.bundleID))
+            }
+            if let selection, !browsers.contains(where: { $0.bundleID == selection }) {
+                Text(selection).tag(String?.some(selection))
+            }
+        }
+    }
+}
+
 struct DevServersPanel: View {
     let reading: DevServerReading?
+    var opener: String?
     @Environment(\.panelActions) private var actions
     @State private var hovered: String?
 
@@ -70,6 +126,8 @@ struct DevServersPanel: View {
                 if servers.count > 12 {
                     Text(loc("and \(servers.count - 12) more")).font(.system(size: 11)).foregroundStyle(.secondary)
                 }
+                BrowserPicker(selection: opener) { actions.setOption(.devServers, DeveloperOptions.Key.openIn, $0) }
+                    .controlSize(.small)
                 ReadOnlyNote(
                     text: loc("Read-only: GlassWork never stops or kills a server. Quit it where it runs (Terminal).")
                 )
@@ -115,7 +173,7 @@ struct DevServersPanel: View {
             }
             if let url = server.url {
                 RowIconButton(symbol: "arrow.up.right.square", help: loc("Open in browser")) {
-                    actions.openURL(url)
+                    BrowserApp.open(url, in: opener, fallback: actions.openURL)
                 }
             }
         }
@@ -133,6 +191,10 @@ struct DevServersPanel: View {
 
 struct DockerPanel: View {
     let reading: DockerReading?
+    var contexts: [DockerContext] = []
+    var onRetry: () -> Void = {}
+    var onUseContext: (String) -> Void = { _ in }
+    @Environment(\.panelActions) private var actions
     @State private var selected: String?
 
     private var containers: [DockerContainer] {
@@ -160,18 +222,21 @@ struct DockerPanel: View {
                     title: loc("docker not found"),
                     detail: loc("Install Docker Desktop, OrbStack or Colima.")
                 )
+                recovery(choosesBinary: true)
             case .notRunning:
                 PanelMessage(
                     symbol: "power",
                     title: loc("Docker is not running"),
                     detail: loc("Start it yourself; GlassWork never does.")
                 )
+                recovery(choosesBinary: false)
             case .permissionDenied:
                 PanelMessage(
                     symbol: "exclamationmark.triangle",
                     title: loc("Permission denied on docker.sock"),
                     tint: Palette.orange
                 )
+                recovery(choosesBinary: false)
             case let .failed(message):
                 PanelMessage(
                     symbol: "exclamationmark.triangle",
@@ -179,6 +244,7 @@ struct DockerPanel: View {
                     detail: message,
                     tint: Palette.orange
                 )
+                recovery(choosesBinary: true)
             case .containers where containers.isEmpty:
                 PanelMessage(symbol: "shippingbox", title: loc("No containers"))
             case .containers:
@@ -194,6 +260,43 @@ struct DockerPanel: View {
         return ""
     }
 
+    /// What can be done about an unreadable Docker: try again, pick another context or another binary.
+    private func recovery(choosesBinary: Bool) -> some View {
+        VStack(spacing: 8) {
+            HStack {
+                Button(loc("Retry"), action: onRetry)
+                if choosesBinary {
+                    Button(loc("Choose docker…")) {
+                        DockerBinaryPicker.choose { path in
+                            actions.setOption(.docker, DeveloperOptions.Key.dockerPath, path)
+                        }
+                    }
+                }
+            }
+            contextMenu
+        }
+        .controlSize(.small)
+        .frame(maxWidth: .infinity)
+    }
+
+    /// Only when there is something to choose from.
+    @ViewBuilder
+    private var contextMenu: some View {
+        if contexts.count > 1 {
+            Menu(loc("Context")) {
+                ForEach(contexts) { context in
+                    Button {
+                        onUseContext(context.name)
+                    } label: {
+                        Text(context.isCurrent ? "✓ \(context.name)" : context.name)
+                    }
+                }
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+        }
+    }
+
     @ViewBuilder
     private var list: some View {
         let running = containers.count(where: \.isRunning)
@@ -205,6 +308,7 @@ struct DockerPanel: View {
         if containers.count > 12 {
             Text(loc("and \(containers.count - 12) more")).font(.system(size: 11)).foregroundStyle(.secondary)
         }
+        contextMenu
         ReadOnlyNote(text: loc("Read-only: never starts, stops or removes containers."))
     }
 
@@ -233,5 +337,22 @@ struct DockerPanel: View {
         .background(.white.opacity(selected == container.id ? 0.07 : 0), in: .rect(cornerRadius: 8))
         .contentShape(.rect)
         .onTapGesture { selected = container.id }
+    }
+}
+
+/// Asks for the docker command line tool when it is not in the usual folders.
+enum DockerBinaryPicker {
+    @MainActor
+    static func choose(_ onChoose: @escaping @MainActor (String) -> Void) {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.message = loc("Choose the docker command line tool")
+        NSApp.activate()
+        panel.begin { response in
+            if response == .OK, let url = panel.url {
+                MainActor.assumeIsolated { onChoose(url.path) }
+            }
+        }
     }
 }

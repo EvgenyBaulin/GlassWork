@@ -1,0 +1,4 @@
+{"Current":false,"Description":"Docker Desktop","DockerEndpoint":"unix:///Users/dev/.docker/run/docker.sock","Error":"","Name":"desktop-linux"}
+{"Current":true,"Description":"OrbStack","DockerEndpoint":"unix:///Users/dev/.orbstack/run/docker.sock","Error":"","Name":"orbstack"}
+{"Current":false,"Description":"Current DOCKER_HOST based configuration","DockerEndpoint":"unix:///var/run/docker.sock","Error":"","Name":"default"}
+{"Current":false,"Description":"","DockerEndpoint":"ssh://dev@build-box","Error":"","Name":"build-box"}

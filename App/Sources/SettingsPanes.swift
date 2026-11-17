@@ -29,7 +29,17 @@ struct WidgetsPane: View {
             CommandsSection(store: store, activity: activity)
             Section(loc("Endpoints")) {
                 ForEach(store.settings.widgets.endpoints) { endpoint in
-                    Text(endpoint.url.absoluteString)
+                    EndpointEditor(endpoint: endpoint) { change in
+                        store.update { settings in
+                            guard let index = settings.widgets.endpoints.firstIndex(where: { $0.id == endpoint.id })
+                            else { return }
+                            if let change {
+                                settings.widgets.endpoints[index] = change
+                            } else {
+                                settings.widgets.endpoints.remove(at: index)
+                            }
+                        }
+                    }
                 }
                 HStack {
                     TextField("https://", text: $endpointText)
@@ -42,6 +52,74 @@ struct WidgetsPane: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+/// One watched address: its URL, how often and how it is checked. `nil` from `onChange` removes it.
+private struct EndpointEditor: View {
+    let endpoint: Endpoint
+    let onChange: (Endpoint?) -> Void
+    @State private var isOpen = false
+    @State private var urlText: String
+
+    private static let intervals: [TimeInterval] = [10, 30, 60, 300, 900, 3600]
+
+    init(endpoint: Endpoint, onChange: @escaping (Endpoint?) -> Void) {
+        self.endpoint = endpoint
+        self.onChange = onChange
+        _urlText = State(initialValue: endpoint.url.absoluteString)
+    }
+
+    var body: some View {
+        DisclosureGroup(isExpanded: $isOpen) {
+            TextField(loc("Address"), text: $urlText)
+                .onSubmit(commitURL)
+            Picker(loc("Check every"), selection: edit(\.interval)) {
+                ForEach(intervalChoices, id: \.self) { Text(Self.title(seconds: $0)).tag($0) }
+            }
+            Picker(loc("Method"), selection: edit(\.method)) {
+                ForEach(EndpointMethod.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+            }
+            Stepper(value: edit(\.expectedStatus), in: 100 ... 599) {
+                LabeledContent(loc("Expected status"), value: String(endpoint.expectedStatus))
+            }
+            Stepper(value: edit(\.timeout), in: Endpoint.timeoutRange, step: 1) {
+                LabeledContent(loc("Timeout"), value: loc("\(Int(endpoint.timeout)) s"))
+            }
+            Button(loc("Remove"), role: .destructive) { onChange(nil) }
+        } label: {
+            Text(endpoint.url.absoluteString).lineLimit(1).truncationMode(.middle)
+        }
+    }
+
+    /// A saved interval outside the list stays selectable.
+    private var intervalChoices: [TimeInterval] {
+        Self.intervals.contains(endpoint.interval) ? Self.intervals : (Self.intervals + [endpoint.interval]).sorted()
+    }
+
+    private static func title(seconds: TimeInterval) -> String {
+        seconds < 60 ? loc("\(Int(seconds)) s") : loc("\(Int(seconds / 60)) min")
+    }
+
+    private func edit<Value>(_ keyPath: WritableKeyPath<Endpoint, Value>) -> Binding<Value> {
+        Binding(
+            get: { endpoint[keyPath: keyPath] },
+            set: { value in
+                var changed = endpoint
+                changed[keyPath: keyPath] = value
+                onChange(changed)
+            }
+        )
+    }
+
+    private func commitURL() {
+        guard let url = URL(string: urlText), url.scheme != nil, url != endpoint.url else {
+            urlText = endpoint.url.absoluteString
+            return
+        }
+        var changed = endpoint
+        changed.url = url
+        onChange(changed)
     }
 }
 

@@ -92,8 +92,8 @@ public final class ActivityStore {
         running.remove(command.id)
     }
 
-    public func check(_ endpoints: [Endpoint]) async {
-        for endpoint in endpoints {
+    public func check(_ endpoints: [Endpoint], at date: Date = Date()) async {
+        for endpoint in endpoints where endpoint.isDue(lastCheck: endpointChecks[endpoint.id]?.last?.date, at: date) {
             let result = await EndpointChecker.check(endpoint)
             endpointChecks[endpoint.id, default: []].append(result)
             endpointChecks[endpoint.id] = endpointChecks[endpoint.id]?.suffix(Self.historyLimit).map(\.self)
