@@ -132,6 +132,7 @@ final class AppModel {
             quit: { [weak self] in self?.quit($0, force: $1) },
             showInFinder: { NSWorkspace.shared.activateFileViewerSelecting([URL(filePath: $0)]) },
             updateSettings: { [weak self] change in self?.store.update(change) },
+            updateState: { [weak self] change in self?.store.update(undoable: false, change) },
             useClipboardEntry: { [weak self] entry, plain in self?.clipboard.use(entry, plainText: plain) },
             isPasteAllowed: { Accessibility.isTrusted },
             openFanCurves: { [weak self] in self?.showFanCurves() },

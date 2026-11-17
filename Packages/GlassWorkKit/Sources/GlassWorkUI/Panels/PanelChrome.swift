@@ -29,6 +29,8 @@ public struct PanelActions {
     public var showInFinder: (String) -> Void
     /// Changes settings from a panel, the same way the Settings window does.
     public var updateSettings: ((inout AppSettings) -> Void) -> Void
+    /// Changes settings that are state, not choices (a counter's value): kept out of undo and redo.
+    public var updateState: ((inout AppSettings) -> Void) -> Void
     /// Puts an entry back on the pasteboard. The flag asks for plain text.
     public var useClipboardEntry: (ClipboardEntry, Bool) -> Void
     /// Only checks. Asking macOS for access is left to the switch in Settings.
@@ -46,6 +48,7 @@ public struct PanelActions {
         quit: @escaping (QuitTarget, Bool) -> Void = { _, _ in },
         showInFinder: @escaping (String) -> Void = { _ in },
         updateSettings: @escaping ((inout AppSettings) -> Void) -> Void = { _ in },
+        updateState: @escaping ((inout AppSettings) -> Void) -> Void = { _ in },
         useClipboardEntry: @escaping (ClipboardEntry, Bool) -> Void = { _, _ in },
         isPasteAllowed: @escaping () -> Bool = { false },
         openFanCurves: @escaping () -> Void = {},
@@ -59,6 +62,7 @@ public struct PanelActions {
         self.quit = quit
         self.showInFinder = showInFinder
         self.updateSettings = updateSettings
+        self.updateState = updateState
         self.useClipboardEntry = useClipboardEntry
         self.isPasteAllowed = isPasteAllowed
         self.openFanCurves = openFanCurves
