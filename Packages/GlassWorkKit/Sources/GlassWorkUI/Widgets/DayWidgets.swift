@@ -278,7 +278,7 @@ struct TodoWidget: View {
     }
 
     private var extraLarge: some View {
-        let layout = TodoGroup.columns(of: TodoGroup.groups(of: open), count: 2, height: 300)
+        let layout = TodoWidgetGroup.columns(of: TodoWidgetGroup.groups(of: open), count: 2, height: 300)
         return HStack(alignment: .top, spacing: 18) {
             VStack(alignment: .leading, spacing: 8) {
                 header
@@ -299,7 +299,7 @@ struct TodoWidget: View {
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundStyle(Color(hex: group.color))
                                     .lineLimit(1)
-                                    .frame(height: TodoGroup.headerHeight, alignment: .bottom)
+                                    .frame(height: TodoWidgetGroup.headerHeight, alignment: .bottom)
                                 ForEach(group.items) { WidgetTodoRow(item: $0, now: now) }
                             }
                             Spacer(minLength: 0)

@@ -438,24 +438,11 @@ struct ColoursPanel: View {
     }
 
     private func pick(_ store: EverydayStore) {
-        NSColorSampler().show { color in
-            guard let hex = color?.hexString else { return }
-            MainActor.assumeIsolated {
-                let limit = options.number(ItemOption.colourLimit, default: EverydayData.colorLimit)
-                store.update { $0.addColor(hex, limit: limit) }
-                copy(hex)
-            }
-        }
+        ColourPicking.pick(store: store, options: options)
     }
 
     private func copy(_ hex: String) {
-        NSPasteboard.general.clearContents()
-        let text = format.text(
-            hex: hex,
-            isUppercase: options.flag(ItemOption.colourUppercase, default: true),
-            hasHash: options.flag(ItemOption.colourHash, default: true)
-        )
-        NSPasteboard.general.setString(text, forType: .string)
+        ColourPicking.copy(hex, store: monitor.everyday, options: options)
     }
 }
 

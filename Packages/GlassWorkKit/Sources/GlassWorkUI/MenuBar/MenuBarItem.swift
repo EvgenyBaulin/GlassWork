@@ -47,6 +47,8 @@ public struct ItemContent {
     public var symbol: String?
     /// False for items that read fine as text alone.
     public var showsSymbol = true
+    /// Fills the symbol with a colour of its own, which keeps the image from being a template.
+    public var swatch: Color?
     /// Drawn before the figure, except in the Labelled style, where the label says the same.
     public var prefix: String?
     /// Replaces the module's short label in the Labelled style.
@@ -111,6 +113,7 @@ public struct ItemContent {
         case .deviceBatteries: deviceBatteries(monitor.deviceBatteries, options: options)
         case .keepAwake: ItemContent(figure: monitor.everyday.isKeepingAwake ? loc("On") : loc("Off"), template: "Off")
         case .notes: notes(monitor.everyday.data.note)
+        case .colours: colours(monitor.everyday)
         case _ where ModuleID.developerCollected.contains(module):
             developer(module, monitor.developer, options: options)
         case .weather: weather(monitor.weather)
@@ -295,6 +298,7 @@ public struct MenuBarItemView: View {
     private func symbol(_ content: ItemContent) -> some View {
         Image(systemName: content.symbol ?? module.symbol, variableValue: content.symbolLevel)
             .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(content.swatch ?? .primary)
             .frame(width: 16)
     }
 

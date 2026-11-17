@@ -32,8 +32,8 @@ final class AppModel {
     )
     private let fanSensors = FanSensorSource()
     private(set) lazy var fans = makeFans()
-    private lazy var panels = PanelController(model: self)
-    private lazy var statusBar = StatusBarController(model: self)
+    lazy var panels = PanelController(model: self)
+    lazy var statusBar = StatusBarController(model: self)
     private lazy var settingsWindow = SettingsWindowController(model: self)
     private lazy var mainWindow = MainWindowController(model: self)
     private lazy var runningApps = RunningAppsObserver(store: monitor.apps)
@@ -186,6 +186,7 @@ final class AppModel {
         }
     }
 
+    /// A click on the Colours item: the eyedropper, then the item says "Copied" for a moment.
     /// Press and hold on the Stopwatch item.
     func resetStopwatch() {
         panels.closeTransient()

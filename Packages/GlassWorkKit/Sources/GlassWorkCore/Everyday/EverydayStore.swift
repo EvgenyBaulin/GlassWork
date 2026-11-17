@@ -14,6 +14,8 @@ public final class EverydayStore {
     @ObservationIgnored public var letsDisplaySleep = false
     /// Applies from the next time Keep Awake is turned on, except for the battery, which is checked all along.
     @ObservationIgnored public var keepAwakeRule = KeepAwakeRule()
+    /// When a colour was last copied, so the menu bar item can say "Copied" for a moment.
+    public private(set) var lastColourCopy: Date?
     /// Called when a timer reaches zero.
     @ObservationIgnored public var onTimerFinished: ((CountdownTimer) -> Void)?
 
@@ -28,6 +30,10 @@ public final class EverydayStore {
     public func update(_ change: (inout EverydayData) -> Void) {
         change(&data)
         try? store.write(data, for: EverydayData.key)
+    }
+
+    public func noteColourCopied(at date: Date = Date()) {
+        lastColourCopy = date
     }
 
     public func startTimer(title: String, duration: TimeInterval) {

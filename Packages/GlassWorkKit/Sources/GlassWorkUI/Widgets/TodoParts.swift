@@ -33,7 +33,7 @@ enum TodoLabels {
 }
 
 /// Open reminders of one list, in the order they came.
-struct TodoGroup: Identifiable, Equatable {
+struct TodoWidgetGroup: Identifiable, Equatable {
     var name: String
     var color: String
     var items: [TodoItem]
@@ -42,13 +42,13 @@ struct TodoGroup: Identifiable, Equatable {
         name
     }
 
-    static func groups(of items: [TodoItem]) -> [TodoGroup] {
-        var groups: [TodoGroup] = []
+    static func groups(of items: [TodoItem]) -> [TodoWidgetGroup] {
+        var groups: [TodoWidgetGroup] = []
         for item in items {
             if let index = groups.firstIndex(where: { $0.name == item.listName }) {
                 groups[index].items.append(item)
             } else {
-                groups.append(TodoGroup(name: item.listName, color: item.listColor, items: [item]))
+                groups.append(TodoWidgetGroup(name: item.listName, color: item.listColor, items: [item]))
             }
         }
         return groups
@@ -60,9 +60,9 @@ struct TodoGroup: Identifiable, Equatable {
 
     /// Groups flowed into columns of a given height; what does not fit is counted.
     static func columns(
-        of groups: [TodoGroup], count: Int, height: CGFloat
-    ) -> (columns: [[TodoGroup]], hidden: Int) {
-        var columns: [[TodoGroup]] = [[]]
+        of groups: [TodoWidgetGroup], count: Int, height: CGFloat
+    ) -> (columns: [[TodoWidgetGroup]], hidden: Int) {
+        var columns: [[TodoWidgetGroup]] = [[]]
         var used: CGFloat = 0
         var hidden = 0
         for group in groups {
@@ -121,7 +121,7 @@ struct WidgetTodoRow: View {
             }
         }
         .font(.system(size: 13))
-        .frame(height: TodoGroup.rowHeight)
+        .frame(height: TodoWidgetGroup.rowHeight)
     }
 }
 

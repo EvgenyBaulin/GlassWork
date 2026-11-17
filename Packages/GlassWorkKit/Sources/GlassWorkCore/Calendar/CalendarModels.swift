@@ -103,6 +103,7 @@ public struct TodoItem: Codable, Sendable, Equatable, Identifiable {
     public var listName: String
     public var listColor: String
     public var due: Date?
+    /// EventKit has no public flag, so this means "high priority" and nothing else.
     public var isFlagged: Bool
     public var isCompleted: Bool
     public var completedAt: Date?
@@ -123,6 +124,57 @@ public struct TodoItem: Codable, Sendable, Equatable, Identifiable {
         self.isCompleted = isCompleted
         self.completedAt = completedAt
         self.priority = priority
+    }
+
+    /// The priority as a level. An item that is flagged and has no priority of its own counts as high.
+    public var level: TodoPriority {
+        priority.map(TodoPriority.init(reminders:)) ?? (isFlagged ? .high : .none)
+    }
+}
+
+/// How urgent a reminder is, from the priority the Reminders app stores.
+public enum TodoPriority: Int, Sendable, Comparable {
+    case none, low, medium, high
+
+    public init(reminders value: Int) {
+        switch value {
+        case 1 ... 4: self = .high
+        case 5: self = .medium
+        case 6 ... 9: self = .low
+        default: self = .none
+        }
+    }
+
+    public static func < (left: Self, right: Self) -> Bool {
+        left.rawValue < right.rawValue
+    }
+
+    /// `!!!`, `!!` or `!`, as Reminders writes them. Empty for none.
+    public var marks: String {
+        String(repeating: "!", count: rawValue)
+    }
+}
+
+/// Reminders of one list, for a panel that groups by list.
+public struct TodoGroup: Identifiable, Sendable, Equatable {
+    public var name: String
+    public var color: String
+    public var items: [TodoItem]
+    public var id: String {
+        name
+    }
+
+    /// Lists in the order they first appear, and each list keeps its items' order.
+    public static func groups(of items: [TodoItem]) -> [TodoGroup] {
+        var result: [TodoGroup] = []
+        for item in items {
+            if let index = result.firstIndex(where: { $0.name == item.listName }) {
+                result[index].items.append(item)
+            } else {
+                result.append(TodoGroup(name: item.listName, color: item.listColor, items: [item]))
+            }
+        }
+        return result
     }
 }
 
@@ -149,12 +201,39 @@ public enum CompletedTodos: String, Sendable, CaseIterable {
 public struct TodoOptions: Sendable, Equatable {
     public var sort = TodoSort.manual
     public var completed = CompletedTodos.hide
+    public var groupsByList = true
+    public var defaultFilter = TodoFilter.all
+    /// The list new reminders go to, remembered from the panel. Nil or a missing list means the Mac's default.
+    public var newItemList: String?
+    /// Nil until the first choice: every list shows.
+    private var hidden: Set<String>?
 
     public init() {}
 
     public init(options: [String: String]) {
         sort = options.choice(ItemOption.todoSort, default: .manual)
         completed = options.choice(ItemOption.todoCompleted, default: .hide)
+        groupsByList = options.flag(ItemOption.todoGroupsByList, default: true)
+        defaultFilter = options.choice(ItemOption.todoDefaultFilter, default: .all)
+        newItemList = options[ItemOption.todoNewItemList].flatMap { $0.isEmpty ? nil : $0 }
+        hidden = options[ItemOption.hiddenTodoLists].map { text in
+            Set(text.split(separator: ",").map(String.init))
+        }
+    }
+
+    public func shows(_ list: CalendarChoice) -> Bool {
+        !(hidden?.contains(list.id) ?? false)
+    }
+
+    /// The stored value after one list is shown or hidden.
+    public func stored(after list: CalendarChoice, isShown: Bool) -> String {
+        var names = hidden ?? []
+        if isShown {
+            names.remove(list.id)
+        } else {
+            names.insert(list.id)
+        }
+        return names.sorted().joined(separator: ",")
     }
 
     /// Open items first, then the ticked ones still on the list, the latest of them first.
@@ -193,7 +272,8 @@ public enum TodoFilter: String, Codable, CaseIterable, Sendable {
             guard !item.isCompleted else { return false }
             switch self {
             case .all: return true
-            case .flagged: return item.isFlagged
+            // Reminders has no flag that apps can read, so "flagged" is the high priority.
+            case .flagged: return item.level == .high
             case .overdue: return item.due.map { $0 < calendar.startOfDay(for: now) } ?? false
             case .today: return item.due.map { calendar.isDate($0, inSameDayAs: now) } ?? false
             }
@@ -215,13 +295,18 @@ public struct CalendarChoice: Identifiable, Sendable, Equatable {
     public var account: String
     public var color: String
     public var isBirthdays: Bool
+    /// False for a list that nothing can be added to.
+    public var isEditable: Bool
 
-    public init(id: String, title: String, account: String, color: String, isBirthdays: Bool = false) {
+    public init(
+        id: String, title: String, account: String, color: String, isBirthdays: Bool = false, isEditable: Bool = true
+    ) {
         self.id = id
         self.title = title
         self.account = account
         self.color = color
         self.isBirthdays = isBirthdays
+        self.isEditable = isEditable
     }
 }
 

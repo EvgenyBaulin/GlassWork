@@ -85,6 +85,9 @@ struct OptionTableTests {
         "5 s": "5 с",
         "8 hours": "8 часов",
         "All": "Все",
+        "Today": "Сегодня",
+        "Overdue": "Просрочено",
+        "Flagged": "С флагом",
         "Any time": "Любое время",
         "Bits/s": "Бит/с",
         "Both": "Оба",
@@ -411,7 +414,7 @@ struct ModuleOptionSnapshotTests {
 
     @Test(arguments: [true, false])
     func todos(dark: Bool) {
-        snapshot(.todos, height: 220, name: "todos", dark: dark)
+        snapshot(.todos, height: 320, name: "todos", dark: dark)
     }
 
     @Test(arguments: [true, false])

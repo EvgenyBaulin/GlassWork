@@ -189,13 +189,20 @@ struct EndsInPanel: View {
 
 struct TodosPanel: View {
     let monitor: SystemMonitor
-    @State private var filter = TodoFilter.all
+    /// Nil until the user picks one, so the Settings choice applies until then.
+    @State private var pickedFilter: TodoFilter?
     @State private var draft = ""
     @State private var undoItem: TodoItem?
     @Environment(\.panelActions) private var actions
 
+    private var options: TodoOptions {
+        TodoOptions(options: actions.moduleOptions(.todos))
+    }
+
     var body: some View {
         let agenda = monitor.agenda
+        let options = options
+        let filter = pickedFilter ?? options.defaultFilter
         let items = filter.apply(to: agenda.todos, now: Date())
         PanelFrame(
             module: .todos,
@@ -204,16 +211,24 @@ struct TodosPanel: View {
             footerAction: { actions.openApp("com.apple.reminders") }
         ) {
             if agenda.remindersAccess == .granted {
-                TodoFilterPicker(filter: $filter, counts: TodoFilter.counts(in: agenda.todos, now: Date()))
+                TodoFilterPicker(
+                    filter: Binding(get: { filter }, set: { pickedFilter = $0 }),
+                    counts: TodoFilter.counts(in: agenda.todos, now: Date())
+                )
                 if items.isEmpty {
                     AllClear()
                 }
                 ScrollView {
+                    // Ticked items stay on the list for a while, so a slip can be undone.
+                    let shown = items + (filter == .all ? agenda.todos.filter(\.isCompleted) : [])
                     VStack(alignment: .leading, spacing: 8) {
-                        ForEach(items) { row($0, agenda: agenda) }
-                        // Ticked items stay on the list for a while, so a slip can be undone.
-                        if filter == .all {
-                            ForEach(agenda.todos.filter(\.isCompleted)) { row($0, agenda: agenda) }
+                        if options.groupsByList {
+                            ForEach(TodoGroup.groups(of: shown)) { group in
+                                TodoGroupHeader(name: group.name, color: group.color)
+                                ForEach(group.items) { row($0, agenda: agenda) }
+                            }
+                        } else {
+                            ForEach(shown) { row($0, agenda: agenda) }
                         }
                     }
                 }
@@ -231,13 +246,16 @@ struct TodosPanel: View {
                         }
                     }
                 }
-                TextField(loc("Add a reminder"), text: $draft)
-                    .textFieldStyle(.roundedBorder)
-                    .onSubmit {
-                        guard !draft.isEmpty else { return }
-                        agenda.addTodo(title: draft)
-                        draft = ""
-                    }
+                HStack(spacing: 6) {
+                    TextField(loc("Add a reminder"), text: $draft)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit {
+                            guard !draft.isEmpty else { return }
+                            agenda.addTodo(title: draft, listID: destination(agenda, options))
+                            draft = ""
+                        }
+                    destinationPicker(agenda, options)
+                }
             } else {
                 AccessRequest(
                     title: loc("See your reminders here"),
@@ -249,10 +267,57 @@ struct TodosPanel: View {
         }
     }
 
+    /// The remembered list while it still exists, and the Mac's own pick otherwise.
+    private func destination(_ agenda: AgendaStore, _ options: TodoOptions) -> String? {
+        let editable = agenda.reminderLists.filter(\.isEditable)
+        if let remembered = options.newItemList, editable.contains(where: { $0.id == remembered }) {
+            return remembered
+        }
+        return agenda.defaultListID
+    }
+
+    /// Where a new reminder goes. The choice is kept in the module's options.
+    @ViewBuilder
+    private func destinationPicker(_ agenda: AgendaStore, _ options: TodoOptions) -> some View {
+        let lists = agenda.reminderLists.filter(\.isEditable)
+        if lists.count > 1 {
+            Picker(
+                loc("Add to"),
+                selection: Binding(
+                    get: { destination(agenda, options) ?? "" },
+                    set: { id in
+                        actions.updateSettings { settings in
+                            settings.update(.todos) { $0.options[ItemOption.todoNewItemList] = id }
+                        }
+                    }
+                )
+            ) {
+                ForEach(lists) { Text(verbatim: $0.title).tag($0.id) }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .controlSize(.small)
+            .fixedSize()
+        }
+    }
+
     private func row(_ item: TodoItem, agenda: AgendaStore) -> some View {
         TodoRow(item: item) {
             agenda.setCompleted(item, !item.isCompleted)
             undoItem = item.isCompleted ? nil : item
+        }
+    }
+}
+
+/// The name of a Reminders list, in the list's colour, above its items.
+struct TodoGroupHeader: View {
+    let name: String
+    let color: String
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle().fill(Color(hex: color)).frame(width: 7, height: 7)
+            Text(verbatim: name).font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
         }
     }
 }
@@ -325,8 +390,10 @@ struct TodoRow: View {
                 }
             }
             Spacer()
-            if item.isFlagged {
-                Image(systemName: "flag.fill").foregroundStyle(Palette.orange).font(.system(size: 10))
+            if item.level != .none, !item.isCompleted {
+                Text(verbatim: item.level.marks)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(item.level == .high ? Palette.orange : .secondary)
             }
         }
     }
