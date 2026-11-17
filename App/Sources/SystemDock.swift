@@ -20,6 +20,31 @@ enum SystemDock {
         return Saved(autoHides: values["autohide"] as? Bool, autoHideDelay: values["autohide-delay"] as? Double)
     }
 
+    /// Exists from the moment GlassWork takes the system Dock over until it has given it back.
+    static var markerURL: URL {
+        URL.applicationSupportDirectory.appending(path: "GlassWork/dock-takeover.marker", directoryHint: .notDirectory)
+    }
+
+    static var hasMarker: Bool {
+        FileManager.default.fileExists(atPath: markerURL.path(percentEncoded: false))
+    }
+
+    static var hasSavedSettings: Bool {
+        saved != nil
+    }
+
+    private static func writeMarker() {
+        try? FileManager.default.createDirectory(
+            at: markerURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        FileManager.default.createFile(atPath: markerURL.path(percentEncoded: false), contents: Data())
+    }
+
+    static func clearMarker() {
+        try? FileManager.default.removeItem(at: markerURL)
+    }
+
     static func hide() {
         guard UserDefaults.standard.dictionary(forKey: savedKey) == nil else { return }
         // A key the owner never set stays out of the saved values, so restoring removes it again.
@@ -28,12 +53,14 @@ enum SystemDock {
             saved[key] = CFPreferencesCopyAppValue(key as CFString, dock)
         }
         UserDefaults.standard.set(saved, forKey: savedKey)
+        writeMarker()
         write("autohide", true as CFBoolean)
         write("autohide-delay", 1000.0 as CFNumber)
         relaunch()
     }
 
     static func restore() {
+        clearMarker()
         guard let saved = UserDefaults.standard.dictionary(forKey: savedKey) else { return }
         for key in keys {
             write(key, saved[key] as CFPropertyList?)

@@ -80,6 +80,13 @@ public struct DockActions {
     public var turnOffPreset: (() -> Void)?
     /// The item under the pointer, for its name label. Set by the app; without it there is no label.
     public var hover: ((DockHover) -> Void)?
+    /// The windows of a running app, front to back. Set by the app; without it the menu lists none.
+    public var windows: (DockApp) -> [DockWindowItem] = { _ in [] }
+    /// Brings one of those windows forward.
+    public var raiseWindow: (DockApp, DockWindowItem) -> Void = { _, _ in }
+    /// The app has a New Window item in its menus, which GlassWork can choose.
+    public var canOpenNewWindow: (DockApp) -> Bool = { _ in false }
+    public var newWindow: (DockApp) -> Void = { _ in }
 
     public init(
         open: @escaping (DockApp) -> Void,
@@ -364,7 +371,13 @@ public struct DockView: View {
             isRunning: running.contains(app.path),
             isLaunching: state.launching.contains(app.path),
             showsIndicator: settings.showsRunningIndicators,
-            position: position
+            position: position,
+            tile: DockTileStates.state(
+                for: app,
+                badges: state.badges,
+                attention: state.attention,
+                hidden: state.hidden
+            )
         ) { actions.open(app) }
             .contextMenu {
                 DockAppMenu(app: app, actions: actions, folders: settings.folders) { state.openCard = $0 }
@@ -395,7 +408,8 @@ public struct DockView: View {
                 isRunning: folder.apps.contains { running.contains($0.path) },
                 isLaunching: folder.apps.contains { state.launching.contains($0.path) },
                 showsIndicator: settings.showsRunningIndicators,
-                position: position
+                position: position,
+                tile: DockTileStates.state(for: folder, badges: state.badges, attention: state.attention)
             ) { toggleCard(item) }
                 .contextMenu { FolderMenu(folder: folder, actions: actions) { state.openCard = $0 } }
                 .dropDestination(for: String.self) { paths, _ in
@@ -448,7 +462,13 @@ private extension DockView {
             isRunning: running.contains(app.path),
             isLaunching: state.launching.contains(app.path),
             showsIndicator: settings.showsRunningIndicators,
-            position: position
+            position: position,
+            tile: DockTileStates.state(
+                for: app,
+                badges: state.badges,
+                attention: state.attention,
+                hidden: state.hidden
+            )
         ) { actions.open(app) }
             .contextMenu {
                 DockAppMenu(app: app, actions: actions, folders: settings.folders) { state.openCard = $0 }

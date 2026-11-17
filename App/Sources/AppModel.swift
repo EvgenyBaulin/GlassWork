@@ -77,6 +77,7 @@ final class AppModel {
         Task { await monitor.apps.load() }
         _ = runningApps
         _ = quickQuit
+        SystemDockGuard.recoverAtLaunch(dockIsOn: store.settings.dock.isEnabled)
         applySettings()
         monitor.developer.restore(aiUsage: SnapshotStore().read(WidgetSnapshot.self, for: WidgetSnapshot.key)?.aiUsage)
         checkSystemWidgets()

@@ -37,11 +37,16 @@ final class DockController {
     private lazy var pointerWatcher = DockPointerWatcher { [weak self] in self?.updateReveal() }
     private var hiding: Task<Void, Never>?
     private let tooltip = DockTooltip()
+    private let newWindowProbe = DockNewWindowProbe()
     private lazy var scheduler = DockPresetScheduler { [weak self] in self?.applyScheduled($0) }
     private lazy var trash = DockTrash { [weak self] full in
         if self?.state.trashIsFull != full {
             self?.state.trashIsFull = full
         }
+    }
+
+    private lazy var tiles = DockTileWatcher(state: state) { [weak self] in
+        self?.window != nil && self?.isRevealed == true
     }
 
     private var cardDismissal: TransientDismissal?
@@ -61,6 +66,7 @@ final class DockController {
             return
         }
         if window == nil {
+            SystemDockGuard.install()
             SystemDock.hide()
             isRevealed = !settings.autoHides
             open()
@@ -110,7 +116,12 @@ final class DockController {
 
     private func observeApps() {
         let center = NSWorkspace.shared.notificationCenter
-        let names = [NSWorkspace.didLaunchApplicationNotification, NSWorkspace.didTerminateApplicationNotification]
+        let names = [
+            NSWorkspace.didLaunchApplicationNotification,
+            NSWorkspace.didTerminateApplicationNotification,
+            NSWorkspace.didHideApplicationNotification,
+            NSWorkspace.didUnhideApplicationNotification,
+        ]
         workspace = names.map { name in
             center.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
                 let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
@@ -123,6 +134,7 @@ final class DockController {
         NSWorkspace.shared.runningApplications.forEach(noteUsed)
         trash.start()
         fullScreen.start()
+        tiles.start()
     }
 
     /// Restores even with no window, so a Dock left hidden by a crash comes back once it is turned off.
@@ -132,6 +144,7 @@ final class DockController {
         }
         shrink?.cancel()
         trash.stop()
+        tiles.stop()
         tooltip.hide()
         fullScreen.stop()
         isFullScreenFront = false
@@ -286,6 +299,10 @@ final class DockController {
         }
     }
 
+    private func windows(of app: DockApp) -> [DockWindowItem] {
+        runningApp(app).map { DockAppWindows.list(pid: $0.processIdentifier) } ?? []
+    }
+
     private func hideOthers(than kept: NSRunningApplication?) {
         kept?.activate()
         let own = NSRunningApplication.current
@@ -347,6 +364,7 @@ final class DockController {
         }
         state.running = DockRunningApps.match(apps, bundleIDs: bundleIDs, running: running)
         tracker.update(running: state.running, at: Date())
+        tiles.refreshHidden()
         showLaunches()
     }
 
@@ -520,6 +538,20 @@ extension DockController {
         )
         actions.trash = trash.actions
         actions.cancelDownload = { [weak self] in self?.folders.cancel($0) }
+        actions.windows = { [weak self] in self?.windows(of: $0) ?? [] }
+        actions.raiseWindow = { [weak self] app, window in
+            if let running = self?.runningApp(app) {
+                DockAppWindows.raise(window, of: running)
+            }
+        }
+        actions.canOpenNewWindow = { [weak self] in
+            self?.runningApp($0).map { self?.newWindowProbe.canOpen(pid: $0.processIdentifier) ?? false } ?? false
+        }
+        actions.newWindow = { [weak self] app in
+            if let running = self?.runningApp(app) {
+                DockAppWindows.newWindow(of: running)
+            }
+        }
         actions.turnOffPreset = { [weak self] in self?.turnOffPreset() }
         actions.hover = { [weak self] hover in
             guard let self else { return }

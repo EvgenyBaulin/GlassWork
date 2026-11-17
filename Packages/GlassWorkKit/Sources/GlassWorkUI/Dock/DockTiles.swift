@@ -104,12 +104,16 @@ struct AppTile: View {
     var showsIndicator = true
     var position = DockPosition.bottom
     var pose: Double?
+    var tile = DockTileState()
+    /// A fixed pulse from 0 to 1 in place of the motion, for snapshots.
+    var pulse: Double?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             DockIndicated(position: position, isLit: showsIndicator && (isRunning || isLaunching)) {
                 AppIcon(app: app, size: size)
+                    .modifier(DockTileDecoration(state: tile, size: size, pulse: pulse))
                     .modifier(LaunchBounce(isActive: isLaunching, size: size, position: position, pose: pose))
             }
         }
@@ -145,6 +149,8 @@ struct FolderTile: View {
     var isLaunching = false
     var showsIndicator = true
     var position = DockPosition.bottom
+    var tile = DockTileState()
+    var pulse: Double?
     let action: () -> Void
 
     var body: some View {
@@ -156,6 +162,7 @@ struct FolderTile: View {
                         folder.tint.map { $0.colour.opacity(0.4) } ?? .white.opacity(0.14),
                         in: .rect(cornerRadius: size / 4.5)
                     )
+                    .modifier(DockTileDecoration(state: tile, size: size, pulse: pulse))
                     .modifier(LaunchBounce(isActive: isLaunching, size: size, position: position))
             }
         }

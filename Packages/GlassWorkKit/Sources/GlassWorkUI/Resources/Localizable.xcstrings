@@ -907,6 +907,38 @@
         }
       }
     },
+    "A preset adds widgets and folders. Your apps stay as they are. Change it any time in Settings → Dock.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A preset adds widgets and folders. Your apps stay as they are. Change it any time in Settings → Dock."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Набор добавляет виджеты и папки. Ваши приложения остаются на месте. Изменить его можно в любой момент: Настройки → Dock."
+          }
+        }
+      }
+    },
+    "A preset adds widgets and folders. Your apps stay put.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A preset adds widgets and folders. Your apps stay put."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Набор добавляет виджеты и папки. Ваши приложения остаются на месте."
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "ru": {
@@ -945,6 +977,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Универсальный доступ"
+          }
+        }
+      }
+    },
+    "Accessibility is on": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility is on"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Универсальный доступ включён"
+          }
+        }
+      }
+    },
+    "Accessibility shows app badges, lists an app's windows and brings one forward. Without it the Dock works in limited mode: no badges and no window list.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility shows app badges, lists an app's windows and brings one forward. Without it the Dock works in limited mode: no badges and no window list."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Универсальный доступ нужен, чтобы показывать значки уведомлений, список окон приложения и выводить окно вперёд. Без него Dock работает в ограниченном режиме: без значков и списка окон."
+          }
+        }
+      }
+    },
+    "Accessibility shows badges and window lists. Without it the Dock runs in limited mode.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility shows badges and window lists. Without it the Dock runs in limited mode."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Универсальный доступ показывает значки и списки окон. Без него Dock работает в ограниченном режиме."
           }
         }
       }
@@ -1259,6 +1339,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Разрешить доступ"
+          }
+        }
+      }
+    },
+    "Allow Accessibility for the full Dock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Accessibility for the full Dock"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите универсальный доступ для полного Dock"
           }
         }
       }
@@ -1935,6 +2031,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Контакты"
+          }
+        }
+      }
+    },
+    "Continue in limited mode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue in limited mode"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продолжить в ограниченном режиме"
           }
         }
       }
@@ -4695,6 +4807,22 @@
         }
       }
     },
+    "New Window": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Window"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новое окно"
+          }
+        }
+      }
+    },
     "Next": {
       "localizations": {
         "ru": {
@@ -5221,6 +5349,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "открыто"
+          }
+        }
+      }
+    },
+    "Open Accessibility Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Accessibility Settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть настройки универсального доступа"
           }
         }
       }
@@ -7159,6 +7303,22 @@
         }
       }
     },
+    "Start from a preset?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start from a preset?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Начать с готового набора?"
+          }
+        }
+      }
+    },
     "Started": {
       "localizations": {
         "ru": {
@@ -7481,6 +7641,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Системный Dock скрыт, пока работает Dock GlassWork, и вернётся как был при выходе."
+          }
+        }
+      }
+    },
+    "The system Dock was restored after an unexpected quit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system Dock was restored after an unexpected quit"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системный Dock восстановлен после неожиданного завершения"
           }
         }
       }
@@ -7837,6 +8013,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Включите в Терминале: make auto-update-on"
+          }
+        }
+      }
+    },
+    "Turn On Dock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn On Dock"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включить Dock"
           }
         }
       }
@@ -8217,6 +8409,22 @@
         }
       }
     },
+    "Waiting for permission…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for permission…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждём разрешения…"
+          }
+        }
+      }
+    },
     "Warm": {
       "localizations": {
         "en": {
@@ -8371,6 +8579,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ветер"
+          }
+        }
+      }
+    },
+    "Window %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Window %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Окно %lld"
           }
         }
       }

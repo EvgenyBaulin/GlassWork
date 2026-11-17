@@ -47,6 +47,10 @@ struct DockAppMenu: View {
             Divider()
         }
         if commands.contains(.showAllWindows) {
+            windowList()
+            if actions.canOpenNewWindow(app) {
+                Button(loc("New Window")) { actions.newWindow(app) }
+            }
             button(loc("Show All Windows"), .showAllWindows)
         }
         if commands.contains(.hide) {
@@ -63,6 +67,18 @@ struct DockAppMenu: View {
             button(loc("Quit"), .quit).modifierKeyAlternate(.option) {
                 button(loc("Force Quit"), .forceQuit)
             }
+        }
+    }
+
+    /// One line per window: its title, or "Window 2" when the title cannot be read.
+    @ViewBuilder
+    private func windowList() -> some View {
+        let windows = actions.windows(app)
+        if !windows.isEmpty {
+            ForEach(windows) { window in
+                Button(window.title ?? loc("Window \(window.number)")) { actions.raiseWindow(app, window) }
+            }
+            Divider()
         }
     }
 
