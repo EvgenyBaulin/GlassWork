@@ -41,12 +41,17 @@ public struct AIUsageCollector: Sendable {
         self.locate = locate
     }
 
-    public func read(at date: Date = Date(), calendar: Calendar = .current) async -> AIUsageReading {
+    /// `skipping` lists tools switched off in Settings; they are not looked for at all.
+    public func read(
+        at date: Date = Date(),
+        calendar: Calendar = .current,
+        skipping off: Set<AITool> = []
+    ) async -> AIUsageReading {
         var tools: [AIToolUsage] = []
-        for tool in AITool.allCases where isInstalled(tool) {
+        for tool in AITool.allCases where !off.contains(tool) && isInstalled(tool) {
             await tools.append(limits.refined(usage(of: tool, at: date, calendar: calendar)))
         }
-        return AIUsageReading(tools: tools, readAt: date)
+        return AIUsageReading(tools: tools, readAt: date).excluding(off)
     }
 
     private func isInstalled(_ tool: AITool) -> Bool {

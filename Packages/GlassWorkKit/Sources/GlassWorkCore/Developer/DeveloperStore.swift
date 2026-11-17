@@ -40,7 +40,8 @@ public final class DeveloperStore {
     @ObservationIgnored private let home: String
     @ObservationIgnored private let locateGit: @Sendable () -> String?
     @ObservationIgnored private var lastRead: [ModuleID: Date] = [:]
-    @ObservationIgnored private var reading: Set<ModuleID> = []
+    /// Modules with a read in flight. Observed, so panels can show that they are updating.
+    private var reading: Set<ModuleID> = []
     @ObservationIgnored private let gitWatcher = GitWatcher()
     @ObservationIgnored private var changedRepositories: Set<String> = []
     @ObservationIgnored private var lastChangeRead = Date.distantPast
@@ -103,6 +104,11 @@ public final class DeveloperStore {
         changedRepositories.formUnion(GitChangeFilter.repositories(changed: paths, in: known))
     }
 
+    /// True while a read of the module is in flight.
+    public func isUpdating(_ module: ModuleID) -> Bool {
+        reading.contains(module)
+    }
+
     func isIdle(_ module: ModuleID) -> Bool {
         !reading.contains(module)
     }
@@ -142,17 +148,21 @@ public final class DeveloperStore {
 
     private func readAIUsage(at date: Date) {
         let collector = AIUsageCollector(runner: runner, home: home)
+        let off = options.aiDisabledTools
         load(.aiUsage) {
-            await collector.read(at: date)
+            await collector.read(at: date, skipping: off)
         } apply: { store, value in
-            store.aiUsage = value.keepingKnown(from: store.aiUsage).warning(at: store.options.usageWarnShare)
+            // Settings may have changed during the read; the newest choice decides what is kept.
+            store.aiUsage = value.keepingKnown(from: store.aiUsage)
+                .excluding(store.options.aiDisabledTools)
+                .warning(at: store.options.usageWarnShare)
         }
     }
 
     /// The reading saved before the app last quit, so a first read that finds nothing still has numbers to keep.
     public func restore(aiUsage saved: AIUsageReading?) {
         guard aiUsage == nil, let saved else { return }
-        aiUsage = saved.warning(at: options.usageWarnShare)
+        aiUsage = saved.excluding(options.aiDisabledTools).warning(at: options.usageWarnShare)
     }
 
     private func readGit() {
@@ -264,7 +274,10 @@ public final class DeveloperStore {
             lastRead[.ping] = nil
         }
         ping.follow(intervalSeconds: options.pingIntervalSeconds)
-        aiUsage = aiUsage?.warning(at: options.usageWarnShare)
+        aiUsage = aiUsage?.excluding(options.aiDisabledTools).warning(at: options.usageWarnShare)
+        if options.aiDisabledTools != old.aiDisabledTools {
+            lastRead[.aiUsage] = nil
+        }
         if options.devServerRule != old.devServerRule {
             lastRead[.devServers] = nil
         }

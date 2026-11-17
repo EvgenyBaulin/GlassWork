@@ -112,6 +112,24 @@ public enum AIUsageOption {
     public static let window = "window"
     public static let warnPercent = "warnAt"
     public static let defaultWarnPercent = 90
+    /// Which tool feeds the menu bar value: `highest` (the default) or a tool's raw value.
+    public static let menuBarTool = "menuBarTool"
+    public static let highestTool = "highest"
+
+    /// The per-tool checkbox, on unless Settings switched it off.
+    public static func enabledKey(_ tool: AITool) -> String {
+        "enabled.\(tool.rawValue)"
+    }
+
+    /// Tools switched off in Settings: not read and not shown.
+    public static func disabledTools(_ options: [String: String]) -> Set<AITool> {
+        Set(AITool.allCases.filter { !options.flag(enabledKey($0), default: true) })
+    }
+
+    /// The tool chosen for the menu bar, or nil for the highest of all.
+    public static func chosenTool(_ options: [String: String]) -> AITool? {
+        options[menuBarTool].flatMap(AITool.init(rawValue:))
+    }
 
     public static func warnShare(_ options: [String: String]) -> Double {
         Double(min(max(options.number(warnPercent, default: defaultWarnPercent), 1), 100)) / 100
@@ -138,6 +156,8 @@ public struct AIUsageReading: Codable, Sendable, Equatable {
     /// Tools found on this Mac, in display order.
     public let tools: [AIToolUsage]
     public let readAt: Date
+    /// Tools switched off in Settings; they are neither shown nor listed as missing.
+    public private(set) var disabled: [AITool]?
 
     public init(tools: [AIToolUsage], readAt: Date) {
         self.tools = tools
@@ -150,7 +170,25 @@ public struct AIUsageReading: Codable, Sendable, Equatable {
     }
 
     public var missing: [AITool] {
-        AITool.allCases.filter { tool in !tools.contains { $0.tool == tool } }
+        AITool.allCases.filter { tool in
+            !tools.contains { $0.tool == tool } && !(disabled ?? []).contains(tool)
+        }
+    }
+
+    /// The same reading without the tools Settings switched off.
+    public func excluding(_ off: Set<AITool>) -> AIUsageReading {
+        var reading = AIUsageReading(tools: tools.filter { !off.contains($0.tool) }, readAt: readAt)
+        reading.warnShare = warnShare
+        reading.disabled = off.isEmpty ? nil : AITool.allCases.filter(off.contains)
+        return reading
+    }
+
+    /// Only one tool, for a menu bar value that follows a chosen tool.
+    public func only(_ tool: AITool) -> AIUsageReading {
+        var reading = AIUsageReading(tools: tools.filter { $0.tool == tool }, readAt: readAt)
+        reading.warnShare = warnShare
+        reading.disabled = disabled
+        return reading
     }
 
     /// The tool and window closest to their limit.
