@@ -38,6 +38,7 @@ public struct ModePicker: View {
 
 /// Every module by group, for a `List`. A row drags within its group, like the tiles in the Hub.
 public struct ModuleOrderSections: View {
+    @Environment(\.hardware) private var hardware
     private let store: SettingsStore
 
     public init(store: SettingsStore) {
@@ -46,7 +47,7 @@ public struct ModuleOrderSections: View {
 
     public var body: some View {
         ForEach(ModuleGroup.allCases, id: \.self) { group in
-            let rows = store.settings.modules.filter { $0.id.isAvailable && $0.id.group == group }
+            let rows = store.settings.modules.filter { $0.id.isAvailable(on: hardware) && $0.id.group == group }
             if !rows.isEmpty {
                 Section(group.title) {
                     ForEach(rows) { setting in

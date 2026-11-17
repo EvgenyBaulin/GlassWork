@@ -12,6 +12,25 @@ public enum ItemGlyph: Equatable {
     case bars([Double])
     /// A thin horizontal bar filled from 0 to 1, for items that measure progress instead of keeping a history.
     case progress(Double)
+    /// A battery filled to the charge, with a bolt while charging and a plug when powered but not charging.
+    case battery(level: Double, state: BatteryPowerState)
+}
+
+/// Where the Mac gets its power, as the battery glyph shows it.
+public enum BatteryPowerState: Equatable, Sendable {
+    case discharging
+    case charging
+    case pluggedIn
+
+    public init(_ sample: BatterySample) {
+        self = if sample.isCharging {
+            .charging
+        } else if sample.isOnAC {
+            .pluggedIn
+        } else {
+            .discharging
+        }
+    }
 }
 
 /// Keys in `ModuleSettings.options`.
@@ -345,6 +364,8 @@ public struct MenuBarItemView: View {
                 Capsule().frame(width: Self.graphWidth * ItemProgress.clamp(value))
             }
             .frame(width: Self.graphWidth, height: 4)
+        case .battery:
+            symbol(content)
         case let .bars(levels):
             HStack(alignment: .bottom, spacing: 2) {
                 ForEach(Array(levels.enumerated()), id: \.offset) { _, level in

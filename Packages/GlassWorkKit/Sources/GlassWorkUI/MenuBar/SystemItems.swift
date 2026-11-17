@@ -162,6 +162,9 @@ extension ItemContent {
             sample.map { Format.percent($0.charge, style: style) } ?? "—"
         }
         var item = ItemContent(figure: figure, alert: isLow ? Palette.red : nil, template: showsTime ? "88:88" : "100%")
+        if let sample {
+            item.glyph = .battery(level: sample.charge, state: BatteryPowerState(sample))
+        }
         if options.flag(ItemOption.hidesWhenFull, default: false), let sample, sample.charge >= 1, sample.isOnAC {
             item.isHidden = true
         }

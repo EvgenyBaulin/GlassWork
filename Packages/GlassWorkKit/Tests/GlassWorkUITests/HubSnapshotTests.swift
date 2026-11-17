@@ -27,12 +27,15 @@ struct HubSnapshotTests {
 
     @Test(arguments: [true, false])
     func editMode(dark: Bool) {
-        snapshotPanel(HubView(monitor: SystemMonitor(), store: store(), isEditing: true), name: "edit", dark: dark)
+        let view = HubView(monitor: SystemMonitor(), store: store(), isEditing: true)
+            .environment(\.hardware, .all)
+        snapshotPanel(view, name: "edit", dark: dark)
     }
 
     @Test(arguments: [true, false])
     func addingModules(dark: Bool) {
         let view = HubView(monitor: SystemMonitor(), store: store(), isEditing: true, isAddingModules: true)
+            .environment(\.hardware, .all)
         snapshotPanel(view, name: "adding", dark: dark)
     }
 

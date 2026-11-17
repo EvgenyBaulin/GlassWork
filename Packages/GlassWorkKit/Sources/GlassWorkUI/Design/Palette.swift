@@ -168,14 +168,21 @@ public extension ModuleID {
 
     /// Modules that already have a collector and a panel.
     var isAvailable: Bool {
+        isAvailable(on: .current)
+    }
+
+    /// Whether the module has anything to show on a Mac with this hardware.
+    func isAvailable(on hardware: HardwareAvailability) -> Bool {
         switch self {
-        case .overview, .cpu, .memory, .disk, .network, .battery, .gpu, .sensors, .uptime: true
+        case .overview, .cpu, .memory, .disk, .network, .gpu, .sensors, .uptime: true
+        case .battery: hardware.hasBattery
         case .worldClocks, .timers, .keepAwake, .notes, .countdown, .stopwatch: true
         case .colours, .appearance, .eject, .sunMoon, .date: true
-        case .aiUsage, .git, .devServers, .docker, .ping, .vpn, .wifi: true
+        case .aiUsage, .git, .devServers, .docker, .ping, .vpn: true
+        case .wifi: hardware.hasWiFi
         case .calendar, .endsIn, .todos, .deviceBatteries: true
         case .weather, .rates, .clipboard, .nowPlaying, .shelf: true
-        case .fans: FanHardware.hasFans
+        case .fans: hardware.hasFans
         default: false
         }
     }
@@ -216,4 +223,9 @@ public struct ModuleIcon: View {
     private var background: AnyShapeStyle {
         renderingMode == .fullColor ? AnyShapeStyle(module.tint.gradient) : AnyShapeStyle(.white.opacity(0.18))
     }
+}
+
+public extension EnvironmentValues {
+    /// The hardware this Mac has. Tests set it so a snapshot reads the same on any Mac.
+    @Entry var hardware: HardwareAvailability = .current
 }

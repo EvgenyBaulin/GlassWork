@@ -1193,6 +1193,22 @@
         }
       }
     },
+    "By recent CPU use, as a share of one core": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "By recent CPU use, as a share of one core"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По недавней нагрузке на процессор, в долях одного ядра"
+          }
+        }
+      }
+    },
     "CBR": {
       "localizations": {
         "ru": {
@@ -4699,6 +4715,22 @@
         }
       }
     },
+    "since %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "since %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "с %@"
+          }
+        }
+      }
+    },
     "Sleeps since start": {
       "localizations": {
         "en": {
@@ -5489,6 +5521,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Введите для поиска…"
+          }
+        }
+      }
+    },
+    "Using significant energy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Using significant energy"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Много расходуют энергии"
           }
         }
       }
