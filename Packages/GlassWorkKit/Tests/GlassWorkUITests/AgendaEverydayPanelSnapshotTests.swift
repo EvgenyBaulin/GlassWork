@@ -69,4 +69,32 @@ struct AgendaEverydayPanelSnapshotTests {
             .frame(width: 320)
         snapshotPanel(view, name: "colours-format", dark: dark)
     }
+
+    @Test(arguments: [true, false])
+    func dateShowsWeekNumbersAndEventDots(dark: Bool) {
+        // Noon UTC on 18 Feb 2026, so every time zone sees the same day.
+        let view = DatePanel(
+            monitor: SystemMonitor(),
+            moment: Date(timeIntervalSince1970: 1_771_416_000),
+            eventDays: [3, 18, 24]
+        )
+        .frame(width: 320)
+        snapshotPanel(view, name: "date-weeks-events", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func deviceBatteriesScanThenShowCharging(dark: Bool) {
+        let devices = [
+            DeviceBattery(name: "Magic Mouse", kind: .mouse, charge: 0.45, isCharging: true),
+            DeviceBattery(name: "AirPods Pro", kind: .headphones, charge: 0.8),
+        ]
+        let view = VStack(alignment: .leading, spacing: 12) {
+            DeviceBatteryList(devices: [], hasRead: false)
+            Divider()
+            DeviceBatteryList(devices: devices, hasRead: true)
+        }
+        .padding(14)
+        .frame(width: 320)
+        snapshotPanel(view, name: "devices-scanning-charging", dark: dark)
+    }
 }

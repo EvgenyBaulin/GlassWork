@@ -181,8 +181,8 @@ public final class SystemMonitor {
     @ObservationIgnored var lastSlow = Date.distantPast
     @ObservationIgnored var lastDevices = Date.distantPast
     @ObservationIgnored var lastTimeMachine = Date.distantPast
-    /// An empty list before the first answer would read as "no devices".
-    @ObservationIgnored private var hasReadDevices = false
+    /// False until the first read has answered; an empty list before that would read as "no devices".
+    public private(set) var hasReadDevices = false
 
     /// `system_profiler` takes seconds and batteries drain slowly, and backups run hourly at most.
     static let occasionalInterval: TimeInterval = 300
@@ -452,7 +452,8 @@ public final class SystemMonitor {
         if demand.devices, date.timeIntervalSince(lastDevices) >= Self.occasionalInterval {
             lastDevices = date
             Task {
-                deviceBatteries = await DeviceBatteryReader.read()
+                let read = await DeviceBatteryReader.read()
+                deviceBatteries = DeviceBatteryReader.marking(read, previous: deviceBatteries)
                 hasReadDevices = true
             }
         }

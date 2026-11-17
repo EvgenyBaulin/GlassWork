@@ -104,6 +104,8 @@ public struct AIToolUsage: Codable, Sendable, Equatable, Identifiable {
 /// Which limit the menu bar shows.
 public enum AIUsageWindowChoice: String, Sendable, CaseIterable {
     case highest, fiveHour, week
+    /// Both the five-hour and the weekly limit at once.
+    case both
 }
 
 public enum AIUsageOption {
@@ -160,9 +162,17 @@ public struct AIUsageReading: Codable, Sendable, Equatable {
     }
 
     /// The same among one kind of window. A tool that reports only the other kind still shows something.
+    /// The highest window of exactly one kind, with no fallback to the other kind.
+    public func peak(at date: Date, kind: AIWindow.Kind) -> (tool: AITool, window: AIWindow)? {
+        let candidates = tools.flatMap { usage in
+            usage.windows.filter { $0.kind == kind }.map { (tool: usage.tool, window: $0) }
+        }
+        return candidates.max { $0.window.used(at: date) < $1.window.used(at: date) }
+    }
+
     public func peak(at date: Date, choice: AIUsageWindowChoice) -> (tool: AITool, window: AIWindow)? {
         let kind: AIWindow.Kind? = switch choice {
-        case .highest: nil
+        case .highest, .both: nil
         case .fiveHour: .fiveHour
         case .week: .week
         }

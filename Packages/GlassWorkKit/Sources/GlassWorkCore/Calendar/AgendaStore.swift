@@ -100,6 +100,31 @@ public final class AgendaStore {
         refresh()
     }
 
+    /// Days of the month (1...31) that have at least one event in a shown calendar. Empty without access.
+    public func eventDays(in month: Date) -> Set<Int> {
+        guard eventsAccess == .granted,
+              let interval = Calendar.current.dateInterval(of: .month, for: month)
+        else { return [] }
+        let shown = store.calendars(for: .event).filter { calendarOptions.shows(Self.calendarChoice($0)) }
+        guard !shown.isEmpty else { return [] }
+        let predicate = store.predicateForEvents(withStart: interval.start, end: interval.end, calendars: shown)
+        let calendar = Calendar.current
+        var days = Set<Int>()
+        for event in store.events(matching: predicate) {
+            guard let start = event.startDate, let end = event.endDate else { continue }
+            // Events end at the start of the next day when they fill the day, so the last moment counts.
+            // Only the days inside the month are walked, however long the event runs.
+            let last = min(max(end.addingTimeInterval(-1), start), interval.end.addingTimeInterval(-1))
+            var day = calendar.startOfDay(for: max(start, interval.start))
+            while day <= last {
+                days.insert(calendar.component(.day, from: day))
+                guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+                day = next
+            }
+        }
+        return days
+    }
+
     private func loadEvents() {
         let start = Calendar.current.startOfDay(for: Date())
         let end = start.addingTimeInterval(86400 * 2)

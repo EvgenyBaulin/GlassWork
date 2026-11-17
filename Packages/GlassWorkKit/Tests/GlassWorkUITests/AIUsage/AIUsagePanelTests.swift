@@ -115,6 +115,58 @@ struct AIUsageItemTests {
         #expect(item.alert == nil)
     }
 
+    @Test func bothWindowsShowOnTwoLines() {
+        let reading = AIUsageReading(
+            tools: [AIToolUsage(tool: .claudeCode, windows: [
+                window(0.42, resetsIn: 60),
+                window(0.17, resetsIn: 3600, kind: .week),
+            ])],
+            readAt: now
+        )
+        let item = ItemContent.aiUsage(reading, at: now)
+
+        #expect(item.figure == "5h 42%")
+        #expect(item.secondLine == "wk 17%")
+        #expect(item.glyph == .ring(0.42))
+        #expect(item.alert == nil)
+    }
+
+    @Test func bothWindowsTurnOrangeWhenEitherIsHigh() {
+        let reading = AIUsageReading(
+            tools: [AIToolUsage(tool: .codex, windows: [
+                window(0.2, resetsIn: 60),
+                window(0.95, resetsIn: 3600, kind: .week),
+            ])],
+            readAt: now
+        )
+        #expect(ItemContent.aiUsage(reading, at: now).alert == Palette.orange)
+    }
+
+    @Test func aToolWithOneWindowStaysOnOneLine() {
+        let reading = AIUsageReading(
+            tools: [AIToolUsage(tool: .codex, windows: [window(0.3, resetsIn: 60, kind: .week)])],
+            readAt: now
+        )
+        let item = ItemContent.aiUsage(reading, at: now)
+
+        #expect(item.figure == "30%")
+        #expect(item.secondLine == nil)
+    }
+
+    @Test func theOldChoicesStillShowOneWindow() {
+        let reading = AIUsageReading(
+            tools: [AIToolUsage(tool: .claudeCode, windows: [
+                window(0.42, resetsIn: 60),
+                window(0.17, resetsIn: 3600, kind: .week),
+            ])],
+            readAt: now
+        )
+        let item = ItemContent.aiUsage(reading, at: now, options: [AIUsageOption.window: "week"])
+
+        #expect(item.figure == "17%")
+        #expect(item.secondLine == nil)
+    }
+
     @Test func noUsageIsFaint() {
         let item = ItemContent.aiUsage(AIUsageReading(tools: [], readAt: now), at: now)
 

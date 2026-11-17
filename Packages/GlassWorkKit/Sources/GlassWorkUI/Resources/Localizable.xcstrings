@@ -513,6 +513,22 @@
         }
       }
     },
+    "5h": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5h"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 ч"
+          }
+        }
+      }
+    },
     "7-day forecast": {
       "localizations": {
         "ru": {
@@ -2873,6 +2889,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Самый длинный день"
+          }
+        }
+      }
+    },
+    "Looking for devices…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Looking for devices…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ищу устройства…"
           }
         }
       }
@@ -5565,6 +5597,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Зарезервированная"
+          }
+        }
+      }
+    },
+    "wk": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "wk"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "нед"
           }
         }
       }

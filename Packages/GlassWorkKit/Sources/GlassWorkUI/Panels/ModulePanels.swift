@@ -31,7 +31,7 @@ public struct ModulePanel: View {
         case .notes: NotesPanel(monitor: monitor)
         case .countdown: CountdownPanel(monitor: monitor)
         case .worldClocks: WorldClocksPanel(monitor: monitor)
-        case .date: DatePanel()
+        case .date: DatePanel(monitor: monitor)
         case .sunMoon: SunMoonPanel(monitor: monitor)
         case .colours: ColoursPanel(monitor: monitor)
         case .eject: EjectPanel(monitor: monitor)

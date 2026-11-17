@@ -7,7 +7,7 @@ extension ItemContent {
         at date: Date = Date(),
         options: [String: String] = [:]
     ) -> ItemContent {
-        let choice = options.choice(AIUsageOption.window, default: AIUsageWindowChoice.highest)
+        let choice = options.choice(AIUsageOption.window, default: AIUsageWindowChoice.both)
         guard let peak = reading?.peak(at: date, choice: choice) else {
             if let usage = reading?.tools.first(where: { $0.windows.isEmpty && $0.spend != nil && !$0.isUnreadable }),
                let spend = usage.spend
@@ -20,6 +20,9 @@ extension ItemContent {
             item.isDimmed = true
             return item
         }
+        if choice == .both, let pair = bothWindows(reading, at: date) {
+            return pair
+        }
         let share = peak.window.used(at: date)
         var item = ItemContent(
             figure: Format.percent(share),
@@ -29,6 +32,35 @@ extension ItemContent {
         item.glyph = .ring(share)
         let reset = peak.window.resetsAt.map { " · \(loc("resets \($0.formatted(date: .omitted, time: .shortened))"))" }
         item.detail = "\(peak.tool.title) \(Format.percent(share))\(reset ?? "")"
+        return item
+    }
+}
+
+extension ItemContent {
+    /// Short text for one window in the menu bar, such as "5h 42%".
+    static func aiWindowText(_ kind: AIWindow.Kind, share: Double) -> String {
+        let label = kind == .week ? loc("wk") : loc("5h")
+        return "\(label) \(Format.percent(share))"
+    }
+
+    /// Both limits on two short lines. Nil when the tools report only one of them.
+    fileprivate static func bothWindows(_ reading: AIUsageReading?, at date: Date) -> ItemContent? {
+        guard let reading,
+              let five = reading.peak(at: date, kind: .fiveHour),
+              let week = reading.peak(at: date, kind: .week)
+        else { return nil }
+        let fiveShare = five.window.used(at: date)
+        let weekShare = week.window.used(at: date)
+        let top = max(fiveShare, weekShare)
+        var item = ItemContent(
+            figure: aiWindowText(.fiveHour, share: fiveShare),
+            alert: top >= reading.warnLevel ? Palette.orange : nil,
+            template: "wk 100%"
+        )
+        item.secondLine = aiWindowText(.week, share: weekShare)
+        item.glyph = .ring(top)
+        item.detail = "\(five.tool.title) \(aiWindowText(.fiveHour, share: fiveShare)) · "
+            + "\(week.tool.title) \(aiWindowText(.week, share: weekShare))"
         return item
     }
 }
