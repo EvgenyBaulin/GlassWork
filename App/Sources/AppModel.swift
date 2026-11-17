@@ -94,6 +94,7 @@ final class AppModel {
             self?.checkAlerts()
             self?.checkUsageAndPing()
             self?.updateIsland()
+            self?.rememberDevices()
         }
         monitor.start()
         observeWidgetCommands()
@@ -423,6 +424,9 @@ final class AppModel {
         snapshot.endpoints = store.settings.widgets.endpoints
         if kinds.contains(.fans) {
             snapshot.fans = fans.widgetState
+        }
+        if kinds.contains(.topApps) {
+            snapshot.topAppsOptions = TopAppsOptions(options: store.settings.module(.cpu)?.options ?? [:])
         }
         return snapshot
     }

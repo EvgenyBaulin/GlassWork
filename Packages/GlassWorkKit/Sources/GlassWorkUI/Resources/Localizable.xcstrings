@@ -721,6 +721,22 @@
         }
       }
     },
+    "3 apps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 apps"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 приложения"
+          }
+        }
+      }
+    },
     "3 hours": {
       "localizations": {
         "en": {
@@ -753,6 +769,22 @@
         }
       }
     },
+    "5 apps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 apps"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 приложений"
+          }
+        }
+      }
+    },
     "5h": {
       "localizations": {
         "en": {
@@ -775,6 +807,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Прогноз на 7 дней"
+          }
+        }
+      }
+    },
+    "8 apps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 apps"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 приложений"
           }
         }
       }
@@ -2111,6 +2159,22 @@
         }
       }
     },
+    "Delete Point": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Point"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить точку"
+          }
+        }
+      }
+    },
     "Developer": {
       "localizations": {
         "ru": {
@@ -2127,6 +2191,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Заряд устройств"
+          }
+        }
+      }
+    },
+    "Devices appear here once they have been connected. All are included until then.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devices appear here once they have been connected. All are included until then."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Устройства появятся здесь после подключения. До тех пор учитываются все."
+          }
+        }
+      }
+    },
+    "Devices in the menu bar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devices in the menu bar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Устройства в строке меню"
           }
         }
       }
@@ -6547,6 +6643,22 @@
         }
       }
     },
+    "The menu bar shows the lowest charge among the ticked devices.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The menu bar shows the lowest charge among the ticked devices."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В строке меню показан наименьший заряд среди отмеченных устройств."
+          }
+        }
+      }
+    },
     "The Shelf is empty": {
       "localizations": {
         "en": {
@@ -6767,6 +6879,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Топ приложений"
+          }
+        }
+      }
+    },
+    "Top Apps widget ranks by": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Apps widget ranks by"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виджет «Топ приложений»: сортировка"
+          }
+        }
+      }
+    },
+    "Top Apps widget shows": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Apps widget shows"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виджет «Топ приложений»: сколько показывать"
           }
         }
       }

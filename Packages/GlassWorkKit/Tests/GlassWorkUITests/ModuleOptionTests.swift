@@ -47,6 +47,12 @@ struct OptionTableTests {
     /// that is down, not a download, so checking that a key exists is not enough.
     private static let choiceRussian: [String: String] = [
         "1 MB/s": "1 МБ/с",
+        "3 apps": "3 приложения",
+        "5 apps": "5 приложений",
+        "8 apps": "8 приложений",
+        "Automatic": "Автоматически",
+        "CPU": "CPU",
+        "Memory": "Память",
         "1 hour": "1 час",
         "1 min": "1 мин",
         "10%": "10%",

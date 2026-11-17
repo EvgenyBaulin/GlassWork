@@ -180,7 +180,8 @@ extension ItemContent {
         }
     }
 
-    static func deviceBatteries(_ devices: [DeviceBattery], options: [String: String]) -> ItemContent {
+    static func deviceBatteries(_ all: [DeviceBattery], options: [String: String]) -> ItemContent {
+        let devices = DeviceSelection(options: options).filter(all)
         let lowest = devices.min { $0.charge < $1.charge }
         let limit = Double(options.number(ItemOption.warnBelow, default: 20)) / 100
         var item = ItemContent(

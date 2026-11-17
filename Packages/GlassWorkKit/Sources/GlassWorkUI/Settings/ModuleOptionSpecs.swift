@@ -164,6 +164,24 @@ public extension ModuleOptionSpec {
                 .number(1 ... 10, step: 1, unit: ""), fallback: "4"
             ),
             option(
+                .cpu, Key.topAppsRanking, "Top Apps widget ranks by", "Виджет «Топ приложений»: сортировка",
+                .choice([
+                    OptionChoice(TopAppsRanking.cpu.rawValue, "CPU"),
+                    OptionChoice(TopAppsRanking.memory.rawValue, "Memory"),
+                ]),
+                fallback: TopAppsRanking.cpu.rawValue
+            ),
+            option(
+                .cpu, Key.topAppsCount, "Top Apps widget shows", "Виджет «Топ приложений»: сколько показывать",
+                .choice([
+                    OptionChoice("", "Automatic"),
+                    OptionChoice("3", "3 apps"),
+                    OptionChoice("5", "5 apps"),
+                    OptionChoice("8", "8 apps"),
+                ]),
+                fallback: ""
+            ),
+            option(
                 .cpu, Key.samplingSeconds, "Sampling interval", "Частота опроса",
                 .choice([OptionChoice("1", "1 s"), OptionChoice("2", "2 s"), OptionChoice("5", "5 s")]),
                 fallback: "2", isAdvanced: true
