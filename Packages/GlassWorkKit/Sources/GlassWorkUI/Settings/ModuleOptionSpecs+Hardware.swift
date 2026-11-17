@@ -17,6 +17,7 @@ extension ModuleOptionSpec {
             ),
             option(.network, Key.networkInterface, "Interface", "Интерфейс", .live(.networkInterfaces), fallback: ""),
             option(.gpu, Key.gpuName, "GPU", "GPU", .live(.gpus), fallback: ""),
+            graphSpan(.gpu),
             option(.disk, Key.volumePath, "Disk", "Диск", .live(.volumes), fallback: ""),
             option(
                 .ping, Developer.pingInterval, "Interval", "Как часто",

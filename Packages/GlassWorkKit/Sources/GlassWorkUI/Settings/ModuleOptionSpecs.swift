@@ -89,6 +89,15 @@ func option(
     )
 }
 
+/// How much history the module's menu bar graph draws.
+func graphSpan(_ module: ModuleID) -> ModuleOptionSpec {
+    option(
+        module, ItemOption.graphMinutes, "Graph span", "Период графика",
+        .choice([OptionChoice("1", "1 min"), OptionChoice("5", "5 min"), OptionChoice("15", "15 min")]),
+        fallback: "1"
+    )
+}
+
 func toggle(
     _ module: ModuleID,
     _ key: String,
@@ -154,6 +163,23 @@ public extension ModuleOptionSpec {
             toggle(.overview, Key.showsCPU, "Show CPU", "Показывать процессор", fallback: true),
             toggle(.overview, Key.showsMemory, "Show memory", "Показывать память", fallback: true),
             toggle(.overview, Key.showsDisk, "Show disk", "Показывать диск", fallback: false),
+            option(
+                .overview, Key.overviewDisk, "Disk figure", "Показатель диска",
+                .choice([
+                    OptionChoice(OverviewDisk.used.rawValue, "Used"),
+                    OptionChoice(OverviewDisk.free.rawValue, "Free"),
+                ]),
+                fallback: OverviewDisk.used.rawValue
+            ),
+            option(
+                .overview, Key.overviewClick, "Clicking opens", "По клику открывать",
+                .choice([
+                    OptionChoice(OverviewClick.panel.rawValue, "Overview panel"),
+                    OptionChoice(OverviewClick.hub.rawValue, "Hub"),
+                ]),
+                fallback: OverviewClick.panel.rawValue
+            ),
+            graphSpan(.cpu),
             toggle(.cpu, Key.splitsUserSystem, "Split user / system", "Разделять польз. и систему", fallback: true),
             toggle(
                 .cpu, Key.showsEfficiencyCores, "Show efficiency cores", "Показывать энергоэффективные ядра",

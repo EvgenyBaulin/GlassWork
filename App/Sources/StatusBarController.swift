@@ -421,6 +421,8 @@ final class ModuleItem: NSObject {
         if module.isClickAction {
             model.performClickAction(module)
             refresh()
+        } else if module == .overview, options.choice(ItemOption.overviewClick, default: OverviewClick.panel) == .hub {
+            model.toggleHub(from: button)
         } else {
             model.togglePanel(module, from: button)
         }

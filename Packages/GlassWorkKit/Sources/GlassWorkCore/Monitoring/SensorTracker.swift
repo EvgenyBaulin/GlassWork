@@ -1,13 +1,12 @@
 import Foundation
 
-/// The last readings of one sensor and its extremes since the app started.
+/// The readings of one sensor over a minute, an hour and a day, and its extremes since the app started.
 public struct SensorTrack: Sendable {
-    public private(set) var history: History<Double>
+    public private(set) var history = TieredHistory()
     public private(set) var minimum: Double
     public private(set) var maximum: Double
 
-    init(capacity: Int, first value: Double, at date: Date) {
-        history = History<Double>(capacity: capacity)
+    init(first value: Double, at date: Date) {
         minimum = value
         maximum = value
         history.append(value, at: date)
@@ -19,17 +18,14 @@ public struct SensorTrack: Sendable {
         maximum = max(maximum, value)
     }
 
-    public var points: [History<Double>.Point] {
-        history.points
+    public func points(in range: TieredHistory.Range, now: Date = Date()) -> [History<Double>.Point] {
+        history.points(in: range, now: now)
     }
 }
 
-/// Per-sensor ring buffers for the sensors the panel lists. The extremes live apart from the buffer,
+/// Per-sensor histories (about 19 KB each) for the sensors the panel lists. The extremes live apart from the buffer,
 /// so they cover the whole session and not only the points that are still kept.
 public struct SensorTracker: Sendable {
-    /// About 2.4 KB per sensor: a sensor that was read every 10 s is kept for 25 minutes.
-    public static let capacity = 150
-
     public private(set) var tracks: [String: SensorTrack] = [:]
 
     public init() {}
@@ -47,7 +43,7 @@ public struct SensorTracker: Sendable {
                 continue
             }
             if tracks[reading.key] == nil {
-                tracks[reading.key] = SensorTrack(capacity: Self.capacity, first: reading.celsius, at: date)
+                tracks[reading.key] = SensorTrack(first: reading.celsius, at: date)
             } else {
                 tracks[reading.key]?.add(reading.celsius, at: date)
             }

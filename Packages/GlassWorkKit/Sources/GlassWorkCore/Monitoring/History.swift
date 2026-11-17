@@ -75,12 +75,18 @@ public struct TieredHistory: Sendable {
     private var fine = History<Double>(capacity: 120)
     private var medium = History<Double>(capacity: 360)
     private var coarse = History<Double>(capacity: 720)
-    private var mediumBucket = Bucket(length: 10)
+    private static let mediumStep: TimeInterval = 10
+    private var mediumBucket = Bucket(length: mediumStep)
     private var coarseBucket = Bucket(length: 120)
+    /// When the first value arrived, which is the app's start for a metric that is always read.
+    public private(set) var firstDate: Date?
 
     public init() {}
 
     public mutating func append(_ value: Double, at date: Date) {
+        if firstDate == nil {
+            firstDate = date
+        }
         fine.append(value, at: date)
         if let average = mediumBucket.add(value, at: date) {
             medium.append(average, at: date)
@@ -101,6 +107,39 @@ public struct TieredHistory: Sendable {
 
     public var latest: Double? {
         fine.latest?.value
+    }
+
+    /// True when the range reaches back past the first value, so the left of the chart is empty
+    /// because the app was not running yet.
+    public func reachesBeforeStart(_ range: Range, now: Date = Date()) -> Bool {
+        guard let firstDate else { return false }
+        return now.addingTimeInterval(-range.duration) < firstDate
+    }
+
+    /// The latest `span` seconds as plain values for a menu bar graph, at most `maxPoints` of them.
+    /// Up to a minute reads the fine tier; longer reads the ten-second tier, averaged down when it has more points.
+    public func graph(span: TimeInterval, maxPoints: Int, now: Date = Date()) -> [Double] {
+        let since = now.addingTimeInterval(-span)
+        if span <= Range.minute.duration {
+            return Array(fine.points(since: since).suffix(maxPoints).map(\.value))
+        }
+        let values = medium.points(since: since).map(\.value)
+        // A span that holds no more than `maxPoints` ten-second values only needs its newest ones: the point on
+        // the very edge of the window must not make it look like one more than fits and halve the detail.
+        if Int(span / Self.mediumStep) <= maxPoints {
+            return Array(values.suffix(maxPoints))
+        }
+        return Self.thinned(values, to: maxPoints)
+    }
+
+    /// Averages neighbours so that no more than `limit` values remain.
+    static func thinned(_ values: [Double], to limit: Int) -> [Double] {
+        guard limit > 0, values.count > limit else { return values }
+        let size = (values.count + limit - 1) / limit
+        return stride(from: 0, to: values.count, by: size).map { start in
+            let group = values[start ..< min(start + size, values.count)]
+            return group.reduce(0, +) / Double(group.count)
+        }
     }
 
     /// Averages values over a fixed time window.
@@ -126,5 +165,28 @@ public struct TieredHistory: Sendable {
             count = 0
             return average
         }
+    }
+}
+
+/// Lowest, average and highest value of the points a chart shows.
+public struct RangeStats: Sendable, Equatable {
+    public let minimum: Double
+    public let average: Double
+    public let maximum: Double
+
+    /// Nil when there is nothing to summarize.
+    public init?(_ points: [History<Double>.Point]) {
+        guard let first = points.first else { return nil }
+        var low = first.value
+        var high = first.value
+        var sum = 0.0
+        for point in points {
+            low = min(low, point.value)
+            high = max(high, point.value)
+            sum += point.value
+        }
+        minimum = low
+        maximum = high
+        average = sum / Double(points.count)
     }
 }

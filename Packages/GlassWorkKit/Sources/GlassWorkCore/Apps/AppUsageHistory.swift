@@ -179,6 +179,54 @@ public struct AppUsageHistory: Sendable {
         return coarse + fine.filter { $0.date >= date }
     }
 
+    /// The app that used the most CPU in the minute (or ten minutes) nearest to `date`, with its CPU as percent of one
+    /// core. Nil when nothing was recorded within a record's length of `date`, such as before the app started.
+    public func busiest(at date: Date) -> (id: String, cpu: Double)? {
+        struct Candidate {
+            let id: String
+            let point: AppUsagePoint
+            let gap: TimeInterval
+        }
+        var best: Candidate?
+        for id in Set(recent.keys).union(long.keys) {
+            let candidates = [(recent[id], Double(Self.minute)), (long[id], Double(Self.longStep))]
+            for (series, reach) in candidates {
+                guard let series, let point = Self.nearest(in: series, to: date) else { continue }
+                let gap = abs(point.date.timeIntervalSince(date))
+                // A recorded minute reaches 90 seconds, the one still being filled included; ten minutes reach 600.
+                guard gap <= (reach == Double(Self.minute) ? 90 : reach) else { continue }
+                if let current = best {
+                    let isCloser = gap < current.gap
+                    let isSameMoment = point.date == current.point.date && point.cpu > current.point.cpu
+                    if isCloser || isSameMoment {
+                        best = Candidate(id: id, point: point, gap: gap)
+                    }
+                } else {
+                    best = Candidate(id: id, point: point, gap: gap)
+                }
+            }
+        }
+        return best.map { ($0.id, $0.point.cpu) }
+    }
+
+    /// Binary search in a series that is ordered by time.
+    private static func nearest(in series: [AppUsagePoint], to date: Date) -> AppUsagePoint? {
+        guard !series.isEmpty else { return nil }
+        var low = 0
+        var high = series.count
+        while low < high {
+            let middle = (low + high) / 2
+            if series[middle].date < date {
+                low = middle + 1
+            } else {
+                high = middle
+            }
+        }
+        let after = series[min(low, series.count - 1)]
+        let before = series[max(low - 1, 0)]
+        return abs(before.date.timeIntervalSince(date)) <= abs(after.date.timeIntervalSince(date)) ? before : after
+    }
+
     /// Thins a long stretch to at most `limit` points by averaging neighbours. A chart cannot show more than its
     /// width anyway, and it redraws on every move of the pointer.
     public static func thinned(_ points: [AppUsagePoint], limit: Int) -> [AppUsagePoint] {

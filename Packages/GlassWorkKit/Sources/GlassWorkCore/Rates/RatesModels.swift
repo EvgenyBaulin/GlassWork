@@ -133,6 +133,24 @@ public struct RateQuote: Codable, Sendable, Equatable, Identifiable {
     public var isUp: Bool {
         change >= 0
     }
+
+    /// Change of each point against the previous published day, as a share of that day's value, for the chart's
+    /// hover readout. A point with no day before it is NaN. A crypto history can hold several points per day,
+    /// so the point to compare with is the last one at least a day earlier.
+    public var dayChanges: [History<Double>.Point] {
+        let points = history.sorted { $0.date < $1.date }
+        return points.map { point in
+            let cutoff = point.date.addingTimeInterval(-Self.day + Self.tolerance)
+            guard let previous = points.last(where: { $0.date <= cutoff }), previous.value != 0 else {
+                return History<Double>.Point(date: point.date, value: .nan)
+            }
+            return History<Double>.Point(date: point.date, value: (point.value - previous.value) / previous.value)
+        }
+    }
+
+    private static let day: TimeInterval = 86400
+    /// A source that publishes an hour early still counts as a day later.
+    private static let tolerance: TimeInterval = 3600
 }
 
 /// What the app keeps for the stale state, and what a widget can read later.

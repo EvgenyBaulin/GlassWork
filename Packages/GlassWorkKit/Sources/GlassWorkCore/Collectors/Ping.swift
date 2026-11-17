@@ -114,12 +114,11 @@ public struct PingLog: Sendable, Equatable {
     public var stats: PingStats? {
         let values = replies
         guard let minimum = values.min(), let maximum = values.max() else { return nil }
-        let steps = zip(values, values.dropFirst()).map { abs($0 - $1) }
         return PingStats(
             minimum: minimum,
             average: values.reduce(0, +) / Double(values.count),
             maximum: maximum,
-            jitter: steps.isEmpty ? 0 : steps.reduce(0, +) / Double(steps.count),
+            jitter: Self.jitter(of: values),
             loss: 1 - Double(values.count) / Double(samples.count)
         )
     }
@@ -143,6 +142,26 @@ public struct PingLog: Sendable, Equatable {
             missed += sample.milliseconds == nil ? 1 : 0
             return History<Double>.Point(date: sample.date, value: missed / Double(index + 1))
         }
+    }
+
+    /// Samples in the window that the jitter at each sample is taken over.
+    public static let jitterWindow = 10
+
+    /// Jitter over the last `jitterWindow` samples up to each sample, for the chart's hover readout.
+    /// A window with fewer than two replies has none, which reads as zero.
+    public var rollingJitter: [History<Double>.Point] {
+        samples.indices.map { index in
+            let window = samples[max(0, index - Self.jitterWindow + 1) ... index]
+            return History<Double>.Point(
+                date: samples[index].date,
+                value: Self.jitter(of: window.compactMap(\.milliseconds))
+            )
+        }
+    }
+
+    static func jitter(of replies: [Double]) -> Double {
+        let steps = zip(replies, replies.dropFirst()).map { abs($0 - $1) }
+        return steps.isEmpty ? 0 : steps.reduce(0, +) / Double(steps.count)
     }
 }
 

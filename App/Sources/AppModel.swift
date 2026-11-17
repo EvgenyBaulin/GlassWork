@@ -208,6 +208,12 @@ final class AppModel {
         showPanel(module, beside: CGRect(origin: NSEvent.mouseLocation, size: .zero))
     }
 
+    /// The Hub opened from another item, below that item and not below the Hub's own icon.
+    func toggleHub(from button: NSStatusBarButton) {
+        statusBar.revealHidden()
+        panels.toggleHub(from: button)
+    }
+
     func toggleHub() {
         statusBar.revealHidden()
         panels.toggleHub(from: statusBar.hubButton)

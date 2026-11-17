@@ -60,6 +60,15 @@ struct DeveloperPanelSnapshotTests {
         snapshotPanel(PingPanel(log: pingLog(values), host: "1.1.1.1"), name: "ping", dark: dark)
     }
 
+    @Test(arguments: [true, false])
+    func pingHoverShowsJitterAndLoss(dark: Bool) {
+        let values: [Double?] = [14, 16, 15, 18, 46, 19, 15, 14, 17, nil, 16, 18, 15, 22, 16, 14]
+        let hover = start.addingTimeInterval(5 * 30)
+        snapshotPanel(
+            PingPanel(log: pingLog(values), host: "1.1.1.1", initialHover: hover), name: "ping-hover", dark: dark
+        )
+    }
+
     @Test func pingHostDown() {
         snapshotPanel(PingPanel(log: pingLog([14, 15, nil, nil, nil]), host: "10.0.0.9"), name: "ping-down")
     }
