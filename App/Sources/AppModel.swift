@@ -274,6 +274,9 @@ final class AppModel {
         focusWatcher.setEnabled(store.settings.island.isEnabled) { [weak self] in self?.updateIsland() }
         updateIsland()
         monitor.temperatureSource = .shown(by: store.settings.module(.sensors)?.options ?? [:])
+        monitor
+            .trackedSensorGroups = Set(SensorGroupOptions(options: store.settings.module(.sensors)?.options ?? [:])
+                .shownGroups)
         applyPolling()
         diagnostics.apply(keepsLog: store.settings.keepsDiagnosticLog, hasSettingsProblem: store.lastError != nil)
         updateDemand()

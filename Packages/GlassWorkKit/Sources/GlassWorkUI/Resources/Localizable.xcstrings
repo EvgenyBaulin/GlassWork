@@ -877,6 +877,22 @@
         }
       }
     },
+    "Awake sessions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awake sessions"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сессии без сна"
+          }
+        }
+      }
+    },
     "Battery": {
       "localizations": {
         "ru": {
@@ -2677,6 +2693,38 @@
         }
       }
     },
+    "Last sleep": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last sleep"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последний сон"
+          }
+        }
+      }
+    },
+    "Last wake": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last wake"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последнее пробуждение"
+          }
+        }
+      }
+    },
     "Launch at login": {
       "localizations": {
         "ru": {
@@ -4375,6 +4423,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показывать два города в строке меню"
+          }
+        }
+      }
+    },
+    "Sleeps since start": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleeps since start"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Снов с запуска"
           }
         }
       }
