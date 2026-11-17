@@ -16,7 +16,11 @@ public enum DockRecovery: Sendable, Equatable {
 
     /// `takesOverAgain`: GlassWork Dock is on, so the system Dock stays hidden as it is and the saved settings stay
     /// the original ones; restoring first would only restart the system Dock twice.
-    public static func decide(markerExists: Bool, hasSavedSettings: Bool, takesOverAgain: Bool = false) -> DockRecovery {
+    public static func decide(
+        markerExists: Bool,
+        hasSavedSettings: Bool,
+        takesOverAgain: Bool = false
+    ) -> DockRecovery {
         if takesOverAgain, hasSavedSettings {
             return .nothing
         }
