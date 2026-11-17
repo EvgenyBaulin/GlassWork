@@ -79,6 +79,8 @@ struct DockPane: View {
                 Toggle(loc("Magnification"), isOn: dock.magnifies)
                 Slider(value: dock.magnifiedSize, in: 48 ... 128) { Text(loc("Magnified size")) }
                 Toggle(loc("Show Trash"), isOn: dock.showsTrash)
+                Toggle(loc("Show Recent Apps"), isOn: dock.showsRecents)
+                Toggle(loc("Show Running Indicators"), isOn: dock.showsRunningIndicators)
             } header: {
                 Text(loc("Size"))
             } footer: {
@@ -301,6 +303,20 @@ struct AppSettingsBinding {
 
     var autoHides: Binding<Bool> {
         Binding(get: { store.settings.dock.autoHides }, set: { value in store.update { $0.dock.autoHides = value } })
+    }
+
+    var showsRecents: Binding<Bool> {
+        Binding(
+            get: { store.settings.dock.showsRecents },
+            set: { value in store.update { $0.dock.showsRecents = value } }
+        )
+    }
+
+    var showsRunningIndicators: Binding<Bool> {
+        Binding(
+            get: { store.settings.dock.showsRunningIndicators },
+            set: { value in store.update { $0.dock.showsRunningIndicators = value } }
+        )
     }
 
     var showsTrash: Binding<Bool> {

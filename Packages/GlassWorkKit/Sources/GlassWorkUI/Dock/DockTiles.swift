@@ -101,13 +101,14 @@ struct AppTile: View {
     let size: CGFloat
     let isRunning: Bool
     var isLaunching = false
+    var showsIndicator = true
     var position = DockPosition.bottom
     var pose: Double?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            DockIndicated(position: position, isLit: isRunning || isLaunching) {
+            DockIndicated(position: position, isLit: showsIndicator && (isRunning || isLaunching)) {
                 AppIcon(app: app, size: size)
                     .modifier(LaunchBounce(isActive: isLaunching, size: size, position: position, pose: pose))
             }
@@ -142,12 +143,13 @@ struct FolderTile: View {
     let size: CGFloat
     let isRunning: Bool
     var isLaunching = false
+    var showsIndicator = true
     var position = DockPosition.bottom
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            DockIndicated(position: position, isLit: isRunning || isLaunching) {
+            DockIndicated(position: position, isLit: showsIndicator && (isRunning || isLaunching)) {
                 content
                     .frame(width: size, height: size)
                     .background(.white.opacity(0.14), in: .rect(cornerRadius: size / 4.5))
@@ -201,6 +203,10 @@ struct FolderCard: View {
                     // A folder just made by a drop or from the menu opens ready to be named.
                     .onAppear { isNaming = folder.name == loc("New Folder") }
                 Menu {
+                    Picker(loc("Sort by"), selection: sortBinding) {
+                        ForEach(FolderSort.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }
+                    Divider()
                     Button(loc("Ungroup")) {
                         actions.update { DockLayout.ungroup(folder, in: $0) }
                         close()
@@ -218,6 +224,7 @@ struct FolderCard: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.fixed(72), spacing: 8), count: 5), spacing: 12) {
                     ForEach(apps) { app in
                         Button {
+                            actions.update { DockLayout.recordLaunch(app, inFolder: folder.id, in: $0) }
                             actions.open(app)
                             close()
                         } label: {
@@ -255,15 +262,15 @@ struct FolderCard: View {
         .glassEffect(.regular, in: .rect(cornerRadius: 22))
     }
 
+    private var sortBinding: Binding<FolderSort> {
+        Binding(
+            get: { folder.sort },
+            set: { sort in actions.update { DockLayout.sort(folder: folder.id, by: sort, in: $0) } }
+        )
+    }
+
     private func rename() {
-        actions.update { items in
-            items.map { item in
-                guard item == .folder(folder) else { return item }
-                var renamed = folder
-                renamed.name = name
-                return .folder(renamed)
-            }
-        }
+        actions.update { DockLayout.rename(folder: folder.id, to: name, in: $0) }
     }
 }
 

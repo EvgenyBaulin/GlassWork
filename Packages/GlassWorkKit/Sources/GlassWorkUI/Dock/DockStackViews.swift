@@ -357,7 +357,15 @@ struct DownloadsCard: View {
     @ViewBuilder
     private func row(_ file: DockFile) -> some View {
         if file.isDownloading {
-            content(file)
+            HStack(spacing: 8) {
+                content(file)
+                Button { actions.cancelDownload(file.path) } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help(loc("Cancel Download"))
+                .accessibilityLabel(loc("Cancel Download"))
+            }
         } else {
             Button {
                 actions.openFile(file.path)
