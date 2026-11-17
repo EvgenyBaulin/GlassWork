@@ -86,6 +86,24 @@ public enum DictionaryEntryParser {
         return entry
     }
 
+    /// For dictionaries that do not follow the English layout: the text after the headword, up to the first
+    /// section heading in capitals, clipped like an English meaning.
+    public static func parsePlain(_ raw: String, word: String) -> DictionaryEntry {
+        var text = raw.split(whereSeparator: \.isNewline).joined(separator: " ")
+            .trimmingCharacters(in: .whitespaces)
+        if text.lowercased().hasPrefix(word.lowercased()) {
+            text = String(text.dropFirst(word.count)).trimmingCharacters(in: .whitespaces)
+        }
+        if let heading = text.range(of: #"\s[А-ЯЁA-Z]{5,}"#, options: .regularExpression) {
+            text = String(text[..<heading.lowerBound])
+        }
+        text = text.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty else { return DictionaryEntry() }
+        var entry = DictionaryEntry()
+        entry.definition = clipped(text)
+        return entry
+    }
+
     /// Removes and returns a leading part of speech such as "noun", with its qualifiers like "[mass noun]".
     private static func takePartOfSpeech(_ text: inout String) -> String? {
         guard let first = text.split(separator: " ").first.map({ String($0).lowercased() }),
@@ -133,12 +151,14 @@ public enum DictionaryEntryParser {
         }
         body = body.trimmingCharacters(in: CharacterSet(charactersIn: " :;"))
         guard !body.isEmpty else { return nil }
-        if body.count > maxDefinition {
-            let clipped = body.prefix(maxDefinition)
-            let atWord = clipped.lastIndex(of: " ").map { String(clipped[..<$0]) } ?? String(clipped)
-            return atWord + "…"
-        }
-        return body
+        return clipped(body)
+    }
+
+    private static func clipped(_ body: String) -> String {
+        guard body.count > maxDefinition else { return body }
+        let head = body.prefix(maxDefinition)
+        let atWord = head.lastIndex(of: " ").map { String(head[..<$0]) } ?? String(head)
+        return atWord + "…"
     }
 
     /// A thesaurus entry gives an example sentence first, then the related words. Some skip the sentence.

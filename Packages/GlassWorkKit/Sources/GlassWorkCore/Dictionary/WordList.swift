@@ -39,3 +39,51 @@ public enum WordList {
         return day % words.count
     }
 }
+
+/// How unusual the words may be.
+public enum WordLevel: String, Codable, CaseIterable, Sendable {
+    /// Words people meet in everyday reading.
+    case common
+    /// The same words and the rarer ones as well.
+    case any
+}
+
+public extension WordList {
+    /// Languages that have a list of words.
+    static let languages = ["en", "ru"]
+
+    static let rareEnglish: [String] = [
+        "acrimony", "bucolic", "calumny", "crepuscular", "defenestrate", "demure", "effulgent", "epiphany",
+        "foment", "grandiloquent", "ineluctable", "loquacious", "lugubrious", "mendacious", "nefarious", "obstreperous",
+        "pellucid", "perspicacious", "propinquity", "recondite", "sanctimonious", "susurrus", "taciturn", "umbrage",
+        "vicissitude", "winsome", "obsequious", "ostensible", "zeitgeist", "abstruse",
+    ]
+
+    static let russian: [String] = [
+        "ветер", "дорога", "память", "тишина", "свет", "река", "мост", "окно", "дружба", "надежда", "радость",
+        "глубина", "поле", "звезда", "огонь", "дождь", "туман", "лес", "море", "берег", "путь", "песня", "сон",
+        "тепло", "время", "мечта", "смелость", "терпение", "любопытство", "уют", "простор", "рассвет", "закат",
+        "гроза", "радуга", "родник", "тропа", "ветка", "облако", "цветок", "улыбка", "шаг", "голос", "взгляд",
+        "сила", "покой", "вечер", "утро", "зима", "весна", "лето", "осень", "город", "книга", "чудо", "добро",
+        "правда", "мудрость", "забота",
+    ]
+
+    static let rareRussian: [String] = [
+        "сумерки", "безмятежность", "сокровенный", "рачительный", "лучезарный", "задумчивый", "окоём", "хрусталь",
+        "пытливый", "раздолье", "благодать", "прозорливый", "умиротворение", "отрада", "бескрайний", "вдохновение",
+        "чаяние", "многоликий", "неспешный", "заповедный",
+    ]
+
+    /// The words of a language at a level. An unknown language gets English.
+    static func words(language: String, level: WordLevel) -> [String] {
+        let isRussian = language == "ru"
+        let common = isRussian ? russian : words
+        return level == .common ? common : common + (isRussian ? rareRussian : rareEnglish)
+    }
+
+    static func word(on date: Date, language: String, level: WordLevel, calendar: Calendar = .current) -> String {
+        let list = words(language: language, level: level)
+        let day = calendar.ordinality(of: .day, in: .era, for: date) ?? 0
+        return list[day % list.count]
+    }
+}

@@ -907,6 +907,22 @@
         }
       }
     },
+    "A chosen repository": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A chosen repository"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбранный репозиторий"
+          }
+        }
+      }
+    },
     "A preset adds widgets and folders. Your apps stay as they are. Change it any time in Settings → Dock.": {
       "localizations": {
         "en": {
@@ -1065,6 +1081,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавить"
+          }
+        }
+      }
+    },
+    "Add a city in Weather or turn on current location to follow the sun.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a city in Weather or turn on current location to follow the sun."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавьте город в «Погоде» или включите геопозицию, чтобы следовать за солнцем."
+          }
+        }
+      }
+    },
+    "Add App": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add App"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить приложение"
           }
         }
       }
@@ -1277,6 +1325,22 @@
         }
       }
     },
+    "All changes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All changes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все изменения"
+          }
+        }
+      }
+    },
     "All clear": {
       "localizations": {
         "en": {
@@ -1299,6 +1363,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Весь день"
+          }
+        }
+      }
+    },
+    "All repositories": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All repositories"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Все репозитории"
           }
         }
       }
@@ -1509,6 +1589,22 @@
         }
       }
     },
+    "Any words": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Any words"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Любые слова"
+          }
+        }
+      }
+    },
     "App": {
       "localizations": {
         "ru": {
@@ -1525,6 +1621,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Оформление"
+          }
+        }
+      }
+    },
+    "Apps not counted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps not counted"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не учитывать приложения"
           }
         }
       }
@@ -2003,6 +2115,22 @@
         }
       }
     },
+    "Common words": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Common words"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обычные слова"
+          }
+        }
+      }
+    },
     "Completed": {
       "localizations": {
         "en": {
@@ -2079,6 +2207,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Не удалось извлечь"
+          }
+        }
+      }
+    },
+    "Count in the menu bar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Count in the menu bar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считать в строке меню"
+          }
+        }
+      }
+    },
+    "Counts as to do": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counts as to do"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считать задачей"
           }
         }
       }
@@ -2433,6 +2593,22 @@
         }
       }
     },
+    "Day starts at": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day starts at"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День начинается в"
+          }
+        }
+      }
+    },
     "Daylight": {
       "localizations": {
         "ru": {
@@ -2591,6 +2767,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Журнал диагностики"
+          }
+        }
+      }
+    },
+    "Dictionary": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dictionary"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Словарь"
           }
         }
       }
@@ -2771,6 +2963,22 @@
         }
       }
     },
+    "Due today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Due today"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На сегодня"
+          }
+        }
+      }
+    },
     "ECB": {
       "localizations": {
         "ru": {
@@ -2937,6 +3145,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Каждый день"
+          }
+        }
+      }
+    },
+    "Everything kept for Screen Time is deleted from this Mac. This cannot be undone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything kept for Screen Time is deleted from this Mac. This cannot be undone."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё, что сохранено для экранного времени, будет удалено с этого Mac. Отменить это нельзя."
           }
         }
       }
@@ -3111,6 +3335,22 @@
         }
       }
     },
+    "Fill": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fill"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заполнить"
+          }
+        }
+      }
+    },
     "First day of the week": {
       "localizations": {
         "en": {
@@ -3123,6 +3363,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Первый день недели"
+          }
+        }
+      }
+    },
+    "Fit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fit"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вписать"
           }
         }
       }
@@ -3225,12 +3481,44 @@
         }
       }
     },
+    "Folder missing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folder missing"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Папка не найдена"
+          }
+        }
+      }
+    },
     "Folder name": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Название папки"
+          }
+        }
+      }
+    },
+    "Follow sunrise and sunset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow sunrise and sunset"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следовать за восходом и закатом"
           }
         }
       }
@@ -3323,6 +3611,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Полный доступ к диску"
+          }
+        }
+      }
+    },
+    "Git widget": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git widget"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виджет Git"
           }
         }
       }
@@ -3843,6 +4147,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Занят: %@"
+          }
+        }
+      }
+    },
+    "Include items without a date": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include items without a date"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включать задачи без даты"
+          }
+        }
+      }
+    },
+    "Include subfolders": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include subfolders"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включая вложенные папки"
           }
         }
       }
@@ -5317,6 +5653,22 @@
         }
       }
     },
+    "Oldest first": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oldest first"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сначала старые"
+          }
+        }
+      }
+    },
     "On": {
       "localizations": {
         "ru": {
@@ -5467,6 +5819,22 @@
         }
       }
     },
+    "Open items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open items"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открытые"
+          }
+        }
+      }
+    },
     "Open Privacy Settings": {
       "localizations": {
         "en": {
@@ -5603,6 +5971,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Или введите мин или мм:сс"
+          }
+        }
+      }
+    },
+    "Order": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Порядок"
           }
         }
       }
@@ -5925,6 +6309,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Личные виджеты"
+          }
+        }
+      }
+    },
+    "Photo size": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo size"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размер фото"
           }
         }
       }
@@ -6309,6 +6709,22 @@
         }
       }
     },
+    "Refresh widgets every": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh widgets every"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновлять виджеты каждые"
+          }
+        }
+      }
+    },
     "Release to add %lld files": {
       "localizations": {
         "en": {
@@ -6337,6 +6753,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Отпустите, чтобы добавить файл"
+          }
+        }
+      }
+    },
+    "Reload All Widgets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload All Widgets"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перезагрузить все виджеты"
           }
         }
       }
@@ -6419,6 +6851,38 @@
         }
       }
     },
+    "Repositories": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repositories"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Репозитории"
+          }
+        }
+      }
+    },
+    "Repository": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repository"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Репозиторий"
+          }
+        }
+      }
+    },
     "Reset": {
       "localizations": {
         "en": {
@@ -6461,6 +6925,22 @@
         }
       }
     },
+    "Reset Data…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Data…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить данные…"
+          }
+        }
+      }
+    },
     "Reset Icon": {
       "localizations": {
         "en": {
@@ -6473,6 +6953,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сбросить значок"
+          }
+        }
+      }
+    },
+    "Reset Screen Time data?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Screen Time data?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить данные экранного времени?"
           }
         }
       }
@@ -6663,6 +7159,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Всё работает"
+          }
+        }
+      }
+    },
+    "Same as the Git module": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Same as the Git module"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как в модуле Git"
           }
         }
       }
@@ -6935,6 +7447,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показывать два города в строке меню"
+          }
+        }
+      }
+    },
+    "Shuffle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shuffle"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вперемешку"
           }
         }
       }
@@ -7527,6 +8055,22 @@
         }
       }
     },
+    "Switches to dark after sunset and to light after sunrise.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switches to dark after sunset and to light after sunrise."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включает тёмную тему после заката и светлую после восхода."
+          }
+        }
+      }
+    },
     "Symbol": {
       "localizations": {
         "ru": {
@@ -7705,6 +8249,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Это настройки системного Dock до того, как его заменил Dock GlassWork."
+          }
+        }
+      }
+    },
+    "This folder is not a Git repository.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This folder is not a Git repository."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В этой папке нет репозитория Git."
           }
         }
       }
@@ -8069,6 +8629,22 @@
         }
       }
     },
+    "Uncommitted changes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uncommitted changes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Незакоммиченные изменения"
+          }
+        }
+      }
+    },
     "Undone: %@": {
       "localizations": {
         "en": {
@@ -8081,6 +8657,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Отменено: %@"
+          }
+        }
+      }
+    },
+    "Unpushed commits": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unpushed commits"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неотправленные коммиты"
           }
         }
       }
@@ -8663,6 +9255,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Слово дня"
+          }
+        }
+      }
+    },
+    "Words": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Words"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слова"
           }
         }
       }

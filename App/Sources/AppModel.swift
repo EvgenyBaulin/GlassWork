@@ -47,14 +47,16 @@ final class AppModel {
     private lazy var location = LocationProvider(store: monitor.weather)
     private lazy var nowPlaying = NowPlayingBridge(
         store: monitor.nowPlaying,
-        refreshSeconds: store.settings.widgets.refreshSeconds
+        // The Now Playing widget follows the song, so a long refresh interval for the other widgets does not apply.
+        refreshSeconds: min(store.settings.widgets.refreshSeconds, 60)
     )
     let shortcuts = ShortcutCenter()
     private var hasOpenPanel = false
     private var isSettingsOpen = false
     private var visibleSection: MainSection?
     private var isQuickQuitOpen = false
-    private var timer: Timer?
+    var timer: Timer?
+    var heartbeatSeconds = 0
     private var thresholds = ThresholdTracker()
     var usageAlerts = AIUsageAlertTracker()
     var pingOutages = PingOutageTracker()
@@ -100,10 +102,7 @@ final class AppModel {
         monitor.start()
         observeWidgetCommands()
         writeHeartbeat()
-        let refresh = TimeInterval(store.settings.widgets.refreshSeconds)
-        timer = Timer.scheduledTimer(withTimeInterval: refresh, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.writeHeartbeat() }
-        }
+        scheduleHeartbeat()
         if !store.settings.welcomeCompleted {
             settingsWindow.showWelcome()
         }
@@ -270,9 +269,13 @@ final class AppModel {
         }
         shortcuts.apply(store.settings.shortcuts)
         applyRegional()
+        if timer != nil {
+            scheduleHeartbeat()
+        }
         applyInfoModules()
         statusBar.apply(store.settings)
         monitor.developer.options = DeveloperOptions(settings: store.settings)
+        applyWidgetData()
         dock.apply(store.settings.dock)
         windowTiles.apply(store.settings.windowTiles)
         islandController.acceptsShelfDrops = store.settings.module(.shelf).map { $0.mode != .off } ?? false
@@ -374,7 +377,7 @@ final class AppModel {
         statusBar.owns(window)
     }
 
-    private func writeHeartbeat() {
+    func writeHeartbeat() {
         checkSystemWidgets()
         Task {
             let hasNewWidgets = await refreshSystemWidgetKinds()
@@ -403,7 +406,7 @@ final class AppModel {
         }
     }
 
-    private func publishSystemWidgets() async {
+    func publishSystemWidgets() async {
         await monitor.readForWidgets(systemWidgetKinds)
         guard writeWidgetSnapshot(), !systemWidgetKinds.isEmpty else { return }
         WidgetCenter.shared.reloadAllTimelines()
@@ -426,6 +429,10 @@ final class AppModel {
         var snapshot = monitor.widgetSnapshot(for: kinds)
         snapshot.commands = store.settings.widgets.commands
         snapshot.endpoints = store.settings.widgets.endpoints
+        snapshot.gitOptions = store.settings.widgets.git.resolved(
+            reading: snapshot.git,
+            moduleSelection: monitor.developer.options.gitRepository
+        )
         if kinds.contains(.fans) {
             snapshot.fans = fans.widgetState
         }
@@ -545,16 +552,6 @@ private extension AppModel {
         monitor.agenda.calendarOptions = CalendarOptions(options: store.settings.module(.calendar)?.options ?? [:])
         monitor.ejectOptions = EjectOptions(options: store.settings.module(.eject)?.options ?? [:])
         applyHardwareChoices()
-    }
-
-    /// An empty or missing value means the Mac's own pick.
-    func applyHardwareChoices() {
-        func chosen(_ module: ModuleID, _ key: String) -> String? {
-            store.settings.module(module)?.options[key].flatMap { $0.isEmpty ? nil : $0 }
-        }
-        monitor.networkInterface = chosen(.network, ItemOption.networkInterface)
-        monitor.gpuName = chosen(.gpu, ItemOption.gpuName)
-        monitor.volumePath = chosen(.disk, ItemOption.volumePath)
     }
 
     func checkAlerts() {

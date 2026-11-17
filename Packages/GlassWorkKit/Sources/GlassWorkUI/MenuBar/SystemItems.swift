@@ -374,7 +374,8 @@ extension ItemContent {
     }
 
     static func todos(_ store: AgendaStore, at now: Date, options: [String: String]) -> ItemContent {
-        let count = TodoFilter.all.apply(to: store.todos, now: now).count
+        let mode = TodoOptions(options: options).countMode
+        let count = mode.count(in: store.todos, now: now)
         let isGranted = store.remindersAccess == .granted
         var item = ItemContent(figure: isGranted ? "\(count)" : "—", template: "888")
         item.glyph = .progress(ItemProgress.todos(store.todos, at: now))

@@ -6,6 +6,8 @@ import WidgetKit
 struct WidgetPhotoView: View {
     let data: Data?
     var radius: CGFloat = 12
+    /// Shows the whole picture, with bars where it does not reach, instead of cropping it to fill.
+    var fits = false
 
     /// The picture hangs on an empty view, so the space it gets decides its size and not the other way round.
     var body: some View {
@@ -16,7 +18,7 @@ struct WidgetPhotoView: View {
                         .resizable()
                         .interpolation(.high)
                         .widgetAccentedRenderingMode(.fullColor)
-                        .scaledToFill()
+                        .aspectRatio(contentMode: fits ? .fit : .fill)
                 } else {
                     ZStack {
                         Rectangle().fill(.quaternary)
@@ -149,13 +151,13 @@ struct PhotoFrameWidget: View {
         let current = shown.first
         switch context.size {
         case .small, .medium:
-            WidgetPhotoView(data: image(current), radius: 14).overlay(alignment: .bottom) {
+            WidgetPhotoView(data: image(current), radius: 14, fits: data.fit == .fit).overlay(alignment: .bottom) {
                 PhotoCaption(title: dateText(current, long: context.size == .medium), detail: place(data, current))
                     .clipShape(.rect(bottomLeadingRadius: 14, bottomTrailingRadius: 14))
             }
         case .large:
             VStack(alignment: .leading, spacing: 6) {
-                WidgetPhotoView(data: image(current))
+                WidgetPhotoView(data: image(current), fits: data.fit == .fit)
                 Text(dateText(current, long: true)).font(.system(size: 14, weight: .semibold)).lineLimit(1)
                 Text(verbatim: "\(data.folderName) · \(loc("\(index + 1) of \(photos.count)"))")
                     .font(.system(size: 11))
@@ -170,7 +172,7 @@ struct PhotoFrameWidget: View {
             }
         case .extraLarge:
             HStack(spacing: 12) {
-                WidgetPhotoView(data: image(current))
+                WidgetPhotoView(data: image(current), fits: data.fit == .fit)
                 VStack(alignment: .leading, spacing: 6) {
                     WidgetCapsTitle(title: loc("Photo Frame"), tint: Palette.pink)
                     Text(dateText(current, long: true)).font(.system(size: 16, weight: .semibold)).lineLimit(1)

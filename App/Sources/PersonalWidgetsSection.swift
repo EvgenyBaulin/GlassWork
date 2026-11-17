@@ -27,7 +27,48 @@ struct PersonalWidgetsSection: View {
         }
     }
 
+    @ViewBuilder
     private var photoFrame: some View {
+        photoFolderRow
+        if settings.isPhotoFrameOn {
+            if isFolderMissing {
+                LabeledContent {
+                    Button(loc("Choose…")) { chooseFolder() }
+                } label: {
+                    Label(loc("Folder missing"), systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                }
+            }
+            Toggle(loc("Include subfolders"), isOn: Binding(
+                get: { settings.photoIncludesSubfolders },
+                set: { value in update { $0.photoIncludesSubfolders = value } }
+            ))
+            Picker(loc("Order"), selection: Binding(
+                get: { settings.photoOrder },
+                set: { value in update { $0.photoOrder = value } }
+            )) {
+                Text(loc("Shuffle")).tag(PhotoOrder.shuffle)
+                Text(loc("Newest first")).tag(PhotoOrder.newest)
+                Text(loc("Oldest first")).tag(PhotoOrder.oldest)
+            }
+            Picker(loc("Photo size"), selection: Binding(
+                get: { settings.photoFit },
+                set: { value in update { $0.photoFit = value } }
+            )) {
+                Text(loc("Fill")).tag(PhotoFit.fill)
+                Text(loc("Fit")).tag(PhotoFit.fit)
+            }
+        }
+    }
+
+    /// Looks at the disk each time the section is drawn, so a folder that came back is noticed at once.
+    private var isFolderMissing: Bool {
+        var isFolder: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: settings.photoFolderPath, isDirectory: &isFolder)
+        return !(exists && isFolder.boolValue)
+    }
+
+    private var photoFolderRow: some View {
         LabeledContent {
             HStack {
                 Button(settings.isPhotoFrameOn ? loc("Change Folder…") : loc("Choose Folder…")) { chooseFolder() }

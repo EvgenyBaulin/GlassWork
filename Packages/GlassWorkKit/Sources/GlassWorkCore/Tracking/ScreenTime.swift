@@ -99,13 +99,15 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
 
     public var days: [ScreenDay] = []
     public var excluded: Set<String> = []
+    /// The hour a day starts, 0 to 6: time before it belongs to the day before.
+    public var dayStartHour = 0
     /// Each app's category, remembered when it comes to the front.
     public var categories: [String: AppCategory] = [:]
 
     public init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case days, excluded, categories
+        case days, excluded, categories, dayStartHour
     }
 
     /// A log from an earlier version must still load: failing here would replace 30 days with an empty log.
@@ -114,6 +116,43 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
         days = try container.decodeIfPresent([ScreenDay].self, forKey: .days) ?? []
         excluded = try container.decodeIfPresent(Set<String>.self, forKey: .excluded) ?? []
         categories = (try? container.decodeIfPresent([String: AppCategory].self, forKey: .categories)) ?? [:]
+        dayStartHour = min(max((try? container.decodeIfPresent(Int.self, forKey: .dayStartHour)) ?? 0, 0), 6)
+        normalizeDays()
+    }
+
+    /// Puts the days in date order and merges two entries with the same key. A day start changed in the middle of a
+    /// day used to leave such a pair behind in files written earlier.
+    mutating func normalizeDays() {
+        guard days.count > 1 else { return }
+        var merged: [ScreenDay] = []
+        for day in days.sorted(by: { $0.day < $1.day }) {
+            guard let last = merged.last, last.day == day.day else {
+                merged.append(day)
+                continue
+            }
+            var combined = last
+            for (app, seconds) in day.seconds {
+                combined.seconds[app, default: 0] += seconds
+            }
+            combined.sessions = (last.sessions + day.sessions).sorted { $0.start < $1.start }
+            combined.breaks = (last.breaks + day.breaks).sorted { $0.start < $1.start }
+            merged[merged.count - 1] = combined
+        }
+        days = merged
+    }
+
+    /// Midnight of the day a moment belongs to. With a day that starts at 4, half past one in the night is still
+    /// the day before.
+    ///
+    /// The boundary is the wall-clock hour on the calendar day, so a day of 23 or 25 hours still starts at 4.
+    public func dayStart(containing date: Date, calendar: Calendar = .current) -> Date {
+        let midnight = calendar.startOfDay(for: date)
+        guard dayStartHour > 0,
+              let boundary = calendar.date(bySettingHour: dayStartHour, minute: 0, second: 0, of: midnight),
+              date < boundary,
+              let before = calendar.date(byAdding: .day, value: -1, to: midnight)
+        else { return midnight }
+        return calendar.startOfDay(for: before)
     }
 
     public static func dayKey(_ date: Date, calendar: Calendar = .current) -> String {
@@ -124,9 +163,9 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
     /// Adds time to an app on the day it ended, then drops days past the limit.
     public mutating func record(app: String, seconds: Double, at date: Date, calendar: Calendar = .current) {
         guard seconds > 0, !excluded.contains(app) else { return }
-        openDay(at: date, calendar: calendar)
-        days[days.count - 1].seconds[app, default: 0] += seconds
-        addSession(app: app, start: date.addingTimeInterval(-seconds), end: date)
+        let index = openDay(at: date, calendar: calendar)
+        days[index].seconds[app, default: 0] += seconds
+        addSession(app: app, start: date.addingTimeInterval(-seconds), end: date, in: index)
         if days.count > Self.keepDays {
             days.removeFirst(days.count - Self.keepDays)
         }
@@ -135,22 +174,31 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
     /// Remembers time away from the Mac, if it was long enough to be a rest.
     public mutating func recordBreak(from start: Date, to end: Date, calendar: Calendar = .current) {
         guard end.timeIntervalSince(start) >= Self.breakThreshold else { return }
-        openDay(at: end, calendar: calendar)
-        days[days.count - 1].breaks.append(ScreenBreak(start: start, end: end))
+        let index = openDay(at: end, calendar: calendar)
+        days[index].breaks.append(ScreenBreak(start: start, end: end))
     }
 
-    private mutating func openDay(at date: Date, calendar: Calendar) {
-        let key = Self.dayKey(date, calendar: calendar)
-        guard days.last?.day != key else { return }
-        if !days.isEmpty {
-            days[days.count - 1].sessions = []
-            days[days.count - 1].breaks = []
+    /// The index of the day a moment belongs to. An existing day is reused, even when it is not the last: the day
+    /// start can change in the middle of a day, and the moment then falls on the day before.
+    private mutating func openDay(at date: Date, calendar: Calendar) -> Int {
+        let key = Self.dayKey(dayStart(containing: date, calendar: calendar), calendar: calendar)
+        normalizeDays()
+        if let index = days.firstIndex(where: { $0.day == key }) {
+            return index
         }
-        days.append(ScreenDay(day: key))
+        let index = days.firstIndex { $0.day > key } ?? days.count
+        days.insert(ScreenDay(day: key), at: index)
+        // Only the newest day keeps its sessions and breaks.
+        if index == days.count - 1 {
+            for older in days.indices.dropLast() {
+                days[older].sessions = []
+                days[older].breaks = []
+            }
+        }
+        return index
     }
 
-    private mutating func addSession(app: String, start: Date, end: Date) {
-        let last = days.count - 1
+    private mutating func addSession(app: String, start: Date, end: Date, in last: Int) {
         if let previous = days[last].sessions.last, previous.app == app,
            start.timeIntervalSince(previous.end) < Self.sessionMergeGap
         {
@@ -163,8 +211,8 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
         }
     }
 
-    public func today(_ date: Date = Date()) -> ScreenDay? {
-        let key = Self.dayKey(date)
+    public func today(_ date: Date = Date(), calendar: Calendar = .current) -> ScreenDay? {
+        let key = Self.dayKey(dayStart(containing: date, calendar: calendar), calendar: calendar)
         return days.last { $0.day == key }
     }
 

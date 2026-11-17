@@ -191,6 +191,7 @@ private final class Counter: @unchecked Sendable {
     // Tests are the only writers and they await every call, so no two touch this at once.
     var requests = 0
     var reads = 0
+    var folderOptions: PhotoFolderOptions?
 }
 
 private struct FakeLibrary: PhotoLibraryReading {
@@ -237,8 +238,9 @@ private struct FakeFolder: PhotoFolderReading {
     var reading: FolderReading?
     let counter: Counter
 
-    func read(folder _: URL, seed _: UInt64, limit _: Int) async -> FolderReading? {
+    func read(folder _: URL, options: PhotoFolderOptions, seed _: UInt64, limit _: Int) async -> FolderReading? {
         counter.reads += 1
+        counter.folderOptions = options
         return reading
     }
 }
@@ -374,6 +376,34 @@ struct PersonalWidgetStoreTests {
         await denied.refresh(settings, for: everything, at: day(2026, 11, 5))
         #expect(denied.data.onThisDay.state == .noAccess)
     }
+
+    @Test func theFolderChoicesReachTheReaderAndTheWidget() async {
+        let store = store(folder: oneFolderPhoto)
+        var settings = allOn
+        settings.photoIncludesSubfolders = true
+        settings.photoOrder = .newest
+        settings.photoFit = .fit
+        await store.refresh(settings, for: [.photoFrame], at: day(2026, 11, 5))
+        #expect(counter.folderOptions == PhotoFolderOptions(includesSubfolders: true, order: .newest))
+        #expect(store.data.photoFrame.fit == .fit)
+    }
+
+    @Test func changingTheOrderReadsTheFolderAgainOnTheSameDay() async {
+        let store = store(folder: oneFolderPhoto)
+        var settings = allOn
+        await store.refresh(settings, for: [.photoFrame], at: day(2026, 11, 5))
+        await store.refresh(settings, for: [.photoFrame], at: day(2026, 11, 5))
+        #expect(counter.reads == 1)
+        settings.photoOrder = .oldest
+        await store.refresh(settings, for: [.photoFrame], at: day(2026, 11, 5))
+        #expect(counter.reads == 2)
+    }
+
+    @Test func fillIsLeftOutOfTheSnapshot() async {
+        let store = store(folder: oneFolderPhoto)
+        await store.refresh(allOn, for: [.photoFrame], at: day(2026, 11, 5))
+        #expect(store.data.photoFrame.fit == nil)
+    }
 }
 
 struct PersonalSettingsTests {
@@ -418,7 +448,12 @@ struct PhotoFolderReaderTests {
         try write("one.jpg", to: folder)
         try write("two.JPG", to: folder)
         try Data("not a photo".utf8).write(to: folder.appending(path: "notes.txt"))
-        let reading = try #require(await PhotoFolderReader().read(folder: folder, seed: 1, limit: 1))
+        let reading = try #require(await PhotoFolderReader().read(
+            folder: folder,
+            options: PhotoFolderOptions(),
+            seed: 1,
+            limit: 1
+        ))
         #expect(reading.total == 2)
         #expect(reading.photos.count == 1)
         let photo = try #require(reading.photos.first)
@@ -428,6 +463,47 @@ struct PhotoFolderReaderTests {
 
     @Test func aMissingFolderIsNil() async {
         let missing = temporaryFolder().appending(path: "nope")
-        #expect(await PhotoFolderReader().read(folder: missing, seed: 1, limit: 1) == nil)
+        #expect(await PhotoFolderReader()
+            .read(folder: missing, options: PhotoFolderOptions(), seed: 1, limit: 1) == nil)
+    }
+
+    @Test func subfoldersAreReadOnlyWhenAsked() async throws {
+        let folder = temporaryFolder()
+        let inner = folder.appending(path: "Trip", directoryHint: .isDirectory)
+        try FileManager.default.createDirectory(at: inner, withIntermediateDirectories: true)
+        try write("top.jpg", to: folder)
+        try write("deep.jpg", to: inner)
+        let reader = PhotoFolderReader()
+        let flat = try #require(await reader.read(folder: folder, options: PhotoFolderOptions(), seed: 1, limit: 5))
+        #expect(flat.total == 1)
+        let options = PhotoFolderOptions(includesSubfolders: true)
+        let deep = try #require(await reader.read(folder: folder, options: options, seed: 1, limit: 5))
+        #expect(deep.total == 2)
+        #expect(Set(deep.photos.map(\.name)) == ["top", "deep"])
+    }
+
+    @Test func newestAndOldestFollowTheDate() {
+        let items = [
+            ("a", Date(timeIntervalSince1970: 200)),
+            ("b", Date(timeIntervalSince1970: 300)),
+            ("c", nil),
+            ("d", Date(timeIntervalSince1970: 100)),
+        ] as [(String, Date?)]
+        func order(_ choice: PhotoOrder) -> [String] {
+            choice.arranged(items, date: { $0.1 }, name: { $0.0 }, seed: 7).map(\.0)
+        }
+        #expect(order(.newest) == ["b", "a", "d", "c"])
+        #expect(order(.oldest) == ["d", "a", "b", "c"])
+        #expect(order(.shuffle) == order(.shuffle))
+        #expect(Set(order(.shuffle)) == ["a", "b", "c", "d"])
+    }
+
+    @Test func aPhotoFolderChoiceFromAnOldFileReadsAsTheDefaults() throws {
+        let old = Data(#"{"isPhotoFrameOn":true,"photoFolderPath":"/tmp/x"}"#.utf8)
+        let settings = try JSONDecoder().decode(PersonalWidgetSettings.self, from: old)
+        #expect(settings.photoOptions == PhotoFolderOptions())
+        #expect(settings.photoFit == .fill)
+        let data = Data(#"{"state":"ready","folderName":"x","total":1,"photos":[]}"#.utf8)
+        #expect(try JSONDecoder().decode(PhotoFrameData.self, from: data).fit == nil)
     }
 }

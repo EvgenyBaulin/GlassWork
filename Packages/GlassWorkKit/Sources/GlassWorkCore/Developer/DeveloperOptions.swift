@@ -33,6 +33,8 @@ public struct DeveloperOptions: Sendable, Equatable {
     public var gitRepository: String?
     /// Repositories added by hand, on top of those found in `~/Developer`.
     public var gitRepositories: [String] = []
+    /// The repository the Git widget was given, which is read along with the others.
+    public var gitWidgetRepository: String?
     /// Off leaves only the repositories added by hand.
     public var gitAutoDiscover = true
     /// How many levels below `~/Developer` to look.
@@ -66,6 +68,7 @@ public struct DeveloperOptions: Sendable, Equatable {
         let git = settings.module(.git)?.options
         gitRepository = git?[Key.repository]
         gitRepositories = Self.decode(git?[Key.repositories])
+        gitWidgetRepository = settings.widgets.git.ownRepository
         gitAutoDiscover = git?.flag(Key.autoDiscover, default: true) ?? true
         gitSearchDepth = git?.number(Key.searchDepth, default: 2) == 1 ? 1 : 2
     }

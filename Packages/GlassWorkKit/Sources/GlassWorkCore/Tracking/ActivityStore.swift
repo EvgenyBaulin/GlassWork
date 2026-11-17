@@ -20,6 +20,9 @@ public final class ActivityStore {
     /// Reports the exit status when `gh` fails, for the diagnostic log.
     @ObservationIgnored public var onGitHubFailed: ((Int32) -> Void)?
 
+    /// Called after the data was deleted, so widgets can be written again at once.
+    @ObservationIgnored public var onScreenTimeReset: (() -> Void)?
+
     @ObservationIgnored private let runner: ProcessRunning
     @ObservationIgnored private let locateGH: @Sendable () -> String?
     @ObservationIgnored private var lastRunsRead: Date?
@@ -77,6 +80,32 @@ public final class ActivityStore {
         currentSince = date
         screenTime.recordBreak(from: start, to: date)
         try? store.write(screenTime, for: ScreenTimeLog.key)
+    }
+
+    /// Counts what was in front up to now first, so the time before the change keeps the old rules.
+    public func configureScreenTime(dayStartHour: Int, excluded: Set<String>, at date: Date = Date()) {
+        let hour = min(max(dayStartHour, 0), 6)
+        guard hour != screenTime.dayStartHour || excluded != screenTime.excluded else { return }
+        creditCurrentApp(at: date)
+        currentSince = date
+        screenTime.dayStartHour = hour
+        screenTime.excluded = excluded
+        try? store.write(screenTime, for: ScreenTimeLog.key)
+    }
+
+    /// Deletes the days kept so far. The exclusions and the day start stay: they are settings, not data.
+    public func resetScreenTime(at date: Date = Date()) {
+        var empty = ScreenTimeLog()
+        empty.dayStartHour = screenTime.dayStartHour
+        empty.excluded = screenTime.excluded
+        screenTime = empty
+        currentSince = date
+        // Away from the Mac now: the break counts from the reset, not from before it.
+        if pausedSince != nil {
+            pausedSince = date
+        }
+        try? store.write(screenTime, for: ScreenTimeLog.key)
+        onScreenTimeReset?()
     }
 
     private func creditCurrentApp(at date: Date) {

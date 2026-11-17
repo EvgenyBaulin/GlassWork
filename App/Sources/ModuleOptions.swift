@@ -18,9 +18,39 @@ struct ModuleOptions: View {
         case .nowPlaying: NowPlayingOptions(store: store)
         case .sunMoon: SunPlaceSection(store: store)
         case .deviceBatteries: DeviceChoiceSection(store: store)
+        case .appearance: AppearanceOptions(store: store)
         case _ where ModuleID.developerCollected.contains(module):
             DeveloperOptionsSection(module: module, store: store)
         default: EmptyView()
+        }
+    }
+}
+
+/// Whether the light or dark look follows the sun. It needs a place, so without one the switch is off and says why.
+private struct AppearanceOptions: View {
+    let store: SettingsStore
+
+    private var hasPlace: Bool {
+        store.settings.weather.useCurrentLocation || !store.settings.weather.places.isEmpty
+    }
+
+    var body: some View {
+        Section {
+            Toggle(loc("Follow sunrise and sunset"), isOn: Binding(
+                get: { hasPlace && store.settings.module(.appearance)?.options.flag(
+                    ItemOption.followsSun,
+                    default: false
+                ) == true },
+                set: { value in
+                    store.update { $0.update(.appearance) { $0.options[ItemOption.followsSun] = value ? "true" : nil } }
+                }
+            ))
+            .disabled(!hasPlace)
+            Text(hasPlace
+                ? loc("Switches to dark after sunset and to light after sunrise.")
+                : loc("Add a city in Weather or turn on current location to follow the sun."))
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }

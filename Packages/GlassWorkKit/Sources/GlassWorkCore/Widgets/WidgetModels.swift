@@ -98,6 +98,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var weather: WidgetWeather?
     public var rates: WidgetRates?
     public var git: GitReading?
+    /// Which repositories the Git widget lists and what counts as to do. Nil in snapshots from before this existed.
+    public var gitOptions: WidgetGitOptions?
     public var devServers: DevServerReading?
     public var docker: DockerReading?
     public var aiUsage: AIUsageReading?
@@ -129,12 +131,41 @@ public extension WidgetSnapshot {
 /// How WidgetKit widgets refresh, and the data some of them show. Old files may hold keys of removed features:
 /// decoding skips them and `SettingsFile` writes them back untouched.
 public struct WidgetSettings: Codable, Sendable, Equatable {
+    /// What the picker in Settings offers, in seconds.
+    public static let refreshChoices = [60, 300, 900, 1800, 3600]
+
     public var refreshSeconds = 60
+
+    /// The interval to use: a hand-edited 0 or a negative number must not make a timer spin.
+    public var heartbeatSeconds: Int {
+        max(refreshSeconds, Self.refreshChoices[0])
+    }
+
     public var tracksScreenTime = false
+    /// The hour a Screen Time day starts, 0 to 6. Work after midnight then still counts for the evening before.
+    public var dayStartHour = 0
     public var commands: [UserCommand] = []
     public var endpoints: [Endpoint] = []
+    public var wordOfDay = WordOfDaySettings()
+    public var git = GitWidgetSettings()
 
     public init() {}
+
+    private enum CodingKeys: String, CodingKey {
+        case refreshSeconds, tracksScreenTime, dayStartHour, commands, endpoints, wordOfDay, git
+    }
+
+    /// Every key is optional: a settings file written before a key existed must still load.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        refreshSeconds = try container.decodeIfPresent(Int.self, forKey: .refreshSeconds) ?? 60
+        tracksScreenTime = try container.decodeIfPresent(Bool.self, forKey: .tracksScreenTime) ?? false
+        dayStartHour = try min(max(container.decodeIfPresent(Int.self, forKey: .dayStartHour) ?? 0, 0), 6)
+        commands = try container.decodeIfPresent([UserCommand].self, forKey: .commands) ?? []
+        endpoints = try container.decodeIfPresent([Endpoint].self, forKey: .endpoints) ?? []
+        wordOfDay = (try? container.decodeIfPresent(WordOfDaySettings.self, forKey: .wordOfDay)) ?? WordOfDaySettings()
+        git = (try? container.decodeIfPresent(GitWidgetSettings.self, forKey: .git)) ?? GitWidgetSettings()
+    }
 }
 
 /// Reminder counts that stay right when the list in a snapshot is cut short.

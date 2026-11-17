@@ -10,22 +10,11 @@ struct WidgetsPane: View {
 
     var body: some View {
         Form {
-            Section {
-                Text(loc("Right-click the desktop and choose Edit Widgets to add system widgets."))
-                    .foregroundStyle(.secondary)
-            } header: {
-                Text(loc("System widgets"))
-            }
+            WidgetRefreshSection(store: store)
             PersonalWidgetsSection(store: store, personal: personal)
-            Section(loc("Screen Time")) {
-                Toggle(loc("Track which app is in front"), isOn: Binding(
-                    get: { store.settings.widgets.tracksScreenTime },
-                    set: { value in store.update { $0.widgets.tracksScreenTime = value } }
-                ))
-                Text(loc("Stored only on this Mac for 30 days."))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            WordOfDaySection(store: store)
+            ScreenTimeSection(store: store, activity: activity)
+            GitWidgetSection(store: store)
             CommandsSection(store: store, activity: activity)
             Section(loc("Endpoints")) {
                 ForEach(store.settings.widgets.endpoints) { endpoint in

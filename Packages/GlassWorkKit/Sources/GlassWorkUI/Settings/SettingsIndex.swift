@@ -283,6 +283,15 @@ extension SettingsIndex {
         return [
             page("widgets.photoFrame", "Photo Frame", "Фоторамка", .widgets, ["Widgets"], keywords: ["photos", "фото"]),
             page(
+                "widgets.photoSubfolders",
+                "Include subfolders",
+                "Включая вложенные папки",
+                .widgets,
+                ["Widgets", "Photo Frame"]
+            ),
+            page("widgets.photoOrder", "Order", "Порядок", .widgets, ["Widgets", "Photo Frame"]),
+            page("widgets.photoSize", "Photo size", "Размер фото", .widgets, ["Widgets", "Photo Frame"]),
+            page(
                 "widgets.onThisDay",
                 "On This Day",
                 "В этот день",
@@ -462,6 +471,64 @@ extension SettingsIndex {
                 .widgets,
                 ["Widgets"],
                 keywords: ["tracking", "учёт"]
+            ),
+            page(
+                "widgets.refresh",
+                "Refresh widgets every",
+                "Обновлять виджеты каждые",
+                .widgets,
+                ["Widgets"],
+                keywords: ["interval", "интервал"]
+            ),
+            page("widgets.reloadAll", "Reload All Widgets", "Перезагрузить все виджеты", .widgets, ["Widgets"]),
+            page("widgets.dayStart", "Day starts at", "День начинается в", .widgets, ["Widgets", "Screen Time"]),
+            page(
+                "widgets.excludedApps",
+                "Apps not counted",
+                "Не учитывать приложения",
+                .widgets,
+                ["Widgets", "Screen Time"],
+                keywords: ["exclude", "исключить"]
+            ),
+            page(
+                "widgets.resetScreenTime",
+                "Reset Data…",
+                "Сбросить данные…",
+                .widgets,
+                ["Widgets", "Screen Time"],
+                keywords: ["delete", "удалить"]
+            ),
+            page(
+                "widgets.wordOfDay",
+                "Word of the Day",
+                "Слово дня",
+                .widgets,
+                ["Widgets"],
+                keywords: ["dictionary", "словарь"]
+            ),
+            page(
+                "widgets.git",
+                "Git widget",
+                "Виджет Git",
+                .widgets,
+                ["Widgets"],
+                keywords: ["repository", "репозиторий"]
+            ),
+            page(
+                "widgets.gitRepositories",
+                "Repositories",
+                "Репозитории",
+                .widgets,
+                ["Widgets", "Git widget"]
+            ),
+            page("widgets.gitToDo", "Counts as to do", "Считать задачей", .widgets, ["Widgets", "Git widget"]),
+            page(
+                "appearance.followSun",
+                "Follow sunrise and sunset",
+                "Следовать за восходом и закатом",
+                .module(.appearance),
+                ["Menu Bar", "Appearance"],
+                keywords: ["dark", "тёмная", "night", "ночь"]
             ),
             page("widgets.commands", "Commands", "Команды", .widgets, ["Widgets"], keywords: ["scripts", "скрипты"]),
             page("widgets.endpoints", "Endpoints", "Адреса", .widgets, ["Widgets"], keywords: ["URL", "сайты"]),

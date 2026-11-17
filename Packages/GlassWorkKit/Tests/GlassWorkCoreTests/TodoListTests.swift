@@ -93,4 +93,34 @@ struct TodoListTests {
         let back = TodoOptions(options: [ItemOption.hiddenTodoLists: both]).stored(after: work, isShown: true)
         #expect(back == "home")
     }
+
+    private static let now = Date(timeIntervalSince1970: 1_800_000_000)
+
+    private static var countItems: [TodoItem] {
+        [
+            TodoItem(id: "1", title: "Late", listName: "L", due: now.addingTimeInterval(-3 * 86400)),
+            TodoItem(id: "2", title: "Today", listName: "L", due: now),
+            TodoItem(id: "3", title: "Someday", listName: "L"),
+            TodoItem(id: "4", title: "Done", listName: "L", isCompleted: true),
+        ]
+    }
+
+    @Test func eachCountModeCountsItsOwnItems() {
+        let items = Self.countItems
+        #expect(TodoCountMode.open.count(in: items, now: Self.now) == 3)
+        #expect(TodoCountMode.dueToday.count(in: items, now: Self.now) == 1)
+        #expect(TodoCountMode.overdue.count(in: items, now: Self.now) == 1)
+    }
+
+    @Test func undatedItemsAreIncludedUnlessTurnedOff() {
+        #expect(TodoOptions(options: [:]).includesUndated)
+        #expect(TodoOptions(options: [:]).countMode == .open)
+        let all = TodoOptions(options: [:]).arranged(Self.countItems, now: Self.now)
+        #expect(all.map(\.id) == ["1", "2", "3"])
+        let dated = TodoOptions(options: [ItemOption.todoIncludesUndated: "false"])
+            .arranged(Self.countItems, now: Self.now)
+        #expect(dated.map(\.id) == ["1", "2"])
+        #expect(TodoOptions(options: [ItemOption.todoCountMode: "overdue"]).countMode == .overdue)
+        #expect(TodoOptions(options: [ItemOption.todoCountMode: "nonsense"]).countMode == .open)
+    }
 }

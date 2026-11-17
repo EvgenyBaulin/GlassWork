@@ -13,7 +13,7 @@ public struct FocusStats: Sendable, Equatable {
 
     public init(log: ScreenTimeLog, at date: Date, calendar: Calendar = .current) {
         hasData = !log.days.isEmpty
-        let today = calendar.startOfDay(for: date)
+        let today = log.dayStart(containing: date, calendar: calendar)
         let totals = Dictionary(log.days.map { ($0.day, $0) }) { first, _ in first }
         func day(_ back: Int) -> (Date, ScreenDay?) {
             let day = calendar.date(byAdding: .day, value: -back, to: today) ?? today

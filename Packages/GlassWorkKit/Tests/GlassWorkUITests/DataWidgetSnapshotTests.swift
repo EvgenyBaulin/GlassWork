@@ -218,6 +218,22 @@ struct DataWidgetSnapshotTests {
         state(.photoFrame, snapshot, "unreadable", sizes: [.medium])
     }
 
+    /// Fit shows the whole picture instead of cropping it, so the same sample looks different from fill.
+    @Test func photoFrameThatFitsThePicture() {
+        var snapshot = DataSamples.personal
+        snapshot.personal?.photoFrame.fit = .fit
+        for dark in [true, false] {
+            for size in [WidgetSize.small, .large] {
+                widgetSnapshot(
+                    WidgetFace(kind: .photoFrame, size: size, snapshot: snapshot, now: sampleNow),
+                    size: size,
+                    dark: dark,
+                    named: "photoFrame-fit-\(size.rawValue)-\(dark ? "dark" : "light")"
+                )
+            }
+        }
+    }
+
     @Test func personalWidgetsWithNothingToShow() {
         var snapshot = WidgetSnapshot(date: sampleNow)
         var data = PersonalWidgetData()
@@ -229,6 +245,16 @@ struct DataWidgetSnapshotTests {
         state(.birthdays, snapshot, "empty", sizes: [.small])
         state(.onThisDay, snapshot, "empty", sizes: [.small])
         state(.photoFrame, snapshot, "empty", sizes: [.small])
+    }
+
+    /// Only commits to push count, and only the chosen repository is listed.
+    @Test func gitWithItsOwnChoices() {
+        var unpushed = DataSamples.git
+        unpushed.gitOptions = WidgetGitOptions(path: nil, countsAs: .unpushed)
+        state(.git, unpushed, "unpushed", sizes: [.small, .medium])
+        var chosen = DataSamples.git
+        chosen.gitOptions = WidgetGitOptions(path: "/Users/me/Developer/glasswork", countsAs: .uncommitted)
+        state(.git, chosen, "one-repository", sizes: [.small, .medium])
     }
 
     @Test func gitWithNoRepositories() {
