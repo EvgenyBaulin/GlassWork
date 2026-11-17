@@ -16,12 +16,12 @@ extension AppModel {
     }
 
     /// Asking for permission is left to the switch in General: a timer must not raise the system's question.
-    private static func notifyIfAllowed(title: String, body: String) async {
+    static func notifyIfAllowed(title: String, body: String, identifier: String = UUID().uuidString) async {
         let center = UNUserNotificationCenter.current()
         guard await center.notificationSettings().authorizationStatus == .authorized else { return }
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
-        try? await center.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
+        try? await center.add(UNNotificationRequest(identifier: identifier, content: content, trigger: nil))
     }
 }

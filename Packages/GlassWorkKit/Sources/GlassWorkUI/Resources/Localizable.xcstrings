@@ -11,6 +11,54 @@
         }
       }
     },
+    "%@ at %@ of the 5-hour limit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ at %@ of the 5-hour limit"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ от 5-часового лимита"
+          }
+        }
+      }
+    },
+    "%@ at %@ of the monthly limit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ at %@ of the monthly limit"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ от месячного лимита"
+          }
+        }
+      }
+    },
+    "%@ at %@ of the weekly limit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ at %@ of the weekly limit"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@ от недельного лимита"
+          }
+        }
+      }
+    },
     "%@ free of %@": {
       "localizations": {
         "ru": {
@@ -37,12 +85,44 @@
         }
       }
     },
+    "%@ is back (down for %@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is back (down for %@)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ снова доступен (не отвечал %2$@)"
+          }
+        }
+      }
+    },
     "%@ is not responding": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ не отвечает"
+          }
+        }
+      }
+    },
+    "%@ is unreachable": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is unreachable"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ недоступен"
           }
         }
       }
@@ -2191,6 +2271,22 @@
         }
       }
     },
+    "Fans: Max": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fans: Max"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вентиляторы: максимум"
+          }
+        }
+      }
+    },
     "Feels": {
       "localizations": {
         "ru": {
@@ -3881,6 +3977,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сообщать о низком заряде и перегреве"
+          }
+        }
+      }
+    },
+    "Notify at warning": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notify at warning"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомлять о предупреждении"
           }
         }
       }

@@ -80,8 +80,8 @@ struct ShortcutsPaneSnapshotTests {
     }
 
     @Test(arguments: [true, false])
-    func ownClash(dark: Bool) {
-        let shortcut = ShortcutAction.hub.defaultShortcut
+    func ownClash(dark: Bool) throws {
+        let shortcut = try #require(ShortcutAction.hub.defaultShortcut)
         let pending = PendingShortcut(action: .quickQuit, shortcut: shortcut, check: .taken(.hub))
         snapshot(store(), name: "own", dark: dark, pending: pending)
     }

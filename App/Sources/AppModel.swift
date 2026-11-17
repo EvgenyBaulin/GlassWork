@@ -55,6 +55,8 @@ final class AppModel {
     private var isQuickQuitOpen = false
     private var timer: Timer?
     private var thresholds = ThresholdTracker()
+    var usageAlerts = AIUsageAlertTracker()
+    var pingOutages = PingOutageTracker()
     /// Widgets in the system's desktop layer, as WidgetKit last reported them.
     private var systemWidgetKinds: Set<WidgetKind> = []
 
@@ -67,6 +69,7 @@ final class AppModel {
         monitor.activity.onGitHubFailed = { [diagnostics] in diagnostics.record(.gitHubFailed(status: $0)) }
         shortcuts.bind(.hub) { [weak self] in self?.toggleHub() }
         shortcuts.setActive(.hub, true)
+        bindFansAndModules()
         _ = textCapture
         Task { await monitor.clipboard.load() }
         Task { await monitor.shelf.load() }
@@ -88,6 +91,7 @@ final class AppModel {
         monitor.onUpdate = { [weak self] in
             self?.statusBar.refreshItems()
             self?.checkAlerts()
+            self?.checkUsageAndPing()
             self?.updateIsland()
         }
         monitor.start()

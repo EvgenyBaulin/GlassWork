@@ -41,15 +41,15 @@ struct ShortcutActionTests {
     }
 
     @Test func everyActionHasItsOwnDefault() {
-        let shortcuts = ShortcutAction.all.map(\.defaultShortcut)
+        let shortcuts = ShortcutAction.all.compactMap(\.defaultShortcut)
         #expect(Set(shortcuts).count == shortcuts.count)
     }
 
     @Test func theDefaultsAreTheOnesPeopleKnow() {
-        #expect(ShortcutAction.hub.defaultShortcut.label == "⌃⌥Space")
-        #expect(ShortcutAction.quickPaste.defaultShortcut.label == "⇧⌘V")
-        #expect(ShortcutAction.textCapture.defaultShortcut.label == "⇧⌘2")
-        #expect(ShortcutAction.quickQuit.defaultShortcut.label == "⌃⌥Q")
+        #expect(ShortcutAction.hub.defaultShortcut?.label == "⌃⌥Space")
+        #expect(ShortcutAction.quickPaste.defaultShortcut?.label == "⇧⌘V")
+        #expect(ShortcutAction.textCapture.defaultShortcut?.label == "⇧⌘2")
+        #expect(ShortcutAction.quickQuit.defaultShortcut?.label == "⌃⌥Q")
     }
 
     @Test func idsAreStable() {
@@ -57,9 +57,18 @@ struct ShortcutActionTests {
         #expect(ShortcutAction.tile(.nextDisplay).id == "tile.nextDisplay")
     }
 
+    @Test func fansAndModulesHaveStableIdsAndNoDefaultKeys() {
+        #expect(ShortcutAction.fansMax.id == "fansMax")
+        #expect(ShortcutAction.openModule(.notes).id == "open.notes")
+        #expect(ShortcutAction.fansMax.defaultShortcut == nil)
+        #expect(ShortcutAction.all.contains(.openModule(.notes)))
+        #expect(ModuleID.allCases.allSatisfy { ShortcutAction.all.contains(.openModule($0)) })
+    }
+
     @Test func everyDefaultIsAcceptedByItsOwnCheck() {
         for action in ShortcutAction.all {
-            #expect(ShortcutCheck(action.defaultShortcut, for: action, in: ShortcutSettings()) == .ok, "\(action)")
+            guard let shortcut = action.defaultShortcut else { continue }
+            #expect(ShortcutCheck(shortcut, for: action, in: ShortcutSettings()) == .ok, "\(action)")
         }
     }
 }
@@ -74,11 +83,11 @@ struct ShortcutSettingsTests {
         }
     }
 
-    @Test func aChangeIsKept() {
+    @Test func aChangeIsKept() throws {
         var settings = ShortcutSettings()
         settings.set(.hub, to: custom)
         #expect(settings.shortcut(for: .hub) == custom)
-        #expect(settings.shortcut(for: .quickQuit) == ShortcutAction.quickQuit.defaultShortcut)
+        #expect(try settings.shortcut(for: .quickQuit) == #require(ShortcutAction.quickQuit.defaultShortcut))
     }
 
     @Test func aClearedShortcutIsNotTheDefault() {
@@ -87,17 +96,17 @@ struct ShortcutSettingsTests {
         #expect(settings.shortcut(for: .hub) == nil)
     }
 
-    @Test func settingTheDefaultStoresNothing() {
+    @Test func settingTheDefaultStoresNothing() throws {
         var settings = ShortcutSettings()
         settings.set(.hub, to: custom)
-        settings.set(.hub, to: ShortcutAction.hub.defaultShortcut)
+        try settings.set(.hub, to: #require(ShortcutAction.hub.defaultShortcut))
         #expect(settings.bindings.isEmpty)
     }
 
-    @Test func replacingTakesTheShortcutAwayFromItsHolder() {
+    @Test func replacingTakesTheShortcutAwayFromItsHolder() throws {
         var settings = ShortcutSettings()
-        settings.replace(.hub, with: ShortcutAction.quickQuit.defaultShortcut)
-        #expect(settings.shortcut(for: .hub) == ShortcutAction.quickQuit.defaultShortcut)
+        try settings.replace(.hub, with: #require(ShortcutAction.quickQuit.defaultShortcut))
+        #expect(try settings.shortcut(for: .hub) == #require(ShortcutAction.quickQuit.defaultShortcut))
         #expect(settings.shortcut(for: .quickQuit) == nil)
     }
 
@@ -113,8 +122,33 @@ struct ShortcutSettingsTests {
         let json = #"{"bindings": [{"action": "hub", "shortcut": {"key": "oops"}},"#
             + #" {"action": "quickQuit"}]}"#
         let settings = try JSONDecoder().decode(ShortcutSettings.self, from: Data(json.utf8))
-        #expect(settings.shortcut(for: .hub) == ShortcutAction.hub.defaultShortcut)
+        #expect(try settings.shortcut(for: .hub) == #require(ShortcutAction.hub.defaultShortcut))
         #expect(settings.shortcut(for: .quickQuit) == nil)
+    }
+
+    @Test func settingsWrittenBeforeFansAndModulesStillLoad() throws {
+        let json = #"{"bindings": [{"action": "hub", "shortcut": {"modifiers": 3, "key": {"code": 45}}}]}"#
+        let settings = try JSONDecoder().decode(ShortcutSettings.self, from: Data(json.utf8))
+        #expect(settings.shortcut(for: .fansMax) == nil)
+        #expect(settings.shortcut(for: .openModule(.notes)) == nil)
+    }
+
+    @Test func aModuleShortcutSurvivesTheFile() throws {
+        var settings = ShortcutSettings()
+        settings.set(.openModule(.notes), to: custom)
+        settings.set(.fansMax, to: GlobalShortcut([.control, .option], .letterQ))
+        let data = try JSONEncoder().encode(settings)
+        let loaded = try JSONDecoder().decode(ShortcutSettings.self, from: data)
+        #expect(loaded.shortcut(for: .openModule(.notes)) == custom)
+        #expect(loaded.shortcut(for: .fansMax) != nil)
+        #expect(loaded == settings)
+        #expect(loaded.bindings.map(\.action).contains("open.notes"))
+    }
+
+    @Test func clearingAnActionWithoutKeysStoresNothing() {
+        var settings = ShortcutSettings()
+        settings.set(.fansMax, to: nil)
+        #expect(settings.bindings.isEmpty)
     }
 
     @Test func aBrokenSectionCostsOnlyItself() throws {
@@ -134,7 +168,7 @@ struct ShortcutSettingsTests {
         settings.shortcuts.restoreDefaults()
         try file.save(settings)
 
-        #expect(try file.load()?.shortcuts.shortcut(for: .hub) == ShortcutAction.hub.defaultShortcut)
+        #expect(try file.load()?.shortcuts.shortcut(for: .hub) == #require(ShortcutAction.hub.defaultShortcut))
     }
 
     @Test func changesSurviveTheFile() throws {
@@ -163,8 +197,8 @@ struct ShortcutCheckTests {
         #expect(ShortcutCheck(GlobalShortcut([], .letterQ), for: .hub, in: settings) == .needsModifier)
     }
 
-    @Test func anotherActionsShortcutIsTaken() {
-        let check = ShortcutCheck(ShortcutAction.quickQuit.defaultShortcut, for: .hub, in: settings)
+    @Test func anotherActionsShortcutIsTaken() throws {
+        let check = try ShortcutCheck(#require(ShortcutAction.quickQuit.defaultShortcut), for: .hub, in: settings)
         #expect(check == .taken(.quickQuit))
     }
 
@@ -173,14 +207,14 @@ struct ShortcutCheckTests {
         #expect(check == .taken(.tile(.place(.center))))
     }
 
-    @Test func anActionDoesNotClashWithItself() {
-        #expect(ShortcutCheck(ShortcutAction.hub.defaultShortcut, for: .hub, in: settings) == .ok)
+    @Test func anActionDoesNotClashWithItself() throws {
+        #expect(try ShortcutCheck(#require(ShortcutAction.hub.defaultShortcut), for: .hub, in: settings) == .ok)
     }
 
-    @Test func aClearedShortcutIsFreeAgain() {
+    @Test func aClearedShortcutIsFreeAgain() throws {
         var settings = ShortcutSettings()
         settings.set(.quickQuit, to: nil)
-        #expect(ShortcutCheck(ShortcutAction.quickQuit.defaultShortcut, for: .hub, in: settings) == .ok)
+        #expect(try ShortcutCheck(#require(ShortcutAction.quickQuit.defaultShortcut), for: .hub, in: settings) == .ok)
     }
 
     @Test func spotlightIsCaught() {
@@ -197,7 +231,7 @@ struct ShortcutCheckTests {
 
     @Test func noDefaultUsesASystemShortcut() {
         let system = Set(SystemShortcut.known.map(\.shortcut))
-        #expect(system.isDisjoint(with: ShortcutAction.all.map(\.defaultShortcut)))
+        #expect(system.isDisjoint(with: ShortcutAction.all.compactMap(\.defaultShortcut)))
     }
 }
 

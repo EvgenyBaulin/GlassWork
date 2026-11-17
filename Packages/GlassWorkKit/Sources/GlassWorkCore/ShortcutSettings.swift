@@ -4,9 +4,14 @@ import Foundation
 public enum ShortcutAction: Hashable, Sendable {
     case hub, quickPaste, textCapture, quickQuit
     case tile(TileCommand)
+    /// Switches the fans to Max, and back to the mode they had.
+    case fansMax
+    /// Opens a module's panel.
+    case openModule(ModuleID)
 
     public static var all: [ShortcutAction] {
         [.hub, .quickPaste, .textCapture, .quickQuit] + TileCommand.all.map(ShortcutAction.tile)
+            + [.fansMax] + ModuleID.allCases.map(ShortcutAction.openModule)
     }
 
     /// What settings.json calls it, so it must not change.
@@ -19,16 +24,20 @@ public enum ShortcutAction: Hashable, Sendable {
         case let .tile(.place(layout)): "tile.\(layout)"
         case .tile(.previousDisplay): "tile.previousDisplay"
         case .tile(.nextDisplay): "tile.nextDisplay"
+        case .fansMax: "fansMax"
+        case let .openModule(module): "open.\(module.rawValue)"
         }
     }
 
-    public var defaultShortcut: GlobalShortcut {
+    /// Nil for the actions that start without keys, so they never take a combination people already use.
+    public var defaultShortcut: GlobalShortcut? {
         switch self {
         case .hub: GlobalShortcut([.control, .option], .space)
         case .quickPaste: GlobalShortcut([.shift, .command], .letterV)
         case .textCapture: GlobalShortcut([.shift, .command], .digit2)
         case .quickQuit: GlobalShortcut([.control, .option], .letterQ)
         case let .tile(command): command.defaultShortcut
+        case .fansMax, .openModule: nil
         }
     }
 }
