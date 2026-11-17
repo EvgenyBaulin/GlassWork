@@ -57,7 +57,7 @@ public struct TextCaptureHUD: View {
     private let shortcut: String?
 
     /// - Parameter shortcut: The label of the shortcut in use, if it has not been cleared.
-    public init(notice: TextCaptureNotice, shortcut: String? = ShortcutAction.textCapture.defaultShortcut.label) {
+    public init(notice: TextCaptureNotice, shortcut: String? = ShortcutAction.textCapture.defaultShortcut?.label) {
         self.notice = notice
         self.shortcut = shortcut
     }

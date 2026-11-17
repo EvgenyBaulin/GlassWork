@@ -19,6 +19,13 @@ extension ModuleOptionSpec {
                 .number(50 ... 100, step: 5, unit: "%"),
                 fallback: String(AIUsageOption.defaultWarnPercent)
             ),
+            toggle(
+                .aiUsage,
+                AIUsageOption.notifyAtWarning,
+                "Notify at warning",
+                "Уведомлять о предупреждении",
+                fallback: true
+            ),
             option(
                 .aiUsage, AIUsageOption.menuBarTool, "Menu bar tool", "Инструмент в строке меню",
                 .choice(

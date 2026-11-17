@@ -10,6 +10,8 @@ public extension ShortcutAction {
         case .textCapture: loc("Copy text from screen")
         case .quickQuit: loc("Quit an app")
         case let .tile(command): command.title
+        case .fansMax: loc("Fans: Max")
+        case let .openModule(module): loc("Open \(module.title)")
         }
     }
 }
@@ -103,6 +105,12 @@ public struct ShortcutsPane: View {
             }
             Section(loc("Window Tiles")) {
                 ForEach(TileCommand.all.map(ShortcutAction.tile), id: \.self) { row($0) }
+            }
+            Section(loc("Fans")) {
+                row(.fansMax)
+            }
+            Section(loc("Modules")) {
+                ForEach(ModuleID.allCases.map(ShortcutAction.openModule), id: \.self) { row($0) }
             }
             Section(loc("In the app")) {
                 LabeledContent(loc("Open Settings"), value: "⌘,")
