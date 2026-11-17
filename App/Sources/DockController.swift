@@ -99,7 +99,8 @@ final class DockController {
         panel.becomesKeyOnlyIfNeeded = true
         // Hide Others in any app counts this app too now that it has a Dock icon.
         panel.canHide = false
-        let hosting = NSHostingView(rootView: DockView(state: state, monitor: model.monitor, actions: actions))
+        let hosting = NSHostingView(rootView: DockView(state: state, monitor: model.monitor, actions: actions)
+            .environment(\.panelActions, model.actions))
         // The window's size is decided here. Left to the content it would grow from its corner, sideways.
         hosting.sizingOptions = []
         panel.contentView = hosting
@@ -180,13 +181,15 @@ final class DockController {
         let context = DockWidgetContext(
             timers: monitor.everyday.data.timers,
             devServers: monitor.developer.devServers,
-            events: monitor.agenda.events
+            events: monitor.agenda.events,
+            countsOnClick: CounterState(options: model.store.settings.module(.counter)?.options ?? [:]).countsOnClick
         )
         switch DockWidgetClick.resolve(module, context: context, at: Date()) {
         case .showCard: toggleCard(module)
         case let .perform(action): model.perform(action)
         case .toggleStopwatch: monitor.everyday.update { $0.stopwatch.toggle(at: Date()) }
         case .togglePlayback: monitor.nowPlaying.perform(.toggle)
+        case .incrementCounter: model.store.update { $0.updateCounter { $0.increment() } }
         case let .open(url): NSWorkspace.shared.open(url)
         }
     }

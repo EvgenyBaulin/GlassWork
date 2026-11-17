@@ -17,7 +17,7 @@ extension AppModel {
         }
         shortcuts.bind(.searchMenuBar) { [weak self] in self?.statusBar.showSearch() }
         shortcuts.setActive(.searchMenuBar, true)
-        for module in ModuleID.allCases {
+        for module in ModuleID.shortcutModules {
             shortcuts.bind(.openModule(module)) { [weak self] in self?.showPanelAtPointer(module) }
             shortcuts.setActive(.openModule(module), true)
         }

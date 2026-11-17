@@ -42,6 +42,9 @@ public struct ModulePanel: View {
         case .clipboard: ClipboardPanel(store: monitor.clipboard)
         case .shelf: ShelfPanel(store: monitor.shelf)
         case .nowPlaying: NowPlayingPanel(store: monitor.nowPlaying)
+        case .counter: CounterPanel()
+        case .breathe: BreathePanel()
+        case .screenTime: ScreenTimePanel(log: monitor.activity.screenTime)
         default: EmptyView()
         }
     }

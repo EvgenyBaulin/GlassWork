@@ -14,7 +14,10 @@ public extension ModuleID {
 
     /// Cards that exist only in the Dock: no menu bar item, Hub tile or panel shortcut.
     var isDockOnly: Bool {
-        self == .sound || self == .micCamera
+        switch self {
+        case .sound, .micCamera, .counter, .breathe, .screenTime: true
+        default: false
+        }
     }
 }
 
@@ -23,8 +26,16 @@ public struct DockWidgetContext: Sendable, Equatable {
     public var timers: [CountdownTimer]
     public var devServers: DevServerReading?
     public var events: [AgendaEvent]
+    /// The Counter adds one on a click, as its card has it set.
+    public var countsOnClick: Bool
 
-    public init(timers: [CountdownTimer] = [], devServers: DevServerReading? = nil, events: [AgendaEvent] = []) {
+    public init(
+        timers: [CountdownTimer] = [],
+        devServers: DevServerReading? = nil,
+        events: [AgendaEvent] = [],
+        countsOnClick: Bool = false
+    ) {
+        self.countsOnClick = countsOnClick
         self.timers = timers
         self.devServers = devServers
         self.events = events
@@ -39,6 +50,7 @@ public enum DockWidgetClick: Sendable, Equatable {
     case perform(WidgetCommand.Action)
     case toggleStopwatch
     case togglePlayback
+    case incrementCounter
     case open(URL)
 
     /// What a click starts when no timer is running.
@@ -52,6 +64,7 @@ public enum DockWidgetClick: Sendable, Equatable {
             .perform(context.timers.first.map { .toggleTimer($0.id) } ?? .startTimer(seconds: timerSeconds))
         case .stopwatch: .toggleStopwatch
         case .nowPlaying: .togglePlayback
+        case .counter: context.countsOnClick ? .incrementCounter : .showCard
         case .devServers: firstServer(context.devServers).map(DockWidgetClick.open) ?? .showCard
         case .calendar, .endsIn: joinableCall(context.events, at: date).map(DockWidgetClick.open) ?? .showCard
         default: .showCard

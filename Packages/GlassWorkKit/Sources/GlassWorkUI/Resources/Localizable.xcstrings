@@ -1117,6 +1117,22 @@
         }
       }
     },
+    "Add one": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add one"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Плюс один"
+          }
+        }
+      }
+    },
     "Add to": {
       "localizations": {
         "en": {
@@ -1807,6 +1823,54 @@
         }
       }
     },
+    "Breathe": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breathe"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дыхание"
+          }
+        }
+      }
+    },
+    "Breathe in": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breathe in"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вдох"
+          }
+        }
+      }
+    },
+    "Breathe out": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breathe out"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выдох"
+          }
+        }
+      }
+    },
     "Brightness": {
       "localizations": {
         "en": {
@@ -2271,6 +2335,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Считать в строке меню"
+          }
+        }
+      }
+    },
+    "Count on click": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Count on click"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считать по клику"
+          }
+        }
+      }
+    },
+    "Counter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counter"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Счётчик"
           }
         }
       }
@@ -4025,6 +4121,22 @@
         }
       }
     },
+    "Hold": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задержка"
+          }
+        }
+      }
+    },
     "Hover delay": {
       "localizations": {
         "en": {
@@ -4181,6 +4293,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "через %lld дн."
+          }
+        }
+      }
+    },
+    "In 4 s, hold 4 s, out 6 s": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In 4 s, hold 4 s, out 6 s"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вдох 4 с, задержка 4 с, выдох 6 с"
           }
         }
       }
@@ -4587,6 +4715,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Запускать при входе"
+          }
+        }
+      }
+    },
+    "Length": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Length"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Длительность"
           }
         }
       }
@@ -6955,6 +7099,22 @@
         }
       }
     },
+    "Ready when you are": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready when you are"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Начните, когда будете готовы"
+          }
+        }
+      }
+    },
     "Rebase": {
       "localizations": {
         "en": {
@@ -7867,6 +8027,22 @@
         }
       }
     },
+    "Since last break": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since last break"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С последнего перерыва"
+          }
+        }
+      }
+    },
     "Since launch": {
       "localizations": {
         "en": {
@@ -8327,6 +8503,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Стиль"
+          }
+        }
+      }
+    },
+    "Subtract one": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtract one"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Минус один"
           }
         }
       }
@@ -9601,6 +9793,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добро пожаловать в GlassWork"
+          }
+        }
+      }
+    },
+    "Well done": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Well done"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отлично"
           }
         }
       }

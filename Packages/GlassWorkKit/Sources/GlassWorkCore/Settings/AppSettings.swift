@@ -14,6 +14,8 @@ public enum ModuleID: String, Codable, CaseIterable, Sendable, Identifiable {
     case weather, rates
     /// Dock-only information cards: they have no menu bar item and no Hub tile.
     case sound, micCamera
+    /// Dock-only focus widgets.
+    case counter, breathe, screenTime
 
     public var id: String {
         rawValue
@@ -154,7 +156,8 @@ public struct AppSettings: Codable, Sendable, Equatable {
             case .overview: ModuleSettings(id: id, mode: .menuBar, style: .graphAndFigure)
             case .cpu: ModuleSettings(id: id, mode: .menuBar, style: .graphAndFigure)
             case .memory: ModuleSettings(id: id, mode: .menuBar, style: .labelled)
-            case _ where developerCollected.contains(id): ModuleSettings(id: id, mode: .off, style: .figure)
+            case _ where developerCollected.contains(id) || id.isDockOnly:
+                ModuleSettings(id: id, mode: .off, style: .figure)
             default: ModuleSettings(id: id, mode: .hubOnly, style: .figure)
             }
         }

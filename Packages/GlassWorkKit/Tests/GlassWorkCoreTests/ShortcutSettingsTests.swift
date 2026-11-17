@@ -62,7 +62,7 @@ struct ShortcutActionTests {
         #expect(ShortcutAction.openModule(.notes).id == "open.notes")
         #expect(ShortcutAction.fansMax.defaultShortcut == nil)
         #expect(ShortcutAction.all.contains(.openModule(.notes)))
-        #expect(ModuleID.allCases.filter { !$0.isDockOnly }.allSatisfy { ShortcutAction.all.contains(.openModule($0)) })
+        #expect(ModuleID.shortcutModules.allSatisfy { ShortcutAction.all.contains(.openModule($0)) })
     }
 
     @Test func everyDefaultIsAcceptedByItsOwnCheck() {
