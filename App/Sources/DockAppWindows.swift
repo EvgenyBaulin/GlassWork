@@ -7,7 +7,18 @@ import GlassWorkCore
 /// Titles come from the window server and need Screen Recording; without it the menu numbers the windows.
 /// Raising and "New Window" go through Accessibility and are offered only when it is granted.
 enum DockAppWindows {
-    private static let timeout: Float = 0.5
+    /// Per Accessibility read. Set on the app's root element, it holds for every element under it.
+    private static let timeout: Float = 0.1
+    /// All the reads of one menu bar search together.
+    private static let searchBudget = Duration.milliseconds(150)
+    /// The app's menu, File and Edit come after the Apple menu, and ⌘N lives in File.
+    private static let menuBarItemsSearched = 4
+
+    private static func appElement(pid: Int32) -> AXUIElement {
+        let root = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(root, timeout)
+        return root
+    }
 
     static func list(pid: Int32) -> [DockWindowItem] {
         let info = CGWindowListCopyWindowInfo(
@@ -37,29 +48,43 @@ enum DockAppWindows {
     static func raise(_ window: DockWindowItem, of app: NSRunningApplication) {
         app.activate()
         guard AXIsProcessTrusted() else { return }
-        let root = AXUIElementCreateApplication(app.processIdentifier)
+        let root = appElement(pid: app.processIdentifier)
         let windows = elements(root, "AXWindows")
-        let described = windows.map { DockWindows.Element(title: string($0, "AXTitle"), frame: frame(of: $0)) }
-        guard let index = DockWindows.match(window, in: described) else { return }
+        let described = windows.map {
+            DockWindows.Element(
+                title: string($0, "AXTitle"),
+                frame: frame(of: $0),
+                minimized: (value($0, "AXMinimized") as? Bool) == true
+            )
+        }
+        let siblings = list(pid: app.processIdentifier)
+        guard let index = DockWindows.match(window, among: siblings, in: described) else { return }
+        if DockWindows.needsRestore(described[index]) {
+            AXUIElementSetAttributeValue(windows[index], "AXMinimized" as CFString, kCFBooleanFalse)
+        }
         AXUIElementPerformAction(windows[index], "AXRaise" as CFString)
     }
 
-    /// The menu item that ⌘N chooses, if the app has one and it can be used now.
+    /// The menu item that ⌘N chooses, if the app has one and it can be used now. Looks at the first few menus only,
+    /// and gives up when the time budget is spent, so an app that does not answer cannot hold the caller for long.
     private static func newWindowItem(pid: Int32) -> AXUIElement? {
         guard AXIsProcessTrusted() else { return nil }
-        let root = AXUIElementCreateApplication(pid)
+        let deadline = ContinuousClock.now + searchBudget
+        let root = appElement(pid: pid)
         guard let bar = element(root, "AXMenuBar") else { return nil }
-        for barItem in elements(bar, "AXChildren") {
+        for barItem in elements(bar, "AXChildren").prefix(menuBarItemsSearched) {
             for menu in elements(barItem, "AXChildren") {
-                for item in elements(menu, "AXChildren")
-                    where DockWindows.isCommandN(
+                for item in elements(menu, "AXChildren") {
+                    guard ContinuousClock.now < deadline else { return nil }
+                    if DockWindows.isCommandN(
                         character: string(item, "AXMenuItemCmdChar"),
                         modifiers: (value(item, "AXMenuItemCmdModifiers") as? NSNumber)?.intValue
-                    ) && (value(item, "AXEnabled") as? Bool) != false
-                {
-                    return item
+                    ), (value(item, "AXEnabled") as? Bool) != false {
+                        return item
+                    }
                 }
             }
+            guard ContinuousClock.now < deadline else { return nil }
         }
         return nil
     }
@@ -89,7 +114,6 @@ enum DockAppWindows {
     }
 
     private static func value(_ element: AXUIElement, _ name: String) -> AnyObject? {
-        AXUIElementSetMessagingTimeout(element, timeout)
         var result: CFTypeRef?
         guard AXUIElementCopyAttributeValue(element, name as CFString, &result) == .success else { return nil }
         return result

@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 @testable import GlassWorkCore
 import Testing
 
@@ -88,5 +89,66 @@ struct DockWindowsTests {
         #expect(!DockWindows.isCommandN(character: "N", modifiers: 8))
         #expect(!DockWindows.isCommandN(character: "T", modifiers: 0))
         #expect(!DockWindows.isCommandN(character: nil, modifiers: nil))
+    }
+}
+
+struct DockWindowMatchingTests {
+    private let frame = CGRect(x: 0, y: 40, width: 800, height: 600)
+
+    private func item(_ id: Int, number: Int, title: String? = nil) -> DockWindowItem {
+        DockWindowItem(id: id, title: title, number: number, bounds: frame)
+    }
+
+    @Test func untitledWindowsWithTheSameBoundsAreMatchedByOrder() {
+        let items = [item(1, number: 1), item(2, number: 2), item(3, number: 3)]
+        let elements = [DockWindows.Element(title: nil, frame: frame), DockWindows.Element(title: nil, frame: frame)]
+        #expect(DockWindows.match(items[0], among: items, in: elements) == 0)
+        #expect(DockWindows.match(items[1], among: items, in: elements) == 1)
+        // More windows than elements: the last element is the closest answer.
+        #expect(DockWindows.match(items[2], among: items, in: elements) == 1)
+    }
+
+    @Test func orderCountsOnlyWindowsInTheSamePlace() {
+        let other = DockWindowItem(id: 9, title: nil, number: 1, bounds: CGRect(x: 300, y: 40, width: 800, height: 600))
+        let items = [other, item(1, number: 2), item(2, number: 3)]
+        let elements = [DockWindows.Element(title: nil, frame: frame), DockWindows.Element(title: nil, frame: frame)]
+        #expect(DockWindows.match(items[2], among: items, in: elements) == 1)
+    }
+
+    @Test func titledDuplicatesAreMatchedByOrderWithinTheTitle() {
+        let items = [item(1, number: 1, title: "A"), item(2, number: 2, title: "B"), item(3, number: 3, title: "B")]
+        let elements = [
+            DockWindows.Element(title: "B", frame: frame),
+            DockWindows.Element(title: "A", frame: frame),
+            DockWindows.Element(title: "B", frame: frame),
+        ]
+        #expect(DockWindows.match(items[0], among: items, in: elements) == 1)
+        #expect(DockWindows.match(items[1], among: items, in: elements) == 0)
+        #expect(DockWindows.match(items[2], among: items, in: elements) == 2)
+    }
+
+    @Test func aMinimizedWindowIsRestoredBeforeRaising() {
+        #expect(DockWindows.needsRestore(DockWindows.Element(title: nil, frame: frame, minimized: true)))
+        #expect(!DockWindows.needsRestore(DockWindows.Element(title: nil, frame: frame)))
+    }
+}
+
+struct DockAnswerCacheTests {
+    @Test func anAnswerHoldsUntilItsLifetimeEnds() {
+        var cache = DockAnswerCache<Int32>(lifetime: 30)
+        let start = Date(timeIntervalSince1970: 1000)
+        #expect(cache.value(for: 5, now: start) == nil)
+        cache.store(true, for: 5, now: start)
+        #expect(cache.value(for: 5, now: start.addingTimeInterval(29)) == true)
+        #expect(cache.value(for: 5, now: start.addingTimeInterval(30)) == nil)
+        #expect(cache.value(for: 6, now: start) == nil)
+    }
+
+    @Test func aNewAnswerReplacesTheOldOne() {
+        var cache = DockAnswerCache<Int32>()
+        let start = Date(timeIntervalSince1970: 1000)
+        cache.store(true, for: 5, now: start)
+        cache.store(false, for: 5, now: start.addingTimeInterval(40))
+        #expect(cache.value(for: 5, now: start.addingTimeInterval(41)) == false)
     }
 }

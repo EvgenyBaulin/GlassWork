@@ -61,6 +61,8 @@ final class DockTileWatcher {
             return
         }
         let items = await Task.detached { DockBadgeReader.read() }.value
+        // A reading that ends after stop() or after the Dock went away must not bring the badges back.
+        guard !Task.isCancelled, isVisible() else { return }
         let wanted = Set(state.settings.apps.map(\.path))
         let labels = DockBadges.labels(from: items).filter { wanted.contains($0.key) }
         let front = NSWorkspace.shared.frontmostApplication?.bundleURL?.path(percentEncoded: false)

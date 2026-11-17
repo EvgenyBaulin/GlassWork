@@ -31,26 +31,25 @@ enum SystemDockGuard {
         termination = source
     }
 
-    /// Runs once at launch, before the Dock is applied. True when the system Dock was put back.
-    static func recoverAtLaunch(dockIsOn: Bool) -> Bool {
+    /// Runs once at launch, before the Dock is applied. Says so on screen when the system Dock was put back.
+    static func recoverAtLaunch(dockIsOn: Bool) {
         switch DockRecovery.decide(
             markerExists: SystemDock.hasMarker,
             hasSavedSettings: SystemDock.hasSavedSettings,
             takesOverAgain: dockIsOn
         ) {
         case .nothing:
-            return false
+            break
         case .clearMarker:
             SystemDock.clearMarker()
-            return false
         case .restore:
             SystemDock.restore()
-            return true
+            showRestoredToast()
         }
     }
 
     /// A small label at the top of the screen that goes by itself.
-    static func showRestoredToast() {
+    private static func showRestoredToast() {
         let hosting = NSHostingView(rootView: Text(loc("The system Dock was restored after an unexpected quit"))
             .font(.system(size: 13, weight: .medium))
             .padding(.horizontal, 16)

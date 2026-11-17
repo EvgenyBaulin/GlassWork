@@ -44,10 +44,12 @@ public enum DockWindows {
     public struct Element: Equatable, Sendable {
         public var title: String?
         public var frame: CGRect
+        public var minimized: Bool
 
-        public init(title: String?, frame: CGRect) {
+        public init(title: String?, frame: CGRect, minimized: Bool = false) {
             self.title = title
             self.frame = frame
+            self.minimized = minimized
         }
     }
 
@@ -74,19 +76,35 @@ public enum DockWindows {
 
     /// Which Accessibility window is this one. The window server's number cannot be turned into an element without a
     /// private call, so they are matched by where they are: same corner and size, and the title when two sit alike.
-    public static func match(_ item: DockWindowItem, in elements: [Element], tolerance: CGFloat = 2) -> Int? {
-        let alike = elements.indices.filter { index in
-            let frame = elements[index].frame
-            return abs(frame.minX - item.bounds.minX) <= tolerance && abs(frame.minY - item.bounds.minY) <= tolerance
-                && abs(frame.width - item.bounds.width) <= tolerance
-                && abs(frame.height - item.bounds.height) <= tolerance
+    /// Windows that are still alike (same bounds, no telling title) are matched by order: the window server and
+    /// Accessibility both list front to back, so the second of them in `siblings` is the second element.
+    public static func match(
+        _ item: DockWindowItem,
+        among siblings: [DockWindowItem] = [],
+        in elements: [Element],
+        tolerance: CGFloat = 2
+    ) -> Int? {
+        func alike(_ lhs: CGRect, _ rhs: CGRect) -> Bool {
+            abs(lhs.minX - rhs.minX) <= tolerance && abs(lhs.minY - rhs.minY) <= tolerance
+                && abs(lhs.width - rhs.width) <= tolerance && abs(lhs.height - rhs.height) <= tolerance
         }
-        if alike.count > 1, let title = item.title,
-           let titled = alike.first(where: { elements[$0].title == title })
-        {
-            return titled
+        var candidates = elements.indices.filter { alike(elements[$0].frame, item.bounds) }
+        var peers = siblings.filter { alike($0.bounds, item.bounds) }
+        if candidates.count > 1, let title = item.title {
+            let titled = candidates.filter { elements[$0].title == title }
+            if !titled.isEmpty {
+                candidates = titled
+                peers = peers.filter { $0.title == title }
+            }
         }
-        return alike.first
+        guard !candidates.isEmpty else { return nil }
+        let rank = peers.firstIndex { $0.id == item.id } ?? 0
+        return candidates[min(rank, candidates.count - 1)]
+    }
+
+    /// A minimized window must be brought back before it is raised, or raising it does nothing visible.
+    public static func needsRestore(_ element: Element) -> Bool {
+        element.minimized
     }
 
     /// Whether a menu item is the one ⌘N chooses: key "N" with Command alone. Found by the shortcut and not the

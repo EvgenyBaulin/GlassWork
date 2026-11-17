@@ -37,6 +37,7 @@ final class DockController {
     private lazy var pointerWatcher = DockPointerWatcher { [weak self] in self?.updateReveal() }
     private var hiding: Task<Void, Never>?
     private let tooltip = DockTooltip()
+    private let newWindowProbe = DockNewWindowProbe()
     private lazy var scheduler = DockPresetScheduler { [weak self] in self?.applyScheduled($0) }
     private lazy var trash = DockTrash { [weak self] full in
         if self?.state.trashIsFull != full {
@@ -544,7 +545,7 @@ extension DockController {
             }
         }
         actions.canOpenNewWindow = { [weak self] in
-            self?.runningApp($0).map { DockAppWindows.hasNewWindow(pid: $0.processIdentifier) } ?? false
+            self?.runningApp($0).map { self?.newWindowProbe.canOpen(pid: $0.processIdentifier) ?? false } ?? false
         }
         actions.newWindow = { [weak self] app in
             if let running = self?.runningApp(app) {
