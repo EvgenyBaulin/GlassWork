@@ -49,7 +49,12 @@ struct BatteryPanelContent: View {
 
     private func summary(_ battery: BatterySample) -> some View {
         HStack(spacing: 14) {
-            RingGauge(value: battery.charge, tint: battery.charge < 0.2 ? Palette.red : Palette.green, lineWidth: 8) {
+            RingGauge(
+                value: battery.charge,
+                tint: battery.charge < 0.2 ? Palette.red : Palette.green,
+                lineWidth: 8,
+                readout: RingReadout(usedTitle: loc("Charged"), freeTitle: loc("Empty"))
+            ) {
                 Text(Format.percent(battery.charge)).font(.system(size: 18, weight: .bold, design: .rounded))
             }
             .frame(width: 84, height: 84)

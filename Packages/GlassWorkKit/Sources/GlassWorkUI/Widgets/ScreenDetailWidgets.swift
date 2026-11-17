@@ -316,7 +316,12 @@ struct BreaksWidget: View {
     }
 
     private func ring(_ stats: ScreenBreakStats, diameter: CGFloat) -> some View {
-        RingGauge(value: stats.share, tint: ringTint, lineWidth: diameter / 10) {
+        RingGauge(
+            value: stats.share,
+            tint: ringTint,
+            lineWidth: diameter / 10,
+            readout: RingReadout(usedTitle: loc("Since break"), freeTitle: loc("Until break"))
+        ) {
             Text(WidgetDuration.short(stats.sinceBreak)).font(.widgetFigure(diameter / 4.4)).lineLimit(1)
         }
         .frame(width: diameter, height: diameter)

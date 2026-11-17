@@ -66,6 +66,7 @@ public struct InteractiveChart: View {
     private let reference: Double?
     private let emphasized: Date?
     @State private var hover: Date?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// `reference` draws a dashed line at that value, such as an average.
     /// `emphasized` keeps one bar in full color and tones down the rest, for today among other days.
@@ -104,7 +105,7 @@ public struct InteractiveChart: View {
                 }
             }
             .frame(height: height)
-            .animation(.easeOut(duration: 0.15), value: hover == nil)
+            .animation(HoverMotion.animation(reduceMotion: reduceMotion), value: hover == nil)
             .widgetAccentable()
     }
 
@@ -286,15 +287,7 @@ public struct InteractiveChart: View {
 
     /// 16 pt right of the cursor, flipping left near the edge and staying 8 pt inside the chart.
     private func tooltipX(_ cursor: CGFloat, width: CGFloat, container: CGFloat) -> CGFloat {
-        let right = cursor + 16
-        if right + width <= container - 8 {
-            return right
-        }
-        let left = cursor - 16 - width
-        if left >= 8 {
-            return left
-        }
-        return min(max(cursor - width / 2, 8), max(container - width - 8, 8))
+        TooltipPlacement.x(cursor, width: width, container: container)
     }
 }
 
@@ -377,19 +370,37 @@ public struct Sparkline: View {
     }
 }
 
-/// Thin progress bar with an optional hover readout.
+/// Thin progress bar. With a `readout`, hovering it shows the shared tooltip with those rows.
 public struct ThinBar: View {
     private let value: Double
     private let tint: Color
     private let height: CGFloat
+    private let readout: [HoverRow]
+    private let initialHover: CGPoint?
 
-    public init(value: Double, tint: Color, height: CGFloat = 4) {
+    public init(
+        value: Double,
+        tint: Color,
+        height: CGFloat = 4,
+        readout: [HoverRow] = [],
+        initialHover: CGPoint? = nil
+    ) {
         self.value = min(max(value, 0), 1)
         self.tint = tint
         self.height = height
+        self.readout = readout
+        self.initialHover = initialHover
     }
 
     public var body: some View {
+        if readout.isEmpty {
+            bar
+        } else {
+            bar.hoverReadout(initialHover: initialHover) { _, _ in readout.map(\.tooltipRow) }
+        }
+    }
+
+    private var bar: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 Capsule().fill(.quaternary)

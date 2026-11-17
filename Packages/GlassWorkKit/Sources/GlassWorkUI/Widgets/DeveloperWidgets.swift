@@ -147,26 +147,49 @@ struct ContributionsWidget: View {
     }
 }
 
-/// Weeks as columns; hovering a cell shows its date and count.
+/// Weeks as columns; hovering a cell shows its date and count in the shared tooltip.
 struct HeatMap: View {
     let days: [ContributionDay]
-    @State private var hovered: ContributionDay?
+    var initialHover: CGPoint?
+
+    /// Side of a cell and the gap between cells; a cell is 8 pt, the smallest hover target.
+    static let cell: CGFloat = 8
+    static let gap: CGFloat = 2
+    static let rows = 7
+
+    /// The day under a point of the grid. Cells fill the columns top to bottom, and the gaps belong to the
+    /// nearest cell so the pointer never falls between two of them.
+    static func index(at point: CGPoint, count: Int) -> Int? {
+        let pitch = cell + gap
+        guard point.x >= 0, point.y >= 0 else { return nil }
+        let row = Int(point.y / pitch)
+        let column = Int(point.x / pitch)
+        guard row < rows else { return nil }
+        let index = column * rows + row
+        return index < count ? index : nil
+    }
 
     var body: some View {
         let peak = max(days.map(\.contributions).max() ?? 1, 1)
-        VStack(alignment: .leading, spacing: 4) {
-            LazyHGrid(rows: Array(repeating: GridItem(.fixed(8), spacing: 2), count: 7), spacing: 2) {
-                ForEach(days, id: \.date) { day in
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(Palette.green
-                            .opacity(day
-                                .contributions == 0 ? 0.12 : 0.3 + 0.7 * Double(day.contributions) / Double(peak)))
-                        .frame(width: 8, height: 8)
-                        .onHover { hovered = $0 ? day : (hovered == day ? nil : hovered) }
-                }
+        LazyHGrid(
+            rows: Array(repeating: GridItem(.fixed(Self.cell), spacing: Self.gap), count: Self.rows),
+            spacing: Self.gap
+        ) {
+            ForEach(days, id: \.date) { day in
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Palette.green
+                        .opacity(day
+                            .contributions == 0 ? 0.12 : 0.3 + 0.7 * Double(day.contributions) / Double(peak)))
+                    .frame(width: Self.cell, height: Self.cell)
             }
-            if let hovered {
-                Text("\(hovered.date) · \(hovered.contributions)").font(.system(size: 11)).monospacedDigit()
+        }
+        .hoverReadout(initialHover: initialHover) { point, _ in
+            Self.index(at: point, count: days.count).map {
+                [HoverRow(
+                    title: days[$0].date,
+                    value: loc("\(days[$0].contributions) contributions"),
+                    color: Palette.green
+                ).tooltipRow]
             }
         }
     }
