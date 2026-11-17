@@ -3,6 +3,8 @@ import Foundation
 /// Everything a global shortcut can do.
 public enum ShortcutAction: Hashable, Sendable {
     case hub, quickPaste, textCapture, quickQuit
+    /// Shows or hides the hidden menu bar items. With Option held it also opens the always-hidden section.
+    case hiddenBar
     case tile(TileCommand)
     /// Switches the fans to Max, and back to the mode they had.
     case fansMax
@@ -10,7 +12,7 @@ public enum ShortcutAction: Hashable, Sendable {
     case openModule(ModuleID)
 
     public static var all: [ShortcutAction] {
-        [.hub, .quickPaste, .textCapture, .quickQuit] + TileCommand.all.map(ShortcutAction.tile)
+        [.hub, .quickPaste, .textCapture, .quickQuit, .hiddenBar] + TileCommand.all.map(ShortcutAction.tile)
             + [.fansMax] + ModuleID.allCases.map(ShortcutAction.openModule)
     }
 
@@ -21,6 +23,7 @@ public enum ShortcutAction: Hashable, Sendable {
         case .quickPaste: "quickPaste"
         case .textCapture: "textCapture"
         case .quickQuit: "quickQuit"
+        case .hiddenBar: "hiddenBar"
         case let .tile(.place(layout)): "tile.\(layout)"
         case .tile(.previousDisplay): "tile.previousDisplay"
         case .tile(.nextDisplay): "tile.nextDisplay"
@@ -37,7 +40,7 @@ public enum ShortcutAction: Hashable, Sendable {
         case .textCapture: GlobalShortcut([.shift, .command], .digit2)
         case .quickQuit: GlobalShortcut([.control, .option], .letterQ)
         case let .tile(command): command.defaultShortcut
-        case .fansMax, .openModule: nil
+        case .hiddenBar, .fansMax, .openModule: nil
         }
     }
 }
