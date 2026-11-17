@@ -45,6 +45,13 @@ final class HiddenBarDriver {
         changed()
     }
 
+    /// Opens what an item is in so it can be pressed. Never closes anything.
+    func reveal(includingAlwaysHidden all: Bool) {
+        guard machine.isCollapsed || (all && machine.phase == .revealed) else { return }
+        machine.toggle(option: all, now: Date())
+        changed()
+    }
+
     private func changed() {
         refreshBand()
         onChange?(machine)

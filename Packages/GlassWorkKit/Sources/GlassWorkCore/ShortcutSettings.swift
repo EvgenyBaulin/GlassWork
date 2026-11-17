@@ -5,6 +5,8 @@ public enum ShortcutAction: Hashable, Sendable {
     case hub, quickPaste, textCapture, quickQuit
     /// Shows or hides the hidden menu bar items. With Option held it also opens the always-hidden section.
     case hiddenBar
+    /// Opens the search over other apps' menu bar items.
+    case searchMenuBar
     case tile(TileCommand)
     /// Switches the fans to Max, and back to the mode they had.
     case fansMax
@@ -12,7 +14,8 @@ public enum ShortcutAction: Hashable, Sendable {
     case openModule(ModuleID)
 
     public static var all: [ShortcutAction] {
-        [.hub, .quickPaste, .textCapture, .quickQuit, .hiddenBar] + TileCommand.all.map(ShortcutAction.tile)
+        [.hub, .quickPaste, .textCapture, .quickQuit, .hiddenBar, .searchMenuBar] + TileCommand.all
+            .map(ShortcutAction.tile)
             + [.fansMax] + ModuleID.allCases.map(ShortcutAction.openModule)
     }
 
@@ -24,6 +27,7 @@ public enum ShortcutAction: Hashable, Sendable {
         case .textCapture: "textCapture"
         case .quickQuit: "quickQuit"
         case .hiddenBar: "hiddenBar"
+        case .searchMenuBar: "searchMenuBar"
         case let .tile(.place(layout)): "tile.\(layout)"
         case .tile(.previousDisplay): "tile.previousDisplay"
         case .tile(.nextDisplay): "tile.nextDisplay"
@@ -40,7 +44,7 @@ public enum ShortcutAction: Hashable, Sendable {
         case .textCapture: GlobalShortcut([.shift, .command], .digit2)
         case .quickQuit: GlobalShortcut([.control, .option], .letterQ)
         case let .tile(command): command.defaultShortcut
-        case .hiddenBar, .fansMax, .openModule: nil
+        case .hiddenBar, .searchMenuBar, .fansMax, .openModule: nil
         }
     }
 }
