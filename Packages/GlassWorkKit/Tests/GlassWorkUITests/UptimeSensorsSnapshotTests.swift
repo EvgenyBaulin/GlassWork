@@ -59,14 +59,17 @@ struct UptimeSensorsSnapshotTests {
 
     @Test(arguments: [false, true])
     func sensorsWithSparklines(dark: Bool) {
-        let view = SensorsPanelContent(sample: Self.sample(step: 39), tracker: Self.tracker, groups: Self.groups)
+        let view = SensorsPanelContent(
+            sample: Self.sample(step: 39), tracker: Self.tracker, groups: Self.groups, now: sampleNow
+        )
         assertPanel(view, dark: dark, name: "sensors-sparklines")
     }
 
     @Test(arguments: [false, true])
     func sensorSparklineHover(dark: Bool) {
         let view = SensorsPanelContent(
-            sample: Self.sample(step: 39), tracker: Self.tracker, groups: Self.groups, hoveredKey: "Tp01"
+            sample: Self.sample(step: 39), tracker: Self.tracker, groups: Self.groups, hoveredKey: "Tp01",
+            now: sampleNow
         )
         assertPanel(view, dark: dark, name: "sensors-sparkline-hover")
     }
@@ -74,7 +77,8 @@ struct UptimeSensorsSnapshotTests {
     @Test(arguments: [false, true])
     func sensorKeysHidden(dark: Bool) {
         let view = SensorsPanelContent(
-            sample: Self.sample(step: 39), tracker: Self.tracker, groups: Self.groups, showsKeys: false
+            sample: Self.sample(step: 39), tracker: Self.tracker, groups: Self.groups, showsKeys: false,
+            now: sampleNow
         )
         assertPanel(view, dark: dark, name: "sensors-no-keys")
     }

@@ -26,7 +26,7 @@ extension ItemContent {
 
     /// Points for the graph styles, or nil for items without a graph.
     func graphValues(_ monitor: SystemMonitor) -> [Double]? {
-        values ?? metric.map { monitor.points($0, in: .minute).suffix(30).map(\.value) }
+        values ?? metric.map { monitor.graphValues($0, span: graphSpan, maxPoints: 30) }
     }
 
     /// Title and artist next to the cover while something plays, then only a note, or nothing if the user prefers.

@@ -20,6 +20,7 @@ public extension SensorGroup {
 /// Every sensor this Mac exposes, grouped, with a short history and the session minimum and maximum.
 struct SensorsPanel: View {
     let monitor: SystemMonitor
+    @AppStorage(PanelRange.sensors) private var range = TieredHistory.Range.hour
     @Environment(\.panelActions) private var actions
 
     private var options: [String: String] {
@@ -31,8 +32,20 @@ struct SensorsPanel: View {
             sample: monitor.sensors,
             tracker: monitor.sensorTracks,
             groups: SensorGroupOptions(options: options).shownGroups,
-            showsKeys: options.flag(ItemOption.showsSensorKeys, default: true)
+            showsKeys: options.flag(ItemOption.showsSensorKeys, default: true),
+            range: range,
+            setRange: { range = $0 }
         )
+    }
+}
+
+extension TemperatureZone {
+    var title: String {
+        switch self {
+        case .cool: loc("Cool")
+        case .warm: loc("Warm")
+        case .hot: loc("Too hot")
+        }
     }
 }
 
@@ -44,12 +57,17 @@ struct SensorsPanelContent: View {
     var showsKeys = true
     /// Starts a sparkline as if the cursor were on its newest point, for tests of the hover state.
     var hoveredKey: String?
+    /// The span of the sparklines. The caller keeps it, so the panel opens on the range it was left on.
+    var range = TieredHistory.Range.hour
+    var setRange: (TieredHistory.Range) -> Void = { _ in }
+    var now = Date()
     @State private var query = ""
 
     var body: some View {
         PanelFrame(module: .sensors, subtitle: loc("\(sample?.readings.count ?? 0) sensors")) {
             if let sample, !sample.readings.isEmpty {
                 averages(sample)
+                RangePicker(range: Binding(get: { range }, set: setRange))
                 TextField(loc("Search sensors"), text: $query).textFieldStyle(.roundedBorder)
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 10) {
@@ -113,6 +131,7 @@ struct SensorsPanelContent: View {
         SensorRow(
             reading: reading,
             title: title,
+            points: tracker.track(for: reading.key)?.points(in: range, now: now) ?? [],
             track: tracker.track(for: reading.key),
             hovered: hoveredKey == reading.key
         )
@@ -129,6 +148,8 @@ struct SensorsPanelContent: View {
 private struct SensorRow: View {
     let reading: SensorReading
     let title: String
+    /// The readings of the range the panel is on.
+    let points: [History<Double>.Point]
     let track: SensorTrack?
     let hovered: Bool
     /// The row under the cursor goes above the next ones, so the sparkline's readout is not covered.
@@ -158,20 +179,39 @@ private struct SensorRow: View {
         .zIndex(isOver || hovered ? 1 : 0)
     }
 
-    private func sparkline(_ track: SensorTrack) -> some View {
-        let points = track.points
+    private func sparkline(_: SensorTrack) -> some View {
         let values = points.map(\.value)
         // A flat sensor would fill the whole height, so the scale is at least four degrees wide.
         let low = (values.min() ?? 0)
-        let high = max(values.max() ?? 0, low + 4)
+        let peak = values.max() ?? 0
+        let high = max(peak, low + 4)
         return InteractiveChart(
-            series: [ChartSeries(
-                id: reading.key,
-                title: reading.key,
-                color: Palette.orange,
-                points: points,
-                format: Format.temperature
-            )],
+            series: [
+                ChartSeries(
+                    id: reading.key,
+                    title: reading.key,
+                    color: Palette.orange,
+                    points: points,
+                    format: Format.temperature
+                ),
+                // Only in the readout: which zone the temperature was in, and the highest one on the chart.
+                ChartSeries(
+                    id: "\(reading.key).zone",
+                    title: loc("Zone"),
+                    color: Palette.gray,
+                    points: points,
+                    isPlotted: false,
+                    format: { TemperatureZone(celsius: $0).title }
+                ),
+                ChartSeries(
+                    id: "\(reading.key).peak",
+                    title: loc("Peak"),
+                    color: Palette.red,
+                    points: points.map { History<Double>.Point(date: $0.date, value: peak) },
+                    isPlotted: false,
+                    format: Format.temperature
+                ),
+            ],
             domain: (low - 1) ... (high + 1),
             height: 22,
             tooltipDate: Date.FormatStyle(date: .omitted, time: .standard),

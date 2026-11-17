@@ -140,7 +140,7 @@ struct RateRow: View {
             Text(loc("Source unavailable")).font(.system(size: 11)).foregroundStyle(Palette.orange).lineLimit(1)
         } else if let quote, quote.history.count > 1 {
             InteractiveChart(
-                series: [series(quote)],
+                series: [series(quote), changeSeries(quote)],
                 domain: ItemContent.padded(quote.history.map(\.value)),
                 height: 32,
                 tooltipDate: .dateTime.day().month(),
@@ -168,6 +168,18 @@ struct RateRow: View {
     private func changeText(_ quote: RateQuote) -> String {
         let amount = Format.exchangeRateChange(quote.change, of: quote.value, digits: digits)
         return "\(quote.isUp ? "↑" : "↓") \(amount)  \(Format.signedPercent(quote.changeShare))"
+    }
+
+    /// Change against the previous day, in the readout only. The first day has none.
+    private func changeSeries(_ quote: RateQuote) -> ChartSeries {
+        ChartSeries(
+            id: "\(pair.id).change",
+            title: loc("vs prev. day"),
+            color: tint,
+            points: quote.dayChanges,
+            isPlotted: false,
+            format: { $0.isNaN ? "—" : Format.signedPercent($0) }
+        )
     }
 
     private func series(_ quote: RateQuote) -> ChartSeries {

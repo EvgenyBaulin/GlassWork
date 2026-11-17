@@ -100,6 +100,9 @@ public enum ItemOption {
     public static let weakSignal = "weakSignal"
     public static let sunPlace = "place"
     public static let sunShows = "shows"
+    public static let graphMinutes = "graphMinutes"
+    public static let overviewDisk = "overviewDisk"
+    public static let overviewClick = "overviewClick"
 }
 
 public enum MemoryFigure: String, Sendable, CaseIterable {
@@ -108,6 +111,24 @@ public enum MemoryFigure: String, Sendable, CaseIterable {
 
 public enum DiskFigure: String, Sendable, CaseIterable {
     case free, activity, both, freePercent
+}
+
+/// What the Disk part of the Overview figure reads.
+public enum OverviewDisk: String, Sendable, CaseIterable {
+    case used, free
+}
+
+/// What a click on the Overview item opens.
+public enum OverviewClick: String, Sendable, CaseIterable {
+    case panel, hub
+}
+
+public extension [String: String] {
+    /// Minutes of history the menu bar graph of CPU and GPU draws: 1, 5 or 15.
+    var graphSpan: TimeInterval {
+        let minutes = number(ItemOption.graphMinutes, default: 1)
+        return TimeInterval([1, 5, 15].contains(minutes) ? minutes : 1) * 60
+    }
 }
 
 public enum RateUnit: String, Sendable, CaseIterable {

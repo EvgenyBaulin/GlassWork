@@ -401,6 +401,16 @@ public final class SystemMonitor {
         histories[metric]?.points(in: range) ?? []
     }
 
+    /// The latest `span` seconds of a metric for a menu bar graph, at most `maxPoints` values.
+    public func graphValues(_ metric: Metric, span: TimeInterval, maxPoints: Int) -> [Double] {
+        histories[metric]?.graph(span: span, maxPoints: maxPoints) ?? []
+    }
+
+    /// True when the range reaches back past the metric's first value, so part of the chart is before the app ran.
+    public func reachesBeforeStart(_ metric: Metric, in range: TieredHistory.Range) -> Bool {
+        histories[metric]?.reachesBeforeStart(range) ?? false
+    }
+
     public func fanPoints(_ fan: Int, in range: TieredHistory.Range) -> [History<Double>.Point] {
         fanHistories[fan]?.points(in: range) ?? []
     }

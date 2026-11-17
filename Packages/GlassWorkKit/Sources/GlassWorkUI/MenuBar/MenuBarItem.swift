@@ -90,6 +90,8 @@ public struct ItemContent {
     public var figureWidth: CGFloat?
     /// Takes no room in the menu bar. The item stays, so it can come back by itself.
     public var isHidden = false
+    /// Seconds of history the graph styles draw for a system metric.
+    public var graphSpan: TimeInterval = 60
 
     /// Text for a raw metric value, used by tooltips.
     func format(_ value: Double) -> String {
@@ -114,7 +116,7 @@ public struct ItemContent {
         case .overview: overview(monitor, options: options)
         case .cpu: cpu(monitor, style: style, options: options)
         case .memory: memory(monitor.memory, style: style, options: options)
-        case .gpu: percent(monitor.gpus.first?.utilization, metric: .gpu, style: style)
+        case .gpu: gpu(monitor, style: style, options: options)
         case .disk: disk(monitor.volumes.first, activity: monitor.diskActivity, style: style, options: options)
         case .network: network(monitor.network, style: style, options: options)
         case .battery: battery(monitor.battery, style: style, options: options)

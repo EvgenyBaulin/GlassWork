@@ -4,6 +4,8 @@ import SwiftUI
 struct PingPanel: View {
     let log: PingLog
     let host: String
+    /// Starts the chart as if the cursor were on this moment, for tests of the hover state.
+    var initialHover: Date?
     @State private var isChangingHost = false
     @Environment(\.panelActions) private var actions
 
@@ -65,7 +67,15 @@ struct PingPanel: View {
                     isPlotted: false,
                     format: { Format.percent($0) }
                 ),
-            ])
+                ChartSeries(
+                    id: "jitter",
+                    title: loc("Jitter"),
+                    color: Palette.orange,
+                    points: log.rollingJitter,
+                    isPlotted: false,
+                    format: DeveloperText.milliseconds
+                ),
+            ], initialHover: initialHover)
             HStack {
                 Text(loc("30 min ago"))
                 Spacer()

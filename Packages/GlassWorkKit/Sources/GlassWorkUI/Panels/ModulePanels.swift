@@ -49,18 +49,52 @@ public struct ModulePanel: View {
 
 struct CPUPanel: View {
     let monitor: SystemMonitor
-    @State private var range = TieredHistory.Range.minute
+    @AppStorage(PanelRange.cpu) private var range = TieredHistory.Range.minute
     @Environment(\.panelActions) private var actions
 
     var body: some View {
+        CPUPanelContent(
+            cpu: monitor.cpu,
+            info: monitor.cpuInfo,
+            loadAverage: monitor.loadAverage,
+            apps: monitor.apps.apps,
+            history: monitor.apps.history,
+            options: actions.moduleOptions(.cpu),
+            points: { monitor.points(.cpu, in: $0) },
+            reachesBeforeStart: { monitor.reachesBeforeStart(.cpu, in: $0) },
+            range: range,
+            setRange: { range = $0 }
+        )
+    }
+}
+
+/// The CPU panel for a reading. Its range is kept by the caller, so the panel opens where it was left.
+struct CPUPanelContent: View {
+    let cpu: CPUSample?
+    let info: CPUInfo
+    let loadAverage: [Double]
+    let apps: [AppUsage]
+    /// What each app used by the minute, for the busiest app at a moment of the chart.
+    let history: AppUsageHistory
+    let options: [String: String]
+    let points: (TieredHistory.Range) -> [History<Double>.Point]
+    let reachesBeforeStart: (TieredHistory.Range) -> Bool
+    var range = TieredHistory.Range.minute
+    var setRange: (TieredHistory.Range) -> Void = { _ in }
+    /// Starts the chart as if the cursor were on this moment, for tests of the hover state.
+    var initialHover: Date?
+    @Environment(\.panelActions) private var actions
+
+    var body: some View {
+        let shown = points(range)
         PanelFrame(
             module: .cpu,
             subtitle: subtitle,
             footerTitle: loc("Open Activity Monitor"),
             footerAction: { actions.openApp("com.apple.ActivityMonitor") }
         ) {
-            BigFigure(text: monitor.cpu.map { Format.percent($0.total) } ?? "—")
-            if let cpu = monitor.cpu, options.flag(ItemOption.splitsUserSystem, default: true) {
+            BigFigure(text: cpu.map { Format.percent($0.total) } ?? "—")
+            if let cpu, options.flag(ItemOption.splitsUserSystem, default: true) {
                 Text(
                     loc(
                         "User \(Format.percent(cpu.user)) · System \(Format.percent(cpu.system)) · Idle \(Format.percent(cpu.idle))"
@@ -69,38 +103,47 @@ struct CPUPanel: View {
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
             }
-            RangePicker(range: $range)
+            RangePicker(range: Binding(get: { range }, set: setRange))
             InteractiveChart(
-                series: [ChartSeries(
-                    id: "cpu",
-                    title: loc("CPU"),
-                    color: Palette.blue,
-                    points: monitor.points(.cpu, in: range),
-                    format: { Format.percent($0, style: .precise) }
-                )],
-                domain: 0 ... 1
+                series: [
+                    ChartSeries(
+                        id: "cpu",
+                        title: loc("CPU"),
+                        color: Palette.blue,
+                        points: shown,
+                        format: { Format.percent($0, style: .precise) }
+                    ),
+                    topAppSeries(shown),
+                ],
+                domain: 0 ... 1,
+                initialHover: initialHover
+            )
+            RangeSummary(
+                stats: RangeStats(shown),
+                reachesBeforeStart: reachesBeforeStart(range),
+                format: { Format.percent($0, style: .precise) }
             )
             Divider()
             PanelSection(
                 title: loc("Cores"),
                 caption: loc(
-                    "\(monitor.cpuInfo.performanceCores) Performance · \(monitor.cpuInfo.efficiencyCores) Efficiency"
+                    "\(info.performanceCores) Performance · \(info.efficiencyCores) Efficiency"
                 )
             ) {
                 CoreBars(
-                    cores: monitor.cpu?.cores ?? [],
-                    info: monitor.cpuInfo,
+                    cores: cpu?.cores ?? [],
+                    info: info,
                     showsEfficiency: options.flag(ItemOption.showsEfficiencyCores, default: true)
                 )
             }
             Divider()
             PanelSection(title: loc("Using the most")) {
-                TopApps(apps: monitor.apps.apps, sort: .cpu, limit: options.number(ItemOption.topApps, default: 4))
+                TopApps(apps: apps, sort: .cpu, limit: options.number(ItemOption.topApps, default: 4))
             }
-            if monitor.loadAverage.count == 3 {
+            if loadAverage.count == 3 {
                 Text(
                     loc(
-                        "Load average  \(monitor.loadAverage.map { String(format: "%.2f", $0) }.joined(separator: " · "))"
+                        "Load average  \(loadAverage.map { String(format: "%.2f", $0) }.joined(separator: " · "))"
                     )
                 )
                 .font(.system(size: 11))
@@ -109,12 +152,28 @@ struct CPUPanel: View {
         }
     }
 
-    private var subtitle: String {
-        loc("\(monitor.cpuInfo.brand) · \(monitor.cpu?.cores.count ?? 0) cores")
+    /// The busiest app at the hovered moment, in the readout only. The value of each point is its time, and the
+    /// readout looks the app up from it, so nothing is searched until the cursor is over the chart.
+    private func topAppSeries(_ shown: [History<Double>.Point]) -> ChartSeries {
+        ChartSeries(
+            id: "top-app",
+            title: loc("Top app"),
+            color: Palette.cyan,
+            points: shown.map { History<Double>.Point(date: $0.date, value: $0.date.timeIntervalSince1970) },
+            isPlotted: false,
+            format: { topApp(at: Date(timeIntervalSince1970: $0)) }
+        )
     }
 
-    private var options: [String: String] {
-        actions.moduleOptions(.cpu)
+    private func topApp(at date: Date) -> String {
+        guard let busiest = history.busiest(at: date) else { return "—" }
+        let name = apps.first { $0.id == busiest.id }?.name
+            ?? busiest.id.split(separator: ".").last.map(String.init) ?? busiest.id
+        return "\(name) \(String(format: "%.0f", busiest.cpu))%"
+    }
+
+    private var subtitle: String {
+        loc("\(info.brand) · \(cpu?.cores.count ?? 0) cores")
     }
 }
 
@@ -349,9 +408,15 @@ struct DiskPanel: View {
 
 struct GPUPanel: View {
     let monitor: SystemMonitor
+    @AppStorage(PanelRange.gpu) private var range = TieredHistory.Range.minute
 
     var body: some View {
-        GPUPanelContent(gpus: monitor.gpus, points: { monitor.points(.gpu, in: $0) })
+        GPUPanelContent(
+            gpus: monitor.gpus,
+            points: { monitor.points(.gpu, in: $0) },
+            range: range,
+            setRange: { range = $0 }
+        )
     }
 }
 
@@ -359,14 +424,16 @@ struct GPUPanel: View {
 struct GPUPanelContent: View {
     let gpus: [GPUSample]
     let points: (TieredHistory.Range) -> [History<Double>.Point]
-    @State private var range = TieredHistory.Range.minute
+    /// Kept by the caller, so the panel opens on the range it was left on.
+    var range = TieredHistory.Range.minute
+    var setRange: (TieredHistory.Range) -> Void = { _ in }
 
     var body: some View {
         let first = gpus.first
         PanelFrame(module: .gpu, subtitle: first?.name ?? "") {
             BigFigure(text: first?.utilization.map { Format.percent($0) } ?? "—")
             if first?.isReported == true {
-                RangePicker(range: $range)
+                RangePicker(range: Binding(get: { range }, set: setRange))
                 InteractiveChart(
                     series: [ChartSeries(
                         id: "gpu",

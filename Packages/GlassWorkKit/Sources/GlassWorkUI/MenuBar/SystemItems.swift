@@ -21,7 +21,7 @@ extension ItemContent {
             parts.append(monitor.memory.map { Format.percent($0.usedShare) } ?? "—")
         }
         if options.flag(ItemOption.showsDisk, default: false) {
-            parts.append(monitor.volumes.first.map { Format.percent(1 - $0.freeShare) } ?? "—")
+            parts.append(overviewDisk(monitor.volumes.first, options: options))
         }
         return ItemContent(
             figure: parts.isEmpty ? "—" : parts.joined(separator: " "),
@@ -31,8 +31,22 @@ extension ItemContent {
         )
     }
 
+    /// Used or free share of the first disk, as the Overview option says.
+    static func overviewDisk(_ volume: DiskVolume?, options: [String: String]) -> String {
+        guard let volume else { return "—" }
+        let isFree = options.choice(ItemOption.overviewDisk, default: OverviewDisk.used) == .free
+        return Format.percent(isFree ? volume.freeShare : 1 - volume.freeShare)
+    }
+
+    static func gpu(_ monitor: SystemMonitor, style: NumberStyle, options: [String: String]) -> ItemContent {
+        var item = percent(monitor.gpus.first?.utilization, metric: .gpu, style: style)
+        item.graphSpan = options.graphSpan
+        return item
+    }
+
     static func cpu(_ monitor: SystemMonitor, style: NumberStyle, options: [String: String]) -> ItemContent {
         var item = percent(monitor.cpu?.total, metric: .cpu, style: style)
+        item.graphSpan = options.graphSpan
         let limit = Double(options.number(ItemOption.highlightAbove, default: 80)) / 100
         if let total = monitor.cpu?.total, total >= limit {
             item.alert = Palette.orange

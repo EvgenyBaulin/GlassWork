@@ -17,7 +17,7 @@ struct SensorTrackerTests {
         var tracker = SensorTracker()
         let all = Set(SensorGroup.allCases)
         tracker.apply(sample([reading("Tp01", .cpuPerformance, 20)]), groups: all, at: start)
-        for index in 1 ... SensorTracker.capacity + 20 {
+        for index in 1 ... 150 {
             tracker.apply(
                 sample([reading("Tp01", .cpuPerformance, 50 + Double(index % 3))]),
                 groups: all,
@@ -25,7 +25,8 @@ struct SensorTrackerTests {
             )
         }
         let track = tracker.track(for: "Tp01")
-        #expect(track?.points.count == SensorTracker.capacity)
+        // The reading of 20 degrees has left the fine tier, which keeps 120. The last minute is 61 readings.
+        #expect(track?.points(in: .minute, now: start.addingTimeInterval(150)).count == 61)
         #expect(track?.minimum == 20)
         #expect(track?.maximum == 52)
     }
@@ -44,7 +45,7 @@ struct SensorTrackerTests {
         tracker.apply(readings, groups: [.cpuPerformance, .gpu], at: start)
         tracker.apply(readings, groups: [.cpuPerformance], at: start.addingTimeInterval(5))
         #expect(tracker.track(for: "Tg01") == nil)
-        #expect(tracker.track(for: "Tp01")?.points.count == 2)
+        #expect(tracker.track(for: "Tp01")?.points(in: .minute, now: start.addingTimeInterval(5)).count == 2)
     }
 
     @Test func aSensorMissingFromOneSampleKeepsItsHistory() {
@@ -52,6 +53,6 @@ struct SensorTrackerTests {
         let all = Set(SensorGroup.allCases)
         tracker.apply(sample([reading("Tp01", .cpuPerformance, 50)]), groups: all, at: start)
         tracker.apply(sample([]), groups: all, at: start.addingTimeInterval(5))
-        #expect(tracker.track(for: "Tp01")?.points.count == 1)
+        #expect(tracker.track(for: "Tp01")?.points(in: .minute, now: start.addingTimeInterval(5)).count == 1)
     }
 }

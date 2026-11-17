@@ -785,6 +785,22 @@
         }
       }
     },
+    "5 min": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 min"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 мин"
+          }
+        }
+      }
+    },
     "5h": {
       "localizations": {
         "en": {
@@ -1571,6 +1587,22 @@
         }
       }
     },
+    "Chart reaches back before the app started": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chart reaches back before the app started"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "График уходит глубже, чем работает приложение"
+          }
+        }
+      }
+    },
     "Check every": {
       "localizations": {
         "en": {
@@ -1663,6 +1695,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Клик вставляет простой текст · ⌥-клик сохраняет форматирование"
+          }
+        }
+      }
+    },
+    "Clicking opens": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clicking opens"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "По клику открывать"
           }
         }
       }
@@ -2259,6 +2307,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Диск"
+          }
+        }
+      }
+    },
+    "Disk figure": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disk figure"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показатель диска"
           }
         }
       }
@@ -3019,6 +3083,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "График и цифра"
+          }
+        }
+      }
+    },
+    "Graph span": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Graph span"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Период графика"
           }
         }
       }
@@ -4959,6 +5039,22 @@
         }
       }
     },
+    "Overview panel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview panel"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Панель обзора"
+          }
+        }
+      }
+    },
     "Overview, CPU and Memory start in the menu bar. Everything else waits in the Hub.": {
       "localizations": {
         "ru": {
@@ -5083,6 +5179,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пауза до %@"
+          }
+        }
+      }
+    },
+    "Peak": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peak"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пик"
           }
         }
       }
@@ -6075,6 +6187,22 @@
         }
       }
     },
+    "Since launch": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since launch"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С запуска"
+          }
+        }
+      }
+    },
     "Sleeps since start": {
       "localizations": {
         "en": {
@@ -6857,6 +6985,22 @@
         }
       }
     },
+    "Too hot": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Too hot"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Горячо"
+          }
+        }
+      }
+    },
     "took %@": {
       "localizations": {
         "en": {
@@ -6869,6 +7013,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "за %@"
+          }
+        }
+      }
+    },
+    "Top app": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top app"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Главное"
           }
         }
       }
@@ -7273,6 +7433,38 @@
         }
       }
     },
+    "vs prev. day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vs prev. day"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "к пред. дню"
+          }
+        }
+      }
+    },
+    "Warm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тепло"
+          }
+        }
+      }
+    },
     "Warnings": {
       "localizations": {
         "en": {
@@ -7647,6 +7839,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "на ревью"
+          }
+        }
+      }
+    },
+    "Zone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зона"
           }
         }
       }
