@@ -84,8 +84,24 @@ struct WidgetDotBar: View {
     let value: Double
     let tint: Color
     var count = 30
+    /// The dates the row spans. With one, hovering a dot shows its slice of the range and the range itself.
+    var range: DateInterval?
+    var initialHover: CGPoint?
 
     var body: some View {
+        if let range {
+            dots.hoverReadout(initialHover: initialHover) { point, size in
+                DotReadout.dotIndex(x: point.x, width: size.width, count: count).map {
+                    DotReadout.rangeRows(index: $0, count: count, range: range, tint: tint).map(\.tooltipRow)
+                }
+            }
+        } else {
+            dots
+        }
+    }
+
+    @ViewBuilder
+    private var dots: some View {
         let filled = Int((min(max(value, 0), 1) * Double(count)).rounded())
         GeometryReader { geometry in
             let diameter = min(geometry.size.height, geometry.size.width / CGFloat(count) * 0.62)

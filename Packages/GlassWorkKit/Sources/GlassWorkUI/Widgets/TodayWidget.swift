@@ -194,7 +194,11 @@ struct TodayWidget: View {
                             .foregroundStyle(tint(period))
                             .monospacedDigit()
                     }
-                    WidgetDotBar(value: item.share, tint: tint(period))
+                    WidgetDotBar(
+                        value: item.share,
+                        tint: tint(period),
+                        range: DateInterval(start: item.start, end: item.end)
+                    )
                 }
             }
         }

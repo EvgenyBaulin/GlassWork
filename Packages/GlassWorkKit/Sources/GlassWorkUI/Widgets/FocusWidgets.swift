@@ -141,7 +141,12 @@ struct PomodoroWidget: View {
     }
 
     private func ring(diameter: CGFloat) -> some View {
-        RingGauge(value: state.map { 1 - $0.share(at: context.now) } ?? 0, tint: tint, lineWidth: diameter / 10) {
+        RingGauge(
+            value: state.map { 1 - $0.share(at: context.now) } ?? 0,
+            tint: tint,
+            lineWidth: diameter / 10,
+            readout: RingReadout(usedTitle: loc("Left"), freeTitle: loc("Elapsed"))
+        ) {
             if let state {
                 countdown(state)
                     .font(.system(size: diameter / 4.4, weight: .bold, design: .rounded))

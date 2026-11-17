@@ -283,6 +283,22 @@
         }
       }
     },
+    "%lld days ago": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld days ago"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld дн. назад"
+          }
+        }
+      }
+    },
     "%lld err": {
       "localizations": {
         "en": {
@@ -1487,6 +1503,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "ЦБ РФ"
+          }
+        }
+      }
+    },
+    "Charged": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Charged"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заряжено"
           }
         }
       }
@@ -3173,6 +3205,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "через %@ · %@"
+          }
+        }
+      }
+    },
+    "in %lld days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in %lld days"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "через %lld дн."
           }
         }
       }
@@ -5193,6 +5241,22 @@
         }
       }
     },
+    "Range": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Range"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Период"
+          }
+        }
+      }
+    },
     "Rates": {
       "localizations": {
         "ru": {
@@ -5481,6 +5545,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сбросить значок"
+          }
+        }
+      }
+    },
+    "Resets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resets"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сброс"
           }
         }
       }
@@ -5879,6 +5959,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "с %@"
+          }
+        }
+      }
+    },
+    "Since break": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since break"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С перерыва"
           }
         }
       }
@@ -6737,6 +6833,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Отменено: %@"
+          }
+        }
+      }
+    },
+    "Until break": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until break"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До перерыва"
           }
         }
       }

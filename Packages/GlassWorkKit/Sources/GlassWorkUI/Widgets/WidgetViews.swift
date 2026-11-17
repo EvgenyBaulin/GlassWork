@@ -237,7 +237,12 @@ struct ActivityWidget: View {
 
     private func ring(_ item: Ring, diameter: CGFloat) -> some View {
         VStack(spacing: 6) {
-            RingGauge(value: item.value, tint: item.tint, lineWidth: diameter / 9) {
+            RingGauge(
+                value: item.value,
+                tint: item.tint,
+                lineWidth: diameter / 9,
+                readout: RingReadout(usedTitle: item.title, freeTitle: loc("Free"))
+            ) {
                 Text(Format.percent(item.value))
                     .font(.system(size: diameter / 5, weight: .semibold, design: .rounded))
             }

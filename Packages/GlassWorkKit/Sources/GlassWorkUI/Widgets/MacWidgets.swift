@@ -101,11 +101,15 @@ struct DevicesWidget: View {
     }
 
     private func ring(_ device: DeviceBattery, diameter: CGFloat) -> some View {
-        RingGauge(value: device.charge, tint: tint(device), lineWidth: diameter / 11) {
+        RingGauge(
+            value: device.charge,
+            tint: tint(device),
+            lineWidth: diameter / 11,
+            readout: RingReadout(usedTitle: loc("Charged"), freeTitle: loc("Empty"))
+        ) {
             Image(systemName: symbol(device)).font(.system(size: diameter / 3)).foregroundStyle(.secondary)
         }
         .frame(width: diameter, height: diameter)
-        .help(Format.percent(device.charge))
     }
 
     private func row(_ device: DeviceBattery) -> some View {

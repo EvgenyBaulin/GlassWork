@@ -399,24 +399,6 @@ struct CountdownWidget: View {
     }
 }
 
-struct YearInDotsWidget: View {
-    let now: Date
-
-    var body: some View {
-        let calendar = Calendar.current
-        let today = calendar.ordinality(of: .day, in: .year, for: now) ?? 1
-        let days = calendar.range(of: .day, in: .year, for: now)?.count ?? 365
-        LazyVGrid(columns: Array(repeating: GridItem(.fixed(5), spacing: 3), count: 20), spacing: 3) {
-            ForEach(1 ... days, id: \.self) { day in
-                Circle()
-                    .fill(day < today ? Color.primary.opacity(0.75) : day == today ? Palette.orange : Color.primary
-                        .opacity(0.15))
-                    .frame(width: 5, height: 5)
-            }
-        }
-    }
-}
-
 struct MoonWidget: View {
     let now: Date
 
@@ -453,7 +435,17 @@ struct StorageWidget: View {
     var body: some View {
         let main = snapshot.volumes.first
         HStack(spacing: 16) {
-            RingGauge(value: main?.freeShare ?? 0, tint: Palette.cyan, lineWidth: 10) {
+            RingGauge(
+                value: main?.freeShare ?? 0,
+                tint: Palette.cyan,
+                lineWidth: 10,
+                readout: RingReadout(
+                    usedTitle: loc("Free"),
+                    freeTitle: loc("Used"),
+                    usedValue: main.map { Format.bytes(Double($0.free)) },
+                    freeValue: main.map { Format.bytes(Double($0.total - min($0.free, $0.total))) }
+                )
+            ) {
                 Text(main.map { Format.bytes(Double($0.free)) } ?? "—")
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
             }

@@ -75,7 +75,12 @@ struct ProgressWidget: View {
     }
 
     private func ring(_ item: PeriodProgress, diameter: CGFloat) -> some View {
-        RingGauge(value: item.share, tint: item.period.tint, lineWidth: diameter / 9) {
+        RingGauge(
+            value: item.share,
+            tint: item.period.tint,
+            lineWidth: diameter / 9,
+            readout: RingReadout(usedTitle: loc("Elapsed"), freeTitle: loc("Left"))
+        ) {
             VStack(spacing: 0) {
                 Text(Format.percent(item.share)).font(.widgetFigure(diameter / 4)).monospacedDigit()
                 Text(loc("of today")).font(.system(size: 10)).foregroundStyle(.secondary)
@@ -95,7 +100,11 @@ struct ProgressWidget: View {
                     .monospacedDigit()
                     .widgetAccentable()
             }
-            WidgetDotBar(value: item.share, tint: item.period.tint)
+            WidgetDotBar(
+                value: item.share,
+                tint: item.period.tint,
+                range: DateInterval(start: item.start, end: item.end)
+            )
             if showsLeft {
                 Text(leftText(item)).font(.system(size: 11)).foregroundStyle(.secondary)
             }

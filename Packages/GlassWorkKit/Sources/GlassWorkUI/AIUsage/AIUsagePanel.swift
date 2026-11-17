@@ -176,7 +176,7 @@ struct AIUsagePanel: View {
                     .monospacedDigit()
                     .foregroundStyle(tint)
             }
-            ThinBar(value: share, tint: tint).help(Format.percent(share, style: .precise))
+            ThinBar(value: share, tint: tint, readout: AIWindowText.breakdown(window, now: now, tint: tint))
             if let caption = caption(window) {
                 Text(caption).font(.system(size: 11)).foregroundStyle(.secondary)
             }
@@ -202,6 +202,19 @@ enum AIWindowText {
         case .week: loc("This week")
         case .month: loc("This month")
         }
+    }
+
+    /// What the hover over a limit bar shows: used and left, and when the window resets.
+    static func breakdown(_ window: AIWindow, now: Date, tint: Color) -> [HoverRow] {
+        let used = window.used(at: now)
+        var rows = [
+            HoverRow(title: loc("Used"), value: Format.percent(used, style: .precise), color: tint),
+            HoverRow(title: loc("Left"), value: Format.percent(1 - used, style: .precise)),
+        ]
+        if let reset = window.resetsAt, reset > now {
+            rows.append(HoverRow(title: loc("Resets"), value: resetDay(reset, from: now)))
+        }
+        return rows
     }
 
     /// A weekday within the week, a date further out (a monthly plan resets weeks away).
