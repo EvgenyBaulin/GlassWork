@@ -301,9 +301,7 @@ public final class SystemMonitor {
         }
         snapshot.commandResults = activity.commandResults
         snapshot.endpointChecks = activity.endpointChecks
-        snapshot.reviews = activity.reviews
-        snapshot.runs = activity.runs
-        snapshot.contributions = activity.contributions
+        snapshot.copyLists(from: activity)
         if kinds.contains(.github) {
             snapshot.github = activity.github
         }
