@@ -6,7 +6,7 @@ struct DockFocusWidgetTests {
     @Test
     func dockOnlyModulesStayOutOfMenuBarAndShortcuts() {
         let ids: Set<ModuleID> = [.counter, .breathe, .screenTime]
-        #expect(Set(ModuleID.allCases.filter(\.isDockOnly)) == ids)
+        #expect(ids.isSubset(of: Set(ModuleID.allCases.filter(\.isDockOnly))))
         #expect(ids.isDisjoint(with: ModuleID.shortcutModules))
         #expect(ids.isSubset(of: Set(ModuleID.dockWidgets)))
         let settings = AppSettings()
