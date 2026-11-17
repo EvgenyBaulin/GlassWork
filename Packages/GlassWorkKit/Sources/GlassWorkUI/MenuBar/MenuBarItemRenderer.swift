@@ -62,7 +62,7 @@ public final class MenuBarItemRenderer {
         (appearance ?? NSAppearance.currentDrawing()).performAsCurrentDrawingAppearance { draw(content) }
         image.unlockFocus()
         // Template images follow the menu bar's light or dark look; alerts and accents keep their color.
-        image.isTemplate = content.alert == nil && content.accent?.color == nil && !showsArtwork(content)
+        image.isTemplate = isTemplate(content)
         return image
     }
 
@@ -92,6 +92,7 @@ public final class MenuBarItemRenderer {
         parts += ["\(content.isDimmed)", "\(content.accent?.color != nil)", appearance?.name.rawValue ?? ""]
         parts.append("\(content.symbolLevel ?? -1)")
         parts.append("\(content.artwork?.count ?? 0)")
+        parts.append(content.swatch.flatMap { NSColor($0).hexString } ?? "")
         if style == .graph || style == .graphAndFigure {
             if let glyph = content.glyph {
                 parts.append("\(glyph)")
@@ -144,9 +145,13 @@ public final class MenuBarItemRenderer {
     /// A template image is tinted by the bar, so black means "the bar's color". An image with a colored
     /// accent is drawn as it is and has to use the bar's text color itself.
     private func baseColor(_ content: ItemContent) -> NSColor {
-        let isTemplate = content.accent?.color == nil && !showsArtwork(content)
+        let isTemplate = content.accent?.color == nil && content.swatch == nil && !showsArtwork(content)
         let color = content.alert.map(NSColor.init) ?? (isTemplate ? .black : .labelColor)
         return content.isDimmed ? color.withAlphaComponent(0.5) : color
+    }
+
+    private func isTemplate(_ content: ItemContent) -> Bool {
+        content.alert == nil && content.accent?.color == nil && content.swatch == nil && !showsArtwork(content)
     }
 
     private func showsArtwork(_ content: ItemContent) -> Bool {
@@ -167,7 +172,7 @@ public final class MenuBarItemRenderer {
 
     private func drawSymbol(_ content: ItemContent, at x: inout CGFloat, color: NSColor) {
         let configuration = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
-            .applying(.init(paletteColors: [color]))
+            .applying(.init(paletteColors: [content.swatch.map(NSColor.init) ?? color]))
         let name = content.symbol ?? module.symbol
         let symbol = content.symbolLevel.map {
             NSImage(systemSymbolName: name, variableValue: $0, accessibilityDescription: nil)

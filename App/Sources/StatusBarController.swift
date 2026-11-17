@@ -349,6 +349,15 @@ final class ModuleItem: NSObject {
             }
             return
         }
+        if module == .colours {
+            // A click picks a colour; Option opens the panel with the colours picked before.
+            if NSEvent.modifierFlags.contains(.option) {
+                model.togglePanel(module, from: button)
+            } else {
+                model.pickColour()
+            }
+            return
+        }
         if module.isClickAction {
             model.performClickAction(module)
             refresh()

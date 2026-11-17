@@ -637,6 +637,22 @@
         }
       }
     },
+    "Add to": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавлять в"
+          }
+        }
+      }
+    },
     "Add Widget": {
       "localizations": {
         "ru": {
@@ -909,6 +925,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Разрешите доступ к напоминаниям"
+          }
+        }
+      }
+    },
+    "Allow reminders access in the To-Dos panel to choose lists.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow reminders access in the To-Dos panel to choose lists."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите доступ к напоминаниям в панели «Дела», чтобы выбрать списки."
           }
         }
       }
@@ -1601,6 +1633,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Осталось дней: %lld"
+          }
+        }
+      }
+    },
+    "Default filter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default filter"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фильтр по умолчанию"
           }
         }
       }
@@ -2335,6 +2383,22 @@
         }
       }
     },
+    "Group by list": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Group by list"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Группировать по спискам"
+          }
+        }
+      }
+    },
     "H %@  L %@": {
       "localizations": {
         "ru": {
@@ -2853,6 +2917,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ссылки"
+          }
+        }
+      }
+    },
+    "Lists": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lists"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Списки"
           }
         }
       }
@@ -3827,6 +3907,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Open-Meteo не отвечает"
+          }
+        }
+      }
+    },
+    "Option-click for the history": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Option-click for the history"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Option-клик — история цветов"
           }
         }
       }

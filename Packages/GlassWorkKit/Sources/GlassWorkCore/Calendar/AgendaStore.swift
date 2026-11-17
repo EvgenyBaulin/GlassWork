@@ -26,6 +26,10 @@ public final class AgendaStore {
     public private(set) var todos: [TodoItem] = []
     /// Every calendar on the Mac, shown or not.
     public private(set) var calendars: [CalendarChoice] = []
+    /// Every Reminders list on the Mac, shown or not.
+    public private(set) var reminderLists: [CalendarChoice] = []
+    /// The list the Reminders app puts a new item in.
+    public private(set) var defaultListID: String?
 
     @ObservationIgnored public var todoOptions = TodoOptions() {
         didSet {
@@ -91,8 +95,12 @@ public final class AgendaStore {
         refresh()
     }
 
-    public func addTodo(title: String) {
-        guard let calendar = store.defaultCalendarForNewReminders() else { return }
+    /// Adds to the given list when it still exists and takes new items, and to the Mac's default list otherwise.
+    public func addTodo(title: String, listID: String? = nil) {
+        let chosen = listID.flatMap { store.calendar(withIdentifier: $0) }.flatMap {
+            $0.allowsContentModifications ? $0 : nil
+        }
+        guard let calendar = chosen ?? store.defaultCalendarForNewReminders() else { return }
         let reminder = EKReminder(eventStore: store)
         reminder.title = title
         reminder.calendar = calendar
@@ -169,15 +177,34 @@ public final class AgendaStore {
     }
 
     private func loadReminders() {
+        let all = store.calendars(for: .reminder)
+        reminderLists = all.map(Self.listChoice).sorted { ($0.account, $0.title) < ($1.account, $1.title) }
+        defaultListID = store.defaultCalendarForNewReminders()?.calendarIdentifier
+        let shown = all.filter { todoOptions.shows(Self.listChoice($0)) }
+        // An empty list would mean every list to EventKit, as nil does not.
+        guard !shown.isEmpty else {
+            todos = []
+            return
+        }
         let predicate = store.predicateForIncompleteReminders(
             withDueDateStarting: nil,
             ending: nil,
-            calendars: nil
+            calendars: shown
         )
         store.fetchReminders(matching: predicate) { [weak self] reminders in
             let items = (reminders ?? []).map(Self.todoItem)
             Task { @MainActor in self?.addCompleted(to: items) }
         }
+    }
+
+    private static func listChoice(_ list: EKCalendar) -> CalendarChoice {
+        CalendarChoice(
+            id: list.calendarIdentifier,
+            title: list.title,
+            account: list.source?.title ?? "",
+            color: hex(list.cgColor),
+            isEditable: list.allowsContentModifications
+        )
     }
 
     /// The same access covers ticked reminders, so this asks for nothing new.
@@ -189,7 +216,7 @@ public final class AgendaStore {
         let predicate = store.predicateForCompletedReminders(
             withCompletionDateStarting: Date().addingTimeInterval(-seconds),
             ending: nil,
-            calendars: nil
+            calendars: store.calendars(for: .reminder).filter { todoOptions.shows(Self.listChoice($0)) }
         )
         store.fetchReminders(matching: predicate) { [weak self] reminders in
             let done = (reminders ?? []).map(Self.todoItem)
@@ -207,7 +234,7 @@ public final class AgendaStore {
             listName: reminder.calendar?.title ?? "",
             listColor: hex(reminder.calendar?.cgColor),
             due: reminder.dueDateComponents?.date,
-            isFlagged: reminder.priority == 1,
+            isFlagged: TodoPriority(reminders: reminder.priority) == .high,
             isCompleted: reminder.isCompleted,
             completedAt: reminder.completionDate,
             priority: reminder.priority > 0 ? reminder.priority : nil

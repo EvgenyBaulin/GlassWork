@@ -186,6 +186,21 @@ final class AppModel {
         }
     }
 
+    /// A click on the Colours item: the eyedropper, then the item says "Copied" for a moment.
+    func pickColour() {
+        panels.closeTransient()
+        ColourPicking.pick(
+            store: monitor.everyday,
+            options: store.settings.module(.colours)?.options ?? [:]
+        ) { [weak self] in
+            self?.statusBar.refreshItems()
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(ItemContent.colourCopiedFlash + 0.1))
+                self?.statusBar.refreshItems()
+            }
+        }
+    }
+
     /// Press and hold on the Stopwatch item.
     func resetStopwatch() {
         panels.closeTransient()

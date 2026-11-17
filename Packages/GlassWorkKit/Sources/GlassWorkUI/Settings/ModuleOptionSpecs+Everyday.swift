@@ -60,6 +60,17 @@ extension ModuleOptionSpec {
                 ]),
                 fallback: CompletedTodos.hide.rawValue
             ),
+            toggle(.todos, Key.todoGroupsByList, "Group by list", "Группировать по спискам", fallback: true),
+            option(
+                .todos, Key.todoDefaultFilter, "Default filter", "Фильтр по умолчанию",
+                .choice([
+                    OptionChoice(TodoFilter.all.rawValue, "All"),
+                    OptionChoice(TodoFilter.today.rawValue, "Today"),
+                    OptionChoice(TodoFilter.overdue.rawValue, "Overdue"),
+                    OptionChoice(TodoFilter.flagged.rawValue, "Flagged"),
+                ]),
+                fallback: TodoFilter.all.rawValue
+            ),
         ]
     }
 }

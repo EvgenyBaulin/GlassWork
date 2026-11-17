@@ -11,6 +11,7 @@ struct ModuleOptions: View {
     var body: some View {
         switch module {
         case .calendar: CalendarChoiceSection(agenda: agenda, store: store)
+        case .todos: TodoListSection(agenda: agenda, store: store)
         case .weather: WeatherOptions(store: store)
         case .rates: RatesOptions(store: store)
         case .clipboard: ClipboardOptions(store: store)
