@@ -1235,6 +1235,22 @@
         }
       }
     },
+    "Check Wi-Fi or Ethernet. Rates return when a connection is back.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check Wi-Fi or Ethernet. Rates return when a connection is back."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверьте Wi-Fi или Ethernet. Скорость появится, когда сеть вернётся."
+          }
+        }
+      }
+    },
     "Clear the shelf?": {
       "localizations": {
         "en": {
@@ -3501,6 +3517,22 @@
         }
       }
     },
+    "No network connection": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No network connection"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет подключения к сети"
+          }
+        }
+      }
+    },
     "No note": {
       "localizations": {
         "en": {
@@ -4127,6 +4159,22 @@
         }
       }
     },
+    "Performance cores": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Performance cores"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Производительные ядра"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "ru": {
@@ -4683,6 +4731,22 @@
         }
       }
     },
+    "Sensor %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sensor %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Датчик %lld"
+          }
+        }
+      }
+    },
     "Sensor groups in the panel": {
       "localizations": {
         "en": {
@@ -4731,6 +4795,22 @@
         }
       }
     },
+    "Show efficiency cores": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show efficiency cores"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать энергоэффективные ядра"
+          }
+        }
+      }
+    },
     "Show Recent Apps": {
       "localizations": {
         "en": {
@@ -4759,6 +4839,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показывать индикаторы запущенных"
+          }
+        }
+      }
+    },
+    "Show sensor keys": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show sensor keys"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать ключи датчиков"
           }
         }
       }

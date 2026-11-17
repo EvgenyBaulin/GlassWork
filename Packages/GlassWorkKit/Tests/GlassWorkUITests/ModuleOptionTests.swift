@@ -274,9 +274,9 @@ struct ItemOptionTests {
 
     @Test func overviewShowsWhatIsTicked() {
         let monitor = SystemMonitor()
-        #expect(ItemContent.overview(monitor, options: [:]).figure == "0% 0%")
+        #expect(ItemContent.overview(monitor, options: [:]).figure == "— —")
         let oneOnly = [ItemOption.showsMemory: "false"]
-        #expect(ItemContent.overview(monitor, options: oneOnly).figure == "0%")
+        #expect(ItemContent.overview(monitor, options: oneOnly).figure == "—")
         #expect(ItemContent.overview(monitor, options: oneOnly).template == "100%")
         let nothing = [ItemOption.showsCPU: "false", ItemOption.showsMemory: "false"]
         #expect(ItemContent.overview(monitor, options: nothing).figure == "—")

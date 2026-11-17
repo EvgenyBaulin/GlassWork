@@ -70,4 +70,12 @@ struct UptimeSensorsSnapshotTests {
         )
         assertPanel(view, dark: dark, name: "sensors-sparkline-hover")
     }
+
+    @Test(arguments: [false, true])
+    func sensorKeysHidden(dark: Bool) {
+        let view = SensorsPanelContent(
+            sample: Self.sample(step: 39), tracker: Self.tracker, groups: Self.groups, showsKeys: false
+        )
+        assertPanel(view, dark: dark, name: "sensors-no-keys")
+    }
 }

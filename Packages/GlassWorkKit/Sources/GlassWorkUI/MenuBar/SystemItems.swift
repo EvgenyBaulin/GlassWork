@@ -15,13 +15,13 @@ extension ItemContent {
     static func overview(_ monitor: SystemMonitor, options: [String: String]) -> ItemContent {
         var parts: [String] = []
         if options.flag(ItemOption.showsCPU, default: true) {
-            parts.append(Format.percent(monitor.cpu?.total ?? 0))
+            parts.append(monitor.cpu.map { Format.percent($0.total) } ?? "—")
         }
         if options.flag(ItemOption.showsMemory, default: true) {
-            parts.append(Format.percent(monitor.memory?.usedShare ?? 0))
+            parts.append(monitor.memory.map { Format.percent($0.usedShare) } ?? "—")
         }
         if options.flag(ItemOption.showsDisk, default: false) {
-            parts.append(Format.percent(1 - (monitor.volumes.first?.freeShare ?? 1)))
+            parts.append(monitor.volumes.first.map { Format.percent(1 - $0.freeShare) } ?? "—")
         }
         return ItemContent(
             figure: parts.isEmpty ? "—" : parts.joined(separator: " "),
@@ -131,7 +131,7 @@ extension ItemContent {
 
     static func network(_ sample: NetworkSample?, style: NumberStyle, options: [String: String]) -> ItemContent {
         let template = style == .compact ? "↓ 999M/s" : "↓ 999.9 Mbit/s"
-        guard let sample, !sample.interfaces.isEmpty else {
+        guard let sample, !sample.isOffline else {
             var item = ItemContent(figure: sample == nil ? "—" : loc("Offline"), template: template)
             item.isDimmed = true
             item.glyph = .symbol
