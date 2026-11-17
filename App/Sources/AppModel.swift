@@ -283,7 +283,7 @@ final class AppModel {
         islandController.apply(store.settings.island)
         islandFeeds.apply(
             isEnabled: store.settings.island.isEnabled,
-            downloadsPath: store.settings.dock.stacks.first(where: \.isDownloads)?.path
+            downloadsPath: islandDownloadsPath
         )
         buildWatcher.setEnabled(store.settings.island.isEnabled)
         focusWatcher.setEnabled(store.settings.island.isEnabled) { [weak self] in self?.updateIsland() }
