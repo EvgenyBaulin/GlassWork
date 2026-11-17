@@ -106,10 +106,13 @@ public struct TodoItem: Codable, Sendable, Equatable, Identifiable {
     public var isFlagged: Bool
     public var isCompleted: Bool
     public var completedAt: Date?
+    /// Reminders' own scale: 1–4 high, 5 medium, 6–9 low. Nil for none, and in snapshots from earlier versions.
+    public var priority: Int?
 
     public init(
         id: String, title: String, listName: String, listColor: String = "#3B82F6",
-        due: Date? = nil, isFlagged: Bool = false, isCompleted: Bool = false, completedAt: Date? = nil
+        due: Date? = nil, isFlagged: Bool = false, isCompleted: Bool = false, completedAt: Date? = nil,
+        priority: Int? = nil
     ) {
         self.id = id
         self.title = title
@@ -119,6 +122,7 @@ public struct TodoItem: Codable, Sendable, Equatable, Identifiable {
         self.isFlagged = isFlagged
         self.isCompleted = isCompleted
         self.completedAt = completedAt
+        self.priority = priority
     }
 }
 

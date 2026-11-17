@@ -283,7 +283,7 @@ public final class SystemMonitor {
             return shown
         }
         snapshot.network = network
-        snapshot.sensors = sensors
+        snapshot.sensors = sensors?.cappedForWidgets()
         if !kinds.isDisjoint(with: [.activity, .topApps]) {
             snapshot.processes = Array(processes.sorted { $0.cpu > $1.cpu }.prefix(12))
             snapshot.apps = apps.apps.sorted(by: .cpu).prefix(12).map {
@@ -292,7 +292,10 @@ public final class SystemMonitor {
         }
         snapshot.everyday = everyday.data
         snapshot.events = agenda.events
-        snapshot.todos = agenda.todos
+        let todos = WidgetTodoSummary.capped(agenda.todos)
+        snapshot.todos = todos.items
+        snapshot.todoSummary = todos.summary
+        snapshot.remindersAccess = agenda.remindersAccess
         snapshot.bootTime = SystemClock.bootTime()
         if !kinds.isDisjoint(with: WidgetKind.screenTimeKinds) {
             snapshot.screenTime = activity.screenTime

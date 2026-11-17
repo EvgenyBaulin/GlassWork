@@ -154,20 +154,162 @@ struct TodoWidget: View {
     let snapshot: WidgetSnapshot
     let now: Date
 
+    private var open: [TodoItem] {
+        TodoFilter.all.apply(to: snapshot.todos, now: now)
+    }
+
+    /// The counts of the app, which cover reminders the snapshot left out.
+    private var summary: WidgetTodoSummary {
+        snapshot.todoSummary ?? WidgetTodoSummary(
+            open: open.count,
+            done: snapshot.todos.count { $0.isCompleted }
+        )
+    }
+
     var body: some View {
-        let open = TodoFilter.all.apply(to: snapshot.todos, now: now)
-        let limit = size == .small ? 3 : size == .medium ? 3 : 10
-        VStack(alignment: .leading, spacing: 6) {
-            WidgetHeader(title: loc("To-Do"), symbol: "checklist", tint: Palette.blue)
-            Text("\(open.count)").font(.system(size: 30, weight: .semibold, design: .rounded))
-            ForEach(open.prefix(limit)) { item in
-                HStack(spacing: 6) {
-                    WidgetActionButton(action: .setTodo(id: item.id, completed: true)) {
-                        Image(systemName: "circle").foregroundStyle(Color(hex: item.listColor))
+        switch snapshot.remindersAccess ?? .granted {
+        case .granted: content
+        case .notAsked:
+            WidgetEmptyState(
+                symbol: "checklist",
+                title: loc("Allow Reminders access"),
+                detail: size == .small ? nil : loc("Open GlassWork and choose Allow in the To-Dos panel."),
+                tint: Palette.blue
+            )
+        case .denied:
+            WidgetEmptyState(
+                symbol: "lock.fill",
+                title: loc("Reminders access is off"),
+                detail: size == .small ? nil : loc("Allow it in System Settings › Privacy & Security › Reminders."),
+                tint: Palette.blue
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch size {
+        case .small: small
+        case .medium: medium
+        case .large: large
+        case .extraLarge: extraLarge
+        }
+    }
+
+    private var header: some View {
+        WidgetHeader(title: loc("To-Do"), symbol: "checklist", tint: Palette.blue)
+    }
+
+    private func figure(_ size: CGFloat) -> some View {
+        Text("\(summary.open)").font(.system(size: size, weight: .semibold, design: .rounded)).monospacedDigit()
+    }
+
+    /// `3 of 8 done` with a bar, once something has been ticked.
+    @ViewBuilder
+    private var progress: some View {
+        if summary.done > 0 {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(loc("\(summary.done) of \(summary.total) done"))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                ThinBar(value: Double(summary.done) / Double(max(summary.total, 1)), tint: Palette.blue)
+            }
+        } else {
+            Text(loc("open")).font(.system(size: 11)).foregroundStyle(.secondary)
+        }
+    }
+
+    private var small: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            header
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                figure(28)
+                progress
+            }
+            ForEach(open.prefix(2)) { item in
+                VStack(alignment: .leading, spacing: 0) {
+                    WidgetTodoRow(item: item, now: now, showsDue: false).frame(height: 18)
+                    if let due = item.due {
+                        Text(TodoLabels.due(due, now: now))
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(TodoLabels.isOverdue(due, now: now) ? Palette.red : .secondary)
+                            .padding(.leading, 20)
                     }
-                    Text(item.title).lineLimit(1)
                 }
-                .font(.system(size: 13))
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var medium: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            header
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    figure(34)
+                    progress
+                }
+                .frame(width: 100, alignment: .leading)
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(open.prefix(4)) { WidgetTodoRow(item: $0, now: now) }
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+    }
+
+    private var large: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            header
+            HStack(alignment: .center, spacing: 12) {
+                figure(34)
+                progress
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(open.prefix(10)) { WidgetTodoRow(item: $0, now: now, showsList: true) }
+                if open.count > 10 {
+                    Text("+\(open.count - 10)").font(.system(size: 11)).foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 0)
+            TodoAddLink()
+        }
+    }
+
+    private var extraLarge: some View {
+        let layout = TodoGroup.columns(of: TodoGroup.groups(of: open), count: 2, height: 300)
+        return HStack(alignment: .top, spacing: 18) {
+            VStack(alignment: .leading, spacing: 8) {
+                header
+                figure(44)
+                progress
+                Spacer(minLength: 0)
+                TodoAddLink()
+            }
+            .frame(width: 150, alignment: .leading)
+            Divider()
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .top, spacing: 18) {
+                    ForEach(Array(layout.columns.enumerated()), id: \.offset) { _, column in
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(column) { group in
+                                Label(group.name.isEmpty ? loc("Reminders") : group.name, systemImage: "circle.fill")
+                                    .labelStyle(WidgetTightLabel())
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundStyle(Color(hex: group.color))
+                                    .lineLimit(1)
+                                    .frame(height: TodoGroup.headerHeight, alignment: .bottom)
+                                ForEach(group.items) { WidgetTodoRow(item: $0, now: now) }
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                    }
+                }
+                if layout.hidden > 0 {
+                    Text("+\(layout.hidden)").font(.system(size: 11)).foregroundStyle(.secondary)
+                }
             }
         }
     }
@@ -345,21 +487,72 @@ struct TemperatureWidget: View {
     let size: WidgetSize
     let snapshot: WidgetSnapshot
 
+    private var sample: SensorSample? {
+        snapshot.sensors
+    }
+
+    /// Averages that come after the CPU one, for the medium size.
+    private var others: [(title: String, celsius: Double)] {
+        guard let sample else { return [] }
+        let rows: [(String, Double?)] = [
+            (loc("GPU avg"), sample.averageGPU),
+            (loc("SoC avg"), sample.averageSoC),
+            (loc("SSD"), sample.average(of: [.storage])),
+            (loc("Battery"), sample.average(of: [.battery])),
+            (loc("Ambient"), sample.average(of: [.ambient])),
+        ]
+        return rows.compactMap { title, value in value.map { (title, $0) } }
+    }
+
     var body: some View {
-        let sample = snapshot.sensors
-        VStack(alignment: .leading, spacing: 8) {
+        switch size {
+        case .small: summary(figure: 44)
+        case .medium:
+            HStack(alignment: .top, spacing: 16) {
+                summary(figure: 44).frame(maxWidth: .infinity, alignment: .leading)
+                VStack(spacing: 6) {
+                    ForEach(others.prefix(4), id: \.title) { row in
+                        InfoRow(title: row.title, value: Format.temperature(row.celsius))
+                    }
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        case .large:
+            VStack(alignment: .leading, spacing: 6) {
+                summary(figure: 36)
+                Divider()
+                list(columns: 2, height: 236)
+            }
+        case .extraLarge:
+            HStack(alignment: .top, spacing: 18) {
+                summary(figure: 44).frame(width: 190, alignment: .leading)
+                Divider()
+                list(columns: 3, height: 346)
+            }
+        }
+    }
+
+    private func summary(figure: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
             WidgetHeader(title: loc("Temperature"), symbol: "thermometer.medium", tint: Palette.red)
             Text(sample?.averageCPU.map(Format.temperature) ?? "—")
-                .font(.system(size: 44, weight: .semibold, design: .rounded))
+                .font(.system(size: figure, weight: .semibold, design: .rounded))
             Text(loc("avg CPU")).font(.system(size: 12)).foregroundStyle(.secondary)
-            if size == .large || size == .extraLarge, let sample {
-                Divider()
-                ForEach(SensorGroup.allCases, id: \.self) { group in
-                    if let value = sample.average(of: [group]) {
-                        InfoRow(title: group.title, value: Format.temperature(value))
-                    }
-                }
+            if let rpm = sample?.averageFanRPM {
+                Label(loc("\(Format.groupedRPM(rpm)) rpm avg"), systemImage: ModuleID.fans.symbol)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Palette.cyan)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func list(columns: Int, height: CGFloat) -> some View {
+        if let sample {
+            WidgetSensorList(sample: sample, columns: columns, height: height)
         }
     }
 }

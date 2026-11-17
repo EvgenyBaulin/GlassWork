@@ -2,7 +2,7 @@ import EventKit
 import Foundation
 import Observation
 
-public enum DataAccess: Sendable, Equatable {
+public enum DataAccess: String, Codable, Sendable, Equatable {
     case notAsked, granted, denied
 
     init(_ status: EKAuthorizationStatus) {
@@ -209,7 +209,8 @@ public final class AgendaStore {
             due: reminder.dueDateComponents?.date,
             isFlagged: reminder.priority == 1,
             isCompleted: reminder.isCompleted,
-            completedAt: reminder.completionDate
+            completedAt: reminder.completionDate,
+            priority: reminder.priority > 0 ? reminder.priority : nil
         )
     }
 

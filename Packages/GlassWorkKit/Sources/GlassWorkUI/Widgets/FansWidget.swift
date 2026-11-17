@@ -329,30 +329,10 @@ struct FansWidget: View {
     private var sensors: some View {
         VStack(alignment: .leading, spacing: 5) {
             WidgetSection(title: loc("Sensors"))
-            ForEach(sensorRows, id: \.title) { row in
-                HStack(spacing: 8) {
-                    Text(row.title).font(.system(size: 11)).frame(width: 66, alignment: .leading).lineLimit(1)
-                    ThinBar(value: row.celsius / 100, tint: row.celsius >= 90 ? Palette.red : Palette.green)
-                    Text(Format.degrees(row.celsius))
-                        .font(.system(size: 11, weight: .medium))
-                        .monospacedDigit()
-                        .frame(width: 30, alignment: .trailing)
-                }
+            if let sample = context.snapshot.sensors {
+                WidgetSensorList(sample: sample, columns: 2, height: state.mode == .curve ? 160 : 215)
             }
         }
-    }
-
-    private var sensorRows: [(title: String, celsius: Double)] {
-        guard let sample = context.snapshot.sensors else { return [] }
-        let rows: [(String, Double?)] = [
-            (loc("CPU avg"), sample.averageCPU),
-            (loc("GPU avg"), sample.averageGPU),
-            (loc("SoC avg"), sample.averageSoC),
-            (loc("SSD"), sample.average(of: [.storage])),
-            (loc("Battery"), sample.average(of: [.battery])),
-            (loc("Ambient"), sample.average(of: [.ambient])),
-        ]
-        return rows.compactMap { title, value in value.map { (title, $0) } }
     }
 }
 
