@@ -17,6 +17,7 @@ struct ModuleOptions: View {
         case .clipboard: ClipboardOptions(store: store)
         case .nowPlaying: NowPlayingOptions(store: store)
         case .sunMoon: SunPlaceSection(store: store)
+        case .deviceBatteries: DeviceChoiceSection(store: store)
         case _ where ModuleID.developerCollected.contains(module):
             DeveloperOptionsSection(module: module, store: store)
         default: EmptyView()

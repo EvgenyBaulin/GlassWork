@@ -562,9 +562,20 @@ struct TopAppsWidget: View {
     let snapshot: WidgetSnapshot
 
     var body: some View {
+        let options = snapshot.topAppsOptions ?? TopAppsOptions()
+        let isMemory = options.ranking == .memory
         VStack(alignment: .leading, spacing: 8) {
-            WidgetHeader(title: loc("Top Apps"), symbol: "cpu", tint: Palette.blue)
-            TopProcessRows(processes: snapshot.topUsage, limit: size == .medium || size == .small ? 4 : 10)
+            WidgetHeader(
+                title: loc("Top Apps"),
+                symbol: isMemory ? ModuleID.memory.symbol : "cpu",
+                tint: isMemory ? Palette.purple : Palette.blue
+            )
+            let limit = options.limit(for: size)
+            TopProcessRows(
+                processes: options.ranked(snapshot, limit: limit),
+                limit: limit,
+                ranking: options.ranking
+            )
         }
     }
 }

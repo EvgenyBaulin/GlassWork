@@ -250,20 +250,34 @@ struct ActivityWidget: View {
 struct TopProcessRows: View {
     let processes: [ProcessUsage]
     let limit: Int
+    var ranking = TopAppsRanking.cpu
 
     var body: some View {
-        let top = processes.sorted { $0.cpu > $1.cpu }.prefix(limit)
-        let peak = max(top.first?.cpu ?? 1, 0.1)
+        let top = ranked.prefix(limit)
+        let peak = max(top.first.map(value) ?? 1, ranking == .cpu ? 0.1 : 1)
         VStack(spacing: 6) {
             ForEach(Array(top)) { process in
                 HStack(spacing: 8) {
                     Text(process.name).lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
-                    ThinBar(value: process.cpu / peak, tint: Palette.blue).frame(width: 90)
-                    Text(String(format: "%.1f%%", process.cpu)).monospacedDigit().frame(width: 48, alignment: .trailing)
+                    ThinBar(value: value(process) / peak, tint: ranking == .cpu ? Palette.blue : Palette.purple)
+                        .frame(width: 90)
+                    Text(text(process)).monospacedDigit().frame(width: 56, alignment: .trailing)
                 }
                 .font(.system(size: 12))
             }
         }
+    }
+
+    private var ranked: [ProcessUsage] {
+        processes.sorted { value($0) > value($1) }
+    }
+
+    private func value(_ process: ProcessUsage) -> Double {
+        ranking == .cpu ? process.cpu : Double(process.memory)
+    }
+
+    private func text(_ process: ProcessUsage) -> String {
+        ranking == .cpu ? String(format: "%.1f%%", process.cpu) : Format.bytes(Double(process.memory))
     }
 }
 

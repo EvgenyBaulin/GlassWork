@@ -86,6 +86,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var fans: WidgetFanState?
     /// Each fan's speed over the last ten minutes.
     public var fanHistory: [Int: [History<Double>.Point]]?
+    /// Optional so a snapshot written by an earlier version still decodes: nil is CPU, sized to the widget.
+    public var topAppsOptions: TopAppsOptions?
     public var diskActivity: DiskActivity?
     /// The last minute, sampled finely.
     public var diskMinute: WidgetDiskHistory?

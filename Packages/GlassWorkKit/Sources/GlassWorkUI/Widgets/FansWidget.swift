@@ -154,10 +154,11 @@ struct FansWidget: View {
             Divider()
             VStack(alignment: .leading, spacing: 8) {
                 if state.mode == .curve {
-                    curveSection(height: 120)
+                    curveSection(height: 100)
                 } else {
                     customSection
                 }
+                presetList
                 sensors
                 Spacer(minLength: 0)
             }
@@ -330,8 +331,48 @@ struct FansWidget: View {
         VStack(alignment: .leading, spacing: 5) {
             WidgetSection(title: loc("Sensors"))
             if let sample = context.snapshot.sensors {
-                WidgetSensorList(sample: sample, columns: 2, height: state.mode == .curve ? 160 : 215)
+                let room: CGFloat = state.mode == .curve ? 180 : 215
+                WidgetSensorList(sample: sample, columns: 2, height: room - Self.presetListHeight(state.presets.count))
             }
+        }
+    }
+
+    /// Room the preset list takes next to the sensors.
+    private static func presetListHeight(_ count: Int) -> CGFloat {
+        let rows = min(count, presetRowLimit)
+        return rows == 0 ? 0 : CGFloat(rows) * (presetRowHeight + 2) + 22
+    }
+
+    private static let presetRowLimit = 5
+    private static let presetRowHeight: CGFloat = 20
+
+    /// Every saved curve, the user's own after the built-in ones. A tap selects it, as in the other sizes.
+    @ViewBuilder
+    private var presetList: some View {
+        if !state.presets.isEmpty {
+            VStack(alignment: .leading, spacing: 2) {
+                WidgetSection(title: loc("Curves"))
+                ForEach(state.presets.prefix(Self.presetRowLimit)) { preset in
+                    presetRow(preset)
+                }
+            }
+        }
+    }
+
+    private func presetRow(_ preset: WidgetFanState.Preset) -> some View {
+        let isOn = preset.id == state.selectedPresetID
+        return WidgetActionButton(action: .selectFanPreset(preset.id), isEnabled: state.canControl) {
+            HStack(spacing: 6) {
+                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 11))
+                    .foregroundStyle(isOn ? Palette.cyan : .secondary)
+                Text(preset.title)
+                    .font(.system(size: 12, weight: isOn ? .semibold : .regular))
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .frame(height: Self.presetRowHeight)
+            .contentShape(.rect)
         }
     }
 }

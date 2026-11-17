@@ -179,11 +179,15 @@ public struct FanSettings: Sendable, Equatable {
         }
     }
 
-    /// Keeps the current curve as a new preset and selects it.
-    public mutating func saveCurve(as name: String, id: String = UUID().uuidString) {
+    /// Keeps the current curve as a new preset and selects it. With separate curves, `fan` is the one being
+    /// edited and gets the new preset too, so its own choice does not keep it on the previous curve.
+    public mutating func saveCurve(as name: String, id: String = UUID().uuidString, forFan fan: Int? = nil) {
         userPresets.append(FanPreset(id: id, name: name, curve: selectedCurve))
         selectedPresetID = id
         draftPoints = []
+        if separateCurves, let fan, fanPresetIDs.indices.contains(fan) {
+            fanPresetIDs[fan] = id
+        }
     }
 
     public mutating func selectPreset(_ id: String) {

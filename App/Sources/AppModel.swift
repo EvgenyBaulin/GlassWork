@@ -94,6 +94,7 @@ final class AppModel {
             self?.checkAlerts()
             self?.checkUsageAndPing()
             self?.updateIsland()
+            self?.rememberDevices()
         }
         monitor.start()
         observeWidgetCommands()
@@ -424,6 +425,9 @@ final class AppModel {
         if kinds.contains(.fans) {
             snapshot.fans = fans.widgetState
         }
+        if kinds.contains(.topApps) {
+            snapshot.topAppsOptions = TopAppsOptions(options: store.settings.module(.cpu)?.options ?? [:])
+        }
         return snapshot
     }
 
@@ -547,6 +551,13 @@ private extension AppModel {
         monitor.networkInterface = chosen(.network, ItemOption.networkInterface)
         monitor.gpuName = chosen(.gpu, ItemOption.gpuName)
         monitor.volumePath = chosen(.disk, ItemOption.volumePath)
+    }
+
+    /// Keeps the names of accessories that have been seen, so Settings can list them while they are away.
+    private func rememberDevices() {
+        let options = store.settings.module(.deviceBatteries)?.options ?? [:]
+        guard let seen = DeviceSelection(options: options).recording(monitor.deviceBatteries) else { return }
+        store.update { $0.update(.deviceBatteries) { $0.options[ItemOption.seenDevices] = seen } }
     }
 
     func checkAlerts() {

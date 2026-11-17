@@ -26,6 +26,8 @@ public struct FanCurveChart: View {
     @Binding private var selection: Int?
     @State private var hover: Double?
     @State private var dragged: Int?
+    /// The point under the cursor, which a right click acts on.
+    @State private var pointUnderCursor: Int?
     /// The curve while a point is being dragged. Saved once at the end, not on every mouse event.
     @State private var draft: FanCurve?
     @FocusState private var isFocused: Bool
@@ -172,8 +174,14 @@ public struct FanCurveChart: View {
                     switch phase {
                     case let .active(location):
                         hover = temperature(at: location, proxy: proxy, plot: plot)
+                        pointUnderCursor = isEditable ? nearestPoint(to: location, proxy: proxy, plot: plot) : nil
                     case .ended:
                         hover = nil
+                    }
+                }
+                .contextMenu {
+                    if let index = pointUnderCursor, curve.removing(index) != nil {
+                        Button(loc("Delete Point"), role: .destructive) { delete(index) }
                     }
                 }
                 .gesture(dragGesture(proxy: proxy, plot: plot))
@@ -273,9 +281,17 @@ public struct FanCurveChart: View {
     }
 
     private func deleteSelection() -> KeyPress.Result {
-        guard isEditable, let selection, let removed = curve.removing(selection) else { return .ignored }
-        self.selection = nil
+        guard isEditable, let selection else { return .ignored }
+        return delete(selection) ? .handled : .ignored
+    }
+
+    /// Keeps the minimum number of points: `FanCurve.removing` refuses to go below it.
+    @discardableResult
+    private func delete(_ index: Int) -> Bool {
+        guard isEditable, let removed = curve.removing(index) else { return false }
+        selection = nil
+        pointUnderCursor = nil
         onChange(removed)
-        return .handled
+        return true
     }
 }

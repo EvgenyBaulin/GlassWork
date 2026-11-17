@@ -123,7 +123,7 @@ struct FanCurvesForm: View {
                 Button(loc("Save as…")) { askForName(.saveAs) }
                 Button(loc("Duplicate")) {
                     let name = loc("\(settings.selectedPreset.title) copy")
-                    control.updateSettings { $0.saveCurve(as: name) }
+                    control.updateSettings { $0.saveCurve(as: name, forFan: editingFan) }
                 }
                 if settings.hasDraft {
                     Button(loc("Revert")) { control.updateSettings { $0.draftPoints = [] } }
@@ -185,7 +185,7 @@ struct FanCurvesForm: View {
         if naming == .rename {
             control.updateSettings { $0.renamePreset($0.selectedPresetID, to: name) }
         } else {
-            control.updateSettings { $0.saveCurve(as: name) }
+            control.updateSettings { $0.saveCurve(as: name, forFan: editingFan) }
         }
     }
 
