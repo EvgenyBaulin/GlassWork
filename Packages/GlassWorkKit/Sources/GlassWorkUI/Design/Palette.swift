@@ -226,6 +226,6 @@ public struct ModuleIcon: View {
 }
 
 public extension EnvironmentValues {
-    // The hardware this Mac has. Tests set it so a snapshot reads the same on any Mac.
+    /// The hardware this Mac has. Tests set it so a snapshot reads the same on any Mac.
     @Entry var hardware: HardwareAvailability = .current
 }
