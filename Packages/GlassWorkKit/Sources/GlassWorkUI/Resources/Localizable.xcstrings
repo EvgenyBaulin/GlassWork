@@ -875,6 +875,22 @@
         }
       }
     },
+    "A preset adds widgets and folders. Your apps stay as they are. Change it any time in Settings → Dock.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A preset adds widgets and folders. Your apps stay as they are. Change it any time in Settings → Dock."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Набор добавляет виджеты и папки. Ваши приложения остаются на месте. Изменить его можно в любой момент: Настройки → Dock."
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "ru": {
@@ -913,6 +929,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Универсальный доступ"
+          }
+        }
+      }
+    },
+    "Accessibility is on": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility is on"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Универсальный доступ включён"
+          }
+        }
+      }
+    },
+    "Accessibility shows app badges, lists an app's windows and brings one forward. Without it the Dock works in limited mode: no badges and no window list.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility shows app badges, lists an app's windows and brings one forward. Without it the Dock works in limited mode: no badges and no window list."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Универсальный доступ нужен, чтобы показывать значки уведомлений, список окон приложения и выводить окно вперёд. Без него Dock работает в ограниченном режиме: без значков и списка окон."
           }
         }
       }
@@ -1227,6 +1275,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Разрешить доступ"
+          }
+        }
+      }
+    },
+    "Allow Accessibility for the full Dock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Accessibility for the full Dock"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешите универсальный доступ для полного Dock"
           }
         }
       }
@@ -1887,6 +1951,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Контакты"
+          }
+        }
+      }
+    },
+    "Continue in limited mode": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue in limited mode"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продолжить в ограниченном режиме"
           }
         }
       }
@@ -5161,6 +5241,22 @@
         }
       }
     },
+    "Open Accessibility Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Accessibility Settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть настройки универсального доступа"
+          }
+        }
+      }
+    },
     "Open Activity Monitor": {
       "localizations": {
         "ru": {
@@ -7063,6 +7159,22 @@
         }
       }
     },
+    "Start from a preset?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start from a preset?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Начать с готового набора?"
+          }
+        }
+      }
+    },
     "Started": {
       "localizations": {
         "ru": {
@@ -7761,6 +7873,22 @@
         }
       }
     },
+    "Turn On Dock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn On Dock"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включить Dock"
+          }
+        }
+      }
+    },
     "Turn on Screen Time tracking in Settings to see your focus.": {
       "localizations": {
         "ru": {
@@ -8133,6 +8261,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "к пред. дню"
+          }
+        }
+      }
+    },
+    "Waiting for permission…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for permission…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ждём разрешения…"
           }
         }
       }
