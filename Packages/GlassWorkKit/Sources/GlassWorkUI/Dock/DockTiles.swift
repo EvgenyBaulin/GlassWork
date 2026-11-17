@@ -152,17 +152,25 @@ struct FolderTile: View {
             DockIndicated(position: position, isLit: showsIndicator && (isRunning || isLaunching)) {
                 content
                     .frame(width: size, height: size)
-                    .background(.white.opacity(0.14), in: .rect(cornerRadius: size / 4.5))
+                    .background(
+                        folder.tint.map { $0.colour.opacity(0.4) } ?? .white.opacity(0.14),
+                        in: .rect(cornerRadius: size / 4.5)
+                    )
                     .modifier(LaunchBounce(isActive: isLaunching, size: size, position: position))
             }
         }
         .buttonStyle(.plain)
     }
 
+    /// An emoji wins over a symbol, and both over the grid of apps.
     @ViewBuilder
     private var content: some View {
-        if let symbol = folder.symbol {
-            Image(systemName: symbol).font(.system(size: size * 0.5))
+        if let emoji = folder.emoji {
+            Text(emoji).font(.system(size: size * 0.55))
+        } else if let symbol = folder.symbol {
+            Image(systemName: symbol)
+                .font(.system(size: size * 0.5))
+                .foregroundStyle(folder.tint?.colour ?? .primary)
         } else {
             let cell = size * 0.24
             LazyVGrid(columns: Array(repeating: GridItem(.fixed(cell), spacing: 2), count: 3), spacing: 2) {
@@ -179,6 +187,7 @@ struct FolderCard: View {
     let close: () -> Void
     @State private var name: String
     @State private var query = ""
+    @State private var isPickingIcon = false
     @FocusState private var isNaming: Bool
 
     init(folder: AppFolder, actions: DockActions, close: @escaping () -> Void) {
@@ -206,6 +215,7 @@ struct FolderCard: View {
                     Picker(loc("Sort by"), selection: sortBinding) {
                         ForEach(FolderSort.allCases, id: \.self) { Text($0.title).tag($0) }
                     }
+                    Button(loc("Icon…")) { isPickingIcon.toggle() }
                     Divider()
                     Button(loc("Ungroup")) {
                         actions.update { DockLayout.ungroup(folder, in: $0) }
@@ -216,6 +226,9 @@ struct FolderCard: View {
                 }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
+            }
+            if isPickingIcon {
+                FolderIconPicker(folder: folder, actions: actions)
             }
             if folder.apps.count > 12 {
                 TextField(loc("Search"), text: $query).textFieldStyle(.roundedBorder)
@@ -234,6 +247,11 @@ struct FolderCard: View {
                             }
                         }
                         .buttonStyle(.plain)
+                        // Drag within the card to reorder by hand, or out onto the Dock to take the app out.
+                        .draggable(DockDrag.payload(path: app.path, fromFolder: folder.id))
+                        .dropDestination(for: String.self) { payloads, _ in
+                            reorder(payloads, onto: app)
+                        }
                         .contextMenu {
                             DockAppMenu(app: app, actions: actions)
                             Divider()
@@ -267,6 +285,15 @@ struct FolderCard: View {
             get: { folder.sort },
             set: { sort in actions.update { DockLayout.sort(folder: folder.id, by: sort, in: $0) } }
         )
+    }
+
+    /// Moves an app of this folder into another's place.
+    private func reorder(_ payloads: [String], onto target: DockApp) -> Bool {
+        guard let payload = payloads.first.map(DockDrag.parse), payload.folder == folder.id,
+              let dragged = folder.apps.first(where: { $0.path == payload.path }), dragged != target
+        else { return false }
+        actions.update { DockLayout.reorder(dragged, onto: target, inFolder: folder.id, in: $0) }
+        return true
     }
 
     private func rename() {
@@ -335,12 +362,18 @@ struct WidgetTile: View {
 struct DockDropHighlight: ViewModifier {
     let isTargeted: Bool
     let size: CGFloat
+    /// Held over long enough that letting go makes a folder: the tile swells and fills.
+    var isReady = false
 
     func body(content: Content) -> some View {
         content
-            .scaleEffect(isTargeted ? 1.08 : 1)
+            .scaleEffect(isTargeted ? (isReady ? 1.18 : 1.08) : 1)
             .overlay {
                 if isTargeted {
+                    RoundedRectangle(cornerRadius: size / 4.5 + 3)
+                        .fill(.white.opacity(isReady ? 0.22 : 0))
+                        .padding(-3)
+                        .frame(width: size, height: size)
                     RoundedRectangle(cornerRadius: size / 4.5 + 3)
                         .strokeBorder(.white.opacity(0.85), lineWidth: 2)
                         .padding(-3)
@@ -348,5 +381,6 @@ struct DockDropHighlight: ViewModifier {
                 }
             }
             .animation(.easeOut(duration: 0.15), value: isTargeted)
+            .animation(.easeOut(duration: 0.15), value: isReady)
     }
 }
