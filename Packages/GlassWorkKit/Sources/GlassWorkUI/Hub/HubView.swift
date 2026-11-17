@@ -5,6 +5,7 @@ import SwiftUI
 public struct HubView: View {
     private let monitor: SystemMonitor
     private let store: SettingsStore
+    @Environment(\.hardware) private var hardware
     @State private var query = ""
     @State private var selected: ModuleID?
     @State private var isEditing: Bool
@@ -38,7 +39,7 @@ public struct HubView: View {
     }
 
     private var available: [ModuleSettings] {
-        store.settings.modules.filter(\.id.isAvailable)
+        store.settings.modules.filter { $0.id.isAvailable(on: hardware) }
     }
 
     private var modules: [ModuleSettings] {

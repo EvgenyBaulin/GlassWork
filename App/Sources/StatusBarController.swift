@@ -236,6 +236,8 @@ final class ModuleItem: NSObject {
     private var visibility: NSKeyValueObservation?
     /// When the mouse went down on the Stopwatch item.
     private var pressedAt: Date?
+    /// The help text is rebuilt now and then, not on every refresh: it only matters while the pointer rests here.
+    private var tooltipBuiltAt = Date.distantPast
 
     var window: NSWindow? {
         item.button?.window
@@ -301,6 +303,13 @@ final class ModuleItem: NSObject {
         if let image = renderer.image(size: size) {
             item.button?.image = image
         }
+        updateTooltip()
+    }
+
+    private func updateTooltip(force: Bool = false) {
+        guard force || Date().timeIntervalSince(tooltipBuiltAt) >= 10 else { return }
+        tooltipBuiltAt = Date()
+        item.button?.toolTip = renderer.tooltip()
     }
 
     private var currentWidth: CGFloat {
@@ -316,6 +325,7 @@ final class ModuleItem: NSObject {
         renderer.options = options
         let size = CGSize(width: width, height: NSStatusBar.system.thickness)
         item.button?.image = renderer.image(size: size, force: true)
+        updateTooltip(force: true)
     }
 
     /// ⌘-dragging an item out keeps the module in the Hub.

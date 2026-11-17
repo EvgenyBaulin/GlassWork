@@ -66,23 +66,23 @@ public final class MenuBarItemRenderer {
         return image
     }
 
-    /// Current value, the graph window's range and one line of context.
+    /// Current value, the range seen since the first reading kept and one line of context.
     public func tooltip() -> String {
         let content = ItemContent.content(module, monitor: monitor, style: .precise)
-        var text = "\(module.title) \(content.figure)"
+        var extremes: ItemTooltip.Extremes?
         if let metric = content.metric {
-            let values = monitor.points(metric, in: .minute).map(\.value)
-            if let low = values.min(), let high = values.max() {
-                text += " · \(loc("min")) \(content.format(low)) · \(loc("max")) \(content.format(high))"
-            }
+            // The coarse day tier reaches furthest back; the fine minute tier keeps the true peaks of now.
+            let points = monitor.points(metric, in: .day) + monitor.points(metric, in: .minute)
+            extremes = ItemTooltip.Extremes(points.map(\.value), since: points.map(\.date).min())
         }
-        if let second = content.secondLine {
-            text += "\n\(second)"
-        }
-        if let detail = content.detail {
-            text += "\n\(detail)"
-        }
-        return text
+        return ItemTooltip.text(
+            title: module.title,
+            figure: content.figure,
+            extremes: extremes,
+            format: content.format,
+            secondLine: content.secondLine,
+            detail: content.detail
+        )
     }
 
     private func signature(_ content: ItemContent, size: CGSize) -> String {
@@ -91,6 +91,9 @@ public final class MenuBarItemRenderer {
         parts += [content.prefix ?? "", content.symbol ?? "", content.label ?? "", content.accent?.text ?? ""]
         parts += ["\(content.isDimmed)", "\(content.accent?.color != nil)", appearance?.name.rawValue ?? ""]
         parts.append("\(content.symbolLevel ?? -1)")
+        if case let .battery(level, state) = content.glyph {
+            parts.append("\(Int((level * 100).rounded()))\(state)")
+        }
         parts.append("\(content.artwork?.count ?? 0)")
         parts.append(content.swatch.flatMap { NSColor($0).hexString } ?? "")
         if style == .graph || style == .graphAndFigure {
@@ -131,7 +134,10 @@ public final class MenuBarItemRenderer {
             }
             drawFigure(content, at: x, color: color)
         case .graph:
-            drawSymbol(content, at: &x, color: color)
+            // A battery is its own graph, so it is drawn once, wide.
+            if case .battery = content.glyph {} else {
+                drawSymbol(content, at: &x, color: color)
+            }
             drawGraph(content, at: x, color: color)
         case .graphAndFigure:
             drawGraph(content, at: x, color: color)
@@ -171,6 +177,12 @@ public final class MenuBarItemRenderer {
     }
 
     private func drawSymbol(_ content: ItemContent, at x: inout CGFloat, color: NSColor) {
+        if case let .battery(level, state) = content.glyph {
+            let frame = CGRect(x: x, y: bounds.midY - 5, width: Self.symbolWidth, height: 10)
+            drawBattery(level: level, state: state, in: frame, color: color)
+            x += Self.symbolWidth + Self.padding
+            return
+        }
         let configuration = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
             .applying(.init(paletteColors: [content.swatch.map(NSColor.init) ?? color]))
         let name = content.symbol ?? module.symbol
@@ -274,6 +286,9 @@ public final class MenuBarItemRenderer {
             drawBars(levels, at: x, color: color)
         case let .progress(value):
             drawProgress(value, at: x, color: color)
+        case let .battery(level, state):
+            let frame = CGRect(x: x, y: bounds.midY - 6, width: 28, height: 12)
+            drawBattery(level: level, state: state, in: frame, color: color)
         }
     }
 
@@ -290,6 +305,50 @@ public final class MenuBarItemRenderer {
             xRadius: height / 2,
             yRadius: height / 2
         ).fill()
+    }
+
+    /// A battery outline with a fill from the left that grows with the charge. The bolt and the plug are cut
+    /// out around themselves so they read over the fill and over the empty part alike.
+    private func drawBattery(level: Double, state: BatteryPowerState, in frame: CGRect, color: NSColor) {
+        let cap: CGFloat = 1.5
+        let body = CGRect(
+            x: frame.minX + 0.5,
+            y: frame.minY + 0.5,
+            width: frame.width - cap - 1,
+            height: frame.height - 1
+        )
+        let outline = NSBezierPath(roundedRect: body, xRadius: 2.5, yRadius: 2.5)
+        outline.lineWidth = 1
+        color.withAlphaComponent(0.55).setStroke()
+        outline.stroke()
+        let nub = CGRect(x: body.maxX + 0.5, y: frame.midY - 2, width: cap, height: 4)
+        color.withAlphaComponent(0.55).setFill()
+        NSBezierPath(roundedRect: nub, xRadius: 0.75, yRadius: 0.75).fill()
+        let inner = body.insetBy(dx: 1.5, dy: 1.5)
+        let share = CGFloat(min(max(level, 0), 1))
+        if share > 0 {
+            let width = max(inner.width * share, 1.5)
+            let filled = CGRect(x: inner.minX, y: inner.minY, width: width, height: inner.height)
+            color.setFill()
+            NSBezierPath(roundedRect: filled, xRadius: 1, yRadius: 1).fill()
+        }
+        let name = switch state {
+        case .discharging: nil as String?
+        case .charging: "bolt.fill"
+        case .pluggedIn: "powerplug.fill"
+        }
+        guard let name, let image = NSImage(systemSymbolName: name, accessibilityDescription: nil) else { return }
+        let configuration = NSImage.SymbolConfiguration(pointSize: frame.height * 0.62, weight: .semibold)
+            .applying(.init(paletteColors: [color]))
+        guard let symbol = image.withSymbolConfiguration(configuration) else { return }
+        let mark = CGRect(
+            x: body.midX - symbol.size.width / 2,
+            y: frame.midY - symbol.size.height / 2,
+            width: symbol.size.width,
+            height: symbol.size.height
+        )
+        symbol.draw(in: mark.insetBy(dx: -1, dy: -1), from: .zero, operation: .destinationOut, fraction: 1)
+        symbol.draw(in: mark, from: .zero, operation: .sourceOver, fraction: 1)
     }
 
     private func drawBars(_ levels: [Double], at x: CGFloat, color: NSColor) {
