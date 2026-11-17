@@ -3,6 +3,13 @@ import GlassWorkCore
 import GlassWorkUI
 
 extension AppModel {
+    /// The folder the island watches for downloads: the Dock's Downloads stack when there is one, otherwise the
+    /// user's Downloads folder, so downloads show up without setting up the Dock (macOS asks for access once).
+    var islandDownloadsPath: String? {
+        store.settings.dock.stacks.first(where: \.isDownloads)?.path
+            ?? FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first?.path
+    }
+
     func updateIsland() {
         guard store.settings.island.isEnabled else { return }
         var input = IslandInput(monitor: monitor, alerts: store.settings.alerts)

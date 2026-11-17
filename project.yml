@@ -68,6 +68,7 @@ targets:
             CFBundleURLSchemes: [glasswork]
         CFBundleLocalizations: [en, ru]
         GWAppGroupID: $(APP_GROUP_ID)
+        NSDownloadsFolderUsageDescription: Files you are downloading appear in the island at the notch with their progress.
         NSAppleEventsUsageDescription: GlassWork asks Finder to empty the Trash when you choose Empty Trash in its Dock.
         NSCalendarsFullAccessUsageDescription: GlassWork shows your events in the menu bar and in widgets.
         NSRemindersFullAccessUsageDescription: GlassWork shows and ticks off your reminders.

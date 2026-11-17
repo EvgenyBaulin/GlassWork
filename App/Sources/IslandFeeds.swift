@@ -40,8 +40,9 @@ final class IslandFeeds {
         self.onChange = onChange
     }
 
-    /// - Parameter downloadsPath: The folder to watch. Reading Downloads can raise a macOS prompt, so the app
-    ///   passes it only when the owner has put a Downloads stack in the Dock; nil leaves downloads out.
+    /// - Parameter downloadsPath: The folder to watch: the Dock's Downloads stack, else the user's Downloads
+    ///   folder. The first read can raise a macOS access prompt; if access is refused the folder reads as empty.
+    ///   nil leaves downloads out.
     func apply(isEnabled: Bool, downloadsPath: String?) {
         guard isEnabled else {
             stop()
