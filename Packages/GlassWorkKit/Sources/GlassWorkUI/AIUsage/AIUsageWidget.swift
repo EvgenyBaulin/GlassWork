@@ -235,7 +235,7 @@ struct AIUsageWidget: View {
 
     private func resetTime(_ date: Date) -> String {
         date.timeIntervalSince(now) < 86400
-            ? date.formatted(date: .omitted, time: .shortened)
+            ? date.timeText
             : AIWindowText.resetDay(date, from: now)
     }
 

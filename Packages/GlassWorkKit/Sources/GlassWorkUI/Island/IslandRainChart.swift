@@ -21,7 +21,7 @@ struct IslandRainChart: View {
             )],
             domain: 0 ... max(points.map(\.value).max() ?? 1, 1),
             height: 56,
-            tooltipDate: Date.FormatStyle(date: .omitted, time: .shortened),
+            tooltipDate: Date.FormatStyle(date: .omitted, time: .shortened).regional,
             style: .bars(unit: .hour),
             initialHover: initialHover
         )

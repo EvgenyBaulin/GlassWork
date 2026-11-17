@@ -56,7 +56,7 @@ struct AgendaRow: View {
 
 private func timeRange(_ event: AgendaEvent) -> String {
     guard !event.isAllDay else { return loc("All day") }
-    let style = Date.FormatStyle(date: .omitted, time: .shortened)
+    let style = Date.FormatStyle(date: .omitted, time: .shortened).regional
     return "\(event.start.formatted(style)) – \(event.end.formatted(style))"
 }
 
@@ -163,7 +163,7 @@ struct EndsInPanel: View {
 
     private func freeText(_ state: EndsInState) -> String {
         guard let next = state.next else { return loc("Free all day") }
-        return loc("Free until \(next.start.formatted(date: .omitted, time: .shortened))")
+        return loc("Free until \(next.start.timeText)")
     }
 
     private func row(_ event: AgendaEvent, now: Date) -> some View {

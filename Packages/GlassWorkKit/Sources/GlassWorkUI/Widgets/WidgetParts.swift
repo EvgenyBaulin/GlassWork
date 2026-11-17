@@ -265,7 +265,7 @@ enum WidgetDuration {
     }
 
     static func clock(_ date: Date) -> String {
-        date.formatted(date: .omitted, time: .shortened)
+        date.timeText
     }
 
     static func range(_ start: Date, _ end: Date) -> String {

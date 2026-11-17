@@ -24,7 +24,7 @@ public struct PeriodProgress: Sendable, Equatable {
     /// Whole calendar days after today before the period ends; 0 on its last day.
     public let daysLeft: Int
 
-    public init(_ period: Period, at date: Date, calendar: Calendar = .current) {
+    public init(_ period: Period, at date: Date, calendar: Calendar = RegionalFormat.calendar) {
         self.period = period
         let interval = calendar.dateInterval(of: period.component, for: date)
             ?? DateInterval(start: calendar.startOfDay(for: date), duration: 86400)

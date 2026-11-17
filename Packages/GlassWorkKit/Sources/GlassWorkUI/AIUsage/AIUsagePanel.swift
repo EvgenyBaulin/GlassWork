@@ -31,7 +31,7 @@ extension ItemContent {
             template: "100%"
         )
         item.glyph = .ring(share)
-        let reset = peak.window.resetsAt.map { " · \(loc("resets \($0.formatted(date: .omitted, time: .shortened))"))" }
+        let reset = peak.window.resetsAt.map { " · \(loc("resets \($0.timeText)"))" }
         item.detail = "\(peak.tool.title) \(Format.percent(share))\(reset ?? "")"
         return item
     }
@@ -187,7 +187,7 @@ struct AIUsagePanel: View {
         guard let reset = window.resetsAt, reset > now else { return nil }
         let left = reset.timeIntervalSince(now)
         if left < 86400 {
-            let time = reset.formatted(date: .omitted, time: .shortened)
+            let time = reset.timeText
             return loc("Resets in \(CompactDuration.format(left)) · \(time)")
         }
         return loc("Resets \(AIWindowText.resetDay(reset, from: now))")
@@ -220,7 +220,7 @@ enum AIWindowText {
     /// A weekday within the week, a date further out (a monthly plan resets weeks away).
     static func resetDay(_ date: Date, from now: Date) -> String {
         date.timeIntervalSince(now) < 6 * 86400
-            ? date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
+            ? date.formatted(.dateTime.weekday(.abbreviated).hour().minute().regional)
             : date.formatted(.dateTime.month(.abbreviated).day())
     }
 }

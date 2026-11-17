@@ -76,7 +76,7 @@ public struct InteractiveChart: View {
         domain: ClosedRange<Double>? = nil,
         mirrored: Bool = false,
         height: CGFloat = 76,
-        tooltipDate: Date.FormatStyle = Date.FormatStyle(date: .omitted, time: .standard),
+        tooltipDate: Date.FormatStyle = Date.FormatStyle(date: .omitted, time: .standard).regional,
         style: ChartStyle = .area,
         reference: Double? = nil,
         emphasized: Date? = nil,
@@ -302,7 +302,7 @@ struct ChartTooltip: View {
 
     var date: Date?
     let rows: [Row]
-    var dateStyle = Date.FormatStyle(date: .omitted, time: .standard)
+    var dateStyle = Date.FormatStyle(date: .omitted, time: .standard).regional
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {

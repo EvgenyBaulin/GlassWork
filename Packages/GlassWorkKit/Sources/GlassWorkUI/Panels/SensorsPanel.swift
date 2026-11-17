@@ -214,7 +214,7 @@ private struct SensorRow: View {
             ],
             domain: (low - 1) ... (high + 1),
             height: 22,
-            tooltipDate: Date.FormatStyle(date: .omitted, time: .standard),
+            tooltipDate: Date.FormatStyle(date: .omitted, time: .standard).regional,
             initialHover: hovered ? points.last?.date : nil
         )
         .frame(width: 64)

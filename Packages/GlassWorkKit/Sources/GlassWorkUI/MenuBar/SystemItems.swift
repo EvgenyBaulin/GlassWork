@@ -250,7 +250,7 @@ extension ItemContent {
         let count = options.flag(ItemOption.showsTwoCities, default: false) ? 2 : 1
         let shown = Array(cities.prefix(count))
         let time: (WorldCity) -> String = { city in
-            var style = Date.FormatStyle(date: .omitted, time: .shortened)
+            var style = Date.FormatStyle(date: .omitted, time: .shortened).regional
             style.timeZone = city.localOrZone
             return now.formatted(style)
         }
@@ -364,7 +364,7 @@ extension ItemContent {
             item.isDimmed = place == nil
             return item
         }
-        var style = Date.FormatStyle(date: .omitted, time: .shortened)
+        var style = Date.FormatStyle(date: .omitted, time: .shortened).regional
         style.timeZone = zone
         let arrow = next.event == .sunrise ? "↑" : "↓"
         var item = ItemContent(figure: "\(arrow) \(next.date.formatted(style))", template: template)

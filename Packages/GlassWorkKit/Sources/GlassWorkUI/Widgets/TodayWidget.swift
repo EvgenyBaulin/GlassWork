@@ -11,7 +11,7 @@ struct TodayWidget: View {
     }
 
     private var calendar: Calendar {
-        .current
+        RegionalFormat.calendar
     }
 
     /// Events still to come. An event under way counts: it is what the day is about right now.
@@ -128,7 +128,7 @@ struct TodayWidget: View {
                     Text(event.title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
                     if detail {
                         Text(
-                            verbatim: "\(wait(until: event)) · \(event.start.formatted(date: .omitted, time: .shortened))"
+                            verbatim: "\(wait(until: event)) · \(event.start.timeText)"
                         )
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
@@ -260,7 +260,7 @@ struct TodayWidget: View {
     private func agendaRow(_ event: AgendaEvent, showsTime: Bool) -> some View {
         HStack(spacing: 8) {
             if showsTime {
-                Text(event.start.formatted(date: .omitted, time: .shortened))
+                Text(event.start.timeText)
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()

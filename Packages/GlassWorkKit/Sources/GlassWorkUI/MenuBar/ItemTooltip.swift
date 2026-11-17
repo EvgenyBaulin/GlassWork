@@ -23,7 +23,7 @@ enum ItemTooltip {
         format: (Double) -> String,
         secondLine: String? = nil,
         detail: String? = nil,
-        timeStyle: Date.FormatStyle = .init(date: .omitted, time: .shortened)
+        timeStyle: Date.FormatStyle = Date.FormatStyle(date: .omitted, time: .shortened).regional
     ) -> String {
         var text = "\(title) \(figure)"
         if let extremes {

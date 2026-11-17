@@ -35,13 +35,13 @@ struct RatesPanel: View {
 
     private var subtitle: String {
         guard let date = store.snapshot.updatedAt else { return "" }
-        return loc("Updated \(date.formatted(date: .omitted, time: .shortened))")
+        return loc("Updated \(date.timeText)")
     }
 
     @ViewBuilder
     private var banner: some View {
         if store.isStale {
-            let date = store.snapshot.updatedAt?.formatted(.dateTime.weekday().day().month().hour().minute())
+            let date = store.snapshot.updatedAt?.formatted(.dateTime.weekday().day().month().hour().minute().regional)
             PanelBanner(
                 symbol: "icloud.slash",
                 title: loc("You’re offline"),

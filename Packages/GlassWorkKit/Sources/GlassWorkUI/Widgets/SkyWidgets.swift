@@ -50,7 +50,7 @@ extension ChartSeries {
 }
 
 func sunTimeText(_ date: Date?) -> String {
-    date?.formatted(date: .omitted, time: .shortened) ?? "—"
+    date?.timeText ?? "—"
 }
 
 /// Path of the sun over the horizon, a faint one under it, and a mark at its position.

@@ -51,7 +51,7 @@ struct AppSparkline: View, Equatable {
                 format: format
             )],
             height: 28,
-            tooltipDate: Date.FormatStyle(date: .omitted, time: .shortened),
+            tooltipDate: Date.FormatStyle(date: .omitted, time: .shortened).regional,
             initialHover: hover
         )
     }

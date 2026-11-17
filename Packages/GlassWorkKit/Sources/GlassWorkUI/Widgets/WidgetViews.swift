@@ -363,6 +363,7 @@ struct DigitalClockWidget: View {
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(Palette.orange)
             Text(now, style: .time)
+                .environment(\.locale, RegionalFormat.locale)
                 .font(.system(size: size == .small ? 38 : 60, weight: .semibold, design: .rounded))
                 .monospacedDigit()
                 .minimumScaleFactor(0.5)

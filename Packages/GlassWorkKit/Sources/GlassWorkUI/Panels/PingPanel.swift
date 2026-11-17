@@ -33,7 +33,7 @@ struct PingPanel: View {
             }
             if let since = log.upSince {
                 Divider()
-                InfoRow(title: loc("Up since"), value: since.formatted(date: .omitted, time: .shortened))
+                InfoRow(title: loc("Up since"), value: since.timeText)
             }
         }
     }

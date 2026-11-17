@@ -113,7 +113,7 @@ struct FinishedTimerRow: View {
                 .frame(width: 24, height: 24)
             VStack(alignment: .leading, spacing: 1) {
                 Text(loc("Done")).font(.system(size: 15, weight: .semibold, design: .rounded))
-                Text("\(timer.title) · \(timer.finishedAt.formatted(date: .omitted, time: .shortened))")
+                Text("\(timer.title) · \(timer.finishedAt.timeText)")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
@@ -190,7 +190,7 @@ struct WorldClocksPanel: View {
     private func row(_ city: WorldCity, store: EverydayStore) -> some View {
         let zone = city.localOrZone
         let now = fixedNow ?? Date()
-        var style = Date.FormatStyle(date: .omitted, time: .shortened)
+        var style = Date.FormatStyle(date: .omitted, time: .shortened).regional
         style.timeZone = zone
         var calendar = Calendar.current
         calendar.timeZone = zone
@@ -370,7 +370,7 @@ struct SunMoonPanel: View {
     }
 
     private func text(_ date: Date?) -> String {
-        var style = Date.FormatStyle(date: .omitted, time: .shortened)
+        var style = Date.FormatStyle(date: .omitted, time: .shortened).regional
         style.timeZone = monitor.sunZone
         return date?.formatted(style) ?? "—"
     }

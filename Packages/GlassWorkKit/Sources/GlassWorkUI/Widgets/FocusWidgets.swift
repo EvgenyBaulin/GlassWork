@@ -98,7 +98,7 @@ struct PomodoroWidget: View {
                 .lineLimit(1)
                 .widgetAccentable()
             if let state {
-                Text(loc("Ends \(state.phaseEnd.formatted(date: .omitted, time: .shortened))"))
+                Text(loc("Ends \(state.phaseEnd.timeText)"))
                     .font(.system(size: 13))
                     .lineLimit(1)
                 HStack(spacing: 8) {
@@ -182,7 +182,7 @@ struct PomodoroWidget: View {
                     Circle().fill(item.phase.isBreak ? Palette.green : Palette.red).frame(width: 8, height: 8)
                     Text(item.phase == .focus ? loc("Focus") : loc("Break")).font(.system(size: 13))
                     Spacer()
-                    Text(item.phaseStart.formatted(date: .omitted, time: .shortened))
+                    Text(item.phaseStart.timeText)
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()

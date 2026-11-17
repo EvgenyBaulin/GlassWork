@@ -28,7 +28,7 @@ struct TimeContext {
 
     /// "Week 45 · Day 306".
     var weekAndDay: String {
-        let calendar = Calendar.current
+        let calendar = RegionalFormat.calendar
         let week = calendar.component(.weekOfYear, from: now)
         let day = calendar.ordinality(of: .day, in: .year, for: now) ?? 1
         return "\(loc("Week \(week)")) · \(loc("Day \(day)"))"
