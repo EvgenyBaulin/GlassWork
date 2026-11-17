@@ -122,6 +122,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     /// Off unless the user turns it on. See `DiagnosticLog`.
     public var keepsDiagnosticLog = false
     public var shortcuts = ShortcutSettings()
+    public var regional = RegionalSettings()
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
         self.modules = modules
@@ -160,7 +161,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
 extension AppSettings {
     private enum CodingKeys: String, CodingKey {
         case version, modules, numberStyle, hiding, alerts, widgets, dock, weather, rates, clipboard, welcomeCompleted
-        case fans, windowTiles, personalWidgets, hub, keepsDiagnosticLog, shortcuts, island
+        case fans, windowTiles, personalWidgets, hub, keepsDiagnosticLog, shortcuts, island, regional
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -188,6 +189,7 @@ extension AppSettings {
         keepsDiagnosticLog = try container.decodeIfPresent(Bool.self, forKey: .keepsDiagnosticLog) ?? false
         shortcuts = (try? container.decodeIfPresent(ShortcutSettings.self, forKey: .shortcuts)) ?? ShortcutSettings()
         island = (try? container.decodeIfPresent(IslandSettings.self, forKey: .island)) ?? IslandSettings()
+        regional = (try? container.decodeIfPresent(RegionalSettings.self, forKey: .regional)) ?? RegionalSettings()
         normalize()
     }
 

@@ -4,7 +4,7 @@ import Foundation
 public struct SettingsChange: Sendable, Equatable {
     public enum Area: String, Sendable, CaseIterable {
         case modules, numberStyle, hiding, alerts, widgets, personalWidgets, dock, weather, rates
-        case clipboard, fans, windowTiles, hub, island, diagnosticLog, shortcuts, other
+        case clipboard, fans, windowTiles, hub, island, diagnosticLog, shortcuts, regional, other
     }
 
     public let area: Area
@@ -39,6 +39,7 @@ public struct SettingsChange: Sendable, Equatable {
             (.island, old.island != new.island),
             (.diagnosticLog, old.keepsDiagnosticLog != new.keepsDiagnosticLog),
             (.shortcuts, old.shortcuts != new.shortcuts),
+            (.regional, old.regional != new.regional),
         ]
         let changed = areas.filter(\.1).map(\.0)
         self.init(area: changed.count == 1 ? changed[0] : .other)

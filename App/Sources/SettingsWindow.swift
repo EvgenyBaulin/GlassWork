@@ -78,10 +78,15 @@ final class SettingsWindowController {
     }
 
     func showWelcome() {
-        let view = WelcomeView(store: model.store) { [weak self] in
-            self?.welcome?.close()
-            self?.welcome = nil
-        }
+        let view = WelcomeView(
+            store: model.store,
+            openSettings: { [weak self] in self?.show(module: nil) },
+            addWidgets: { [weak self] in self?.showWidgets() },
+            finish: { [weak self] in
+                self?.welcome?.close()
+                self?.welcome = nil
+            }
+        )
         let created = NSWindow(contentViewController: NSHostingController(rootView: view))
         created.title = loc("Welcome to GlassWork")
         created.styleMask = [.titled, .closable, .fullSizeContentView]
@@ -282,8 +287,8 @@ struct SettingsRoot: View {
             )
             .id(navigation.fanCurveRequests)
         case .windowTiles: WindowTilesPage(store: store, shortcuts: shortcuts)
+        case .permissions: PermissionsPane(store: store, monitor: monitor)
         case .about: AboutPane()
-        default: ContentUnavailableView(loc("Coming soon"), systemImage: "hammer")
         }
     }
 }
@@ -489,6 +494,8 @@ struct GeneralPane: View {
             Section(loc("Notifications")) {
                 Toggle(loc("Notify about low battery and high temperature"), isOn: alertsEnabled)
             }
+            GeneralRegionalSection(store: store)
+            GeneralUpdatesSection()
             DiagnosticLogSection(
                 isOn: keepsLog,
                 path: (DiagnosticLog.defaultURL.path(percentEncoded: false) as NSString).abbreviatingWithTildeInPath,

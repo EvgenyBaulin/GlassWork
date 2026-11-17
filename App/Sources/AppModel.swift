@@ -266,6 +266,7 @@ final class AppModel {
             Task { @MainActor in self?.applySettings() }
         }
         shortcuts.apply(store.settings.shortcuts)
+        applyRegional()
         applyInfoModules()
         statusBar.apply(store.settings)
         monitor.developer.options = DeveloperOptions(settings: store.settings)
