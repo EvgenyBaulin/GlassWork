@@ -10,6 +10,7 @@ public extension ShortcutAction {
         case .textCapture: loc("Copy text from screen")
         case .quickQuit: loc("Quit an app")
         case .hiddenBar: loc("Show hidden menu bar items")
+        case .searchMenuBar: loc("Search menu bar items")
         case let .tile(command): command.title
         case .fansMax: loc("Fans: Max")
         case let .openModule(module): loc("Open \(module.title)")
@@ -98,7 +99,10 @@ public struct ShortcutsPane: View {
     public var body: some View {
         Form {
             Section {
-                ForEach([ShortcutAction.hub, .quickPaste, .textCapture, .quickQuit, .hiddenBar], id: \.self) { row($0) }
+                ForEach(
+                    [ShortcutAction.hub, .quickPaste, .textCapture, .quickQuit, .hiddenBar, .searchMenuBar],
+                    id: \.self
+                ) { row($0) }
             } header: {
                 Text(loc("GlassWork"))
             } footer: {

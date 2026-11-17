@@ -1563,6 +1563,22 @@
         }
       }
     },
+    "Always hidden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always hidden"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всегда скрыт"
+          }
+        }
+      }
+    },
     "Always-hidden section": {
       "localizations": {
         "en": {
@@ -3843,6 +3859,22 @@
         }
       }
     },
+    "Hidden": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hidden"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыт"
+          }
+        }
+      }
+    },
     "Hide again after %lld s": {
       "localizations": {
         "ru": {
@@ -5251,12 +5283,44 @@
         }
       }
     },
+    "No hidden items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hidden items"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрытых значков нет"
+          }
+        }
+      }
+    },
     "No matches": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Ничего не найдено"
+          }
+        }
+      }
+    },
+    "No menu bar items found": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No menu bar items found"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Значков в строке меню не найдено"
           }
         }
       }
@@ -6625,6 +6689,22 @@
         }
       }
     },
+    "Reading menu bar items…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading menu bar items…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Читаю значки строки меню…"
+          }
+        }
+      }
+    },
     "Reading text…": {
       "localizations": {
         "en": {
@@ -7083,6 +7163,22 @@
         }
       }
     },
+    "Return opens  ·  ↑↓ choose  ·  Esc closes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return opens  ·  ↑↓ choose  ·  Esc closes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return открывает  ·  ↑↓ выбор  ·  Esc закрывает"
+          }
+        }
+      }
+    },
     "Reveal in Finder": {
       "localizations": {
         "ru": {
@@ -7243,6 +7339,38 @@
         }
       }
     },
+    "Search menu bar items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search menu bar items"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поиск по значкам строки меню"
+          }
+        }
+      }
+    },
+    "Searching menu bar items needs Accessibility access to read what other apps put there.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Searching menu bar items needs Accessibility access to read what other apps put there."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для поиска по значкам строки меню нужен универсальный доступ: так GlassWork увидит, что добавили другие приложения."
+          }
+        }
+      }
+    },
     "Sensor %lld": {
       "localizations": {
         "en": {
@@ -7303,6 +7431,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Полка"
+          }
+        }
+      }
+    },
+    "Show all": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show all"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать все"
           }
         }
       }
@@ -8615,6 +8759,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Включите учёт экранного времени в настройках, чтобы видеть фокус."
+          }
+        }
+      }
+    },
+    "Type an item or app name": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type an item or app name"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Название значка или приложения"
           }
         }
       }

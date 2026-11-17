@@ -18,6 +18,11 @@ final class StatusBarController: NSObject {
         position: alwaysHiddenPosition
     )
     private let hidden = HiddenBarDriver()
+    private lazy var search = MenuBarSearchController(
+        model: model,
+        geometry: { [weak self] in self?.searchGeometry() ?? .init() },
+        reveal: { [weak self] all in self?.hidden.reveal(includingAlwaysHidden: all) }
+    )
     private var hiding = HidingSettings()
     private var appliedLayout: HiddenBarLayout?
     private lazy var seconds = SecondTicker { [weak self] modules in
@@ -164,6 +169,20 @@ final class StatusBarController: NSObject {
         hidden.toggle(option: option)
     }
 
+    /// The shortcut, and the separator's menu.
+    func showSearch() {
+        search.toggle()
+    }
+
+    /// Where the hiding separators are, in the same coordinates as other apps' menu bar items. Nil when not in use.
+    private func searchGeometry() -> MenuBarSearchController.Geometry {
+        func edge(_ item: NSStatusItem) -> Double? {
+            guard item.isVisible, let window = item.button?.window else { return nil }
+            return Double(window.frame.maxX)
+        }
+        return .init(separatorMaxX: edge(separator), alwaysHiddenMaxX: edge(alwaysHiddenSeparator))
+    }
+
     private func configureHub() {
         guard let button = hub.button else { return }
         button.image = NSImage(systemSymbolName: "square.grid.2x2", accessibilityDescription: "GlassWork")
@@ -176,6 +195,7 @@ final class StatusBarController: NSObject {
         guard let button = separator.button else { return }
         button.target = self
         button.action = #selector(separatorClicked)
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         button.toolTip = loc("Click to show or hide. Hold ⌘ and drag an item across ‹ to choose.")
         separator.length = Self.separatorLength
         button.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
@@ -198,6 +218,10 @@ final class StatusBarController: NSObject {
     }
 
     @objc private func separatorClicked() {
+        if NSApp.currentEvent?.type == .rightMouseUp {
+            showSeparatorMenu()
+            return
+        }
         model.closePanels()
         hidden.toggle(option: NSApp.currentEvent?.modifierFlags.contains(.option) == true)
     }
@@ -226,6 +250,19 @@ final class StatusBarController: NSObject {
             screenMaxY: screen.frame.maxY,
             barHeight: barHeight
         )
+    }
+
+    private func showSeparatorMenu() {
+        let menu = NSMenu()
+        menu.addItem(withTitle: loc("Search menu bar items"), action: #selector(searchFromMenu), keyEquivalent: "")
+            .target = self
+        separator.menu = menu
+        separator.button?.performClick(nil)
+        separator.menu = nil
+    }
+
+    @objc private func searchFromMenu() {
+        search.show()
     }
 
     private func showMenu() {

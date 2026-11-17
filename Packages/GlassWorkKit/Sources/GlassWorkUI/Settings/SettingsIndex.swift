@@ -454,6 +454,13 @@ extension SettingsIndex {
                 .shortcuts,
                 ["Shortcuts"]
             ),
+            page(
+                "shortcut.searchMenuBar",
+                "Search menu bar items",
+                "Поиск по значкам строки меню",
+                .shortcuts,
+                ["Shortcuts"]
+            ),
             page("menuBar.resetOrder", "Reset order", "Сбросить порядок", .menuBar, ["Menu Bar"]),
             page("menuBar.defaults", "Restore defaults", "Вернуть по умолчанию", .menuBar, ["Menu Bar"]),
             page("menuBar.allHub", "All to Hub", "Всё в Хаб", .menuBar, ["Menu Bar"]),

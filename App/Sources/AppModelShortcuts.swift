@@ -15,6 +15,8 @@ extension AppModel {
             let option = NSEvent.modifierFlags.contains(.option) && !own.contains(.option)
             statusBar.toggleHidden(option: option)
         }
+        shortcuts.bind(.searchMenuBar) { [weak self] in self?.statusBar.showSearch() }
+        shortcuts.setActive(.searchMenuBar, true)
         for module in ModuleID.allCases {
             shortcuts.bind(.openModule(module)) { [weak self] in self?.showPanelAtPointer(module) }
             shortcuts.setActive(.openModule(module), true)
