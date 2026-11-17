@@ -553,13 +553,6 @@ private extension AppModel {
         monitor.volumePath = chosen(.disk, ItemOption.volumePath)
     }
 
-    /// Keeps the names of accessories that have been seen, so Settings can list them while they are away.
-    private func rememberDevices() {
-        let options = store.settings.module(.deviceBatteries)?.options ?? [:]
-        guard let seen = DeviceSelection(options: options).recording(monitor.deviceBatteries) else { return }
-        store.update { $0.update(.deviceBatteries) { $0.options[ItemOption.seenDevices] = seen } }
-    }
-
     func checkAlerts() {
         let settings = store.settings.alerts
         guard settings.isEnabled else { return }
