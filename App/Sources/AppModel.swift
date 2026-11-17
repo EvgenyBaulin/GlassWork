@@ -554,16 +554,6 @@ private extension AppModel {
         applyHardwareChoices()
     }
 
-    /// An empty or missing value means the Mac's own pick.
-    func applyHardwareChoices() {
-        func chosen(_ module: ModuleID, _ key: String) -> String? {
-            store.settings.module(module)?.options[key].flatMap { $0.isEmpty ? nil : $0 }
-        }
-        monitor.networkInterface = chosen(.network, ItemOption.networkInterface)
-        monitor.gpuName = chosen(.gpu, ItemOption.gpuName)
-        monitor.volumePath = chosen(.disk, ItemOption.volumePath)
-    }
-
     func checkAlerts() {
         let settings = store.settings.alerts
         guard settings.isEnabled else { return }
