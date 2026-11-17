@@ -105,19 +105,46 @@ public enum SystemDictionaries {
 
     private typealias Create = @convention(c) (CFURL) -> Unmanaged<CFTypeRef>?
 
-    /// The text one dictionary gives for a word, or the first active dictionary's when none is chosen.
+    /// Dictionaries opened so far, by identifier: each one is created once and kept.
+    private final class Opened: @unchecked Sendable {
+        // Safe because every access to `byID` holds `lock`.
+        private let lock = NSLock()
+        private var byID: [String: DCSDictionary] = [:]
+
+        func dictionary(for id: String, create: () -> DCSDictionary?) -> DCSDictionary? {
+            lock.lock()
+            defer { lock.unlock() }
+            if let known = byID[id] {
+                return known
+            }
+            guard let made = create() else { return nil }
+            byID[id] = made
+            return made
+        }
+    }
+
+    private static let opened = Opened()
+
+    /// The text one dictionary gives for a word. With no dictionary chosen the first active one answers. A chosen
+    /// dictionary that cannot be opened gives nothing: another dictionary's text would be the wrong meaning.
     ///
     /// Opening a dictionary by its folder has no public call, so this uses the one DictionaryServices has inside.
-    /// If that is missing the first active dictionary answers instead. The handle is not released: a lookup
-    /// happens once per word per day, so the cost is a few bytes.
+    /// It follows the Create rule, so the handle is owned here and kept for the next lookup.
     public static func definition(for word: String, in dictionary: SystemDictionary?) -> String? {
         let range = CFRangeMake(0, (word as NSString).length)
-        guard let dictionary, let symbol = dlsym(dlopen(nil, RTLD_LAZY), "DCSDictionaryCreate"),
-              let created = unsafeBitCast(symbol, to: Create.self)(dictionary.url as CFURL)
-        else {
+        guard let dictionary else {
             return DCSCopyTextDefinition(nil, word as CFString, range)?.takeRetainedValue() as String?
         }
-        let ref = unsafeBitCast(created.takeUnretainedValue(), to: DCSDictionary.self)
+        guard let ref = opened.dictionary(for: dictionary.id, create: { create(at: dictionary.url) }) else {
+            return nil
+        }
         return DCSCopyTextDefinition(ref, word as CFString, range)?.takeRetainedValue() as String?
+    }
+
+    private static func create(at url: URL) -> DCSDictionary? {
+        guard let symbol = dlsym(dlopen(nil, RTLD_LAZY), "DCSDictionaryCreate"),
+              let created = unsafeBitCast(symbol, to: Create.self)(url as CFURL)
+        else { return nil }
+        return unsafeBitCast(created.takeRetainedValue(), to: DCSDictionary.self)
     }
 }

@@ -313,7 +313,7 @@ public final class SystemMonitor {
         }
         snapshot.place = sunPlace
         if kinds.contains(.wordOfDay) {
-            snapshot.words = wordOfDay.recent(6, at: date)
+            snapshot.words = wordOfDay.recentDeferred(6, at: date)
         }
         if !kinds.isDisjoint(with: [.nowPlaying, .lyrics]) {
             snapshot.nowPlaying = nowPlaying.widgetData

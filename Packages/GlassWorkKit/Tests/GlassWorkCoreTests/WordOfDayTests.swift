@@ -114,4 +114,28 @@ struct WordOfDayTests {
         #expect(today.word == WordList.word(on: date, calendar: calendar))
         #expect(today.definition == nil)
     }
+
+    @MainActor
+    @Test func deferredLookupReturnsAtOnceAndFillsInLater() async {
+        let provider = WordOfDayProvider(backgroundLookup: { word, _ in
+            "\(word) | ɡliːm | noun a faint light: a gleam."
+        })
+        let first = provider.recentDeferred(2, at: date, calendar: calendar)
+        #expect(first.count == 2)
+        #expect(first.allSatisfy { $0.definition == nil })
+        await withCheckedContinuation { continuation in
+            provider.onFilled = { continuation.resume() }
+        }
+        let second = provider.recentDeferred(2, at: date, calendar: calendar)
+        #expect(second.first?.definition == "a faint light")
+    }
+
+    @MainActor
+    @Test func aChosenDictionaryThatIsNotInstalledGivesNoMeaning() {
+        let provider = WordOfDayProvider(lookup: { _ in "x | y | noun a meaning: an example." })
+        var settings = WordOfDaySettings()
+        settings.dictionaryID = "missing.dictionary"
+        provider.apply(settings, installed: [])
+        #expect(provider.word(on: date, calendar: calendar).definition == nil)
+    }
 }

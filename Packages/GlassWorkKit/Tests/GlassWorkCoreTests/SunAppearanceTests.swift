@@ -37,17 +37,43 @@ struct SunAppearanceTests {
         #expect(SunAppearance.wantsDark(at: midnight, latitude: 80, longitude: 15) == nil)
     }
 
-    @Test func itSwitchesOnlyWhenTheSunsSideOfTheDayChanges() {
-        // First look after the option was turned on.
-        #expect(SunAppearance.change(wanted: true, last: nil) == true)
-        #expect(SunAppearance.change(wanted: false, last: nil) == false)
-        // Nothing changed since the last look, so a click on the Appearance item is left alone.
-        #expect(SunAppearance.change(wanted: true, last: true) == nil)
-        #expect(SunAppearance.change(wanted: false, last: false) == nil)
-        // Sunrise and sunset.
-        #expect(SunAppearance.change(wanted: false, last: true) == false)
-        #expect(SunAppearance.change(wanted: true, last: false) == true)
-        // No place or a polar night: nothing to do.
-        #expect(SunAppearance.change(wanted: nil, last: true) == nil)
+    private func look(hour: Double, next: Double?) -> SunAppearance.Look {
+        SunAppearance.look(
+            at: midnight.addingTimeInterval(hour * 3600),
+            latitude: 51.48,
+            longitude: 0,
+            nextEvent: next.map { midnight.addingTimeInterval($0 * 3600) }
+        )
+    }
+
+    @Test func theFirstLookAppliesTheCurrentSide() {
+        let day = look(hour: 12, next: nil)
+        #expect(day.dark == false)
+        let sunset = try? #require(day.nextEvent)
+        #expect(sunset.map { $0.timeIntervalSince(midnight) / 3600 > 16 } == true)
+        #expect(look(hour: 20, next: nil).dark == true)
+    }
+
+    @Test func aClickHoldsUntilTheNextEventPasses() {
+        let first = look(hour: 12, next: nil)
+        let next = first.nextEvent.map { $0.timeIntervalSince(midnight) / 3600 }
+        #expect(look(hour: 14, next: next).dark == nil)
+        #expect(look(hour: 14, next: next).nextEvent == first.nextEvent)
+    }
+
+    @Test func aSunriseSleptThroughIsAppliedOnWaking() {
+        // Dark was picked at noon on the 4th; the sunset at about 16:25 came and went during sleep.
+        let sunset = look(hour: 12, next: nil).nextEvent.map { $0.timeIntervalSince(midnight) / 3600 }
+        // Woken at noon the next day: the side of the day is light again, though it was light at the last look too.
+        let woke = look(hour: 36, next: sunset)
+        #expect(woke.dark == false)
+        #expect((woke.nextEvent ?? .distantPast) > midnight.addingTimeInterval(36 * 3600))
+        // Woken in the evening instead: dark.
+        #expect(look(hour: 22, next: sunset).dark == true)
+    }
+
+    @Test func noPlaceToFollowDoesNothing() {
+        let polar = SunAppearance.look(at: midnight, latitude: 80, longitude: 15, nextEvent: nil)
+        #expect(polar == SunAppearance.Look(dark: nil, nextEvent: nil))
     }
 }

@@ -4,12 +4,12 @@ import GlassWorkCore
 /// Switches to dark after sunset and to light after sunrise while the Appearance module follows the sun.
 ///
 /// It looks once a minute, which is cheap, and also right after the Mac wakes: a timer set for the exact moment
-/// would fire late then. It acts only when the sun's side of the day changes, so a click on the Appearance item
-/// holds until the next sunrise or sunset.
+/// would fire late then. It acts only once the sunrise or sunset it was waiting for has passed, so a click on the
+/// Appearance item holds until then, and a sunrise slept through is still applied on waking.
 @MainActor
 final class SunAppearanceScheduler {
     private var timer: Timer?
-    private var last: Bool?
+    private var nextEvent: Date?
     private var place: () -> WeatherPlace? = { nil }
 
     /// Starts or stops with the option. `place` is asked again at every look, since a position may arrive later.
@@ -18,7 +18,7 @@ final class SunAppearanceScheduler {
         guard isOn else {
             timer?.invalidate()
             timer = nil
-            last = nil
+            nextEvent = nil
             return
         }
         guard timer == nil else { return }
@@ -29,11 +29,15 @@ final class SunAppearanceScheduler {
     }
 
     private func look(at date: Date = Date()) {
-        let wanted = place()
-            .flatMap { SunAppearance.wantsDark(at: date, latitude: $0.latitude, longitude: $0.longitude) }
-        guard let dark = SunAppearance.change(wanted: wanted, last: last) else { return }
-        last = dark
-        if dark != Appearance.isDark {
+        guard let place = place() else { return }
+        let result = SunAppearance.look(
+            at: date,
+            latitude: place.latitude,
+            longitude: place.longitude,
+            nextEvent: nextEvent
+        )
+        nextEvent = result.nextEvent
+        if let dark = result.dark, dark != Appearance.isDark {
             Appearance.set(dark: dark)
         }
     }

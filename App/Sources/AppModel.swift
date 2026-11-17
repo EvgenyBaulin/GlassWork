@@ -406,7 +406,7 @@ final class AppModel {
         }
     }
 
-    private func publishSystemWidgets() async {
+    func publishSystemWidgets() async {
         await monitor.readForWidgets(systemWidgetKinds)
         guard writeWidgetSnapshot(), !systemWidgetKinds.isEmpty else { return }
         WidgetCenter.shared.reloadAllTimelines()

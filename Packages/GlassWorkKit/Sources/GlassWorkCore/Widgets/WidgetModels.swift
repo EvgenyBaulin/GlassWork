@@ -135,6 +135,12 @@ public struct WidgetSettings: Codable, Sendable, Equatable {
     public static let refreshChoices = [60, 300, 900, 1800, 3600]
 
     public var refreshSeconds = 60
+
+    /// The interval to use: a hand-edited 0 or a negative number must not make a timer spin.
+    public var heartbeatSeconds: Int {
+        max(refreshSeconds, Self.refreshChoices[0])
+    }
+
     public var tracksScreenTime = false
     /// The hour a Screen Time day starts, 0 to 6. Work after midnight then still counts for the evening before.
     public var dayStartHour = 0

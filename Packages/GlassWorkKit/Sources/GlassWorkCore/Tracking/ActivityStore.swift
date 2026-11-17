@@ -20,6 +20,9 @@ public final class ActivityStore {
     /// Reports the exit status when `gh` fails, for the diagnostic log.
     @ObservationIgnored public var onGitHubFailed: ((Int32) -> Void)?
 
+    /// Called after the data was deleted, so widgets can be written again at once.
+    @ObservationIgnored public var onScreenTimeReset: (() -> Void)?
+
     @ObservationIgnored private let runner: ProcessRunning
     @ObservationIgnored private let locateGH: @Sendable () -> String?
     @ObservationIgnored private var lastRunsRead: Date?
@@ -97,7 +100,12 @@ public final class ActivityStore {
         empty.excluded = screenTime.excluded
         screenTime = empty
         currentSince = date
+        // Away from the Mac now: the break counts from the reset, not from before it.
+        if pausedSince != nil {
+            pausedSince = date
+        }
         try? store.write(screenTime, for: ScreenTimeLog.key)
+        onScreenTimeReset?()
     }
 
     private func creditCurrentApp(at date: Date) {
