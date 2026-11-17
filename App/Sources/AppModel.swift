@@ -30,6 +30,7 @@ final class AppModel {
         nowPlaying: NowPlayingBridge.makeStore(),
         personal: PersonalWidgetStore(library: SystemPhotoLibrary(), contacts: SystemBirthdays())
     )
+    private(set) lazy var updatePause = UpdatePauseController(monitor: monitor)
     private let fanSensors = FanSensorSource()
     private(set) lazy var fans = makeFans()
     lazy var panels = PanelController(model: self)

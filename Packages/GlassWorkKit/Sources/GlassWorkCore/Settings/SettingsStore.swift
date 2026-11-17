@@ -8,6 +8,8 @@ public final class SettingsStore {
     public private(set) var settings: AppSettings
     public private(set) var lastError: String?
     public private(set) var undoStack: [AppSettings] = []
+    /// What ⌘Z took back, until the next change. A new change clears it.
+    public private(set) var redoStack: [AppSettings] = []
 
     @ObservationIgnored public let backups: SettingsBackups
     @ObservationIgnored private let file: SettingsFile
@@ -32,24 +34,46 @@ public final class SettingsStore {
         var copy = settings
         change(&copy)
         guard copy != settings else { return }
-        undoStack.append(settings)
-        if undoStack.count > Self.undoLimit {
-            undoStack.removeFirst()
-        }
+        pushUndo(settings)
+        redoStack.removeAll()
         apply(copy)
     }
 
-    /// Changes apply instantly, so ⌘Z is how a mistake gets reverted.
-    public func undo() {
-        guard let previous = undoStack.popLast() else { return }
+    /// Changes apply instantly, so ⌘Z is how a mistake gets reverted. Returns what changed back.
+    @discardableResult
+    public func undo() -> SettingsChange? {
+        guard let previous = undoStack.popLast() else { return nil }
+        let change = SettingsChange(from: settings, to: previous)
+        redoStack.append(settings)
         apply(previous)
+        return change
     }
 
-    /// Replaces everything, keeping a backup of what was there.
-    public func replace(with new: AppSettings) {
-        backups.create(from: settings)
-        undoStack.append(settings)
+    /// Takes back an undo. Returns what changed back.
+    @discardableResult
+    public func redo() -> SettingsChange? {
+        guard let next = redoStack.popLast() else { return nil }
+        let change = SettingsChange(from: settings, to: next)
+        pushUndo(settings)
+        apply(next)
+        return change
+    }
+
+    /// Replaces everything, keeping a backup of what was there unless `backup` is false.
+    public func replace(with new: AppSettings, backup: Bool = true) {
+        if backup {
+            backups.create(from: settings)
+        }
+        pushUndo(settings)
+        redoStack.removeAll()
         apply(new)
+    }
+
+    private func pushUndo(_ previous: AppSettings) {
+        undoStack.append(previous)
+        if undoStack.count > Self.undoLimit {
+            undoStack.removeFirst()
+        }
     }
 
     private func apply(_ new: AppSettings) {

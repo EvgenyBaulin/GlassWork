@@ -661,6 +661,22 @@
         }
       }
     },
+    "About GlassWork": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About GlassWork"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "О GlassWork"
+          }
+        }
+      }
+    },
     "Active": {
       "localizations": {
         "ru": {
@@ -815,6 +831,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "AirDrop"
+          }
+        }
+      }
+    },
+    "Alerts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уведомления"
           }
         }
       }
@@ -1827,6 +1859,22 @@
         }
       }
     },
+    "Diagnostic log": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagnostic log"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Журнал диагностики"
+          }
+        }
+      }
+    },
     "Digital Clock": {
       "localizations": {
         "ru": {
@@ -2121,6 +2169,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Каждый день"
+          }
+        }
+      }
+    },
+    "Everything returns to its defaults. ⌘Z takes it back.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything returns to its defaults. ⌘Z takes it back."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё вернётся к значениям по умолчанию. ⌘Z вернёт обратно."
           }
         }
       }
@@ -2599,6 +2663,22 @@
         }
       }
     },
+    "Hide modules": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide modules"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скрыть модули"
+          }
+        }
+      }
+    },
     "Hide when nothing to eject": {
       "localizations": {
         "en": {
@@ -2819,6 +2899,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Занят: %@"
+          }
+        }
+      }
+    },
+    "Indefinitely": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indefinitely"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Бессрочно"
           }
         }
       }
@@ -3443,6 +3539,22 @@
         }
       }
     },
+    "Module settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки модуля"
+          }
+        }
+      }
+    },
     "Modules": {
       "localizations": {
         "ru": {
@@ -3911,6 +4023,22 @@
         }
       }
     },
+    "Number style": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Number style"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вид чисел"
+          }
+        }
+      }
+    },
     "Numbers": {
       "localizations": {
         "ru": {
@@ -4341,12 +4469,44 @@
         }
       }
     },
+    "Pause updates": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause updates"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приостановить обновления"
+          }
+        }
+      }
+    },
     "Paused": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Пауза"
+          }
+        }
+      }
+    },
+    "Paused until %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused until %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пауза до %@"
           }
         }
       }
@@ -4373,6 +4533,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Разрешения"
+          }
+        }
+      }
+    },
+    "Personal widgets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal widgets"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Личные виджеты"
           }
         }
       }
@@ -4677,6 +4853,38 @@
         }
       }
     },
+    "Redo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redo"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторить"
+          }
+        }
+      }
+    },
+    "Redone: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redone: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Возвращено: %@"
+          }
+        }
+      }
+    },
     "Release to add %lld files": {
       "localizations": {
         "en": {
@@ -4787,6 +4995,38 @@
         }
       }
     },
+    "Reset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить"
+          }
+        }
+      }
+    },
+    "Reset all settings?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset all settings?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить все настройки?"
+          }
+        }
+      }
+    },
     "Reset all…": {
       "localizations": {
         "ru": {
@@ -4813,6 +5053,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вернуть по умолчанию"
+          }
+        }
+      }
+    },
+    "Resume": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Возобновить"
           }
         }
       }
@@ -4923,6 +5179,22 @@
         }
       }
     },
+    "Save a backup first": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save a backup first"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сначала сохранить резервную копию"
+          }
+        }
+      }
+    },
     "Scan again": {
       "localizations": {
         "en": {
@@ -5015,6 +5287,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показывать энергоэффективные ядра"
+          }
+        }
+      }
+    },
+    "Show modules": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show modules"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать модули"
           }
         }
       }
@@ -5921,6 +6209,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Введите для поиска…"
+          }
+        }
+      }
+    },
+    "Undone: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Undone: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отменено: %@"
+          }
+        }
+      }
+    },
+    "Until tomorrow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until tomorrow"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До завтра"
           }
         }
       }

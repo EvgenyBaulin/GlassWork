@@ -91,7 +91,11 @@ extension AppModel {
         for name in resume {
             center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated {
-                    self?.monitor.start()
+                    // A pause the user chose outlasts a wake; it ends on its own clock.
+                    self?.updatePause.resumeIfDue()
+                    if self?.updatePause.isPaused != true {
+                        self?.monitor.start()
+                    }
                     self?.clipboard.setPaused(false)
                     self?.screenAway(false)
                 }

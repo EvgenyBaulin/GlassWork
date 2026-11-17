@@ -203,10 +203,60 @@ final class StatusBarController: NSObject {
         open.target = self
         menu.addItem(withTitle: loc("Settings…"), action: #selector(openSettings), keyEquivalent: ",").target = self
         menu.addItem(.separator())
+        addPauseItems(to: menu)
+        menu.addItem(.separator())
+        menu.addItem(withTitle: loc("About GlassWork"), action: #selector(showAbout), keyEquivalent: "").target = self
         menu.addItem(withTitle: loc("Quit GlassWork"), action: #selector(quit), keyEquivalent: "q").target = self
         hub.menu = menu
         hub.button?.performClick(nil)
         hub.menu = nil
+    }
+
+    private func addPauseItems(to menu: NSMenu) {
+        let pause = model.updatePause
+        if pause.isPaused {
+            let state = pause.pausedUntil.map { loc("Paused until \(Self.pauseEnd($0))") } ?? loc("Paused")
+            let line = menu.addItem(withTitle: state, action: nil, keyEquivalent: "")
+            line.isEnabled = false
+            menu.addItem(withTitle: loc("Resume"), action: #selector(resumeUpdates), keyEquivalent: "").target = self
+            return
+        }
+        let parent = menu.addItem(withTitle: loc("Pause updates"), action: nil, keyEquivalent: "")
+        let submenu = NSMenu()
+        for (index, duration) in UpdatePause.allCases.enumerated() {
+            let title = switch duration {
+            case .fifteenMinutes: loc("15 minutes")
+            case .oneHour: loc("1 hour")
+            case .untilTomorrow: loc("Until tomorrow")
+            case .indefinitely: loc("Indefinitely")
+            }
+            let item = submenu.addItem(withTitle: title, action: #selector(pauseUpdates(_:)), keyEquivalent: "")
+            item.target = self
+            item.tag = index
+        }
+        parent.submenu = submenu
+    }
+
+    /// The time alone for today, with the day added when the pause runs past midnight.
+    private static func pauseEnd(_ date: Date) -> String {
+        if Calendar.current.isDateInToday(date) {
+            return date.formatted(date: .omitted, time: .shortened)
+        }
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    @objc private func pauseUpdates(_ sender: NSMenuItem) {
+        guard UpdatePause.allCases.indices.contains(sender.tag) else { return }
+        model.updatePause.pause(UpdatePause.allCases[sender.tag])
+    }
+
+    @objc private func resumeUpdates() {
+        model.updatePause.resume()
+    }
+
+    @objc private func showAbout() {
+        NSApp.activate()
+        NSApp.orderFrontStandardAboutPanel(nil)
     }
 
     @objc private func openMainWindow() {

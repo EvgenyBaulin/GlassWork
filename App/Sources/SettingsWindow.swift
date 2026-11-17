@@ -113,6 +113,9 @@ struct SettingsRoot: View {
     let shortcuts: ShortcutCenter
     @Bindable var navigation: SettingsNavigation
     @State private var query = ""
+    @State private var toast: SettingsToast?
+    /// Whether the module list under Menu Bar is open. Remembered between launches.
+    @AppStorage("settings.menuBarModulesExpanded") private var modulesExpanded = true
 
     private var modules: [ModuleSettings] {
         store.settings.modules.filter(\.id.isAvailable)
@@ -137,7 +140,29 @@ struct SettingsRoot: View {
             detail
                 .environment(\.settingsHighlight, navigation.openedResult)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background { undoButton }
+                .background { undoButtons }
+                .overlay(alignment: .bottom) { toastView }
+        }
+    }
+
+    @ViewBuilder
+    private var toastView: some View {
+        if let toast {
+            SettingsToastView(toast) {
+                if toast.isUndo {
+                    undo()
+                } else {
+                    redo()
+                }
+            }
+            .padding(.bottom, 16)
+            .transition(.opacity)
+            .id(toast.id)
+            .task(id: toast.id) {
+                try? await Task.sleep(for: .seconds(4))
+                guard !Task.isCancelled else { return }
+                withAnimation { self.toast = nil }
+            }
         }
     }
 
@@ -146,8 +171,8 @@ struct SettingsRoot: View {
         if query.isEmpty {
             List(selection: $navigation.selection) {
                 row(.general, loc("General"), "gearshape", .gray)
-                row(.menuBar, loc("Menu Bar"), "menubar.rectangle", .blue)
-                ForEach(modules) { setting in
+                menuBarRow
+                ForEach(modulesExpanded ? modules : []) { setting in
                     Label {
                         Text(setting.id.title)
                     } icon: {
@@ -169,17 +194,60 @@ struct SettingsRoot: View {
         }
     }
 
+    /// Menu Bar with a chevron that opens and closes the module list under it.
+    private var menuBarRow: some View {
+        HStack(spacing: 0) {
+            row(.menuBar, loc("Menu Bar"), "menubar.rectangle", .blue)
+            Spacer(minLength: 4)
+            Button {
+                withAnimation(.easeInOut(duration: 0.15)) { modulesExpanded.toggle() }
+            } label: {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(modulesExpanded ? 90 : 0))
+                    .frame(width: 20, height: 20)
+                    .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(modulesExpanded ? loc("Hide modules") : loc("Show modules"))
+        }
+        .tag(SettingsPage.menuBar)
+    }
+
     private func open(_ result: SettingsResult) {
         navigation.selection = result.destination
         navigation.openedResult = result.id
+        if case .module = result.destination {
+            modulesExpanded = true
+        }
     }
 
-    /// Changes apply instantly; ⌘Z takes back the last one.
-    private var undoButton: some View {
-        Button("") { store.undo() }
-            .keyboardShortcut("z")
-            .disabled(store.undoStack.isEmpty)
-            .opacity(0)
+    /// Changes apply instantly; ⌘Z takes back the last one and ⇧⌘Z brings it back.
+    private var undoButtons: some View {
+        ZStack {
+            Button("") { undo() }
+                .keyboardShortcut("z")
+                .disabled(store.undoStack.isEmpty)
+            Button("") { redo() }
+                .keyboardShortcut("z", modifiers: [.command, .shift])
+                .disabled(store.redoStack.isEmpty)
+        }
+        .opacity(0)
+    }
+
+    private func undo() {
+        guard let change = store.undo() else { return }
+        show(SettingsToast(message: loc("Undone: \(change.title)"), actionTitle: loc("Redo"), isUndo: false))
+    }
+
+    private func redo() {
+        guard let change = store.redo() else { return }
+        show(SettingsToast(message: loc("Redone: \(change.title)"), actionTitle: loc("Undo"), isUndo: true))
+    }
+
+    private func show(_ new: SettingsToast) {
+        withAnimation { toast = new }
     }
 
     private func row(_ page: SettingsPage, _ title: String, _ symbol: String, _ color: Color) -> some View {
@@ -295,6 +363,12 @@ struct ModulePane: View {
     let module: ModuleID
     let store: SettingsStore
     let monitor: SystemMonitor
+    /// Read once: a Mac does not gain or lose its battery while Settings is open.
+    private let hasBattery = HardwareAvailability.current.hasBattery
+
+    private var lacksBattery: Bool {
+        module == .battery && !hasBattery
+    }
 
     private var style: Binding<DisplayStyle> {
         Binding(
@@ -327,8 +401,17 @@ struct ModulePane: View {
                     )
                 }
             }
-            ModuleOptions(module: module, store: store, agenda: monitor.agenda)
-            ModuleOptionRows(module: module, store: store)
+            if lacksBattery {
+                Section {
+                    Label(loc("This Mac has no battery"), systemImage: "battery.0percent")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Group {
+                ModuleOptions(module: module, store: store, agenda: monitor.agenda)
+                ModuleOptionRows(module: module, store: store)
+            }
+            .disabled(lacksBattery)
             if module == .sensors {
                 SensorsMenuBarSection(selection: sensor, sample: monitor.sensors)
                 SensorGroupsSection(store: store)
@@ -423,7 +506,7 @@ struct GeneralPane: View {
                     Button(loc("Export…"), action: exportSettings)
                     Button(loc("Import…"), action: importSettings)
                     Spacer()
-                    Button(loc("Reset all…"), role: .destructive) { store.replace(with: AppSettings()) }
+                    Button(loc("Reset all…"), role: .destructive, action: confirmReset)
                 }
                 ForEach(store.backups.list()) { backup in
                     LabeledContent(backup.date.formatted(date: .abbreviated, time: .shortened)) {
@@ -444,6 +527,22 @@ struct GeneralPane: View {
 }
 
 extension GeneralPane {
+    /// Asks first. The backup is on by default, so a reset can always be walked back from the list below.
+    func confirmReset() {
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = loc("Reset all settings?")
+        alert.informativeText = loc("Everything returns to its defaults. ⌘Z takes it back.")
+        let backup = NSButton(checkboxWithTitle: loc("Save a backup first"), target: nil, action: nil)
+        backup.state = .on
+        backup.sizeToFit()
+        alert.accessoryView = backup
+        alert.addButton(withTitle: loc("Reset")).hasDestructiveAction = true
+        alert.addButton(withTitle: loc("Cancel"))
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        store.replace(with: AppSettings(), backup: backup.state == .on)
+    }
+
     func exportSettings() {
         let panel = NSSavePanel()
         panel.nameFieldStringValue = "GlassWork Settings.json"
@@ -485,87 +584,5 @@ extension GeneralPane {
                 }
             }
         )
-    }
-}
-
-struct AboutPane: View {
-    private var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
-    }
-
-    var body: some View {
-        VStack(spacing: 8) {
-            Text("GlassWork").font(.largeTitle.weight(.semibold))
-            Text(loc("Version \(version)")).foregroundStyle(.secondary)
-            Link(
-                "github.com/EvgenyBaulin/GlassWork",
-                destination: URL(string: "https://github.com/EvgenyBaulin/GlassWork")!
-            )
-            Text(loc("MIT License")).foregroundStyle(.secondary)
-        }
-    }
-}
-
-/// Four steps with Skip: welcome, what to enable, permissions, done.
-struct WelcomeView: View {
-    let store: SettingsStore
-    let finish: () -> Void
-    @State private var step = 0
-    @State private var launchAtLogin = true
-
-    var body: some View {
-        VStack(spacing: 18) {
-            Spacer()
-            content
-            Spacer()
-            HStack {
-                Button(loc("Skip")) { complete() }.buttonStyle(.plain).foregroundStyle(.secondary)
-                Spacer()
-                Button(step == 3 ? loc("Done") : loc("Continue")) { advance() }
-                    .keyboardShortcut(.defaultAction)
-            }
-        }
-        .padding(28)
-        .frame(width: 520, height: 380)
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        switch step {
-        case 0:
-            Text(loc("Welcome to GlassWork")).font(.largeTitle.weight(.semibold))
-            Text(loc("Live figures in your menu bar, with everything else one click away in the Hub."))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-        case 1:
-            Text(loc("What to enable")).font(.title.weight(.semibold))
-            Text(loc("Overview, CPU and Memory start in the menu bar. Everything else waits in the Hub."))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-        case 2:
-            Text(loc("Permissions")).font(.title.weight(.semibold))
-            Text(loc("Nothing is needed now. Each module asks for access only when you turn it on."))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-        default:
-            Text(loc("All set")).font(.title.weight(.semibold))
-            Toggle(loc("Launch at login"), isOn: $launchAtLogin).toggleStyle(.checkbox)
-        }
-    }
-
-    private func advance() {
-        if step == 3 {
-            complete()
-        } else {
-            step += 1
-        }
-    }
-
-    private func complete() {
-        if launchAtLogin {
-            try? SMAppService.mainApp.register()
-        }
-        store.update { $0.welcomeCompleted = true }
-        finish()
     }
 }
