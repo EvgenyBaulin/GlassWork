@@ -36,7 +36,7 @@ struct TimersPanel: View {
                 Stepper(value: $minutes, in: 1 ... 600) {
                     Text(loc("Custom: \(Int(minutes)) min")).font(.system(size: 12))
                 }
-                TextField(loc("Or type min or mm:ss"), text: $typed)
+                TextField(loc("Or type 25, 1:30 or 1h 5m"), text: $typed)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 12))
                     .onSubmit { startCustom(store) }
@@ -143,48 +143,6 @@ struct NotesPanel: View {
     }
 }
 
-struct CountdownPanel: View {
-    let monitor: SystemMonitor
-    @State private var title = ""
-    @State private var date = Date().addingTimeInterval(86400 * 7)
-
-    var body: some View {
-        let store = monitor.everyday
-        let now = Date()
-        PanelFrame(module: .countdown, subtitle: loc("\(store.data.dates.count) dates")) {
-            ForEach(store.data.sortedDates(from: now)) { item in
-                HStack {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(item.title).font(.system(size: 13, weight: .medium))
-                        Text(item.date.formatted(date: .abbreviated, time: .omitted))
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Text(loc("\(item.daysLeft(from: now)) days"))
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                    Button {
-                        store.update { $0.dates.removeAll { $0.id == item.id } }
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
-                }
-            }
-            Divider()
-            TextField(loc("New date"), text: $title).textFieldStyle(.roundedBorder)
-            DatePicker(loc("Date"), selection: $date, displayedComponents: .date)
-            Button(loc("Add")) {
-                guard !title.isEmpty else { return }
-                store.update { $0.dates.append(ImportantDate(title: title, date: date)) }
-                title = ""
-            }
-        }
-    }
-}
-
 /// How far a city is from local time.
 enum WorldClockOffset {
     /// `+3 h`, `−8 h`, `+5:30 h`; nothing to say when it is the same time.
@@ -247,6 +205,25 @@ struct WorldClocksPanel: View {
                 .foregroundStyle(.secondary)
             Spacer()
             Text(now.formatted(style)).font(.system(size: 15, weight: .semibold, design: .rounded)).monospacedDigit()
+            VStack(spacing: 0) {
+                Button {
+                    store.update { $0.moveCity(city.id, by: -1) }
+                } label: {
+                    Image(systemName: "chevron.up")
+                }
+                .disabled(store.data.cities.first?.id == city.id)
+                .help(loc("Move up"))
+                Button {
+                    store.update { $0.moveCity(city.id, by: 1) }
+                } label: {
+                    Image(systemName: "chevron.down")
+                }
+                .disabled(store.data.cities.last?.id == city.id)
+                .help(loc("Move down"))
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(.secondary)
             Button {
                 store.update { $0.cities.removeAll { $0.id == city.id } }
             } label: {

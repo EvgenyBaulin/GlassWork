@@ -99,7 +99,7 @@ public final class ClipboardStore {
 
     public func apply(_ new: ClipboardSettings) {
         guard new != settings else { return }
-        let retentionChanged = new.retentionDays != settings.retentionDays
+        let retentionChanged = new.retentionDays != settings.retentionDays || new.historyLimit != settings.historyLimit
         settings = new
         if retentionChanged {
             prune(at: Date())
@@ -158,7 +158,11 @@ public final class ClipboardStore {
 
     private func prune(at date: Date) {
         lastPrune = date
-        let removed = history.prune(at: date, retentionDays: settings.retentionDays)
+        let removed = history.prune(
+            at: date,
+            retentionDays: settings.retentionDays,
+            limit: max(settings.historyLimit, 1)
+        )
         guard !removed.isEmpty else { return }
         discard(removed)
         save()

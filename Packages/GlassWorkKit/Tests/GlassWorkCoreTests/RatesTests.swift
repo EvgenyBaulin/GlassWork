@@ -158,6 +158,18 @@ struct RateFormatTests {
         #expect(Format.exchangeRate(value, locale: locale) == expected)
     }
 
+    @Test(arguments: [(68420.4, 2, "68,420.40"), (81.4221, 4, "81.4221"), (1.15581, 2, "1.16")])
+    func fixedDigitsOverrideTheRule(value: Double, digits: Int, expected: String) {
+        #expect(Format.exchangeRate(value, digits: digits, locale: locale) == expected)
+        #expect(Format.exchangeRate(value, digits: nil, locale: locale) == Format.exchangeRate(value, locale: locale))
+    }
+
+    @Test func decimalPlacesAreAutomaticInOldSettings() throws {
+        #expect(try JSONDecoder().decode(RatesSettings.self, from: Data("{}".utf8)).decimalPlaces == nil)
+        let fixed = try JSONDecoder().decode(RatesSettings.self, from: Data(#"{"decimalPlaces":2}"#.utf8))
+        #expect(fixed.decimalPlaces == 2)
+    }
+
     @Test func aChangeUsesTheDigitsOfItsRate() {
         #expect(Format.exchangeRateChange(-0.24, of: 81.42, locale: locale) == "0.24")
         #expect(Format.exchangeRateChange(0.0012, of: 1.1558, locale: locale) == "0.0012")

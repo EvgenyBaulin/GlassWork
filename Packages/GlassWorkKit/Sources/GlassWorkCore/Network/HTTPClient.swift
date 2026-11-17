@@ -52,7 +52,7 @@ public struct RefreshSchedule: Sendable, Equatable {
 
     private var lastAttempt: Date?
     private var lastFailed = false
-    private let every: TimeInterval
+    private var every: TimeInterval
 
     public init(lastSuccess: Date? = nil, every: TimeInterval = Self.interval) {
         lastAttempt = lastSuccess
@@ -67,6 +67,11 @@ public struct RefreshSchedule: Sendable, Equatable {
     public mutating func record(success: Bool, at date: Date) {
         lastAttempt = date
         lastFailed = !success
+    }
+
+    /// Changes the wait between downloads; the last attempt stays.
+    public mutating func setInterval(_ interval: TimeInterval) {
+        every = interval
     }
 
     /// The next tick asks right away, for example after a city was added.

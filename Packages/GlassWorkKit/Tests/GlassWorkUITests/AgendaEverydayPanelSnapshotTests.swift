@@ -97,4 +97,20 @@ struct AgendaEverydayPanelSnapshotTests {
         .frame(width: 320)
         snapshotPanel(view, name: "devices-scanning-charging", dark: dark)
     }
+
+    @Test(arguments: [true, false])
+    func countdownListsRepeatingDatesWithEdit(dark: Bool) {
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = EverydayStore(store: SnapshotStore(directory: folder))
+        store.update { data in
+            data.dates = [
+                ImportantDate(title: "Launch", date: start.addingTimeInterval(86400 * 400)),
+                ImportantDate(title: "Rent", date: start.addingTimeInterval(-86400 * 40), repeats: .monthly),
+            ]
+        }
+        let view = CountdownPanel(monitor: SystemMonitor(everyday: store), fixedNow: start)
+            .frame(width: 340)
+        snapshotPanel(view, name: "countdown-repeat", dark: dark)
+    }
 }

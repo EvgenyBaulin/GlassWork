@@ -270,7 +270,9 @@ struct ClipboardPanel: View {
 
     private var hint: String {
         store.settings.pasteOnClick && actions.isPasteAllowed()
-            ? loc("Click to paste · ⌥-click pastes plain text")
+            ? (store.settings.pastesPlainByDefault
+                ? loc("Click to paste plain text · ⌥-click keeps formatting")
+                : loc("Click to paste · ⌥-click pastes plain text"))
             : loc("Click to copy")
     }
 

@@ -286,6 +286,9 @@ public enum TimerDuration {
 
     /// Seconds, or nil for anything that is not a duration from one second to a day.
     public static func parse(_ text: String) -> TimeInterval? {
+        if let seconds = parseUnits(text) {
+            return seconds
+        }
         let parts = text.trimmingCharacters(in: .whitespaces).split(separator: ":", omittingEmptySubsequences: false)
         guard (1 ... 3).contains(parts.count),
               parts.allSatisfy({ !$0.isEmpty && $0.count <= 5 && $0.allSatisfy { $0.isASCII && $0.isNumber } })
@@ -305,6 +308,33 @@ public enum TimerDuration {
         }
         let value = TimeInterval(seconds)
         return value >= 1 && value <= maximum ? value : nil
+    }
+
+    /// "1h 5m", "90s", "2h", "1h5m30s": numbers each followed by h, m or s (in that order, each at most once).
+    private static func parseUnits(_ text: String) -> TimeInterval? {
+        let units: [(letters: Set<String>, factor: Int)] = [
+            (["h", "hr", "hrs", "hour", "hours"], 3600),
+            (["m", "min", "mins", "minute", "minutes"], 60),
+            (["s", "sec", "secs", "second", "seconds"], 1),
+        ]
+        var rest = Substring(text.lowercased().filter { !$0.isWhitespace })
+        var total = 0
+        var nextUnit = 0
+        var found = false
+        while !rest.isEmpty {
+            let digits = rest.prefix { $0.isASCII && $0.isNumber }
+            rest = rest.dropFirst(digits.count)
+            let word = rest.prefix { $0.isLetter }
+            rest = rest.dropFirst(word.count)
+            guard let number = Int(digits), digits.count <= 5,
+                  let index = units[nextUnit...].firstIndex(where: { $0.letters.contains(String(word)) })
+            else { return nil }
+            total += number * units[index].factor
+            nextUnit = index + 1
+            found = true
+        }
+        let value = TimeInterval(total)
+        return found && value >= 1 && value <= maximum ? value : nil
     }
 }
 

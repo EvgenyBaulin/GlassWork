@@ -248,6 +248,16 @@ struct ClipboardHistoryTests {
         #expect(history.entries.map(\.text) == ["a", "pinned"])
     }
 
+    @Test func aSmallerHistoryLimitDropsTheOldestUnpinned() {
+        var history = ClipboardHistory(entries: (0 ..< 120).map { entry("item \($0)", age: TimeInterval($0)) })
+
+        let removed = history.prune(at: now, retentionDays: 30, limit: 50)
+
+        #expect(history.entries.count == 50)
+        #expect(removed.count == 70)
+        #expect(history.entries.first?.text == "item 0")
+    }
+
     @Test func clearAllKeepsPinnedEntries() throws {
         var history = ClipboardHistory(entries: [entry("a"), entry("b")])
         try history.togglePin(#require(history.entries.first).id)
@@ -278,6 +288,20 @@ struct ClipboardSettingsTests {
         #expect(!settings.isRecording)
         #expect(!settings.pasteOnClick)
         #expect(settings.retentionDays == 30)
+    }
+
+    @Test func historySizeAndPlainPasteDefaultToTheOldBehaviour() throws {
+        let settings = try JSONDecoder().decode(ClipboardSettings.self, from: Data("{}".utf8))
+
+        #expect(settings.historyLimit == 500)
+        #expect(!settings.pastesPlainByDefault)
+        #expect(ClipboardSettings.historyLimits == [50, 100, 250, 500])
+        let saved = try JSONDecoder().decode(
+            ClipboardSettings.self,
+            from: Data(#"{"historyLimit":100,"pastesPlainByDefault":true}"#.utf8)
+        )
+        #expect(saved.historyLimit == 100)
+        #expect(saved.pastesPlainByDefault)
     }
 
     @Test func aHandEditedFileKeepsItsDefaults() throws {

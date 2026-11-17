@@ -78,7 +78,8 @@ struct RatesPanel: View {
                         pair: pair,
                         quote: store.snapshot.quote(for: pair),
                         isStale: store.isStale,
-                        isUnavailable: store.isUnavailable(pair)
+                        isUnavailable: store.isUnavailable(pair),
+                        digits: store.settings.decimalPlaces
                     )
                     .background(hovered == pair ? .white.opacity(0.06) : .clear, in: .rect(cornerRadius: 8))
                     .onHover { hovered = $0 ? pair : hovered == pair ? nil : hovered }
@@ -100,6 +101,8 @@ struct RateRow: View {
     var isStale = false
     var isUnavailable = false
     var initialHover: Date?
+    /// Fixed decimals from Settings; nil is automatic.
+    var digits: Int?
 
     private var isOld: Bool {
         isStale || isUnavailable
@@ -119,7 +122,7 @@ struct RateRow: View {
             .frame(width: 78, alignment: .leading)
             middle.frame(maxWidth: .infinity)
             VStack(alignment: .trailing, spacing: 1) {
-                Text(isUnavailable ? "—" : quote.map { Format.exchangeRate($0.value) } ?? "—")
+                Text(isUnavailable ? "—" : quote.map { Format.exchangeRate($0.value, digits: digits) } ?? "—")
                     .font(.system(size: 14, weight: .semibold))
                     .monospacedDigit()
                 change
@@ -163,7 +166,7 @@ struct RateRow: View {
     }
 
     private func changeText(_ quote: RateQuote) -> String {
-        let amount = Format.exchangeRateChange(quote.change, of: quote.value)
+        let amount = Format.exchangeRateChange(quote.change, of: quote.value, digits: digits)
         return "\(quote.isUp ? "↑" : "↓") \(amount)  \(Format.signedPercent(quote.changeShare))"
     }
 
@@ -177,7 +180,7 @@ struct RateRow: View {
             title: pair.id,
             color: tint,
             points: history.points,
-            format: { Format.exchangeRate($0) }
+            format: { Format.exchangeRate($0, digits: digits) }
         )
     }
 }

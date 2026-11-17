@@ -109,6 +109,22 @@ struct RefreshScheduleTests {
         #expect(schedule.isDue(at: start.addingTimeInterval(30 * 60)))
     }
 
+    @Test func theIntervalCanChangeWithoutForgettingTheLastAttempt() {
+        var schedule = RefreshSchedule()
+        schedule.record(success: true, at: start)
+        schedule.setInterval(3 * 3600)
+
+        #expect(!schedule.isDue(at: start.addingTimeInterval(2 * 3600)))
+        #expect(schedule.isDue(at: start.addingTimeInterval(3 * 3600)))
+    }
+
+    @Test func weatherSettingsRefreshEveryHalfHourUnlessChosen() throws {
+        #expect(try JSONDecoder().decode(WeatherSettings.self, from: Data("{}".utf8)).refreshMinutes == 30)
+        let chosen = try JSONDecoder().decode(WeatherSettings.self, from: Data(#"{"refreshMinutes":180}"#.utf8))
+        #expect(chosen.refreshMinutes == 180)
+        #expect(WeatherSettings.refreshChoices == [15, 30, 60, 180])
+    }
+
     @Test func retriesFiveMinutesAfterFailure() {
         var schedule = RefreshSchedule()
         schedule.record(success: false, at: start)

@@ -168,8 +168,9 @@ final class ClipboardController {
     }
 
     /// Copies an entry, then pastes it into the app in front if the user asked for that.
+    /// `plainText` is true when ⌥ was held, which flips the "plain text by default" setting.
     func use(_ entry: ClipboardEntry, plainText: Bool) {
-        write(entry, plainText: plainText)
+        write(entry, plainText: plainText != store.settings.pastesPlainByDefault)
         model.closePanels()
         closeQuickPaste()
         guard store.settings.pasteOnClick, Accessibility.isTrusted else { return }

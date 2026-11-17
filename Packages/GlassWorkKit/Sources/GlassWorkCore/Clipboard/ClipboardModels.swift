@@ -18,6 +18,11 @@ public struct ClipboardSettings: Codable, Sendable, Equatable {
     /// Off by default: pasting into another app needs Accessibility.
     public var pasteOnClick = false
     public var retentionDays = 30
+    /// How many entries are kept, pinned ones aside.
+    public var historyLimit = ClipboardHistory.entryLimit
+    public static let historyLimits = [50, 100, 250, 500]
+    /// Pastes without formatting unless ⌥ is held, instead of the other way round.
+    public var pastesPlainByDefault = false
     public var excludedApps = ClipboardSettings.defaultExcludedApps
     /// The menu bar shows the last item instead of the count. Off, so it stays private on shared screens.
     public var showsLastItem = false
@@ -25,7 +30,7 @@ public struct ClipboardSettings: Codable, Sendable, Equatable {
     public init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case isRecording, pasteOnClick, retentionDays, excludedApps, showsLastItem
+        case isRecording, pasteOnClick, retentionDays, historyLimit, pastesPlainByDefault, excludedApps, showsLastItem
     }
 
     public init(from decoder: Decoder) throws {
@@ -33,6 +38,8 @@ public struct ClipboardSettings: Codable, Sendable, Equatable {
         isRecording = try container.decodeIfPresent(Bool.self, forKey: .isRecording) ?? false
         pasteOnClick = try container.decodeIfPresent(Bool.self, forKey: .pasteOnClick) ?? false
         retentionDays = try container.decodeIfPresent(Int.self, forKey: .retentionDays) ?? 30
+        historyLimit = try container.decodeIfPresent(Int.self, forKey: .historyLimit) ?? ClipboardHistory.entryLimit
+        pastesPlainByDefault = try container.decodeIfPresent(Bool.self, forKey: .pastesPlainByDefault) ?? false
         excludedApps = try container.decodeIfPresent([String].self, forKey: .excludedApps)
             ?? Self.defaultExcludedApps
         showsLastItem = try container.decodeIfPresent(Bool.self, forKey: .showsLastItem) ?? false
