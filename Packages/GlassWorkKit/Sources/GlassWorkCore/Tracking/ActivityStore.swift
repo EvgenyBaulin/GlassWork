@@ -12,7 +12,10 @@ public final class ActivityStore {
     public private(set) var reviews: [PullRequest] = []
     public private(set) var runs: [WorkflowRun] = []
     public private(set) var contributions: [ContributionDay] = []
+    public private(set) var contributionSummary: ContributionSummary?
     public private(set) var github: WidgetGitHub?
+    /// Why the GitHub widgets have nothing to show, when they do not.
+    public private(set) var githubAccess: WidgetGitHub.Access = .ready
     /// False when `gh` is missing or not signed in.
     public private(set) var githubAvailable = true
 
@@ -33,9 +36,12 @@ public final class ActivityStore {
     private static let historyLimit = 30
     /// Every repository costs a call, and this runs from a widget refresh, so the list stays short.
     private static let repositoryLimit = 5
-    private static let runsPerRepository = 5
-    private static let runLimit = 12
-    private static let runFields = "databaseId,displayTitle,headBranch,status,conclusion,createdAt"
+    /// Enough per repository to cover a week of runs for the success rate.
+    private static let runsPerRepository = 20
+    /// Runs are kept for a week, so the success rate has something to count, up to this many.
+    private static let runLimit = 200
+    private static let runHistory: TimeInterval = 7 * 86400
+    private static let runFields = "databaseId,displayTitle,headBranch,status,conclusion,createdAt,startedAt,updatedAt"
     private static let idleRunsInterval: TimeInterval = 300
     /// A run under way is what someone is waiting for, so it is checked more often.
     private static let activeRunsInterval: TimeInterval = 60
@@ -139,24 +145,28 @@ public final class ActivityStore {
     ) async {
         guard let tool = locateGH() else {
             githubAvailable = false
+            githubAccess = .notInstalled
             github = WidgetGitHub(access: .notInstalled)
             return
         }
-        let fields = "title,repository,number,url,updatedAt"
+        let fields = "title,repository,number,url,updatedAt,createdAt"
         let review = ["search", "prs", "--review-requested=@me", "--state=open", "--json", fields]
         let output = try? await runner.run(tool, arguments: review, timeout: 20)
         guard let output, output.status == 0 else {
             githubAvailable = false
+            githubAccess = .notSignedIn
             github = WidgetGitHub(access: .notSignedIn)
             onGitHubFailed?(output?.status ?? -1)
             return
         }
         githubAvailable = true
+        githubAccess = .ready
         reviews = GitHubParser.pullRequests(Data(output.stdout.utf8))
-        let query = "query{viewer{contributionsCollection{contributionCalendar{weeks{contributionDays"
-            + "{date contributionCount}}}}}}"
+        let query = GitHubParser.contributionsQuery
         let graph = try? await runner.run(tool, arguments: ["api", "graphql", "-f", "query=\(query)"], timeout: 20)
-        contributions = GitHubParser.contributions(Data((graph?.stdout ?? "").utf8))
+        let graphData = Data((graph?.stdout ?? "").utf8)
+        contributions = GitHubParser.contributions(graphData)
+        contributionSummary = GitHubParser.contributionSummary(graphData)
         if includesDigest {
             await refreshDigest(tool: tool, at: date)
         }
@@ -202,6 +212,10 @@ public final class ActivityStore {
                 fresh += GitHubParser.workflowRuns(Data(output.stdout.utf8), repository: repository)
             }
         }
-        runs = Array(fresh.sorted { $0.createdAt > $1.createdAt }.prefix(Self.runLimit))
+        // Runs read earlier stay for a week unless the new answer has them again, so the rate has a week to count.
+        let known = Set(fresh.map(\.id))
+        let cutoff = date.addingTimeInterval(-Self.runHistory)
+        let kept = runs.filter { !known.contains($0.id) && $0.createdAt >= cutoff }
+        runs = Array((fresh + kept).sorted { $0.createdAt > $1.createdAt }.prefix(Self.runLimit))
     }
 }

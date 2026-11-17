@@ -257,6 +257,22 @@
         }
       }
     },
+    "%@ · %@ ago": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@ ago"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@ назад"
+          }
+        }
+      }
+    },
     "%@ · %lld cores": {
       "localizations": {
         "ru": {
@@ -279,6 +295,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ · своп %@"
+          }
+        }
+      }
+    },
+    "%lld commits": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld commits"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Коммитов: %lld"
           }
         }
       }
@@ -565,6 +597,22 @@
         }
       }
     },
+    "%lld running now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld running now"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас идёт: %lld"
+          }
+        }
+      }
+    },
     "%lld s": {
       "localizations": {
         "en": {
@@ -587,6 +635,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Датчиков: %lld"
+          }
+        }
+      }
+    },
+    "%lld today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld today"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сегодня: %lld"
           }
         }
       }
@@ -759,6 +823,22 @@
         }
       }
     },
+    "1–3 days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1–3 days"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1–3 дня"
+          }
+        }
+      }
+    },
     "24 h": {
       "localizations": {
         "ru": {
@@ -887,6 +967,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Прогноз на 7 дней"
+          }
+        }
+      }
+    },
+    "7-day success": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7-day success"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Успешных за 7 дней"
           }
         }
       }
@@ -1725,6 +1821,22 @@
         }
       }
     },
+    "Average run %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Average run %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В среднем %@"
+          }
+        }
+      }
+    },
     "Awake sessions": {
       "localizations": {
         "en": {
@@ -2159,6 +2271,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Программа в командной строке"
+          }
+        }
+      }
+    },
+    "Commits": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commits"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Коммиты"
           }
         }
       }
@@ -4315,6 +4443,22 @@
         }
       }
     },
+    "Issues": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Issues"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задачи"
+          }
+        }
+      }
+    },
     "Items dragged left of this mark stay hidden. Option-click ‹ to show them.": {
       "localizations": {
         "en": {
@@ -5909,6 +6053,22 @@
         }
       }
     },
+    "Oldest wait: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oldest wait: %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дольше всего ждёт: %@"
+          }
+        }
+      }
+    },
     "On": {
       "localizations": {
         "ru": {
@@ -6267,6 +6427,22 @@
         }
       }
     },
+    "Over 3 days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Over 3 days"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Больше 3 дней"
+          }
+        }
+      }
+    },
     "Overdue": {
       "localizations": {
         "ru": {
@@ -6403,6 +6579,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Переменная облачность"
+          }
+        }
+      }
+    },
+    "Passed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passed"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Успешно"
           }
         }
       }
@@ -6733,6 +6925,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Публичный IP"
+          }
+        }
+      }
+    },
+    "Pull requests": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pull requests"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пул-реквесты"
           }
         }
       }
@@ -8957,6 +9165,22 @@
         }
       }
     },
+    "Top repositories": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top repositories"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Главные репозитории"
+          }
+        }
+      }
+    },
     "Track which app is in front": {
       "localizations": {
         "ru": {
@@ -9057,6 +9281,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Незакоммиченные изменения"
+          }
+        }
+      }
+    },
+    "Under a day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Under a day"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Меньше суток"
           }
         }
       }

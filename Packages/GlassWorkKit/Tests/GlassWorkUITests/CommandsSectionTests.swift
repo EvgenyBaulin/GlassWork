@@ -75,7 +75,7 @@ struct CommandsSectionSnapshotTests {
             ),
             WorkflowRun(id: 2, name: "Tests", branch: "fix/ui", state: .failed, createdAt: date, repository: "me/api"),
         ]
-        let view = ActionsWidget(size: .medium, snapshot: snapshot)
+        let view = ActionsWidget(size: .medium, snapshot: snapshot, now: date)
             .padding(16)
             .frame(width: WidgetSize.medium.width, height: WidgetSize.medium.height)
         snapshotPanel(view, name: "actions", dark: dark)

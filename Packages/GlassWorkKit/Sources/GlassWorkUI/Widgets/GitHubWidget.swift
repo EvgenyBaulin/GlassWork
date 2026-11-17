@@ -22,23 +22,8 @@ struct GitHubWidget: View {
 
     var body: some View {
         if let data {
-            switch data.access {
-            case .ready:
+            GitHubAccessGate(access: data.access, size: context.size, symbol: symbol) {
                 content
-            case .notInstalled:
-                WidgetEmptyState(
-                    symbol: symbol,
-                    title: loc("The gh tool is not installed"),
-                    detail: context.size == .small ? nil : "brew install gh",
-                    tint: Palette.purple
-                )
-            case .notSignedIn:
-                WidgetEmptyState(
-                    symbol: symbol,
-                    title: loc("Not signed in to gh"),
-                    detail: context.size == .small ? nil : "gh auth login",
-                    tint: Palette.purple
-                )
             }
         } else {
             WidgetChecking(symbol: symbol, tint: Palette.purple)

@@ -12,6 +12,8 @@ public struct PullRequest: Codable, Sendable, Equatable, Identifiable {
     public var number: Int
     public var url: String
     public var updatedAt: Date
+    /// When the request was opened. Optional so reviews saved before it existed still decode.
+    public var createdAt: Date?
 }
 
 public enum WorkflowState: String, Codable, Sendable {
@@ -26,6 +28,21 @@ public struct WorkflowRun: Codable, Sendable, Equatable, Identifiable {
     public var createdAt: Date
     /// `owner/name`. Optional so runs saved before it existed still decode.
     public var repository: String?
+    /// Optional so runs saved before they were kept for a week still decode.
+    public var startedAt: Date?
+    /// The last change of the run: for a finished one, the time it ended.
+    public var updatedAt: Date?
+
+    /// How long a finished run took.
+    public var duration: TimeInterval? {
+        guard state != .running, let startedAt, let updatedAt else { return nil }
+        return max(updatedAt.timeIntervalSince(startedAt), 0)
+    }
+
+    /// When a finished run ended.
+    public var completedAt: Date? {
+        state == .running ? nil : updatedAt
+    }
 
     /// The name without the owner, which is what a small widget has room for.
     public var repositoryName: String? {
@@ -46,7 +63,7 @@ public enum GitHubParser {
         return decoder
     }
 
-    /// `gh search prs --review-requested=@me --state=open --json title,repository,number,url,updatedAt`.
+    /// `gh search prs --review-requested=@me --state=open --json title,repository,number,url,updatedAt,createdAt`.
     public static func pullRequests(_ json: Data) -> [PullRequest] {
         struct Row: Decodable {
             struct Repository: Decodable { let nameWithOwner: String }
@@ -55,6 +72,7 @@ public enum GitHubParser {
             let number: Int
             let url: String
             let updatedAt: Date
+            let createdAt: Date?
         }
         let rows = (try? decoder.decode([Row].self, from: json)) ?? []
         return rows.map {
@@ -63,7 +81,8 @@ public enum GitHubParser {
                 repository: $0.repository.nameWithOwner,
                 number: $0.number,
                 url: $0.url,
-                updatedAt: $0.updatedAt
+                updatedAt: $0.updatedAt,
+                createdAt: $0.createdAt
             )
         }
     }
@@ -75,7 +94,7 @@ public enum GitHubParser {
             .filter { $0.contains("/") }
     }
 
-    /// `gh run list --json databaseId,displayTitle,headBranch,status,conclusion,createdAt`.
+    /// `gh run list --json databaseId,displayTitle,headBranch,status,conclusion,createdAt,startedAt,updatedAt`.
     public static func workflowRuns(_ json: Data, repository: String? = nil) -> [WorkflowRun] {
         struct Row: Decodable {
             let databaseId: Int
@@ -84,6 +103,8 @@ public enum GitHubParser {
             let status: String
             let conclusion: String?
             let createdAt: Date
+            let startedAt: Date?
+            let updatedAt: Date?
         }
         let rows = (try? decoder.decode([Row].self, from: json)) ?? []
         return rows.map {
@@ -93,7 +114,9 @@ public enum GitHubParser {
                 branch: $0.headBranch,
                 state: state(status: $0.status, conclusion: $0.conclusion),
                 createdAt: $0.createdAt,
-                repository: repository
+                repository: repository,
+                startedAt: $0.startedAt,
+                updatedAt: $0.updatedAt
             )
         }
     }
@@ -106,6 +129,12 @@ public enum GitHubParser {
         default: return .other
         }
     }
+
+    /// One call gives the calendar, the totals and the busiest repositories, so the widget costs no more.
+    public static let contributionsQuery = "query{viewer{contributionsCollection{totalCommitContributions "
+        + "totalPullRequestContributions totalIssueContributions "
+        + "commitContributionsByRepository(maxRepositories:3){repository{nameWithOwner} contributions{totalCount}} "
+        + "contributionCalendar{weeks{contributionDays{date contributionCount}}}}}}"
 
     /// The contribution calendar from `gh api graphql`.
     public static func contributions(_ json: Data) -> [ContributionDay] {

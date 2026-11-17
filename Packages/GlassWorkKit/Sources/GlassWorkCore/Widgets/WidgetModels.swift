@@ -78,6 +78,10 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var reviews: [PullRequest] = []
     public var runs: [WorkflowRun] = []
     public var contributions: [ContributionDay] = []
+    /// Totals and busiest repositories behind the calendar. Nil in snapshots from earlier versions.
+    public var contributionSummary: ContributionSummary?
+    /// Whether `gh` is there and signed in, for the widgets that list its data. Nil in earlier snapshots.
+    public var githubAccess: WidgetGitHub.Access?
     /// Your pull requests and the ones waiting for you. Nil until `gh` has answered.
     public var github: WidgetGitHub?
     /// The first weather place, used by the sun-based clocks; nil until one is saved.
