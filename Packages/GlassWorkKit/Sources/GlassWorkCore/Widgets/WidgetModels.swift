@@ -98,6 +98,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var weather: WidgetWeather?
     public var rates: WidgetRates?
     public var git: GitReading?
+    /// Which repositories the Git widget lists and what counts as to do. Nil in snapshots from before this existed.
+    public var gitOptions: WidgetGitOptions?
     public var devServers: DevServerReading?
     public var docker: DockerReading?
     public var aiUsage: AIUsageReading?
@@ -139,11 +141,12 @@ public struct WidgetSettings: Codable, Sendable, Equatable {
     public var commands: [UserCommand] = []
     public var endpoints: [Endpoint] = []
     public var wordOfDay = WordOfDaySettings()
+    public var git = GitWidgetSettings()
 
     public init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case refreshSeconds, tracksScreenTime, dayStartHour, commands, endpoints, wordOfDay
+        case refreshSeconds, tracksScreenTime, dayStartHour, commands, endpoints, wordOfDay, git
     }
 
     /// Every key is optional: a settings file written before a key existed must still load.
@@ -155,6 +158,7 @@ public struct WidgetSettings: Codable, Sendable, Equatable {
         commands = try container.decodeIfPresent([UserCommand].self, forKey: .commands) ?? []
         endpoints = try container.decodeIfPresent([Endpoint].self, forKey: .endpoints) ?? []
         wordOfDay = (try? container.decodeIfPresent(WordOfDaySettings.self, forKey: .wordOfDay)) ?? WordOfDaySettings()
+        git = (try? container.decodeIfPresent(GitWidgetSettings.self, forKey: .git)) ?? GitWidgetSettings()
     }
 }
 

@@ -10,12 +10,20 @@ struct GitWidget: View {
         context.snapshot.git
     }
 
+    private var options: WidgetGitOptions {
+        context.snapshot.gitOptions ?? WidgetGitOptions()
+    }
+
     private var projects: [GitRepository] {
-        reading?.byWork ?? []
+        options.shown(in: reading?.byWork ?? [])
     }
 
     private var toDo: Int {
-        projects.count(where: \.needsWork)
+        projects.count(where: needsWork)
+    }
+
+    private func needsWork(_ project: GitRepository) -> Bool {
+        project.needsWork(counting: options.countsAs)
     }
 
     private var header: some View {
@@ -122,7 +130,7 @@ struct GitWidget: View {
     private var pills: some View {
         HStack(spacing: 3) {
             ForEach(projects.prefix(8)) { project in
-                Capsule().fill(tint(project)).frame(height: 5).widgetAccentable(project.needsWork)
+                Capsule().fill(tint(project)).frame(height: 5).widgetAccentable(needsWork(project))
             }
         }
     }
@@ -148,15 +156,15 @@ struct GitWidget: View {
     @ViewBuilder
     private func counts(_ project: GitRepository) -> some View {
         if let status = project.status {
-            if project.needsWork {
+            if needsWork(project) {
                 HStack(spacing: 6) {
-                    if status.changed + status.conflicted > 0 {
+                    if options.countsAs != .unpushed, status.changed + status.conflicted > 0 {
                         count("pencil", status.changed + status.conflicted, Palette.orange)
                     }
-                    if status.ahead > 0 {
+                    if options.countsAs != .uncommitted, status.ahead > 0 {
                         count("arrow.up", status.ahead, Palette.blue)
                     }
-                    if status.behind > 0 {
+                    if options.countsAs == .both, status.behind > 0 {
                         count("arrow.down", status.behind, Palette.blue)
                     }
                 }
@@ -204,6 +212,9 @@ struct GitWidget: View {
 
     private func symbol(_ project: GitRepository) -> String {
         guard let status = project.status else { return "questionmark.circle" }
+        if !needsWork(project) {
+            return "checkmark.circle"
+        }
         if !status.isClean {
             return "pencil.circle"
         }
@@ -215,6 +226,9 @@ struct GitWidget: View {
 
     private func tint(_ project: GitRepository) -> Color {
         guard let status = project.status else { return Palette.gray }
+        if !needsWork(project) {
+            return Palette.green.opacity(0.7)
+        }
         if !status.isClean {
             return Palette.orange
         }

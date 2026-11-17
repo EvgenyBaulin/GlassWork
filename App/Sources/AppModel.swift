@@ -429,6 +429,10 @@ final class AppModel {
         var snapshot = monitor.widgetSnapshot(for: kinds)
         snapshot.commands = store.settings.widgets.commands
         snapshot.endpoints = store.settings.widgets.endpoints
+        snapshot.gitOptions = store.settings.widgets.git.resolved(
+            reading: snapshot.git,
+            moduleSelection: monitor.developer.options.gitRepository
+        )
         if kinds.contains(.fans) {
             snapshot.fans = fans.widgetState
         }

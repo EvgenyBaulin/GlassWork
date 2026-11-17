@@ -283,6 +283,15 @@ extension SettingsIndex {
         return [
             page("widgets.photoFrame", "Photo Frame", "Фоторамка", .widgets, ["Widgets"], keywords: ["photos", "фото"]),
             page(
+                "widgets.photoSubfolders",
+                "Include subfolders",
+                "Включая вложенные папки",
+                .widgets,
+                ["Widgets", "Photo Frame"]
+            ),
+            page("widgets.photoOrder", "Order", "Порядок", .widgets, ["Widgets", "Photo Frame"]),
+            page("widgets.photoSize", "Photo size", "Размер фото", .widgets, ["Widgets", "Photo Frame"]),
+            page(
                 "widgets.onThisDay",
                 "On This Day",
                 "В этот день",
@@ -497,6 +506,22 @@ extension SettingsIndex {
                 ["Widgets"],
                 keywords: ["dictionary", "словарь"]
             ),
+            page(
+                "widgets.git",
+                "Git widget",
+                "Виджет Git",
+                .widgets,
+                ["Widgets"],
+                keywords: ["repository", "репозиторий"]
+            ),
+            page(
+                "widgets.gitRepositories",
+                "Repositories",
+                "Репозитории",
+                .widgets,
+                ["Widgets", "Git widget"]
+            ),
+            page("widgets.gitToDo", "Counts as to do", "Считать задачей", .widgets, ["Widgets", "Git widget"]),
             page("widgets.commands", "Commands", "Команды", .widgets, ["Widgets"], keywords: ["scripts", "скрипты"]),
             page("widgets.endpoints", "Endpoints", "Адреса", .widgets, ["Widgets"], keywords: ["URL", "сайты"]),
             page("tiles.use", "Use Window Tiles", "Включить раскладку окон", .windowTiles, ["Window Tiles"]),

@@ -84,15 +84,18 @@ public final class PersonalWidgetStore {
             clearPhotoFrame()
             return
         }
-        guard isWanted, isDue(.photoFrame, "\(dayMark(date)) \(settings.photoFolderPath)", force: force) else { return }
+        let mark = "\(dayMark(date)) \(settings.photoFolderPath) \(settings.photoOptions) \(settings.photoFit)"
+        guard isWanted, isDue(.photoFrame, mark, force: force) else { return }
         let url = URL(filePath: settings.photoFolderPath, directoryHint: .isDirectory)
         let folder = folder
         let seed = PhotoRotation.daySeed(date)
+        let options = settings.photoOptions
         let reading = await Task.detached(priority: .utility) {
-            await folder.read(folder: url, seed: seed, limit: Self.photoLimit)
+            await folder.read(folder: url, options: options, seed: seed, limit: Self.photoLimit)
         }.value
         var result = PhotoFrameData()
         result.folderName = url.lastPathComponent
+        result.fit = settings.photoFit == .fill ? nil : settings.photoFit
         if let reading {
             result.state = .ready
             result.total = reading.total

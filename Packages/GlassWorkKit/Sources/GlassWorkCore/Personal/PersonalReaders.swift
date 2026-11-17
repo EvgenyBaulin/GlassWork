@@ -34,7 +34,7 @@ public struct FolderReading: Sendable, Equatable {
 /// Reads the folder the user picked. Tests substitute their own.
 public protocol PhotoFolderReading: Sendable {
     /// Nil when the folder cannot be read.
-    func read(folder: URL, seed: UInt64, limit: Int) async -> FolderReading?
+    func read(folder: URL, options: PhotoFolderOptions, seed: UInt64, limit: Int) async -> FolderReading?
 }
 
 /// The Photos library. Tests substitute their own, so no test can bring up the macOS prompt.
@@ -83,19 +83,32 @@ public struct PhotoFolderReader: PhotoFolderReading {
 
     public init() {}
 
-    public func read(folder: URL, seed: UInt64, limit: Int) async -> FolderReading? {
+    public func read(folder: URL, options: PhotoFolderOptions, seed: UInt64, limit: Int) async -> FolderReading? {
         let manager = FileManager.default
-        let options: FileManager.DirectoryEnumerationOptions = [.skipsHiddenFiles, .skipsSubdirectoryDescendants]
-        guard let files = try? manager.contentsOfDirectory(
+        let keys: [URLResourceKey] = [.creationDateKey]
+        guard let top = try? manager.contentsOfDirectory(
             at: folder,
-            includingPropertiesForKeys: [.creationDateKey],
-            options: options
+            includingPropertiesForKeys: keys,
+            options: [.skipsHiddenFiles]
         ) else { return nil }
-        let images = files
-            .filter { Self.extensions.contains($0.pathExtension.lowercased()) }
-            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        var files = top
+        if options.includesSubfolders {
+            let walker = manager.enumerator(
+                at: folder,
+                includingPropertiesForKeys: keys,
+                options: [.skipsHiddenFiles, .skipsPackageDescendants]
+            )
+            files = walker?.compactMap { $0 as? URL } ?? top
+        }
+        let images = files.filter { Self.extensions.contains($0.pathExtension.lowercased()) }
+        let ordered = options.order.arranged(
+            images,
+            date: { try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate },
+            name: { $0.path },
+            seed: seed
+        )
         var photos: [ReadPhoto] = []
-        for file in PhotoRotation.shuffled(images, seed: seed) where photos.count < limit {
+        for file in ordered where photos.count < limit {
             if let photo = Self.photo(at: file) {
                 photos.append(photo)
             }

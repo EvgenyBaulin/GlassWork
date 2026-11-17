@@ -14,6 +14,7 @@ struct WidgetsPane: View {
             PersonalWidgetsSection(store: store, personal: personal)
             WordOfDaySection(store: store)
             ScreenTimeSection(store: store, activity: activity)
+            GitWidgetSection(store: store)
             CommandsSection(store: store, activity: activity)
             Section(loc("Endpoints")) {
                 ForEach(store.settings.widgets.endpoints) { endpoint in
