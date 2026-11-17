@@ -4615,6 +4615,22 @@
         }
       }
     },
+    "New Window": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Window"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новое окно"
+          }
+        }
+      }
+    },
     "Next": {
       "localizations": {
         "ru": {
@@ -8275,6 +8291,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ветер"
+          }
+        }
+      }
+    },
+    "Window %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Window %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Окно %lld"
           }
         }
       }

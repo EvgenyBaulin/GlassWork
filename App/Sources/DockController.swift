@@ -533,6 +533,20 @@ extension DockController {
         )
         actions.trash = trash.actions
         actions.cancelDownload = { [weak self] in self?.folders.cancel($0) }
+        actions.windows = { [weak self] in self?.runningApp($0).map { DockAppWindows.list(pid: $0.processIdentifier) } ?? [] }
+        actions.raiseWindow = { [weak self] app, window in
+            if let running = self?.runningApp(app) {
+                DockAppWindows.raise(window, of: running)
+            }
+        }
+        actions.canOpenNewWindow = { [weak self] in
+            self?.runningApp($0).map { DockAppWindows.hasNewWindow(pid: $0.processIdentifier) } ?? false
+        }
+        actions.newWindow = { [weak self] app in
+            if let running = self?.runningApp(app) {
+                DockAppWindows.newWindow(of: running)
+            }
+        }
         actions.turnOffPreset = { [weak self] in self?.turnOffPreset() }
         actions.hover = { [weak self] hover in
             guard let self else { return }

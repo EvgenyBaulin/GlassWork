@@ -80,6 +80,13 @@ public struct DockActions {
     public var turnOffPreset: (() -> Void)?
     /// The item under the pointer, for its name label. Set by the app; without it there is no label.
     public var hover: ((DockHover) -> Void)?
+    /// The windows of a running app, front to back. Set by the app; without it the menu lists none.
+    public var windows: (DockApp) -> [DockWindowItem] = { _ in [] }
+    /// Brings one of those windows forward.
+    public var raiseWindow: (DockApp, DockWindowItem) -> Void = { _, _ in }
+    /// The app has a New Window item in its menus, which GlassWork can choose.
+    public var canOpenNewWindow: (DockApp) -> Bool = { _ in false }
+    public var newWindow: (DockApp) -> Void = { _ in }
 
     public init(
         open: @escaping (DockApp) -> Void,
