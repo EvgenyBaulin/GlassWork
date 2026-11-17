@@ -16,7 +16,7 @@ public enum ShortcutAction: Hashable, Sendable {
     public static var all: [ShortcutAction] {
         [.hub, .quickPaste, .textCapture, .quickQuit, .hiddenBar, .searchMenuBar] + TileCommand.all
             .map(ShortcutAction.tile)
-            + [.fansMax] + ModuleID.allCases.map(ShortcutAction.openModule)
+            + [.fansMax] + ModuleID.allCases.filter { !$0.isDockOnly }.map(ShortcutAction.openModule)
     }
 
     /// What settings.json calls it, so it must not change.

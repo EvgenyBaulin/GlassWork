@@ -329,6 +329,7 @@ struct WidgetTile: View {
 
     var body: some View {
         let content = ItemContent.content(module, monitor: monitor, style: .compact)
+        let look = DockSystemTileLook.of(module, monitor: monitor)
         Button {
             if press.released() {
                 click()
@@ -336,8 +337,10 @@ struct WidgetTile: View {
         } label: {
             DockIndicated(position: position, isLit: false) {
                 VStack(spacing: 1) {
-                    Image(systemName: module.symbol).font(.system(size: size * 0.28)).foregroundStyle(module.tint)
-                    Text(module == .shelf ? Self.shelfCaption(monitor.shelf.items.count) : content.figure)
+                    Image(systemName: look?.symbol ?? module.symbol).font(.system(size: size * 0.28))
+                        .foregroundStyle(look?.tint ?? module.tint)
+                    Text(module == .shelf ? Self.shelfCaption(monitor.shelf.items.count) : look?.caption ?? content
+                        .figure)
                         .font(.system(
                             size: size * (module == .shelf ? 0.15 : 0.2),
                             weight: .semibold,
@@ -359,6 +362,16 @@ struct WidgetTile: View {
         .onHover { isInside in
             if !isInside {
                 press.left()
+            }
+        }
+        .onAppear {
+            if module.isDockOnly {
+                monitor.media.retain()
+            }
+        }
+        .onDisappear {
+            if module.isDockOnly {
+                monitor.media.release()
             }
         }
     }

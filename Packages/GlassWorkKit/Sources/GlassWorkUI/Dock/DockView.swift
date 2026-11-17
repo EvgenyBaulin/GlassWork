@@ -17,7 +17,6 @@ public extension ModuleID {
         switch self {
         case .timers: loc("Click: start 25 min")
         case .stopwatch: loc("Click: start or stop")
-        case .keepAwake: loc("Click: turn on or off")
         case .nowPlaying: loc("Click: play or pause")
         case .devServers: loc("Click: open in browser")
         case .calendar, .endsIn: loc("Click: join call")

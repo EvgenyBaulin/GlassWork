@@ -85,6 +85,18 @@ public final class EverydayStore {
         }
     }
 
+    /// Turns Keep Awake on for this long, or until it is turned off when `minutes` is nil. When it is on already
+    /// it is started again, so the deadline and the system's timeout both follow the new choice.
+    public func startKeepAwake(minutes: Int?, at date: Date = Date()) {
+        if isKeepingAwake {
+            toggleKeepAwake(at: date)
+        }
+        let saved = keepAwakeRule
+        keepAwakeRule.minutes = max(minutes ?? 0, 0)
+        toggleKeepAwake(at: date)
+        keepAwakeRule = saved
+    }
+
     /// Extends both the visible deadline and the system assertion's timeout.
     public func extendKeepAwake(by interval: TimeInterval, at date: Date = Date()) {
         guard isKeepingAwake, let end = keepAwakeEnds, interval > 0 else { return }

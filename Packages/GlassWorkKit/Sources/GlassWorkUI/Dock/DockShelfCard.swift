@@ -170,10 +170,12 @@ public struct DockWidgetCard: View {
     }
 
     public var body: some View {
-        if module == .shelf {
-            DockShelfCard(store: monitor.shelf)
-        } else {
-            ModulePanel(module: module, monitor: monitor)
+        switch module {
+        case .shelf: DockShelfCard(store: monitor.shelf)
+        case .keepAwake: DockKeepAwakeCard(monitor: monitor)
+        case .sound: DockSoundCard(monitor: monitor)
+        case .micCamera: DockMicCameraCard(monitor: monitor)
+        default: ModulePanel(module: module, monitor: monitor)
         }
     }
 }

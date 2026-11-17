@@ -1563,6 +1563,22 @@
         }
       }
     },
+    "Also keeping this Mac awake": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also keeping this Mac awake"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ещё не дают Mac уснуть"
+          }
+        }
+      }
+    },
     "Always hidden": {
       "localizations": {
         "en": {
@@ -1941,6 +1957,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Календарь, таймеры, мировые часы, «Сейчас играет» и «Заканчивается через»"
+          }
+        }
+      }
+    },
+    "Camera": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camera"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Камера"
           }
         }
       }
@@ -4065,6 +4097,22 @@
         }
       }
     },
+    "Idle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idle"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не используются"
+          }
+        }
+      }
+    },
     "Image": {
       "localizations": {
         "ru": {
@@ -4227,6 +4275,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Бессрочно"
+          }
+        }
+      }
+    },
+    "Input": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Input"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ввод"
           }
         }
       }
@@ -4737,6 +4801,22 @@
         }
       }
     },
+    "macOS does not say which app is using them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS does not say which app is using them."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS не сообщает, какое приложение их использует."
+          }
+        }
+      }
+    },
     "Max items": {
       "localizations": {
         "en": {
@@ -4797,6 +4877,70 @@
           "stringUnit": {
             "state": "translated",
             "value": "Метод"
+          }
+        }
+      }
+    },
+    "Mic": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mic"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Микрофон"
+          }
+        }
+      }
+    },
+    "Mic & Camera": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mic & Camera"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Микрофон и камера"
+          }
+        }
+      }
+    },
+    "Mic + Cam": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mic + Cam"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Микр. + камера"
+          }
+        }
+      }
+    },
+    "Microphone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microphone"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Микрофон"
           }
         }
       }
@@ -5443,6 +5587,22 @@
         }
       }
     },
+    "Not in use": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not in use"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не используется"
+          }
+        }
+      }
+    },
     "Not needed": {
       "localizations": {
         "en": {
@@ -5553,6 +5713,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пока ничего не скопировано"
+          }
+        }
+      }
+    },
+    "Nothing else is keeping this Mac awake.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing else is keeping this Mac awake."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Больше ничто не мешает Mac уснуть."
           }
         }
       }
@@ -6075,6 +6251,22 @@
         }
       }
     },
+    "Output": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Output"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вывод"
+          }
+        }
+      }
+    },
     "Overdue": {
       "localizations": {
         "ru": {
@@ -6419,6 +6611,22 @@
         }
       }
     },
+    "Pick a time to start": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick a time to start"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите время, чтобы включить"
+          }
+        }
+      }
+    },
     "Pin": {
       "localizations": {
         "ru": {
@@ -6717,6 +6925,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Распознаю текст…"
+          }
+        }
+      }
+    },
+    "Reading…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reading…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтение…"
           }
         }
       }
@@ -8307,6 +8531,38 @@
         }
       }
     },
+    "The display can sleep": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The display can sleep"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Экран может гаснуть"
+          }
+        }
+      }
+    },
+    "The display stays on too": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The display stays on too"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Экран тоже не гаснет"
+          }
+        }
+      }
+    },
     "The menu bar shows the lowest charge among the ticked devices.": {
       "localizations": {
         "en": {
@@ -8837,6 +9093,22 @@
         }
       }
     },
+    "Until %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До %@"
+          }
+        }
+      }
+    },
     "Until break": {
       "localizations": {
         "en": {
@@ -8853,6 +9125,22 @@
         }
       }
     },
+    "Until off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until off"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До выключения"
+          }
+        }
+      }
+    },
     "Until tomorrow": {
       "localizations": {
         "en": {
@@ -8865,6 +9153,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "До завтра"
+          }
+        }
+      }
+    },
+    "Until you turn it off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until you turn it off"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока вы не выключите"
           }
         }
       }

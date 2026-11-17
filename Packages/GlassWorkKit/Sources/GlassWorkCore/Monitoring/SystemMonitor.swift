@@ -136,6 +136,8 @@ public final class SystemMonitor {
     public let rates: RatesStore
     public let clipboard: ClipboardStore
     public let shelf: ShelfStore
+    /// Sound and capture state for the Dock's information cards; it listens only while one is on screen.
+    public let media: SystemMediaStore
     /// The adapter process runs only while `demand.nowPlaying` is set.
     public let nowPlaying: NowPlayingStore
 
@@ -155,11 +157,6 @@ public final class SystemMonitor {
 
     /// The Weather place the user picked for the sun, if any.
     public var sunPlaceID: Int?
-
-    /// Where the Sun and Moon item, its panel and the sun widgets all look.
-    public var sunPlace: WeatherPlace? {
-        SunLocation.place(in: weather.places, chosen: sunPlaceID)
-    }
 
     /// Called after each read. Menu bar items redraw from here, without SwiftUI's update machinery.
     @ObservationIgnored public var onUpdate: (() -> Void)?
@@ -192,6 +189,7 @@ public final class SystemMonitor {
         rates: RatesStore = RatesStore(),
         clipboard: ClipboardStore = ClipboardStore(),
         shelf: ShelfStore = ShelfStore(),
+        media: SystemMediaStore = SystemMediaStore(),
         nowPlaying: NowPlayingStore = NowPlayingStore(),
         apps: AppUsageStore = AppUsageStore(),
         personal: PersonalWidgetStore = PersonalWidgetStore(),
@@ -204,6 +202,7 @@ public final class SystemMonitor {
         self.rates = rates
         self.clipboard = clipboard
         self.shelf = shelf
+        self.media = media
         self.nowPlaying = nowPlaying
         developer.onChange = { [weak self] in self?.onUpdate?() }
         nowPlaying.onUpdate = { [weak self] in self?.onUpdate?() }
@@ -532,6 +531,13 @@ public final class SystemMonitor {
 
     private func record(_ metric: Metric, _ value: Double, _ date: Date) {
         histories[metric, default: TieredHistory()].append(value, at: date)
+    }
+}
+
+public extension SystemMonitor {
+    /// Where the Sun and Moon item, its panel and the sun widgets all look.
+    var sunPlace: WeatherPlace? {
+        SunLocation.place(in: weather.places, chosen: sunPlaceID)
     }
 }
 

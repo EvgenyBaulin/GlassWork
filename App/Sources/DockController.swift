@@ -186,7 +186,6 @@ final class DockController {
         case .showCard: toggleCard(module)
         case let .perform(action): model.perform(action)
         case .toggleStopwatch: monitor.everyday.update { $0.stopwatch.toggle(at: Date()) }
-        case .toggleKeepAwake: monitor.everyday.toggleKeepAwake()
         case .togglePlayback: monitor.nowPlaying.perform(.toggle)
         case let .open(url): NSWorkspace.shared.open(url)
         }

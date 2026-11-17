@@ -12,6 +12,8 @@ public enum ModuleID: String, Codable, CaseIterable, Sendable, Identifiable {
     case notes, todos, countdown, stopwatch, shelf, colours, appearance
     case deviceBatteries, eject, sunMoon, date, clipboard
     case weather, rates
+    /// Dock-only information cards: they have no menu bar item and no Hub tile.
+    case sound, micCamera
 
     public var id: String {
         rawValue

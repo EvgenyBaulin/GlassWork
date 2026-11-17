@@ -32,7 +32,6 @@ struct DockWidgetClickTests {
 
     @Test func switchesFlipOnClick() {
         #expect(resolve(.stopwatch) == .toggleStopwatch)
-        #expect(resolve(.keepAwake) == .toggleKeepAwake)
         #expect(resolve(.nowPlaying) == .togglePlayback)
     }
 
@@ -76,7 +75,7 @@ struct DockWidgetClickTests {
 
     /// Nothing that writes to the system may hide behind a click. Containers stay read-only too.
     @Test func everyOtherWidgetOnlyShowsItsCard() {
-        let acting: Set<ModuleID> = [.timers, .stopwatch, .keepAwake, .nowPlaying]
+        let acting: Set<ModuleID> = [.timers, .stopwatch, .nowPlaying]
         for module in ModuleID.allCases where !acting.contains(module) {
             #expect(resolve(module) == .showCard)
         }
@@ -84,8 +83,23 @@ struct DockWidgetClickTests {
 
     @Test func aSwitchHasNoCardToOpen() {
         #expect(!ModuleID.stopwatch.hasDockCard)
-        #expect(!ModuleID.keepAwake.hasDockCard)
+        #expect(ModuleID.keepAwake.hasDockCard)
+        #expect(ModuleID.sound.hasDockCard)
+        #expect(ModuleID.micCamera.hasDockCard)
         #expect(ModuleID.battery.hasDockCard)
+    }
+
+    @Test func keepAwakeOpensItsCardOnAClick() {
+        #expect(resolve(.keepAwake) == .showCard)
+    }
+
+    @Test func theInformationCardsAreOnlyForTheDock() {
+        #expect(ModuleID.dockWidgets.contains(.sound))
+        #expect(ModuleID.dockWidgets.contains(.micCamera))
+        #expect(ModuleID.sound.isDockOnly)
+        #expect(ModuleID.micCamera.isDockOnly)
+        #expect(!ModuleID.keepAwake.isDockOnly)
+        #expect(!ShortcutAction.all.contains(.openModule(.sound)))
     }
 
     @Test func modulesWithNothingToShowAreNotOffered() {

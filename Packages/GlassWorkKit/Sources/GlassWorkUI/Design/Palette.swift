@@ -61,6 +61,8 @@ public extension ModuleID {
         case .rates: loc("Rates")
         case .clipboard: loc("Clipboard")
         case .shelf: loc("Shelf")
+        case .sound: loc("Sound")
+        case .micCamera: loc("Mic & Camera")
         default: rawValue
         }
     }
@@ -103,6 +105,8 @@ public extension ModuleID {
         case .rates: "chart.line.uptrend.xyaxis"
         case .clipboard: "list.clipboard"
         case .shelf: "tray"
+        case .sound: "speaker.wave.2.fill"
+        case .micCamera: "mic.fill"
         default: "square.dashed"
         }
     }
@@ -128,6 +132,8 @@ public extension ModuleID {
         case .rates: Palette.green
         case .clipboard: Palette.teal
         case .shelf: Palette.purple
+        case .sound: Palette.pink
+        case .micCamera: Palette.teal
         default: Palette.gray
         }
     }
