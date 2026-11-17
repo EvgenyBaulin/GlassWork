@@ -115,7 +115,9 @@ public struct ShortcutsPane: View {
                 row(.fansMax)
             }
             Section(loc("Modules")) {
-                ForEach(ModuleID.allCases.map(ShortcutAction.openModule), id: \.self) { row($0) }
+                ForEach(ModuleID.allCases.filter { !$0.isDockOnly }.map(ShortcutAction.openModule), id: \.self) {
+                    row($0)
+                }
             }
             Section(loc("In the app")) {
                 LabeledContent(loc("Open Settings"), value: "⌘,")

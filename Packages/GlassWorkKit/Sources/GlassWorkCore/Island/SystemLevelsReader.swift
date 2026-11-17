@@ -60,7 +60,7 @@ public enum SystemLevelsReader {
         return status == noErr && device != kAudioObjectUnknown ? device : nil
     }
 
-    private static func volume(of device: AudioObjectID) -> Double? {
+    static func volume(of device: AudioObjectID) -> Double? {
         var level = Float32(0)
         var size = UInt32(MemoryLayout<Float32>.size)
         var address = property(kAudioHardwareServiceDeviceProperty_VirtualMainVolume)
@@ -70,7 +70,7 @@ public enum SystemLevelsReader {
         return Double(level)
     }
 
-    private static func isMuted(_ device: AudioObjectID) -> Bool? {
+    static func isMuted(_ device: AudioObjectID) -> Bool? {
         var muted = UInt32(0)
         var size = UInt32(MemoryLayout<UInt32>.size)
         var address = property(kAudioDevicePropertyMute)
@@ -80,7 +80,7 @@ public enum SystemLevelsReader {
         return muted != 0
     }
 
-    private static func name(of device: AudioObjectID) -> String? {
+    static func name(of device: AudioObjectID) -> String? {
         var name: Unmanaged<CFString>?
         var size = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
         var address = property(kAudioObjectPropertyName, scope: kAudioObjectPropertyScopeGlobal)

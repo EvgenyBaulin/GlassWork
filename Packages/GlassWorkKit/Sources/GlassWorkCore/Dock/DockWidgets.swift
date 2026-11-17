@@ -7,9 +7,14 @@ public extension ModuleID {
         allCases.filter { ![.appearance, .deviceBatteries].contains($0) }
     }
 
-    /// Whether holding the tile has a card to open. These two are switches with no panel behind them.
+    /// Whether holding the tile has a card to open. The stopwatch is a switch with no panel behind it.
     var hasDockCard: Bool {
-        self != .stopwatch && self != .keepAwake
+        self != .stopwatch
+    }
+
+    /// Cards that exist only in the Dock: no menu bar item, Hub tile or panel shortcut.
+    var isDockOnly: Bool {
+        self == .sound || self == .micCamera
     }
 }
 
@@ -26,13 +31,13 @@ public struct DockWidgetContext: Sendable, Equatable {
     }
 }
 
-/// What clicking a widget does. Everything here is something the app already does elsewhere: a click never
+/// What clicking a widget does. Keep Awake opens its card, where the switch is. Everything here is something the app
+/// already does elsewhere: a click never
 /// changes system settings, and developer modules stay read-only.
 public enum DockWidgetClick: Sendable, Equatable {
     case showCard
     case perform(WidgetCommand.Action)
     case toggleStopwatch
-    case toggleKeepAwake
     case togglePlayback
     case open(URL)
 
@@ -46,7 +51,6 @@ public enum DockWidgetClick: Sendable, Equatable {
         case .timers:
             .perform(context.timers.first.map { .toggleTimer($0.id) } ?? .startTimer(seconds: timerSeconds))
         case .stopwatch: .toggleStopwatch
-        case .keepAwake: .toggleKeepAwake
         case .nowPlaying: .togglePlayback
         case .devServers: firstServer(context.devServers).map(DockWidgetClick.open) ?? .showCard
         case .calendar, .endsIn: joinableCall(context.events, at: date).map(DockWidgetClick.open) ?? .showCard
