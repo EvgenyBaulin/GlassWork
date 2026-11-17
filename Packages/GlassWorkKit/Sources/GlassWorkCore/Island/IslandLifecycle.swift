@@ -11,6 +11,8 @@ public struct IslandLifecycle: Sendable, Equatable {
 
     public private(set) var phase = IslandPhase.idle
     public var hoverToExpand: Bool
+    /// A click on the peek opens the card even with no event, to show the mini widgets.
+    public var opensWidgets = false
     private var hasEvents = false
     private var enteredAt: Date?
     private var exitedAt: Date?
@@ -50,7 +52,8 @@ public struct IslandLifecycle: Sendable, Equatable {
 
     public mutating func clicked() {
         switch phase {
-        case .idle, .peek: phase = .peek
+        case .idle: phase = .peek
+        case .peek: phase = opensWidgets ? .expanded : .peek
         case .compact: phase = .expanded
         case .expanded: collapse()
         }

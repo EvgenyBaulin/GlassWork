@@ -110,6 +110,7 @@ public struct AlertSettings: Codable, Sendable, Equatable {
 public struct IslandSettings: Codable, Sendable, Equatable {
     public var isEnabled = true
     public var expandsOnHover = false
+    public var miniWidgets = IslandMiniSet()
 
     public init() {}
 
@@ -117,6 +118,7 @@ public struct IslandSettings: Codable, Sendable, Equatable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
         expandsOnHover = try container.decodeIfPresent(Bool.self, forKey: .expandsOnHover) ?? false
+        miniWidgets = try container.decodeIfPresent(IslandMiniSet.self, forKey: .miniWidgets) ?? IslandMiniSet()
     }
 }
 
