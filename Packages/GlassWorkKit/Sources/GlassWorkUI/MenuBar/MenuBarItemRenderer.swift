@@ -267,7 +267,24 @@ public final class MenuBarItemRenderer {
             }
         case let .bars(levels):
             drawBars(levels, at: x, color: color)
+        case let .progress(value):
+            drawProgress(value, at: x, color: color)
         }
+    }
+
+    private func drawProgress(_ value: Double, at x: CGFloat, color: NSColor) {
+        let height: CGFloat = 4
+        let track = CGRect(x: x, y: bounds.midY - height / 2, width: Self.graphWidth, height: height)
+        color.withAlphaComponent(0.25).setFill()
+        NSBezierPath(roundedRect: track, xRadius: height / 2, yRadius: height / 2).fill()
+        let filled = Self.graphWidth * CGFloat(ItemProgress.clamp(value))
+        guard filled > 0 else { return }
+        color.setFill()
+        NSBezierPath(
+            roundedRect: CGRect(x: x, y: track.minY, width: max(filled, height), height: height),
+            xRadius: height / 2,
+            yRadius: height / 2
+        ).fill()
     }
 
     private func drawBars(_ levels: [Double], at x: CGFloat, color: NSColor) {

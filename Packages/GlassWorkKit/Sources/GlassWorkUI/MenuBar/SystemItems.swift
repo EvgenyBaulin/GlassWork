@@ -180,11 +180,13 @@ extension ItemContent {
     static func deviceBatteries(_ devices: [DeviceBattery], options: [String: String]) -> ItemContent {
         let lowest = devices.min { $0.charge < $1.charge }
         let limit = Double(options.number(ItemOption.warnBelow, default: 20)) / 100
-        return ItemContent(
+        var item = ItemContent(
             figure: lowest.map { Format.percent($0.charge) } ?? "—",
             alert: (lowest?.charge ?? 1) < limit ? Palette.red : nil,
             template: "100%"
         )
+        item.glyph = .progress(ItemProgress.lowestBattery(devices))
+        return item
     }
 
     static func timers(_ remaining: TimeInterval?, options: [String: String]) -> ItemContent {
@@ -256,15 +258,17 @@ extension ItemContent {
             item.isDimmed = true
             item.symbol = "pause.circle"
         }
+        item.glyph = .progress(ItemProgress.timer(shown, at: now))
         item.detail = timers.isEmpty ? nil : loc("\(timers.count) timers")
         return item
     }
 
     static func calendar(_ events: [AgendaEvent], at now: Date, options: [String: String]) -> ItemContent {
+        let windowHours = options.number(ItemOption.calendarWindowHours, default: 4)
         let state = CalendarItem.state(
             in: events,
             at: now,
-            windowHours: options.number(ItemOption.calendarWindowHours, default: 4),
+            windowHours: windowHours,
             skipsAllDay: options.flag(ItemOption.skipsAllDay, default: true)
         )
         let limit = options.number(ItemOption.titleLength, default: 20)
@@ -281,7 +285,9 @@ extension ItemContent {
             ),
             calendarText(.callSoon(AgendaEvent(id: "", title: widest, start: now, end: now)), limit: limit),
         ].max { $0.count < $1.count } ?? widest
-        return ItemContent(figure: state.map { calendarText($0, limit: limit) } ?? "—", template: template)
+        var item = ItemContent(figure: state.map { calendarText($0, limit: limit) } ?? "—", template: template)
+        item.glyph = .progress(ItemProgress.calendar(state, at: now, windowHours: windowHours))
+        return item
     }
 
     static func calendarText(_ state: CalendarItemState, limit: Int) -> String {
@@ -310,15 +316,18 @@ extension ItemContent {
         guard let remaining = state.current.first?.end.timeIntervalSince(now) else {
             var free = ItemContent(figure: loc("Free"), template: "8:88:88")
             free.isHidden = !options.flag(ItemOption.showsFree, default: true)
+            free.glyph = .progress(0)
             return free
         }
         let warnAt = TimeInterval(options.number(ItemOption.warnMinutes, default: 5) * 60)
         let urgency = EndsInUrgency(remaining: remaining, warnAt: warnAt)
-        return ItemContent(
+        var item = ItemContent(
             figure: remaining.clockText,
             alert: urgency == .lastMinute ? Palette.red : urgency == .soon ? Palette.orange : nil,
             template: "8:88:88"
         )
+        item.glyph = .progress(ItemProgress.endsIn(state, at: now))
+        return item
     }
 
     /// Dimmed with no place: without a city there is no honest time to show.
@@ -342,6 +351,7 @@ extension ItemContent {
         let arrow = next.event == .sunrise ? "↑" : "↓"
         var item = ItemContent(figure: "\(arrow) \(next.date.formatted(style))", template: template)
         item.detail = place.name
+        item.glyph = .progress(ItemProgress.sunMoon(at: now, latitude: place.latitude, longitude: place.longitude))
         return item
     }
 
@@ -349,6 +359,7 @@ extension ItemContent {
         let count = TodoFilter.all.apply(to: store.todos, now: now).count
         let isGranted = store.remindersAccess == .granted
         var item = ItemContent(figure: isGranted ? "\(count)" : "—", template: "888")
+        item.glyph = .progress(ItemProgress.todos(store.todos, at: now))
         item.isHidden = isGranted && count == 0 && options.flag(ItemOption.hidesWhenDone, default: true)
         return item
     }
