@@ -45,6 +45,11 @@ final class StatusBarController: NSObject {
         hub.button
     }
 
+    /// The menu bar button of a module, nil when it is not in the menu bar.
+    func button(for module: ModuleID) -> NSStatusBarButton? {
+        items[module]?.button
+    }
+
     init(model: AppModel) {
         self.model = model
         super.init()
@@ -317,6 +322,10 @@ final class ModuleItem: NSObject {
 
     var window: NSWindow? {
         item.button?.window
+    }
+
+    var button: NSStatusBarButton? {
+        item.button
     }
 
     init(setting: ModuleSettings, numbers: NumberStyle, model: AppModel) {

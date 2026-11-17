@@ -138,6 +138,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var keepsDiagnosticLog = false
     public var shortcuts = ShortcutSettings()
     public var regional = RegionalSettings()
+    public var detachedPanels = DetachedPanelMemory()
 
     public init(modules: [ModuleSettings] = AppSettings.defaultModules) {
         self.modules = modules
@@ -177,6 +178,7 @@ extension AppSettings {
     private enum CodingKeys: String, CodingKey {
         case version, modules, numberStyle, hiding, alerts, widgets, dock, weather, rates, clipboard, welcomeCompleted
         case fans, windowTiles, personalWidgets, hub, keepsDiagnosticLog, shortcuts, island, regional
+        case detachedPanels
     }
 
     /// Missing keys fall back to defaults so hand-edited files keep working.
@@ -205,6 +207,8 @@ extension AppSettings {
         shortcuts = (try? container.decodeIfPresent(ShortcutSettings.self, forKey: .shortcuts)) ?? ShortcutSettings()
         island = (try? container.decodeIfPresent(IslandSettings.self, forKey: .island)) ?? IslandSettings()
         regional = (try? container.decodeIfPresent(RegionalSettings.self, forKey: .regional)) ?? RegionalSettings()
+        detachedPanels = (try? container.decodeIfPresent(DetachedPanelMemory.self, forKey: .detachedPanels))
+            ?? DetachedPanelMemory()
         normalize()
     }
 

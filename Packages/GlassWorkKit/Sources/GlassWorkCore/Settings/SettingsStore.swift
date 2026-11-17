@@ -30,12 +30,19 @@ public final class SettingsStore {
         watch()
     }
 
-    public func update(_ change: (inout AppSettings) -> Void) {
+    /// With `undoable` false the change is also applied to the undo and redo snapshots,
+    /// so ⌘Z neither steps over it nor brings the old value back.
+    public func update(undoable: Bool = true, _ change: (inout AppSettings) -> Void) {
         var copy = settings
         change(&copy)
         guard copy != settings else { return }
-        pushUndo(settings)
-        redoStack.removeAll()
+        if undoable {
+            pushUndo(settings)
+            redoStack.removeAll()
+        } else {
+            undoStack = undoStack.map { var entry = $0; change(&entry); return entry }
+            redoStack = redoStack.map { var entry = $0; change(&entry); return entry }
+        }
         apply(copy)
     }
 

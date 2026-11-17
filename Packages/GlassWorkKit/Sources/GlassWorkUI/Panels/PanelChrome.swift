@@ -20,6 +20,8 @@ public struct PanelGlass: ViewModifier {
 public struct PanelActions {
     public var openSettings: (ModuleID) -> Void
     public var detach: (ModuleID) -> Void
+    /// Puts a floating window back under its menu bar item.
+    public var attach: (ModuleID) -> Void
     public var openApp: (String) -> Void
     public var openURL: (URL) -> Void
     /// The flag asks for Force Quit. Every Quit button in the app ends up here.
@@ -38,6 +40,7 @@ public struct PanelActions {
     public init(
         openSettings: @escaping (ModuleID) -> Void = { _ in },
         detach: @escaping (ModuleID) -> Void = { _ in },
+        attach: @escaping (ModuleID) -> Void = { _ in },
         openApp: @escaping (String) -> Void = { _ in },
         openURL: @escaping (URL) -> Void = { _ in },
         quit: @escaping (QuitTarget, Bool) -> Void = { _, _ in },
@@ -50,6 +53,7 @@ public struct PanelActions {
     ) {
         self.openSettings = openSettings
         self.detach = detach
+        self.attach = attach
         self.openApp = openApp
         self.openURL = openURL
         self.quit = quit
@@ -64,6 +68,8 @@ public struct PanelActions {
 
 public extension EnvironmentValues {
     @Entry var panelActions: PanelActions = MainActor.assumeIsolated { PanelActions() }
+    /// True inside a floating window, which can be resized and put back under the menu bar.
+    @Entry var panelDetached = false
 }
 
 /// Header, content and footer every module panel shares.
@@ -74,6 +80,7 @@ struct PanelFrame<Content: View>: View {
     var footerAction: (() -> Void)?
     @ViewBuilder let content: Content
     @Environment(\.panelActions) private var actions
+    @Environment(\.panelDetached) private var detached
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -84,7 +91,9 @@ struct PanelFrame<Content: View>: View {
             footer
         }
         .padding(16)
-        .frame(width: 340, alignment: .leading)
+        // A floating window can be resized, so the panel follows its width; under the menu bar it is fixed.
+        .frame(width: detached ? nil : 340, alignment: .leading)
+        .frame(maxWidth: detached ? .infinity : nil, alignment: .leading)
     }
 
     private var header: some View {
@@ -94,13 +103,17 @@ struct PanelFrame<Content: View>: View {
             Spacer()
             Text(subtitle).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
             Button {
-                actions.detach(module)
+                if detached {
+                    actions.attach(module)
+                } else {
+                    actions.detach(module)
+                }
             } label: {
-                Image(systemName: "pin")
+                Image(systemName: detached ? "pin.slash" : "pin")
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
-            .help(loc("Keep open in a floating window"))
+            .help(detached ? loc("Put back under the menu bar item") : loc("Keep open in a floating window"))
         }
     }
 

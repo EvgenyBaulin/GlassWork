@@ -124,6 +124,7 @@ final class AppModel {
         PanelActions(
             openSettings: { [weak self] module in self?.showSettings(module: module) },
             detach: { [weak self] module in self?.panels.detach(module) },
+            attach: { [weak self] module in self?.panels.attach(module) },
             openApp: { bundleID in
                 guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return }
                 NSWorkspace.shared.openApplication(at: url, configuration: .init())
@@ -148,6 +149,7 @@ final class AppModel {
         monitor.apps.saveNow()
         monitor.nowPlaying.stop()
         nowPlaying.prepareToQuit()
+        panels.flushDetached()
     }
 
     func showSettings(module: ModuleID? = nil) {
