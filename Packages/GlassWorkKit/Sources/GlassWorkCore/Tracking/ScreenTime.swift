@@ -99,13 +99,15 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
 
     public var days: [ScreenDay] = []
     public var excluded: Set<String> = []
+    /// The hour a day starts, 0 to 6: time before it belongs to the day before.
+    public var dayStartHour = 0
     /// Each app's category, remembered when it comes to the front.
     public var categories: [String: AppCategory] = [:]
 
     public init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case days, excluded, categories
+        case days, excluded, categories, dayStartHour
     }
 
     /// A log from an earlier version must still load: failing here would replace 30 days with an empty log.
@@ -114,6 +116,13 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
         days = try container.decodeIfPresent([ScreenDay].self, forKey: .days) ?? []
         excluded = try container.decodeIfPresent(Set<String>.self, forKey: .excluded) ?? []
         categories = (try? container.decodeIfPresent([String: AppCategory].self, forKey: .categories)) ?? [:]
+        dayStartHour = min(max((try? container.decodeIfPresent(Int.self, forKey: .dayStartHour)) ?? 0, 0), 6)
+    }
+
+    /// Midnight of the day a moment belongs to. With a day that starts at 4, half past one in the night is still
+    /// the day before.
+    public func dayStart(containing date: Date, calendar: Calendar = .current) -> Date {
+        calendar.startOfDay(for: calendar.date(byAdding: .hour, value: -dayStartHour, to: date) ?? date)
     }
 
     public static func dayKey(_ date: Date, calendar: Calendar = .current) -> String {
@@ -140,7 +149,7 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
     }
 
     private mutating func openDay(at date: Date, calendar: Calendar) {
-        let key = Self.dayKey(date, calendar: calendar)
+        let key = Self.dayKey(dayStart(containing: date, calendar: calendar), calendar: calendar)
         guard days.last?.day != key else { return }
         if !days.isEmpty {
             days[days.count - 1].sessions = []
@@ -164,7 +173,7 @@ public struct ScreenTimeLog: Codable, Sendable, Equatable {
     }
 
     public func today(_ date: Date = Date()) -> ScreenDay? {
-        let key = Self.dayKey(date)
+        let key = Self.dayKey(dayStart(containing: date))
         return days.last { $0.day == key }
     }
 

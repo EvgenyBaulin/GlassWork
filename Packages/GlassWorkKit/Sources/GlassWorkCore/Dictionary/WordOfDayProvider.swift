@@ -16,17 +16,27 @@ public final class WordOfDayProvider {
     }
 
     private var cache: [String: CacheEntry] = [:]
-    private let lookup: (String) -> String?
+    private let lookup: ((String) -> String?)?
+    private var settings = WordOfDaySettings()
+    private var dictionary: SystemDictionary?
 
     /// `lookup` returns the dictionary's text for a word; tests replace it.
-    public init(lookup: @escaping (String) -> String? = WordOfDayProvider.systemDefinition) {
+    public init(lookup: ((String) -> String?)? = nil) {
         self.lookup = lookup
+    }
+
+    /// Takes the user's choice. A new language, dictionary or level means other words, so the cache starts over.
+    public func apply(_ new: WordOfDaySettings, installed: [SystemDictionary]) {
+        let chosen = installed.first { $0.id == new.dictionaryID && $0.languages.contains(new.language) }
+        guard new != settings || chosen != dictionary else { return }
+        settings = new
+        dictionary = chosen
+        cache = [:]
     }
 
     /// The text the first active dictionary gives for a word, or nil when none knows it.
     public nonisolated static func systemDefinition(for word: String) -> String? {
-        let range = CFRangeMake(0, (word as NSString).length)
-        return DCSCopyTextDefinition(nil, word as CFString, range)?.takeRetainedValue() as String?
+        SystemDictionaries.definition(for: word, in: nil)
     }
 
     /// Today's word first, then the days before it.
@@ -43,8 +53,13 @@ public final class WordOfDayProvider {
         if let cached = cache[day], !cached.isMissing || now.timeIntervalSince(cached.askedAt) < Self.retryAfter {
             return cached.word
         }
-        let word = WordList.word(on: date, calendar: calendar)
-        let entry = lookup(word).map { DictionaryEntryParser.parse($0, word: word) } ?? DictionaryEntry()
+        let word = WordList.word(on: date, language: settings.language, level: settings.level, calendar: calendar)
+        let text = lookup.map { $0(word) } ?? SystemDictionaries.definition(for: word, in: dictionary)
+        let entry = text.map { raw in
+            settings.language == "en"
+                ? DictionaryEntryParser.parse(raw, word: word)
+                : DictionaryEntryParser.parsePlain(raw, word: word)
+        } ?? DictionaryEntry()
         let result = WordOfDay(day: day, word: word, entry: entry)
         cache[day] = CacheEntry(word: result, askedAt: now, isMissing: entry == DictionaryEntry())
         for key in cache.keys.sorted().dropLast(30) {

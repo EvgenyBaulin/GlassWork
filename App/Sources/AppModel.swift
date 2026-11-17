@@ -47,14 +47,16 @@ final class AppModel {
     private lazy var location = LocationProvider(store: monitor.weather)
     private lazy var nowPlaying = NowPlayingBridge(
         store: monitor.nowPlaying,
-        refreshSeconds: store.settings.widgets.refreshSeconds
+        // The Now Playing widget follows the song, so a long refresh interval for the other widgets does not apply.
+        refreshSeconds: min(store.settings.widgets.refreshSeconds, 60)
     )
     let shortcuts = ShortcutCenter()
     private var hasOpenPanel = false
     private var isSettingsOpen = false
     private var visibleSection: MainSection?
     private var isQuickQuitOpen = false
-    private var timer: Timer?
+    var timer: Timer?
+    var heartbeatSeconds = 0
     private var thresholds = ThresholdTracker()
     var usageAlerts = AIUsageAlertTracker()
     var pingOutages = PingOutageTracker()
@@ -100,10 +102,7 @@ final class AppModel {
         monitor.start()
         observeWidgetCommands()
         writeHeartbeat()
-        let refresh = TimeInterval(store.settings.widgets.refreshSeconds)
-        timer = Timer.scheduledTimer(withTimeInterval: refresh, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.writeHeartbeat() }
-        }
+        scheduleHeartbeat()
         if !store.settings.welcomeCompleted {
             settingsWindow.showWelcome()
         }
@@ -270,9 +269,13 @@ final class AppModel {
         }
         shortcuts.apply(store.settings.shortcuts)
         applyRegional()
+        if timer != nil {
+            scheduleHeartbeat()
+        }
         applyInfoModules()
         statusBar.apply(store.settings)
         monitor.developer.options = DeveloperOptions(settings: store.settings)
+        applyWidgetData()
         dock.apply(store.settings.dock)
         windowTiles.apply(store.settings.windowTiles)
         islandController.acceptsShelfDrops = store.settings.module(.shelf).map { $0.mode != .off } ?? false
@@ -374,7 +377,7 @@ final class AppModel {
         statusBar.owns(window)
     }
 
-    private func writeHeartbeat() {
+    func writeHeartbeat() {
         checkSystemWidgets()
         Task {
             let hasNewWidgets = await refreshSystemWidgetKinds()

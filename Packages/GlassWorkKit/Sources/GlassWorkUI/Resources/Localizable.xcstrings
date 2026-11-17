@@ -1069,6 +1069,22 @@
         }
       }
     },
+    "Add App": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add App"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить приложение"
+          }
+        }
+      }
+    },
     "Add to": {
       "localizations": {
         "en": {
@@ -1509,6 +1525,22 @@
         }
       }
     },
+    "Any words": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Any words"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Любые слова"
+          }
+        }
+      }
+    },
     "App": {
       "localizations": {
         "ru": {
@@ -1525,6 +1557,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Оформление"
+          }
+        }
+      }
+    },
+    "Apps not counted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apps not counted"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не учитывать приложения"
           }
         }
       }
@@ -2003,6 +2051,22 @@
         }
       }
     },
+    "Common words": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Common words"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обычные слова"
+          }
+        }
+      }
+    },
     "Completed": {
       "localizations": {
         "en": {
@@ -2449,6 +2513,22 @@
         }
       }
     },
+    "Day starts at": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day starts at"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "День начинается в"
+          }
+        }
+      }
+    },
     "Daylight": {
       "localizations": {
         "ru": {
@@ -2607,6 +2687,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Журнал диагностики"
+          }
+        }
+      }
+    },
+    "Dictionary": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dictionary"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Словарь"
           }
         }
       }
@@ -2969,6 +3065,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Каждый день"
+          }
+        }
+      }
+    },
+    "Everything kept for Screen Time is deleted from this Mac. This cannot be undone.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything kept for Screen Time is deleted from this Mac. This cannot be undone."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё, что сохранено для экранного времени, будет удалено с этого Mac. Отменить это нельзя."
           }
         }
       }
@@ -6373,6 +6485,22 @@
         }
       }
     },
+    "Refresh widgets every": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh widgets every"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновлять виджеты каждые"
+          }
+        }
+      }
+    },
     "Release to add %lld files": {
       "localizations": {
         "en": {
@@ -6401,6 +6529,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Отпустите, чтобы добавить файл"
+          }
+        }
+      }
+    },
+    "Reload All Widgets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload All Widgets"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перезагрузить все виджеты"
           }
         }
       }
@@ -6525,6 +6669,22 @@
         }
       }
     },
+    "Reset Data…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Data…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить данные…"
+          }
+        }
+      }
+    },
     "Reset Icon": {
       "localizations": {
         "en": {
@@ -6537,6 +6697,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сбросить значок"
+          }
+        }
+      }
+    },
+    "Reset Screen Time data?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Screen Time data?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить данные экранного времени?"
           }
         }
       }
@@ -8727,6 +8903,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Слово дня"
+          }
+        }
+      }
+    },
+    "Words": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Words"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Слова"
           }
         }
       }

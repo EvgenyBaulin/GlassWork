@@ -79,6 +79,27 @@ public final class ActivityStore {
         try? store.write(screenTime, for: ScreenTimeLog.key)
     }
 
+    /// Counts what was in front up to now first, so the time before the change keeps the old rules.
+    public func configureScreenTime(dayStartHour: Int, excluded: Set<String>, at date: Date = Date()) {
+        let hour = min(max(dayStartHour, 0), 6)
+        guard hour != screenTime.dayStartHour || excluded != screenTime.excluded else { return }
+        creditCurrentApp(at: date)
+        currentSince = date
+        screenTime.dayStartHour = hour
+        screenTime.excluded = excluded
+        try? store.write(screenTime, for: ScreenTimeLog.key)
+    }
+
+    /// Deletes the days kept so far. The exclusions and the day start stay: they are settings, not data.
+    public func resetScreenTime(at date: Date = Date()) {
+        var empty = ScreenTimeLog()
+        empty.dayStartHour = screenTime.dayStartHour
+        empty.excluded = screenTime.excluded
+        screenTime = empty
+        currentSince = date
+        try? store.write(screenTime, for: ScreenTimeLog.key)
+    }
+
     private func creditCurrentApp(at date: Date) {
         guard let currentApp, pausedSince == nil else { return }
         screenTime.record(app: currentApp, seconds: date.timeIntervalSince(currentSince), at: date)

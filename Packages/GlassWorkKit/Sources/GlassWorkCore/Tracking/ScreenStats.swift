@@ -13,7 +13,7 @@ public struct ScreenWeekStats: Sendable, Equatable {
     public let previous: [Day]
 
     public init(log: ScreenTimeLog, at date: Date, calendar: Calendar = .current) {
-        let today = calendar.startOfDay(for: date)
+        let today = log.dayStart(containing: date, calendar: calendar)
         let totals = Dictionary(log.days.map { ($0.day, $0.total) }) { first, _ in first }
         func day(_ back: Int) -> Day {
             let day = calendar.date(byAdding: .day, value: -back, to: today) ?? today
@@ -241,7 +241,7 @@ public struct AppTimeStats: Sendable, Equatable {
 
     public init(app: String, log: ScreenTimeLog, at date: Date, calendar: Calendar = .current) {
         self.app = app
-        let today = calendar.startOfDay(for: date)
+        let today = log.dayStart(containing: date, calendar: calendar)
         let byDay = Dictionary(log.days.map { ($0.day, $0) }) { first, _ in first }
         week = (0 ..< 7).reversed().map { back in
             let day = calendar.date(byAdding: .day, value: -back, to: today) ?? today
@@ -282,7 +282,7 @@ public extension ScreenTimeLog {
         at date: Date,
         calendar: Calendar = .current
     ) -> [(app: String, seconds: Double)] {
-        let today = calendar.startOfDay(for: date)
+        let today = dayStart(containing: date, calendar: calendar)
         let keys = Set((0 ..< count).compactMap { back in
             calendar.date(byAdding: .day, value: -back, to: today).map { Self.dayKey($0, calendar: calendar) }
         })

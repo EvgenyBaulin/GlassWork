@@ -463,6 +463,40 @@ extension SettingsIndex {
                 ["Widgets"],
                 keywords: ["tracking", "учёт"]
             ),
+            page(
+                "widgets.refresh",
+                "Refresh widgets every",
+                "Обновлять виджеты каждые",
+                .widgets,
+                ["Widgets"],
+                keywords: ["interval", "интервал"]
+            ),
+            page("widgets.reloadAll", "Reload All Widgets", "Перезагрузить все виджеты", .widgets, ["Widgets"]),
+            page("widgets.dayStart", "Day starts at", "День начинается в", .widgets, ["Widgets", "Screen Time"]),
+            page(
+                "widgets.excludedApps",
+                "Apps not counted",
+                "Не учитывать приложения",
+                .widgets,
+                ["Widgets", "Screen Time"],
+                keywords: ["exclude", "исключить"]
+            ),
+            page(
+                "widgets.resetScreenTime",
+                "Reset Data…",
+                "Сбросить данные…",
+                .widgets,
+                ["Widgets", "Screen Time"],
+                keywords: ["delete", "удалить"]
+            ),
+            page(
+                "widgets.wordOfDay",
+                "Word of the Day",
+                "Слово дня",
+                .widgets,
+                ["Widgets"],
+                keywords: ["dictionary", "словарь"]
+            ),
             page("widgets.commands", "Commands", "Команды", .widgets, ["Widgets"], keywords: ["scripts", "скрипты"]),
             page("widgets.endpoints", "Endpoints", "Адреса", .widgets, ["Widgets"], keywords: ["URL", "сайты"]),
             page("tiles.use", "Use Window Tiles", "Включить раскладку окон", .windowTiles, ["Window Tiles"]),
