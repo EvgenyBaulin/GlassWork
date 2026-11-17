@@ -10,7 +10,7 @@ public struct MonthRow: Equatable, Sendable {
 public enum MonthRows {
     /// Rows of the month in `calendar`'s week order. The week number is the ISO one of the row's middle day,
     /// which is the day ISO weeks are named after (the Thursday of a Monday-first row).
-    public static func rows(for month: Date, calendar: Calendar = .current) -> [MonthRow] {
+    public static func rows(for month: Date, calendar: Calendar = RegionalFormat.calendar) -> [MonthRow] {
         guard let interval = calendar.dateInterval(of: .month, for: month),
               let count = calendar.range(of: .day, in: .month, for: month)?.count
         else { return [] }

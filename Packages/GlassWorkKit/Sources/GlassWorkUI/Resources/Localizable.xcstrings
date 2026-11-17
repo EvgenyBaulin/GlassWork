@@ -695,6 +695,22 @@
         }
       }
     },
+    "12-hour": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12-hour"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12-часовой"
+          }
+        }
+      }
+    },
     "15 minutes": {
       "localizations": {
         "en": {
@@ -717,6 +733,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "24 ч"
+          }
+        }
+      }
+    },
+    "24-hour": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "24-hour"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "24-часовой"
           }
         }
       }
@@ -869,6 +901,22 @@
         }
       }
     },
+    "Accessibility": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Универсальный доступ"
+          }
+        }
+      }
+    },
     "Active": {
       "localizations": {
         "ru": {
@@ -985,6 +1033,22 @@
         }
       }
     },
+    "Add widgets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add widgets"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить виджеты"
+          }
+        }
+      }
+    },
     "Added to the Shelf": {
       "localizations": {
         "en": {
@@ -1055,6 +1119,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Уведомления"
+          }
+        }
+      }
+    },
+    "Alerts, timers, usage limits and outages": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts, timers, usage limits and outages"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оповещения, таймеры, лимиты использования и сбои"
           }
         }
       }
@@ -1249,6 +1329,22 @@
         }
       }
     },
+    "Allow…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешить…"
+          }
+        }
+      }
+    },
     "Already in the list": {
       "localizations": {
         "ru": {
@@ -1353,6 +1449,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сессии без сна"
+          }
+        }
+      }
+    },
+    "Background update": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Background update"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фоновое обновление"
           }
         }
       }
@@ -1541,6 +1653,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "По недавней нагрузке на процессор, в долях одного ядра"
+          }
+        }
+      }
+    },
+    "Calendar, timers, world clocks, Now Playing and Ends In": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar, timers, world clocks, Now Playing and Ends In"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Календарь, таймеры, мировые часы, «Сейчас играет» и «Заканчивается через»"
           }
         }
       }
@@ -1743,6 +1871,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выполнено"
+          }
+        }
+      }
+    },
+    "Contacts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contacts"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контакты"
           }
         }
       }
@@ -2611,6 +2755,22 @@
         }
       }
     },
+    "Events in Calendar, Ends In and the agenda": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Events in Calendar, Ends In and the agenda"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "События для Календаря, «Заканчивается через» и повестки"
+          }
+        }
+      }
+    },
     "Everyday": {
       "localizations": {
         "ru": {
@@ -2787,6 +2947,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Файлы останутся на месте, если полка их не копировала."
+          }
+        }
+      }
+    },
+    "First day of the week": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First day of the week"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Первый день недели"
           }
         }
       }
@@ -2975,6 +3151,38 @@
         }
       }
     },
+    "Full Disk Access": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Disk Access"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Полный доступ к диску"
+          }
+        }
+      }
+    },
+    "Git, dev servers, Docker, Ping, VPN, Wi-Fi and AI usage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git, dev servers, Docker, Ping, VPN, Wi-Fi and AI usage"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git, dev-серверы, Docker, Ping, VPN, Wi-Fi и AI Usage"
+          }
+        }
+      }
+    },
     "GlassWork Dock turns off and the system Dock comes back with the settings shown here.": {
       "localizations": {
         "en": {
@@ -3063,6 +3271,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Память GPU"
+          }
+        }
+      }
+    },
+    "Granted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Granted"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Разрешено"
           }
         }
       }
@@ -3633,12 +3857,60 @@
         }
       }
     },
+    "Language": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык"
+          }
+        }
+      }
+    },
+    "Language and time": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language and time"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык и время"
+          }
+        }
+      }
+    },
     "Last 7 days": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Последние 7 дней"
+          }
+        }
+      }
+    },
+    "Last build": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last build"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Последняя сборка"
           }
         }
       }
@@ -3889,6 +4161,22 @@
         }
       }
     },
+    "Mac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac"
+          }
+        }
+      }
+    },
     "Max items": {
       "localizations": {
         "en": {
@@ -4125,6 +4413,22 @@
         }
       }
     },
+    "Monday": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monday"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Понедельник"
+          }
+        }
+      }
+    },
     "Monochrome day change in the menu bar": {
       "localizations": {
         "ru": {
@@ -4331,6 +4635,38 @@
         }
       }
     },
+    "Next check": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next check"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующая проверка"
+          }
+        }
+      }
+    },
+    "Next rebuild": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next rebuild"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Следующая пересборка"
+          }
+        }
+      }
+    },
     "Next weekend": {
       "localizations": {
         "ru": {
@@ -4483,6 +4819,54 @@
         }
       }
     },
+    "Not granted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not granted"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не разрешено"
+          }
+        }
+      }
+    },
+    "Not needed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not needed"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не нужно"
+          }
+        }
+      }
+    },
+    "Not needed means no enabled module uses it. The list updates when you return from Settings.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not needed means no enabled module uses it. The list updates when you return from Settings."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Не нужно» значит, что ни один включённый модуль его не использует. Список обновляется, когда вы возвращаетесь из Настроек."
+          }
+        }
+      }
+    },
     "Not reported": {
       "localizations": {
         "en": {
@@ -4561,6 +4945,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пока ничего не скопировано"
+          }
+        }
+      }
+    },
+    "Nothing is needed for what you chose. Each module asks for access only when you turn it on.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing is needed for what you chose. Each module asks for access only when you turn it on."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для выбранного ничего не нужно. Каждый модуль запрашивает доступ только при включении."
           }
         }
       }
@@ -5055,12 +5455,60 @@
         }
       }
     },
+    "Overview, CPU and Memory are in the menu bar. Everything else waits in the Hub.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview, CPU and Memory are in the menu bar. Everything else waits in the Hub."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обзор, CPU и память в строке меню. Всё остальное ждёт в Хабе."
+          }
+        }
+      }
+    },
     "Overview, CPU and Memory start in the menu bar. Everything else waits in the Hub.": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "Обзор, CPU и Память будут в строке меню. Всё остальное ждёт в Хабе."
+          }
+        }
+      }
+    },
+    "Overview, CPU and Memory start in the menu bar. Pick sets to add more.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview, CPU and Memory start in the menu bar. Pick sets to add more."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обзор, CPU и память стартуют в строке меню. Выберите наборы, чтобы добавить ещё."
+          }
+        }
+      }
+    },
+    "Overview, CPU, memory, disk, network, battery, sensors and fans": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview, CPU, memory, disk, network, battery, sensors and fans"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обзор, CPU, память, диск, сеть, батарея, датчики и вентиляторы"
           }
         }
       }
@@ -5127,6 +5575,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вставлять по клику"
+          }
+        }
+      }
+    },
+    "Paste on click and Window Tiles": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste on click and Window Tiles"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставка по клику и плитки окон"
           }
         }
       }
@@ -5237,6 +5701,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Личные виджеты"
+          }
+        }
+      }
+    },
+    "Photos": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фото"
           }
         }
       }
@@ -5773,6 +6253,22 @@
         }
       }
     },
+    "Restart GlassWork to apply the language.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart GlassWork to apply the language."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перезапустите GlassWork, чтобы применить язык."
+          }
+        }
+      }
+    },
     "Restore": {
       "localizations": {
         "ru": {
@@ -5975,6 +6471,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Искать снова"
+          }
+        }
+      }
+    },
+    "Screen Recording": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen Recording"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запись экрана"
           }
         }
       }
@@ -6645,6 +7157,22 @@
         }
       }
     },
+    "Sunday": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunday"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Воскресенье"
+          }
+        }
+      }
+    },
     "Sunrise": {
       "localizations": {
         "ru": {
@@ -6691,6 +7219,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Подкачка"
+          }
+        }
+      }
+    },
+    "Switched on: %@. They wait in the Hub, and the main ones are in the menu bar.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switched on: %@. They wait in the Hub, and the main ones are in the menu bar."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включено: %@. Они ждут в Хабе, а главные — в строке меню."
           }
         }
       }
@@ -6771,6 +7315,22 @@
         }
       }
     },
+    "Text Capture reads text from the screen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text Capture reads text from the screen"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Захват текста читает текст с экрана"
+          }
+        }
+      }
+    },
     "The menu bar shows the lowest charge among the ticked devices.": {
       "localizations": {
         "en": {
@@ -6809,6 +7369,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Системный Dock скрыт, пока работает Dock GlassWork, и вернётся как был при выходе."
+          }
+        }
+      }
+    },
+    "The To-Do list": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The To-Do list"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Список дел"
           }
         }
       }
@@ -6905,6 +7481,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Тайлер"
+          }
+        }
+      }
+    },
+    "Time format": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time format"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Формат времени"
+          }
+        }
+      }
+    },
+    "Time Machine backup history": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time Machine backup history"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "История копий Time Machine"
           }
         }
       }
@@ -7105,6 +7713,22 @@
         }
       }
     },
+    "Turn it on in Terminal: make auto-update-on": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn it on in Terminal: make auto-update-on"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включите в Терминале: make auto-update-on"
+          }
+        }
+      }
+    },
     "Turn on Screen Time tracking in Settings to see your focus.": {
       "localizations": {
         "ru": {
@@ -7169,6 +7793,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "До завтра"
+          }
+        }
+      }
+    },
+    "Updates": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновления"
           }
         }
       }
@@ -7417,6 +8057,22 @@
         }
       }
     },
+    "View log": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View log"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыть журнал"
+          }
+        }
+      }
+    },
     "Volume": {
       "localizations": {
         "en": {
@@ -7487,6 +8143,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Погода"
+          }
+        }
+      }
+    },
+    "Weather for where you are": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather for where you are"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Погода там, где вы находитесь"
           }
         }
       }

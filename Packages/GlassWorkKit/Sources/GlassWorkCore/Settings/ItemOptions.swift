@@ -249,7 +249,7 @@ public struct DateItemText: Sendable {
     public var pattern = ""
     public var showsWeek = false
     public var numbering = WeekNumbering.iso
-    public var locale = Locale.current
+    public var locale = RegionalFormat.locale
     public var timeZone = TimeZone.current
 
     public init() {}
@@ -267,7 +267,7 @@ public struct DateItemText: Sendable {
     }
 
     public func week(of date: Date) -> Int {
-        var calendar = numbering == .iso ? Calendar(identifier: .iso8601) : Calendar.current
+        var calendar = numbering == .iso ? Calendar(identifier: .iso8601) : RegionalFormat.calendar
         calendar.timeZone = timeZone
         return calendar.component(.weekOfYear, from: date)
     }
