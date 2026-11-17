@@ -36,6 +36,8 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
     public var sort = FolderSort.manual
     /// Brought by a preset, and goes when another preset comes.
     public var isFromPreset = false
+    /// How many times each app was opened from this folder, by path. Feeds Most Used sorting.
+    public var launchCounts: [String: Int] = [:]
 
     public init(name: String, apps: [DockApp]) {
         self.name = name
@@ -43,15 +45,25 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
     }
 
     public var sortedApps: [DockApp] {
-        sort == .name
-            ? apps.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-            : apps
+        switch sort {
+        case .manual:
+            return apps
+        case .name:
+            return apps.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        case .mostUsed:
+            // Apps never opened keep the stored order, so a folder without counts looks as it does by hand.
+            let counts = launchCounts
+            return apps.enumerated().sorted { lhs, rhs in
+                let (left, right) = (counts[lhs.element.path] ?? 0, counts[rhs.element.path] ?? 0)
+                return left != right ? left > right : lhs.offset < rhs.offset
+            }.map(\.element)
+        }
     }
 }
 
 extension AppFolder {
     private enum CodingKeys: String, CodingKey {
-        case id, name, apps, symbol, sort, isFromPreset
+        case id, name, apps, symbol, sort, isFromPreset, launchCounts
     }
 
     /// Missing keys fall back to defaults, so a file from an earlier version keeps loading.
@@ -65,6 +77,7 @@ extension AppFolder {
         symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
         sort = try container.decodeIfPresent(FolderSort.self, forKey: .sort) ?? .manual
         isFromPreset = try container.decodeIfPresent(Bool.self, forKey: .isFromPreset) ?? false
+        launchCounts = try container.decodeIfPresent([String: Int].self, forKey: .launchCounts) ?? [:]
     }
 }
 
@@ -107,6 +120,8 @@ public struct DockSettings: Codable, Sendable, Equatable {
     public var showsRecents = false
     /// The Trash at the end of the Dock, after the stacks, as in the system Dock.
     public var showsTrash = true
+    /// The dot under an app that is running.
+    public var showsRunningIndicators = true
     public var items: [DockItem] = []
     /// Turning the Dock on hides the system one, so this is explained once before it happens.
     public var hasSeenIntro = false
@@ -135,6 +150,7 @@ public struct DockSettings: Codable, Sendable, Equatable {
 extension DockSettings {
     private enum CodingKeys: String, CodingKey {
         case isEnabled, position, iconSize, magnifies, magnifiedSize, autoHides, showsRecents, showsTrash, items
+        case showsRunningIndicators
         case hasSeenIntro, activePreset, presets, followsSchedule, schedule
     }
 
@@ -159,6 +175,8 @@ extension DockSettings {
         autoHides = try container.decodeIfPresent(Bool.self, forKey: .autoHides) ?? autoHides
         showsRecents = try container.decodeIfPresent(Bool.self, forKey: .showsRecents) ?? showsRecents
         showsTrash = try container.decodeIfPresent(Bool.self, forKey: .showsTrash) ?? showsTrash
+        showsRunningIndicators = try container.decodeIfPresent(Bool.self, forKey: .showsRunningIndicators)
+            ?? showsRunningIndicators
         items = try container.decodeIfPresent([LossyItem].self, forKey: .items)?.compactMap(\.value) ?? items
         hasSeenIntro = try container.decodeIfPresent(Bool.self, forKey: .hasSeenIntro) ?? hasSeenIntro
         activePreset = try container.decodeIfPresent(String.self, forKey: .activePreset)
@@ -230,6 +248,33 @@ public enum DockLayout {
         return result
     }
 
+    /// Counts an app opened from a folder, for Most Used sorting.
+    public static func recordLaunch(_ app: DockApp, inFolder id: UUID, in items: [DockItem]) -> [DockItem] {
+        items.map { item in
+            guard case var .folder(folder) = item, folder.id == id else { return item }
+            folder.launchCounts[app.path, default: 0] += 1
+            return .folder(folder)
+        }
+    }
+
+    /// Renames a folder, found by its id.
+    public static func rename(folder id: UUID, to name: String, in items: [DockItem]) -> [DockItem] {
+        items.map { item in
+            guard case var .folder(folder) = item, folder.id == id else { return item }
+            folder.name = name
+            return .folder(folder)
+        }
+    }
+
+    /// Changes how a folder orders its apps, found by its id.
+    public static func sort(folder id: UUID, by sort: FolderSort, in items: [DockItem]) -> [DockItem] {
+        items.map { item in
+            guard case var .folder(folder) = item, folder.id == id else { return item }
+            folder.sort = sort
+            return .folder(folder)
+        }
+    }
+
     private static func index(of app: DockApp, in items: [DockItem]) -> Int? {
         items.firstIndex(of: .app(app))
     }
@@ -252,5 +297,26 @@ public enum SystemDockApps {
     public static func read() -> [DockApp] {
         let value = CFPreferencesCopyAppValue("persistent-apps" as CFString, "com.apple.dock" as CFString)
         return parse(value as? [[String: Any]] ?? [])
+    }
+}
+
+/// The apps opened lately that are not pinned, for the Dock's recents section.
+public enum DockRecents {
+    /// The Dock shows this many.
+    public static let shown = 3
+    /// How many are remembered, so that pinning one still leaves others to show.
+    public static let remembered = 12
+
+    /// Puts an app first, once.
+    public static func record(_ app: DockApp, in history: [DockApp]) -> [DockApp] {
+        let key = DockRunningApps.normalized(app.path)
+        let rest = history.filter { DockRunningApps.normalized($0.path) != key }
+        return Array(([app] + rest).prefix(remembered))
+    }
+
+    /// Newest first, without apps already in the Dock.
+    public static func visible(_ history: [DockApp], pinned: [DockApp], limit: Int = shown) -> [DockApp] {
+        let pinnedKeys = Set(pinned.map { DockRunningApps.normalized($0.path) })
+        return Array(history.filter { !pinnedKeys.contains(DockRunningApps.normalized($0.path)) }.prefix(limit))
     }
 }

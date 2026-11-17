@@ -112,10 +112,15 @@ final class DockController {
         let center = NSWorkspace.shared.notificationCenter
         let names = [NSWorkspace.didLaunchApplicationNotification, NSWorkspace.didTerminateApplicationNotification]
         workspace = names.map { name in
-            center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.refreshRunning() }
+            center.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
+                let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+                MainActor.assumeIsolated {
+                    self?.noteUsed(app)
+                    self?.refreshRunning()
+                }
             }
         }
+        NSWorkspace.shared.runningApplications.forEach(noteUsed)
         trash.start()
         fullScreen.start()
     }
@@ -244,6 +249,13 @@ final class DockController {
         }
     }
 
+    /// Remembers an app that started or quit, for the recents section.
+    private func noteUsed(_ running: NSRunningApplication?) {
+        if let app = running?.dockApp {
+            state.recentApps = DockRecents.record(app, in: state.recentApps)
+        }
+    }
+
     private func target(of running: NSRunningApplication) -> QuitTarget {
         QuitTarget(
             pid: running.processIdentifier,
@@ -326,7 +338,7 @@ final class DockController {
 
     /// An app that is still starting counts only once it has finished: that is when bouncing stops.
     private func refreshRunning() {
-        let apps = state.settings.apps
+        let apps = state.settings.apps + state.recentApps
         for app in apps where bundleIDs[app.path] == nil {
             bundleIDs[app.path] = Bundle(path: app.path)?.bundleIdentifier
         }
@@ -507,6 +519,7 @@ extension DockController {
             openSettings: { [weak self] in self?.model.showMainWindow(.dock) }
         )
         actions.trash = trash.actions
+        actions.cancelDownload = { [weak self] in self?.folders.cancel($0) }
         actions.turnOffPreset = { [weak self] in self?.turnOffPreset() }
         actions.hover = { [weak self] hover in
             guard let self else { return }

@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import GlassWorkCore
 
 /// Keeps what is in the Dock's stacks up to date.
@@ -29,6 +29,18 @@ final class DockFolders {
         }
         onChange(files)
         followDownloads()
+    }
+
+    /// Moves a download that is not finished to the Trash and takes it off the lists at once.
+    func cancel(_ path: String) {
+        NSWorkspace.shared.recycle([URL(filePath: path)]) { [weak self] _, error in
+            guard error == nil else { return }
+            Task { @MainActor in
+                guard let folders = self else { return }
+                folders.files = folders.files.mapValues { $0.filter { $0.path != path } }
+                folders.onChange(folders.files)
+            }
+        }
     }
 
     private func start(_ path: String) {
@@ -71,5 +83,18 @@ final class DockFolders {
                 sources.keys.forEach(read)
             }
         }
+    }
+}
+
+extension NSRunningApplication {
+    /// The app as the Dock keeps it, for apps with a window of their own. GlassWork itself is left out.
+    var dockApp: DockApp? {
+        guard activationPolicy == .regular, self != .current, let url = bundleURL, url.pathExtension == "app" else {
+            return nil
+        }
+        return DockApp(
+            path: url.path(percentEncoded: false),
+            name: localizedName ?? url.deletingPathExtension().lastPathComponent
+        )
     }
 }

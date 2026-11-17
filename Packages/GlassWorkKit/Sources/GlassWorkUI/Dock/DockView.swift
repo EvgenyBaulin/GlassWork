@@ -62,6 +62,8 @@ public struct DockActions {
     public var turnPage: (Int) -> Void
     /// Opens a file from a stack.
     public var openFile: (String) -> Void
+    /// Moves a download that is still arriving to the Trash, by path. Set by the app.
+    public var cancelDownload: (String) -> Void = { _ in }
     /// Opens a stack's folder in Finder.
     public var showFolder: (String) -> Void
     /// Changes Dock settings other than the items, such as magnification.
@@ -315,6 +317,9 @@ public struct DockView: View {
             DockPagerTile(direction: .next, size: size, arrangement: arrangement, position: position) {
                 actions.turnPage(1)
             }
+        case let .recent(app):
+            recentTile(app, size: size)
+                .modifier(DockHoverLabel(id: slot.id, text: app.name) { actions.hover?($0) })
         case .trash:
             TrashTile(isFull: state.trashIsFull, size: size, position: position) { actions.trash?.open() }
                 .modifier(DockHoverLabel(id: slot.id, text: loc("Trash")) { actions.hover?($0) })
@@ -329,6 +334,20 @@ public struct DockView: View {
                     return true
                 }
         }
+    }
+
+    private func recentTile(_ app: DockApp, size: CGFloat) -> some View {
+        AppTile(
+            app: app,
+            size: size,
+            isRunning: running.contains(app.path),
+            isLaunching: state.launching.contains(app.path),
+            showsIndicator: settings.showsRunningIndicators,
+            position: position
+        ) { actions.open(app) }
+            .contextMenu {
+                DockAppMenu(app: app, actions: actions, folders: settings.folders) { state.openCard = $0 }
+            }
     }
 
     private func toggleCard(_ item: DockItem) {
@@ -352,6 +371,7 @@ public struct DockView: View {
                 size: size,
                 isRunning: running.contains(app.path),
                 isLaunching: state.launching.contains(app.path),
+                showsIndicator: settings.showsRunningIndicators,
                 position: position
             ) { actions.open(app) }
                 .contextMenu {
@@ -370,8 +390,10 @@ public struct DockView: View {
                 size: size,
                 isRunning: folder.apps.contains { running.contains($0.path) },
                 isLaunching: folder.apps.contains { state.launching.contains($0.path) },
+                showsIndicator: settings.showsRunningIndicators,
                 position: position
             ) { toggleCard(item) }
+                .contextMenu { FolderMenu(folder: folder, actions: actions) { state.openCard = $0 } }
                 .dropDestination(for: String.self) { paths, _ in
                     drop(paths) { dragged, items in DockLayout.drop(dragged, into: folder, in: items) }
                 } isTargeted: { targeted in

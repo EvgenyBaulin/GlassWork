@@ -261,6 +261,8 @@ public final class DockLiveState {
     public var openCard: String?
     /// The Trash has something in it. False when the Trash cannot be read.
     public var trashIsFull = false
+    /// Apps opened lately, newest first. Those pinned to the Dock are left out when it is drawn.
+    public var recentApps: [DockApp] = []
     /// What each stack holds, by folder path. Filled only for stacks in the Dock.
     public var files: [String: [DockFile]] = [:]
 
@@ -274,7 +276,8 @@ public final class DockLiveState {
             iconSize: settings.iconSize,
             length: available,
             page: page,
-            showsTrash: settings.showsTrash
+            showsTrash: settings.showsTrash,
+            recents: settings.showsRecents ? DockRecents.visible(recentApps, pinned: settings.apps) : []
         )
     }
 

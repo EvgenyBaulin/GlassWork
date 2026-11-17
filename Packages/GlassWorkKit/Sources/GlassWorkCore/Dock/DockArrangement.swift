@@ -6,6 +6,8 @@ public enum DockSlot: Sendable, Equatable, Identifiable {
     case previousPage
     case nextPage
     case trash
+    /// A recently used app that is not pinned.
+    case recent(DockApp)
 
     public var id: String {
         switch self {
@@ -13,6 +15,7 @@ public enum DockSlot: Sendable, Equatable, Identifiable {
         case .previousPage: "previous-page"
         case .nextPage: "next-page"
         case .trash: "trash"
+        case let .recent(app): "recent-\(app.path)"
         }
     }
 }
@@ -39,18 +42,26 @@ public struct DockArrangement: Sendable, Equatable {
     /// - Parameter length: The room along the screen's edge.
     /// - Parameter page: The set of widgets wanted. A page that no longer exists falls back to the last one.
     /// - Parameter showsTrash: The Trash goes last, after the stacks.
-    public init(items: [DockItem], iconSize: Double, length: Double, page: Int = 0, showsTrash: Bool = false) {
+    /// - Parameter recents: Apps used lately and not pinned, after a divider that follows the apps and widgets.
+    public init(
+        items: [DockItem],
+        iconSize: Double,
+        length: Double,
+        page: Int = 0,
+        showsTrash: Bool = false,
+        recents: [DockApp] = []
+    ) {
         let apps = items.filter(\.isAppLike)
         let widgets = items.filter(\.isWidget)
         let stacks = items.filter(\.isStack)
         let trash = showsTrash ? 1 : 0
-        let fixed = apps.count + stacks.count + trash
+        let fixed = apps.count + stacks.count + trash + recents.count
 
         var size = iconSize
         var set = widgets
         var current = 0
         var count = 1
-        if DockBarLayout.restWidth(count: items.count + trash, base: iconSize) > length {
+        if DockBarLayout.restWidth(count: items.count + trash + recents.count, base: iconSize) > length {
             let needsPager = !widgets.isEmpty
             let least = fixed + (needsPager ? 1 + Self.pagerSlots : 0)
             size = min(iconSize, Self.iconSize(toFit: least, in: length))
@@ -81,9 +92,9 @@ public struct DockArrangement: Sendable, Equatable {
         }
         // The Trash sits with the stacks, without a divider of its own, as in the system Dock.
         let tail = stacks.map(DockSlot.item) + (showsTrash ? [.trash] : [])
-        if !tail.isEmpty {
+        for group in [recents.map(DockSlot.recent), tail] where !group.isEmpty {
             close()
-            slots += tail
+            slots += group
         }
         self.slots = slots
         self.dividers = dividers

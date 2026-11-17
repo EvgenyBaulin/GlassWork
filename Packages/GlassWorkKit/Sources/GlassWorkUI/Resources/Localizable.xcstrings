@@ -1209,6 +1209,22 @@
         }
       }
     },
+    "Cancel Download": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel Download"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отменить загрузку"
+          }
+        }
+      }
+    },
     "CBR": {
       "localizations": {
         "ru": {
@@ -4715,6 +4731,38 @@
         }
       }
     },
+    "Show Recent Apps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Recent Apps"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать недавние приложения"
+          }
+        }
+      }
+    },
+    "Show Running Indicators": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Running Indicators"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать индикаторы запущенных"
+          }
+        }
+      }
+    },
     "Show thumbnails": {
       "localizations": {
         "en": {
@@ -4775,6 +4823,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Снов с запуска"
+          }
+        }
+      }
+    },
+    "Sort by": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sort by"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сортировка"
           }
         }
       }
