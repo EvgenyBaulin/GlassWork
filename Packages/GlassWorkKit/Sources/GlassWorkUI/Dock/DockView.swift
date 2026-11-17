@@ -125,10 +125,15 @@ public struct DockView: View {
     @State private var pointer: Double?
     /// The app or folder an app is being dragged over.
     @State private var dropTarget: String?
+    /// The tile an app has been held over long enough for a drop to make a folder.
+    @State private var holdReady: String?
+    @State private var holdTimer: Task<Void, Never>?
 
     private static let canvas = "dock"
     /// Quick enough to feel attached to the pointer, long enough not to pop.
     private static let hoverAnimation = Animation.easeOut(duration: 0.14)
+    /// How long an app is held over another before the tile shows it will become a folder.
+    private static let holdToFolder = Duration.milliseconds(600)
 
     /// - Parameter pointer: Where the pointer starts, measured from the middle of the Dock.
     public init(state: DockLiveState, monitor: SystemMonitor, actions: DockActions, pointer: Double? = nil) {
@@ -189,6 +194,18 @@ public struct DockView: View {
         .coordinateSpace(.named(Self.canvas))
         .onChange(of: space) { _, space in actions.needsSpace(space) }
         .onChange(of: state.openCard) { _, open in removeEmptyFolders(keeping: open) }
+        .onChange(of: dropTarget) { _, target in startHold(on: target) }
+    }
+
+    private func startHold(on target: String?) {
+        holdTimer?.cancel()
+        holdReady = nil
+        guard let target else { return }
+        holdTimer = Task {
+            try? await Task.sleep(for: Self.holdToFolder)
+            guard !Task.isCancelled else { return }
+            holdReady = target
+        }
     }
 
     @ViewBuilder
@@ -273,6 +290,10 @@ public struct DockView: View {
             }
         }
         .padding(DockBarLayout.padding)
+        // An app dragged out of a folder's card and dropped on the bar goes back to the top level.
+        .dropDestination(for: String.self) { payloads, _ in
+            takeOut(payloads, before: nil)
+        }
         .background(alignment: edge) {
             // Keeps its depth: icons grow out of it, away from the screen's edge.
             let depth = DockBarLayout.restHeight(base: settings.iconSize)
@@ -366,24 +387,7 @@ public struct DockView: View {
     private func tile(_ item: DockItem, size: CGFloat) -> some View {
         switch item {
         case let .app(app):
-            AppTile(
-                app: app,
-                size: size,
-                isRunning: running.contains(app.path),
-                isLaunching: state.launching.contains(app.path),
-                showsIndicator: settings.showsRunningIndicators,
-                position: position
-            ) { actions.open(app) }
-                .contextMenu {
-                    DockAppMenu(app: app, actions: actions, folders: settings.folders) { state.openCard = $0 }
-                }
-                .draggable(app.path)
-                .dropDestination(for: String.self) { paths, _ in
-                    makeFolder(dropping: paths, onto: app)
-                } isTargeted: { targeted in
-                    dropTarget = targeted ? item.id : (dropTarget == item.id ? nil : dropTarget)
-                }
-                .modifier(DockDropHighlight(isTargeted: dropTarget == item.id, size: size))
+            appTile(app, item: item, size: size)
         case let .folder(folder):
             FolderTile(
                 folder: folder,
@@ -436,12 +440,50 @@ public struct DockView: View {
 }
 
 private extension DockView {
+    /// An app on the bar: a drag source, and a target that makes a folder or takes an app out of one.
+    func appTile(_ app: DockApp, item: DockItem, size: CGFloat) -> some View {
+        AppTile(
+            app: app,
+            size: size,
+            isRunning: running.contains(app.path),
+            isLaunching: state.launching.contains(app.path),
+            showsIndicator: settings.showsRunningIndicators,
+            position: position
+        ) { actions.open(app) }
+            .contextMenu {
+                DockAppMenu(app: app, actions: actions, folders: settings.folders) { state.openCard = $0 }
+            }
+            .draggable(app.path)
+            .dropDestination(for: String.self) { paths, _ in
+                if paths.first.map(DockDrag.parse)?.folder != nil {
+                    return takeOut(paths, before: item)
+                }
+                return makeFolder(dropping: paths, onto: app)
+            } isTargeted: { targeted in
+                dropTarget = targeted ? item.id : (dropTarget == item.id ? nil : dropTarget)
+            }
+            .modifier(DockDropHighlight(
+                isTargeted: dropTarget == item.id,
+                size: size,
+                isReady: holdReady == item.id
+            ))
+    }
+
     /// An app dropped on another makes a folder named New Folder, whose card opens with the name ready to change.
     func makeFolder(dropping paths: [String], onto target: DockApp) -> Bool {
         guard let path = paths.first, let dragged = app(at: path), dragged != target else { return false }
         let folder = AppFolder(name: loc("New Folder"), apps: [])
         actions.update { DockLayout.drop(dragged, onto: target, in: $0, making: folder) }
         state.openCard = DockItem.folder(folder).id
+        return true
+    }
+
+    /// Moves an app dragged out of a folder's card to the top level: in front of an item, or at the folder's side.
+    func takeOut(_ payloads: [String], before target: DockItem?) -> Bool {
+        guard let payload = payloads.first.map(DockDrag.parse), let id = payload.folder,
+              let app = settings.folders.first(where: { $0.id == id })?.apps.first(where: { $0.path == payload.path })
+        else { return false }
+        actions.update { DockLayout.moveOut(app, ofFolder: id, before: target, in: $0) }
         return true
     }
 

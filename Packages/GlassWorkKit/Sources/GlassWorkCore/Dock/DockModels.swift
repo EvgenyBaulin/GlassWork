@@ -33,6 +33,10 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
     public var name: String
     public var apps: [DockApp]
     public var symbol: String?
+    /// An emoji shown in place of the symbol and the grid of apps.
+    public var emoji: String?
+    /// Colours the symbol and the tile behind it.
+    public var tint: FolderTint?
     public var sort = FolderSort.manual
     /// Brought by a preset, and goes when another preset comes.
     public var isFromPreset = false
@@ -63,7 +67,7 @@ public struct AppFolder: Codable, Sendable, Equatable, Identifiable {
 
 extension AppFolder {
     private enum CodingKeys: String, CodingKey {
-        case id, name, apps, symbol, sort, isFromPreset, launchCounts
+        case id, name, apps, symbol, emoji, tint, sort, isFromPreset, launchCounts
     }
 
     /// Missing keys fall back to defaults, so a file from an earlier version keeps loading.
@@ -75,6 +79,9 @@ extension AppFolder {
         )
         id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
         symbol = try container.decodeIfPresent(String.self, forKey: .symbol)
+        emoji = try container.decodeIfPresent(String.self, forKey: .emoji)
+        // A colour this version does not know leaves the folder uncoloured instead of losing it.
+        tint = try? container.decode(FolderTint.self, forKey: .tint)
         sort = try container.decodeIfPresent(FolderSort.self, forKey: .sort) ?? .manual
         isFromPreset = try container.decodeIfPresent(Bool.self, forKey: .isFromPreset) ?? false
         launchCounts = try container.decodeIfPresent([String: Int].self, forKey: .launchCounts) ?? [:]

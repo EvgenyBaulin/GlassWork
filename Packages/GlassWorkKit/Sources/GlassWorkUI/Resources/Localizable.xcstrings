@@ -141,6 +141,22 @@
         }
       }
     },
+    "%@ s": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ s"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ с"
+          }
+        }
+      }
+    },
     "%@ to full": {
       "localizations": {
         "ru": {
@@ -1129,6 +1145,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "При текущей нагрузке"
+          }
+        }
+      }
+    },
+    "Auto-hide": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-hide"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Автоскрытие"
+          }
+        }
+      }
+    },
+    "Auto-hide delay": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-hide delay"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задержка автоскрытия"
           }
         }
       }
@@ -2223,6 +2271,22 @@
         }
       }
     },
+    "Emoji": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emoji"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Эмодзи"
+          }
+        }
+      }
+    },
     "Empty": {
       "localizations": {
         "en": {
@@ -2623,6 +2687,22 @@
         }
       }
     },
+    "GlassWork Dock turns off and the system Dock comes back with the settings shown here.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GlassWork Dock turns off and the system Dock comes back with the settings shown here."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dock GlassWork выключится, а системный Dock вернётся с показанными здесь настройками."
+          }
+        }
+      }
+    },
     "GPU": {
       "localizations": {
         "ru": {
@@ -2925,6 +3005,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Размер значков"
+          }
+        }
+      }
+    },
+    "Icon…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Icon…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Значок…"
           }
         }
       }
@@ -3781,6 +3877,22 @@
         }
       }
     },
+    "Move Down": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Down"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ниже"
+          }
+        }
+      }
+    },
     "Move up": {
       "localizations": {
         "en": {
@@ -3793,6 +3905,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вверх"
+          }
+        }
+      }
+    },
+    "Move Up": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Up"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выше"
           }
         }
       }
@@ -4061,6 +4189,22 @@
         }
       }
     },
+    "Not set": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not set"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не задано"
+          }
+        }
+      }
+    },
     "Not started": {
       "localizations": {
         "ru": {
@@ -4107,6 +4251,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Сейчас ничего не нужно. Каждый модуль попросит доступ только при включении."
+          }
+        }
+      }
+    },
+    "Nothing saved: GlassWork has not changed the system Dock.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing saved: GlassWork has not changed the system Dock."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ничего не сохранено: GlassWork не менял системный Dock."
           }
         }
       }
@@ -5197,6 +5357,22 @@
         }
       }
     },
+    "Reset Icon": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Icon"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сбросить значок"
+          }
+        }
+      }
+    },
     "Restore": {
       "localizations": {
         "ru": {
@@ -5213,6 +5389,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вернуть по умолчанию"
+          }
+        }
+      }
+    },
+    "Restore System Dock…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore System Dock…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Восстановить системный Dock…"
+          }
+        }
+      }
+    },
+    "Restore the system Dock?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore the system Dock?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Восстановить системный Dock?"
           }
         }
       }
@@ -6075,6 +6283,22 @@
         }
       }
     },
+    "System Dock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Dock"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системный Dock"
+          }
+        }
+      }
+    },
     "System widgets": {
       "localizations": {
         "ru": {
@@ -6137,6 +6361,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Системный Dock скрыт, пока работает Dock GlassWork, и вернётся как был при выходе."
+          }
+        }
+      }
+    },
+    "These are the system Dock's own settings from before GlassWork Dock took over.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These are the system Dock's own settings from before GlassWork Dock took over."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это настройки системного Dock до того, как его заменил Dock GlassWork."
           }
         }
       }

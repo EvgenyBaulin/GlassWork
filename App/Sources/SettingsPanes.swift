@@ -190,6 +190,7 @@ struct DockPane: View {
             stacksSection
             presetsSection
             DockScheduleSection(store: store)
+            DockSystemSection(store: store)
         }
         .formStyle(.grouped)
         .sheet(isPresented: $isExplaining) {
@@ -219,18 +220,33 @@ private extension DockPane {
 
     var widgetsSection: some View {
         Section {
+            // Rows are dragged by hand: `onMove` does nothing inside a `Form`. The arrows do the same by click.
             ForEach(widgets) { module in
                 HStack {
+                    Image(systemName: "line.3.horizontal").foregroundStyle(.secondary)
                     Text(module.title)
                     Spacer()
                     Text(module.dockClickTitle).font(.caption).foregroundStyle(.secondary)
+                    Button { setWidgets(DockLayout.moving(module, by: -1, in: widgets)) } label: {
+                        Image(systemName: "chevron.up")
+                    }
+                    .disabled(module == widgets.first)
+                    .help(loc("Move Up"))
+                    Button { setWidgets(DockLayout.moving(module, by: 1, in: widgets)) } label: {
+                        Image(systemName: "chevron.down")
+                    }
+                    .disabled(module == widgets.last)
+                    .help(loc("Move Down"))
                     Button(loc("Remove")) { setWidgets(widgets.filter { $0 != module }) }
                 }
-            }
-            .onMove { source, destination in
-                var moved = widgets
-                moved.move(fromOffsets: source, toOffset: destination)
-                setWidgets(moved)
+                .contentShape(.rect)
+                .draggable(module.rawValue)
+                .dropDestination(for: String.self) { dropped, _ in
+                    guard let raw = dropped.first, let dragged = ModuleID(rawValue: raw), widgets.contains(dragged)
+                    else { return false }
+                    setWidgets(DockLayout.moving(dragged, onto: module, in: widgets))
+                    return true
+                }
             }
             Menu(loc("Add Widget")) {
                 ForEach(ModuleID.dockWidgets.filter { !widgets.contains($0) }) { module in
