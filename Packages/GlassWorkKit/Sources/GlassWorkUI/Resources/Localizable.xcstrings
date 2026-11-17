@@ -5841,6 +5841,22 @@
         }
       }
     },
+    "Put back under the menu bar item": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put back under the menu bar item"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вернуть под значок в строке меню"
+          }
+        }
+      }
+    },
     "Quit": {
       "localizations": {
         "ru": {

@@ -292,7 +292,10 @@ struct MemoryPanel: View {
             MemoryPart(title: loc("Cached"), bytes: memory.cached, tint: Palette.cyan),
         ]
         return PanelSection(title: loc("Breakdown")) {
-            StackedBar(parts: parts.map { ($0.bytes, $0.tint) }, total: memory.total)
+            StackedBar(
+                parts: parts.map { StackedPart(title: $0.title, bytes: $0.bytes, tint: $0.tint) },
+                total: memory.total
+            )
             Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 4) {
                 GridRow { legend(parts[0]); legend(parts[1]) }
                 GridRow { legend(parts[2]); legend(parts[3]) }
@@ -322,28 +325,6 @@ struct MemoryPanel: View {
             Text(Format.bytes(Double(part.bytes), style: .precise)).monospacedDigit()
         }
         .font(.system(size: 12))
-    }
-}
-
-/// Horizontal bar split into colored parts.
-struct StackedBar: View {
-    let parts: [(UInt64, Color)]
-    let total: UInt64
-
-    var body: some View {
-        GeometryReader { geometry in
-            HStack(spacing: 1) {
-                ForEach(Array(parts.enumerated()), id: \.offset) { _, part in
-                    Rectangle()
-                        .fill(part.1)
-                        .frame(width: geometry.size.width * Double(part.0) / Double(max(total, 1)))
-                }
-                Spacer(minLength: 0)
-            }
-            .background(.quaternary)
-            .clipShape(Capsule())
-        }
-        .frame(height: 8)
     }
 }
 
