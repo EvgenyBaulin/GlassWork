@@ -61,6 +61,7 @@ final class DockController {
             return
         }
         if window == nil {
+            SystemDockGuard.install()
             SystemDock.hide()
             isRevealed = !settings.autoHides
             open()

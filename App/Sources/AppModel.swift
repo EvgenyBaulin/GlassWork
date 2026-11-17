@@ -77,6 +77,10 @@ final class AppModel {
         Task { await monitor.apps.load() }
         _ = runningApps
         _ = quickQuit
+        // Before the Dock is applied: otherwise taking over again would find the old settings and do nothing.
+        if SystemDockGuard.recoverAtLaunch() {
+            SystemDockGuard.showRestoredToast()
+        }
         applySettings()
         monitor.developer.restore(aiUsage: SnapshotStore().read(WidgetSnapshot.self, for: WidgetSnapshot.key)?.aiUsage)
         checkSystemWidgets()

@@ -7373,6 +7373,22 @@
         }
       }
     },
+    "The system Dock was restored after an unexpected quit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system Dock was restored after an unexpected quit"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Системный Dock восстановлен после неожиданного завершения"
+          }
+        }
+      }
+    },
     "The To-Do list": {
       "localizations": {
         "en": {
