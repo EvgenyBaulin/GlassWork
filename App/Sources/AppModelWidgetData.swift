@@ -6,7 +6,18 @@ extension AppModel {
     /// Read once: dictionaries are added rarely, and a launch picks them up.
     private static let installedDictionaries = SystemDictionaries.installed()
 
+    private static let sunAppearance = SunAppearanceScheduler()
+
+    /// Appearance follows the sun by the place Sun and Moon uses: a city in Weather, or the current location.
+    func applySunAppearance() {
+        let follows = store.settings.module(.appearance)?.options.flag(ItemOption.followsSun, default: false) ?? false
+        Self.sunAppearance.apply(isOn: follows && store.settings.module(.appearance)?.mode != .off) { [weak self] in
+            self?.monitor.sunPlace
+        }
+    }
+
     func applyWidgetData() {
+        applySunAppearance()
         let widgets = store.settings.widgets
         monitor.activity.configureScreenTime(
             dayStartHour: widgets.dayStartHour,

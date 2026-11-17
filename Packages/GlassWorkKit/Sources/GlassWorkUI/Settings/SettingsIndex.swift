@@ -522,6 +522,14 @@ extension SettingsIndex {
                 ["Widgets", "Git widget"]
             ),
             page("widgets.gitToDo", "Counts as to do", "Считать задачей", .widgets, ["Widgets", "Git widget"]),
+            page(
+                "appearance.followSun",
+                "Follow sunrise and sunset",
+                "Следовать за восходом и закатом",
+                .module(.appearance),
+                ["Menu Bar", "Appearance"],
+                keywords: ["dark", "тёмная", "night", "ночь"]
+            ),
             page("widgets.commands", "Commands", "Команды", .widgets, ["Widgets"], keywords: ["scripts", "скрипты"]),
             page("widgets.endpoints", "Endpoints", "Адреса", .widgets, ["Widgets"], keywords: ["URL", "сайты"]),
             page("tiles.use", "Use Window Tiles", "Включить раскладку окон", .windowTiles, ["Window Tiles"]),

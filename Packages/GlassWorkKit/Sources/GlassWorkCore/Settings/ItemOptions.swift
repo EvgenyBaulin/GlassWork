@@ -101,6 +101,7 @@ public enum ItemOption {
     public static let warnMilliseconds = "warnMilliseconds"
     public static let weakSignal = "weakSignal"
     public static let sunPlace = "place"
+    public static let followsSun = "followSun"
     public static let sunShows = "shows"
     public static let graphMinutes = "graphMinutes"
     public static let overviewDisk = "overviewDisk"

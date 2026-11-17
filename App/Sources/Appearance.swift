@@ -6,11 +6,18 @@ import AppKit
 enum Appearance {
     private typealias SetTheme = @convention(c) (Bool) -> Void
 
-    static func toggle() {
-        let isDark = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    @MainActor static var isDark: Bool {
+        NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    }
+
+    @MainActor static func toggle() {
+        set(dark: !isDark)
+    }
+
+    static func set(dark: Bool) {
         guard let library = dlopen("/System/Library/PrivateFrameworks/SkyLight.framework/SkyLight", RTLD_LAZY),
               let symbol = dlsym(library, "SLSSetAppearanceThemeLegacy")
         else { return }
-        unsafeBitCast(symbol, to: SetTheme.self)(!isDark)
+        unsafeBitCast(symbol, to: SetTheme.self)(dark)
     }
 }
