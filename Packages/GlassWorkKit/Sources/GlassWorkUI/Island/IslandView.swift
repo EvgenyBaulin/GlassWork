@@ -175,7 +175,9 @@ public struct IslandView: View {
     @ViewBuilder
     private func expanded(now: Date) -> some View {
         let pages = store.queue.pages
-        if pages.indices.contains(store.page) {
+        if showsMiniWidgets {
+            miniWidgetsSurface(now: now)
+        } else if pages.indices.contains(store.page) {
             let event = pages[store.page]
             VStack(spacing: 4) {
                 ScrollView {
@@ -205,6 +207,28 @@ public struct IslandView: View {
             IslandShape(radius: 14).fill(.black)
                 .frame(width: geometry.notch.width, height: geometry.notch.height)
         }
+    }
+
+    private func miniWidgetsSurface(now: Date) -> some View {
+        VStack(spacing: 4) {
+            ScrollView {
+                IslandMiniWidgetsCard(store: store, actions: actions)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .frame(height: cardHeight(now: now))
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, geometry.notch.height + 12)
+        .padding(.bottom, 16)
+        .frame(width: expandedWidth)
+        .background(IslandShape(radius: 28).fill(.black))
+        .onTapGesture {
+            if !store.isEditingWidgets {
+                store.lifecycle.clicked()
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(loc("GlassWork Island, \(loc("Opened by you · your widgets"))"))
     }
 
     private func pageDots(_ pages: [IslandEvent]) -> some View {
@@ -238,7 +262,7 @@ public struct IslandView: View {
         case .compact:
             geometry.compactFrame(leftWing: compactWings(now: now).left, rightWing: compactWings(now: now).right)
         case .expanded:
-            store.queue.events.isEmpty ? geometry.notch : geometry.expandedFrame(size: CGSize(
+            store.queue.events.isEmpty && !showsMiniWidgets ? geometry.notch : geometry.expandedFrame(size: CGSize(
                 width: expandedWidth,
                 height: geometry.notch.height + 12 + cardHeight(now: now) + footerHeight
             ))
@@ -251,7 +275,7 @@ public struct IslandView: View {
         case _ where store.dropPreview != nil: 28
         case .idle, .peek: 14
         case .compact: 16
-        case .expanded: store.queue.events.isEmpty ? 14 : 28
+        case .expanded: store.queue.events.isEmpty && !showsMiniWidgets ? 14 : 28
         }
         return IslandShape(radius: radius).path(in: CGRect(origin: .zero, size: frame.size))
             .contains(CGPoint(x: point.x - frame.minX, y: frame.maxY - point.y))
@@ -265,7 +289,19 @@ public struct IslandView: View {
         store.queue.pages.count > 1 ? 21 : 16
     }
 
+    /// Opened by the user with no event to show: the mini widgets fill the card.
+    private var showsMiniWidgets: Bool {
+        store.lifecycle.opensWidgets && store.queue.events.isEmpty
+    }
+
     private func cardHeight(now: Date) -> CGFloat {
+        if showsMiniWidgets {
+            let card = IslandMiniWidgetsCard(store: store, actions: actions)
+                .frame(width: expandedWidth - 32)
+                .environment(\.locale, locale)
+                .environment(\.timeZone, timeZone)
+            return NSHostingView(rootView: card).fittingSize.height
+        }
         let pages = store.queue.pages
         guard pages.indices.contains(store.page) else { return 0 }
         let card = IslandExpandedCard(presentation: presentation(pages[store.page], now: now), actions: actions)

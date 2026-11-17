@@ -58,6 +58,12 @@ final class IslandController {
         if store.lifecycle.hoverToExpand != settings.expandsOnHover {
             store.lifecycle.hoverToExpand = settings.expandsOnHover
         }
+        if !store.lifecycle.opensWidgets {
+            store.lifecycle.opensWidgets = true
+        }
+        if store.miniWidgets != settings.miniWidgets {
+            store.miniWidgets = settings.miniWidgets
+        }
         guard settings.isEnabled else {
             stop()
             return
@@ -129,6 +135,9 @@ final class IslandController {
             _ = store.lifecycle
             _ = store.queue
             _ = store.page
+            _ = store.miniWidgets
+            _ = store.miniReadings
+            _ = store.isEditingWidgets
         } onChange: { [weak self] in
             Task { @MainActor in
                 guard let self, self.isEnabled, self.observationGeneration == generation else { return }

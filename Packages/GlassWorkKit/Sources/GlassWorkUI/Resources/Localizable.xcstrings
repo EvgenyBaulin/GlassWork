@@ -681,6 +681,22 @@
         }
       }
     },
+    "+ Add widget": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ Add widget"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+ Добавить виджет"
+          }
+        }
+      }
+    },
     "+%@ vs yesterday": {
       "localizations": {
         "ru": {
@@ -2271,6 +2287,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Выберите программу docker"
+          }
+        }
+      }
+    },
+    "Choose your widgets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your widgets"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите виджеты"
           }
         }
       }
@@ -4075,6 +4107,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Группировать по спискам"
+          }
+        }
+      }
+    },
+    "H": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "H"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Макс."
           }
         }
       }
@@ -6073,6 +6121,22 @@
         }
       }
     },
+    "Nothing to show yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to show yet"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока нечего показать"
+          }
+        }
+      }
+    },
     "Notifications": {
       "localizations": {
         "ru": {
@@ -6467,6 +6531,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Open-Meteo не отвечает"
+          }
+        }
+      }
+    },
+    "Opened by you · your widgets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opened by you · your widgets"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открыто вами · ваши виджеты"
           }
         }
       }
@@ -9601,6 +9681,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Пока вы не выключите"
+          }
+        }
+      }
+    },
+    "Up next": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up next"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Далее"
           }
         }
       }

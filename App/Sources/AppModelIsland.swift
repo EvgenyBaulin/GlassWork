@@ -64,6 +64,9 @@ extension AppModel {
             dismiss: { [weak self] in self?.island.dismiss(id: $0) },
             openPage: { [weak self] in self?.island.showPage($0) }
         )
+        actions.setMiniWidgets = { [weak self] set in
+            self?.store.update { $0.island.miniWidgets = set }
+        }
         // The initializer has no brightness parameter; the slider stays hidden without a settable display.
         if SystemLevelsReader.canSetBrightness {
             actions.setBrightness = { [weak self] in

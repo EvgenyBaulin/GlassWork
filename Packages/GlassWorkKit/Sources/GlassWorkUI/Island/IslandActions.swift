@@ -32,6 +32,8 @@ public struct IslandActions {
     public var stopKeepAwake: () -> Void
     public var dismiss: (String) -> Void
     public var openPage: (Int) -> Void
+    /// Saves the chosen mini widgets.
+    public var setMiniWidgets: (IslandMiniSet) -> Void = { _ in }
 
     public init(
         joinMeeting: @escaping (URL) -> Void = { _ in },

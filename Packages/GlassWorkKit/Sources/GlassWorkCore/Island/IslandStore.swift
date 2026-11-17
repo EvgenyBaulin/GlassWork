@@ -10,6 +10,12 @@ public final class IslandStore {
     /// Files being dragged over the notch; the island shows the drop zone while this is set.
     public private(set) var dropPreview: IslandDropPreview?
 
+    /// The chosen mini widgets and what each says, for the card opened with no event on screen.
+    public var miniWidgets = IslandMiniSet()
+    public private(set) var miniReadings: [IslandMiniWidget: IslandMiniReading] = [:]
+    /// Whether the opened card lists the widgets to choose from instead of showing them.
+    public var isEditingWidgets = false
+
     @ObservationIgnored private var previous: IslandInput?
     @ObservationIgnored private var dismissedOngoing: Set<String> = []
 
@@ -48,6 +54,10 @@ public final class IslandStore {
             return event
         }
         previous = input
+        let readings = IslandMiniReading.readings(from: input, now: now)
+        if readings != miniReadings {
+            miniReadings = readings
+        }
         // Observers redraw on every assignment, so an unchanged queue is not assigned: the surface stays
         // still while nothing happens.
         if merged != queue.events {
@@ -67,6 +77,9 @@ public final class IslandStore {
         state.tick(at: now)
         if state != lifecycle {
             lifecycle = state
+        }
+        if isEditingWidgets, lifecycle.phase != .expanded {
+            isEditingWidgets = false
         }
     }
 
@@ -119,7 +132,11 @@ public final class IslandStore {
     public func reset() {
         previous = nil
         queue = IslandQueue()
-        lifecycle = IslandLifecycle(hoverToExpand: lifecycle.hoverToExpand)
+        var fresh = IslandLifecycle(hoverToExpand: lifecycle.hoverToExpand)
+        fresh.opensWidgets = lifecycle.opensWidgets
+        lifecycle = fresh
+        isEditingWidgets = false
+        miniReadings = [:]
         page = 0
         dropPreview = nil
         dismissedOngoing = []

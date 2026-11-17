@@ -40,6 +40,12 @@ public struct IslandInput: Sendable, Equatable {
     /// Rain coming or under way at the first Weather place; nil when none, or when the module is off or has no
     /// place. Read when the snapshot is taken, so two snapshots compare what was true at their own moments.
     public var rain: IslandRain?
+    /// For the opened island's mini widgets.
+    public var cpu: CPUSample?
+    public var memory: MemorySample?
+    public var weather: WeatherReport?
+    /// The configured pairs in order, those with a quote.
+    public var rates: [RateQuote] = []
 
     public init() {}
 
@@ -60,6 +66,10 @@ public struct IslandInput: Sendable, Equatable {
         docker = monitor.developer.docker
         devServers = monitor.developer.devServers
         battery = monitor.battery
+        cpu = monitor.cpu
+        memory = monitor.memory
+        weather = monitor.weather.primaryReport
+        rates = monitor.rates.settings.pairs.compactMap(monitor.rates.snapshot.quote(for:))
         isKeepingAwake = monitor.everyday.isKeepingAwake
         keepAwakeEnds = monitor.everyday.keepAwakeEnds
         keepAwakeIncludesDisplay = !monitor.everyday.letsDisplaySleep
