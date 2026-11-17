@@ -155,6 +155,10 @@ public extension ModuleOptionSpec {
             toggle(.overview, Key.showsMemory, "Show memory", "Показывать память", fallback: true),
             toggle(.overview, Key.showsDisk, "Show disk", "Показывать диск", fallback: false),
             toggle(.cpu, Key.splitsUserSystem, "Split user / system", "Разделять польз. и систему", fallback: true),
+            toggle(
+                .cpu, Key.showsEfficiencyCores, "Show efficiency cores", "Показывать энергоэффективные ядра",
+                fallback: true
+            ),
             option(
                 .cpu, Key.topApps, "Top apps in panel", "Приложений в панели",
                 .number(1 ... 10, step: 1, unit: ""), fallback: "4"
@@ -236,6 +240,7 @@ public extension ModuleOptionSpec {
                 fallback: false
             ),
             lowBattery,
+            toggle(.sensors, Key.showsSensorKeys, "Show sensor keys", "Показывать ключи датчиков", fallback: true),
             option(.sensors, Key.warnAbove, "Warn above", "Предупреждать выше", temperature, fallback: "95"),
             notifyTemperature,
             option(

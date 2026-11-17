@@ -22,11 +22,16 @@ struct SensorsPanel: View {
     let monitor: SystemMonitor
     @Environment(\.panelActions) private var actions
 
+    private var options: [String: String] {
+        actions.moduleOptions(.sensors)
+    }
+
     var body: some View {
         SensorsPanelContent(
             sample: monitor.sensors,
             tracker: monitor.sensorTracks,
-            groups: SensorGroupOptions(options: actions.moduleOptions(.sensors)).shownGroups
+            groups: SensorGroupOptions(options: options).shownGroups,
+            showsKeys: options.flag(ItemOption.showsSensorKeys, default: true)
         )
     }
 }
@@ -35,6 +40,8 @@ struct SensorsPanelContent: View {
     let sample: SensorSample?
     let tracker: SensorTracker
     let groups: [SensorGroup]
+    /// Off, rows read "Sensor 1, 2…" within their group instead of the raw SMC key.
+    var showsKeys = true
     /// Starts a sparkline as if the cursor were on its newest point, for tests of the hover state.
     var hoveredKey: String?
     @State private var query = ""
@@ -95,14 +102,17 @@ struct SensorsPanelContent: View {
         if !readings.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
                 Text(group.title).font(.system(size: 12, weight: .semibold))
-                ForEach(readings) { row($0) }
+                ForEach(Array(readings.enumerated()), id: \.element.id) { offset, reading in
+                    row(reading, title: showsKeys ? reading.key : loc("Sensor \(offset + 1)"))
+                }
             }
         }
     }
 
-    private func row(_ reading: SensorReading) -> some View {
+    private func row(_ reading: SensorReading, title: String) -> some View {
         SensorRow(
             reading: reading,
+            title: title,
             track: tracker.track(for: reading.key),
             hovered: hoveredKey == reading.key
         )
@@ -118,6 +128,7 @@ struct SensorsPanelContent: View {
 /// One sensor: its name, session range, a sparkline of the latest readings and the current value.
 private struct SensorRow: View {
     let reading: SensorReading
+    let title: String
     let track: SensorTrack?
     let hovered: Bool
     /// The row under the cursor goes above the next ones, so the sparkline's readout is not covered.
@@ -125,7 +136,7 @@ private struct SensorRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(reading.key)
+            Text(title)
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)

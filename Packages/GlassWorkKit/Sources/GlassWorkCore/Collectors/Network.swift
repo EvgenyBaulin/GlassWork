@@ -32,6 +32,11 @@ public struct NetworkSample: Codable, Sendable, Equatable {
     public var sessionReceived: UInt64
     public var sessionSent: UInt64
 
+    /// No active interface means no route out, which is not the same as an idle connection.
+    public var isOffline: Bool {
+        interfaces.isEmpty
+    }
+
     /// Physical interfaces only: tunnels and virtual links would count the same traffic twice.
     public static func isPhysical(_ name: String) -> Bool {
         name.hasPrefix("en")

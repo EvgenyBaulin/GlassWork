@@ -59,7 +59,7 @@ struct CPUPanel: View {
             footerTitle: loc("Open Activity Monitor"),
             footerAction: { actions.openApp("com.apple.ActivityMonitor") }
         ) {
-            BigFigure(text: Format.percent(monitor.cpu?.total ?? 0))
+            BigFigure(text: monitor.cpu.map { Format.percent($0.total) } ?? "—")
             if let cpu = monitor.cpu, options.flag(ItemOption.splitsUserSystem, default: true) {
                 Text(
                     loc(
@@ -87,7 +87,11 @@ struct CPUPanel: View {
                     "\(monitor.cpuInfo.performanceCores) Performance · \(monitor.cpuInfo.efficiencyCores) Efficiency"
                 )
             ) {
-                CoreBars(cores: monitor.cpu?.cores ?? [], info: monitor.cpuInfo)
+                CoreBars(
+                    cores: monitor.cpu?.cores ?? [],
+                    info: monitor.cpuInfo,
+                    showsEfficiency: options.flag(ItemOption.showsEfficiencyCores, default: true)
+                )
             }
             Divider()
             PanelSection(title: loc("Using the most")) {
@@ -118,6 +122,7 @@ struct CPUPanel: View {
 struct CoreBars: View {
     let cores: [Double]
     let info: CPUInfo
+    var showsEfficiency = true
     @State private var hovered: Int?
 
     /// macOS numbers efficiency cores first on Apple silicon.
@@ -126,6 +131,7 @@ struct CoreBars: View {
             Core(index: index, load: load, isPerformance: index >= info.efficiencyCores)
         }
         .sorted { $0.isPerformance && !$1.isPerformance }
+        .filter { showsEfficiency || $0.isPerformance }
     }
 
     private struct Core {
@@ -147,7 +153,9 @@ struct CoreBars: View {
     }
 
     private var caption: String {
-        guard let hovered, cores.indices.contains(hovered) else { return loc("P-cores, then E-cores") }
+        guard let hovered, cores.indices.contains(hovered) else {
+            return showsEfficiency ? loc("P-cores, then E-cores") : loc("Performance cores")
+        }
         return loc("Core \(hovered + 1): \(Format.percent(cores[hovered], style: .precise))")
     }
 
@@ -339,72 +347,6 @@ struct DiskPanel: View {
     }
 }
 
-struct NetworkPanel: View {
-    let monitor: SystemMonitor
-    @State private var range = TieredHistory.Range.minute
-    @State private var showsPublicIP = false
-    @State private var publicIP: String?
-
-    var body: some View {
-        let network = monitor.network
-        PanelFrame(module: .network, subtitle: network?.interfaces.first?.name ?? "") {
-            HStack(alignment: .firstTextBaseline, spacing: 18) {
-                BigFigure(text: "↓ \(Format.rate(network?.download ?? 0, style: .precise))")
-                Text("↑ \(Format.rate(network?.upload ?? 0, style: .precise))")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-            }
-            RangePicker(range: $range)
-            InteractiveChart(
-                series: [
-                    series("download", loc("Download"), Palette.teal, .download),
-                    series("upload", loc("Upload"), Palette.blue, .upload),
-                ],
-                mirrored: true,
-                height: 70
-            )
-            Divider()
-            if let network {
-                PanelSection(title: loc("Interfaces"), caption: "↓ · ↑") {
-                    ForEach(network.interfaces, id: \.name) { interface in
-                        InfoRow(
-                            title: interface.name,
-                            value: "↓ \(Format.rate(interface.download, style: .precise))  ↑ \(Format.rate(interface.upload, style: .precise))"
-                        )
-                    }
-                }
-                Divider()
-                InfoRow(
-                    title: loc("This session"),
-                    value: "↓ \(Format.bytes(Double(network.sessionReceived), style: .precise))  ↑ \(Format.bytes(Double(network.sessionSent), style: .precise))"
-                )
-            }
-            InfoRow(title: loc("Local IP"), value: NetworkReader.localAddress() ?? "—")
-            Toggle(isOn: $showsPublicIP) {
-                HStack {
-                    Text(loc("Public IP")).foregroundStyle(.secondary)
-                    Spacer()
-                    Text(showsPublicIP ? publicIP ?? "…" : "•••.•••.•••.•••").monospacedDigit()
-                }
-                .font(.system(size: 12))
-            }
-            .toggleStyle(.switch)
-            .controlSize(.mini)
-            .help(loc("Contacts an external service"))
-            .task(id: showsPublicIP) {
-                publicIP = showsPublicIP ? await NetworkReader.publicAddress() : nil
-            }
-        }
-    }
-
-    private func series(_ id: String, _ title: String, _ color: Color, _ metric: Metric) -> ChartSeries {
-        ChartSeries(id: id, title: title, color: color, points: monitor.points(metric, in: range)) {
-            Format.rate($0, style: .precise)
-        }
-    }
-}
-
 struct GPUPanel: View {
     let monitor: SystemMonitor
 
@@ -480,9 +422,9 @@ struct OverviewPanel: View {
             footerAction: { actions.openApp("com.apple.ActivityMonitor") }
         ) {
             HStack(spacing: 18) {
-                ring(monitor.cpu?.total ?? 0, Palette.blue, loc("CPU"))
-                ring(monitor.memory?.usedShare ?? 0, Palette.green, loc("Memory"))
-                ring(1 - (monitor.volumes.first?.freeShare ?? 1), Palette.cyan, loc("Disk"))
+                ring(monitor.cpu?.total, Palette.blue, loc("CPU"))
+                ring(monitor.memory?.usedShare, Palette.green, loc("Memory"))
+                ring(monitor.volumes.first.map { 1 - $0.freeShare }, Palette.cyan, loc("Disk"))
             }
             .frame(maxWidth: .infinity)
             Divider()
@@ -492,10 +434,11 @@ struct OverviewPanel: View {
         }
     }
 
-    private func ring(_ value: Double, _ tint: Color, _ title: String) -> some View {
+    /// No value yet is a dash, not a ring at 0%.
+    private func ring(_ value: Double?, _ tint: Color, _ title: String) -> some View {
         VStack(spacing: 6) {
-            RingGauge(value: value, tint: tint, lineWidth: 7) {
-                Text(Format.percent(value)).font(.system(size: 14, weight: .bold, design: .rounded))
+            RingGauge(value: value ?? 0, tint: tint, lineWidth: 7) {
+                Text(value.map { Format.percent($0) } ?? "—").font(.system(size: 14, weight: .bold, design: .rounded))
             }
             .frame(width: 76, height: 76)
             Text(title).font(.system(size: 11)).foregroundStyle(.secondary)
