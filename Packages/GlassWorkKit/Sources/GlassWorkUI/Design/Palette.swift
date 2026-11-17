@@ -63,6 +63,9 @@ public extension ModuleID {
         case .shelf: loc("Shelf")
         case .sound: loc("Sound")
         case .micCamera: loc("Mic & Camera")
+        case .counter: loc("Counter")
+        case .breathe: loc("Breathe")
+        case .screenTime: loc("Screen Time")
         default: rawValue
         }
     }
@@ -107,6 +110,9 @@ public extension ModuleID {
         case .shelf: "tray"
         case .sound: "speaker.wave.2.fill"
         case .micCamera: "mic.fill"
+        case .counter: "number.circle"
+        case .breathe: "wind"
+        case .screenTime: "hourglass.bottomhalf.filled"
         default: "square.dashed"
         }
     }
@@ -131,9 +137,10 @@ public extension ModuleID {
         case .weather: Palette.cyan
         case .rates: Palette.green
         case .clipboard: Palette.teal
-        case .shelf: Palette.purple
+        case .shelf, .screenTime: Palette.purple
         case .sound: Palette.pink
-        case .micCamera: Palette.teal
+        case .micCamera, .breathe: Palette.teal
+        case .counter: Palette.orange
         default: Palette.gray
         }
     }

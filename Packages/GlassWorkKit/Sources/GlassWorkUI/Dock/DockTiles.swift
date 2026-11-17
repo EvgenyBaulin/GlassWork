@@ -314,9 +314,15 @@ struct WidgetTile: View {
     let size: CGFloat
     let monitor: SystemMonitor
     var position = DockPosition.bottom
+    /// False holds the Breathe circle still, as Reduce Motion does.
+    var animates = true
+    /// For tests: stands in for the recorded screen time.
+    var screenTimeLog: ScreenTimeLog?
     let click: () -> Void
     let hold: () -> Void
     @State private var press = DockPress()
+    @Environment(\.panelActions) private var panelActions
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// "3 files": the shelf says what it holds in words, as there is room for them.
     static func shelfCaption(_ count: Int) -> String {
@@ -327,9 +333,34 @@ struct WidgetTile: View {
         }
     }
 
+    /// What the tile says under its symbol.
+    private func caption(_ content: ItemContent) -> String {
+        switch module {
+        case .shelf: Self.shelfCaption(monitor.shelf.items.count)
+        case .counter: String(CounterState(options: panelActions.moduleOptions(.counter)).value)
+        case .screenTime: ScreenTimeSummary(log: screenTimeLog ?? monitor.activity.screenTime, at: Date()).tileText
+        case .breathe: loc("Breathe")
+        default: DockSystemTileLook.of(module, monitor: monitor)?.caption ?? content.figure
+        }
+    }
+
+    private var hasSmallCaption: Bool {
+        module == .shelf || module == .breathe
+    }
+
+    @ViewBuilder
+    private var symbol: some View {
+        if module == .breathe {
+            BreathingTileOrb(size: size * 0.34, animates: animates && !reduceMotion)
+        } else {
+            let look = DockSystemTileLook.of(module, monitor: monitor)
+            Image(systemName: look?.symbol ?? module.symbol).font(.system(size: size * 0.28))
+                .foregroundStyle(look?.tint ?? module.tint)
+        }
+    }
+
     var body: some View {
         let content = ItemContent.content(module, monitor: monitor, style: .compact)
-        let look = DockSystemTileLook.of(module, monitor: monitor)
         Button {
             if press.released() {
                 click()
@@ -337,12 +368,10 @@ struct WidgetTile: View {
         } label: {
             DockIndicated(position: position, isLit: false) {
                 VStack(spacing: 1) {
-                    Image(systemName: look?.symbol ?? module.symbol).font(.system(size: size * 0.28))
-                        .foregroundStyle(look?.tint ?? module.tint)
-                    Text(module == .shelf ? Self.shelfCaption(monitor.shelf.items.count) : look?.caption ?? content
-                        .figure)
+                    symbol
+                    Text(caption(content))
                         .font(.system(
-                            size: size * (module == .shelf ? 0.15 : 0.2),
+                            size: size * (hasSmallCaption ? 0.15 : 0.2),
                             weight: .semibold,
                             design: .rounded
                         ))
