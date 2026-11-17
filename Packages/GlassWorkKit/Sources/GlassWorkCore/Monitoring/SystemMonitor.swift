@@ -336,18 +336,10 @@ public final class SystemMonitor {
             snapshot.diskLonger = diskHistory(.hour, seconds: 300, at: date)
         }
         if kinds.contains(.weather) {
-            snapshot.weather = WidgetWeather(
-                reports: weather.reports,
-                isStale: weather.isStale,
-                hasPlaces: !weather.places.isEmpty
-            )
+            snapshot.weather = widgetWeather
         }
         if kinds.contains(.rates) {
-            snapshot.rates = WidgetRates(
-                quotes: rates.snapshot.quotes,
-                updatedAt: rates.snapshot.updatedAt,
-                isStale: rates.isStale
-            )
+            snapshot.rates = widgetRates
         }
         fillDeveloper(of: &snapshot, for: kinds, at: date)
         if kinds.contains(.devices) {
