@@ -166,23 +166,23 @@ struct WidgetGapLogicTests {
             TodoItem(id: "2", title: "b", listName: "Home"),
             TodoItem(id: "3", title: "c", listName: "Work"),
         ]
-        let groups = TodoGroup.groups(of: items)
+        let groups = TodoWidgetGroup.groups(of: items)
         #expect(groups.map(\.name) == ["Work", "Home"])
         #expect(groups[0].items.map(\.id) == ["1", "3"])
     }
 
     @Test func groupsFlowIntoColumnsAndTheRestIsCounted() {
         let groups = (0 ..< 4).map { index in
-            TodoGroup(
+            TodoWidgetGroup(
                 name: "L\(index)", color: "#000000",
                 items: (0 ..< 3).map { TodoItem(id: "\(index)-\($0)", title: "t", listName: "L\(index)") }
             )
         }
         // A group costs a header and three rows: 88 points, so two fit in 180 and the rest go to the next column.
-        let layout = TodoGroup.columns(of: groups, count: 2, height: 180)
+        let layout = TodoWidgetGroup.columns(of: groups, count: 2, height: 180)
         #expect(layout.columns.map(\.count) == [2, 2])
         #expect(layout.hidden == 0)
-        let tight = TodoGroup.columns(of: groups, count: 2, height: 100)
+        let tight = TodoWidgetGroup.columns(of: groups, count: 2, height: 100)
         #expect(tight.columns.map(\.count) == [1, 1])
         #expect(tight.hidden == 6)
     }
