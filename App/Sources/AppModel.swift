@@ -78,7 +78,7 @@ final class AppModel {
         _ = runningApps
         _ = quickQuit
         // Before the Dock is applied: otherwise taking over again would find the old settings and do nothing.
-        if SystemDockGuard.recoverAtLaunch() {
+        if SystemDockGuard.recoverAtLaunch(dockIsOn: store.settings.dock.isEnabled) {
             SystemDockGuard.showRestoredToast()
         }
         applySettings()

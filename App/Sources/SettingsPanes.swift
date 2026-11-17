@@ -195,9 +195,13 @@ struct DockPane: View {
         .formStyle(.grouped)
         .sheet(isPresented: $isExplaining) {
             DockFirstRunView(
+                presets: presets,
                 proceed: {
                     isExplaining = false
                     enable()
+                },
+                applyPreset: { preset in
+                    store.update { DockPresets.apply(preset, current: nil, to: &$0.dock) }
                 },
                 cancel: { isExplaining = false }
             )

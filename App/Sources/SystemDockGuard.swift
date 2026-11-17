@@ -32,8 +32,12 @@ enum SystemDockGuard {
     }
 
     /// Runs once at launch, before the Dock is applied. True when the system Dock was put back.
-    static func recoverAtLaunch() -> Bool {
-        switch DockRecovery.decide(markerExists: SystemDock.hasMarker, hasSavedSettings: SystemDock.hasSavedSettings) {
+    static func recoverAtLaunch(dockIsOn: Bool) -> Bool {
+        switch DockRecovery.decide(
+            markerExists: SystemDock.hasMarker,
+            hasSavedSettings: SystemDock.hasSavedSettings,
+            takesOverAgain: dockIsOn
+        ) {
         case .nothing:
             return false
         case .clearMarker:

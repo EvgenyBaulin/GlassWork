@@ -19,4 +19,10 @@ struct DockRecoveryTests {
     @Test func aCleanLaunchDoesNothing() {
         #expect(DockRecovery.decide(markerExists: false, hasSavedSettings: false) == .nothing)
     }
+
+    /// GlassWork Dock takes over again at once, so the hidden system Dock stays as it is and nothing is shown.
+    @Test func aDockThatIsOnKeepsTheSystemDockHidden() {
+        #expect(DockRecovery.decide(markerExists: true, hasSavedSettings: true, takesOverAgain: true) == .nothing)
+        #expect(DockRecovery.decide(markerExists: true, hasSavedSettings: false, takesOverAgain: true) == .clearMarker)
+    }
 }
