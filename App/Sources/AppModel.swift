@@ -148,6 +148,7 @@ final class AppModel {
         monitor.apps.saveNow()
         monitor.nowPlaying.stop()
         nowPlaying.prepareToQuit()
+        panels.flushDetached()
     }
 
     func showSettings(module: ModuleID? = nil) {

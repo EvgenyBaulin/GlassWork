@@ -138,11 +138,24 @@ final class DetachedPanels {
         }
     }
 
+    /// Saves every pending frame now, for quitting before the delay has passed.
+    func flush() {
+        for module in Array(saves.keys) {
+            saves[module]?.cancel()
+            saves[module] = nil
+            remember(module)
+        }
+    }
+
     private func remember(_ module: ModuleID) {
         guard let window = windows[module], let screen = window.screen,
               let display = DisplayInfo(screen) else { return }
         let frame = window.frame
-        model.store.update { $0.detachedPanels.remember(module, frame: frame, on: display, at: Date()) }
+        guard !model.store.settings.detachedPanels.isCurrent(module, frame: frame, on: display) else { return }
+        // Window positions are not settings changes: they stay out of undo and redo.
+        model.store.update(undoable: false) {
+            $0.detachedPanels.remember(module, frame: frame, on: display, at: Date())
+        }
     }
 
     private func closed(_ module: ModuleID) {

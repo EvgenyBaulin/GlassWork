@@ -66,18 +66,23 @@ public struct DetachedPanelMemory: Codable, Sendable, Equatable {
         )
     }
 
+    /// Whether the saved frame for this module and display is already `frame`.
+    public func isCurrent(_ module: ModuleID, frame: CGRect, on display: DisplayInfo) -> Bool {
+        records[Self.key(module, display: display)]?.frame == frame
+    }
+
     /// The frame to open a module's window with, or nil when it has never been moved (the caller centers it).
     ///
     /// The record for the preferred display wins. Otherwise the newest record whose display is still connected
     /// is used, and when all of them are gone the newest one is brought onto the preferred display.
     public func frame(for module: ModuleID, preferred: DisplayInfo, displays: [DisplayInfo]) -> CGRect? {
-        let mine = records.values.filter { $0.module == module.rawValue }
-        if let record = mine.first(where: { matches($0, preferred) }) {
+        let newest = records.values.filter { $0.module == module.rawValue }.sorted { $0.savedAt > $1.savedAt }
+        let connected = displays.contains { $0.id == preferred.id } ? displays : displays + [preferred]
+        if let record = newest.first(where: { Self.display(for: $0, in: connected)?.id == preferred.id }) {
             return Self.clamp(record.frame, to: preferred.visibleFrame)
         }
-        let newest = mine.sorted { $0.savedAt > $1.savedAt }
         for record in newest {
-            if let display = displays.first(where: { matches(record, $0) }) {
+            if let display = Self.display(for: record, in: displays) {
                 return Self.clamp(record.frame, to: display.visibleFrame)
             }
         }
@@ -85,8 +90,13 @@ public struct DetachedPanelMemory: Codable, Sendable, Equatable {
         return Self.clamp(record.frame, to: preferred.visibleFrame)
     }
 
-    /// The same display keeps its identifier; a reconnected one may get a new identifier but keeps its name.
-    private func matches(_ record: Record, _ display: DisplayInfo) -> Bool {
-        record.displayID == display.id || record.displayName == display.name
+    /// The display a record belongs to: the same identifier first. A reconnected display may get a new
+    /// identifier, so the name is used only when no identifier matches and exactly one display has that name.
+    private static func display(for record: Record, in displays: [DisplayInfo]) -> DisplayInfo? {
+        if let byID = displays.first(where: { $0.id == record.displayID }) {
+            return byID
+        }
+        let named = displays.filter { $0.name == record.displayName }
+        return named.count == 1 ? named[0] : nil
     }
 }

@@ -98,9 +98,14 @@ final class PanelController {
     }
 
     func toggle(_ module: ModuleID, from button: NSStatusBarButton) {
-        toggle(.module(module), from: button) {
-            AnyView(ModulePanel(module: module, monitor: self.model.monitor))
-        }
+        // Show, never toggle: the panel of this module may already be open under its item.
+        closeTransient()
+        show(.module(module), from: button, view: AnyView(ModulePanel(module: module, monitor: model.monitor)))
+    }
+
+    /// Writes any floating window position that is still waiting to be saved.
+    func flushDetached() {
+        floating.flush()
     }
 
     func toggleHub(from button: NSStatusBarButton?) {

@@ -103,6 +103,42 @@ struct DetachedPanelFramesTests {
             == CGRect(x: 1500, y: 20, width: 500, height: 600))
     }
 
+    @Test func anExactIdMatchBeatsANameMatch() {
+        var memory = DetachedPanelMemory()
+        let twinA = DisplayInfo(id: 5, name: "Dell", visibleFrame: CGRect(x: 0, y: 0, width: 1920, height: 1000))
+        let twinB = DisplayInfo(id: 6, name: "Dell", visibleFrame: CGRect(x: 1920, y: 0, width: 1920, height: 1000))
+        memory.remember(.cpu, frame: CGRect(x: 100, y: 100, width: 400, height: 400), on: twinA, at: now)
+        memory.remember(
+            .cpu,
+            frame: CGRect(x: 2000, y: 100, width: 500, height: 500),
+            on: twinB,
+            at: now.addingTimeInterval(-5)
+        )
+        let frame = memory.frame(for: .cpu, preferred: twinB, displays: [twinA, twinB])
+        #expect(frame == CGRect(x: 2000, y: 100, width: 500, height: 500))
+    }
+
+    @Test func aNameSharedByTwoDisplaysIsNotAMatch() {
+        var memory = DetachedPanelMemory()
+        let old = DisplayInfo(id: 5, name: "Dell", visibleFrame: CGRect(x: 0, y: 0, width: 1920, height: 1000))
+        memory.remember(.cpu, frame: CGRect(x: 100, y: 100, width: 400, height: 400), on: old, at: now)
+        let twinA = DisplayInfo(id: 7, name: "Dell", visibleFrame: CGRect(x: 0, y: 0, width: 1920, height: 1000))
+        let twinB = DisplayInfo(id: 8, name: "Dell", visibleFrame: CGRect(x: 1920, y: 0, width: 1920, height: 1000))
+        // Neither display can be told apart, so the frame is brought onto the preferred one, not matched by name.
+        let frame = memory.frame(for: .cpu, preferred: twinB, displays: [twinA, twinB])
+        #expect(frame == CGRect(x: 1920, y: 100, width: 400, height: 400))
+    }
+
+    @Test func anUnchangedFrameIsRecognized() {
+        var memory = DetachedPanelMemory()
+        let frame = CGRect(x: 10, y: 10, width: 320, height: 400)
+        #expect(!memory.isCurrent(.cpu, frame: frame, on: main))
+        memory.remember(.cpu, frame: frame, on: main, at: now)
+        #expect(memory.isCurrent(.cpu, frame: frame, on: main))
+        #expect(!memory.isCurrent(.cpu, frame: frame.offsetBy(dx: 1, dy: 0), on: main))
+        #expect(!memory.isCurrent(.memory, frame: frame, on: main))
+    }
+
     @Test func aSmallerScreenShrinksAndMovesTheSavedFrame() {
         var memory = DetachedPanelMemory()
         memory.remember(.cpu, frame: CGRect(x: 2000, y: 100, width: 600, height: 1200), on: main, at: now)
