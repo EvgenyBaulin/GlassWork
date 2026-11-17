@@ -143,13 +143,11 @@ private extension DockFirstRunView {
             VStack(spacing: 10) {
                 Text(loc("Allow Accessibility for the full Dock"))
                     .font(.system(size: 20, weight: .semibold))
-                Text(loc(
-                    "Accessibility shows app badges, lists an app's windows and brings one forward. Without it the Dock works in limited mode: no badges and no window list."
-                ))
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+                Text(loc("Accessibility shows badges and window lists. Without it the Dock runs in limited mode."))
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             HStack(spacing: 8) {
                 if trusted {
@@ -190,15 +188,11 @@ private extension DockFirstRunView {
             VStack(spacing: 10) {
                 Text(loc("Start from a preset?"))
                     .font(.system(size: 20, weight: .semibold))
-                Text(
-                    loc(
-                        "A preset adds widgets and folders. Your apps stay as they are. Change it any time in Settings → Dock."
-                    )
-                )
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+                Text(loc("A preset adds widgets and folders. Your apps stay put."))
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             VStack(spacing: 6) {
                 presetRow(id: nil, title: loc("No Preset"))

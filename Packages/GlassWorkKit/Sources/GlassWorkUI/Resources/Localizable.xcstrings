@@ -891,6 +891,22 @@
         }
       }
     },
+    "A preset adds widgets and folders. Your apps stay put.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A preset adds widgets and folders. Your apps stay put."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Набор добавляет виджеты и папки. Ваши приложения остаются на месте."
+          }
+        }
+      }
+    },
     "About": {
       "localizations": {
         "ru": {
@@ -961,6 +977,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Универсальный доступ нужен, чтобы показывать значки уведомлений, список окон приложения и выводить окно вперёд. Без него Dock работает в ограниченном режиме: без значков и списка окон."
+          }
+        }
+      }
+    },
+    "Accessibility shows badges and window lists. Without it the Dock runs in limited mode.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility shows badges and window lists. Without it the Dock runs in limited mode."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Универсальный доступ показывает значки и списки окон. Без него Dock работает в ограниченном режиме."
           }
         }
       }

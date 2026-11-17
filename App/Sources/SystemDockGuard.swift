@@ -1,5 +1,6 @@
 import AppKit
 import GlassWorkCore
+import GlassWorkUI
 import SwiftUI
 
 /// Gives the system Dock back when GlassWork ends in a way the normal quit path does not cover.

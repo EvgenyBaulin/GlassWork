@@ -298,6 +298,10 @@ final class DockController {
         }
     }
 
+    private func windows(of app: DockApp) -> [DockWindowItem] {
+        runningApp(app).map { DockAppWindows.list(pid: $0.processIdentifier) } ?? []
+    }
+
     private func hideOthers(than kept: NSRunningApplication?) {
         kept?.activate()
         let own = NSRunningApplication.current
@@ -533,7 +537,7 @@ extension DockController {
         )
         actions.trash = trash.actions
         actions.cancelDownload = { [weak self] in self?.folders.cancel($0) }
-        actions.windows = { [weak self] in self?.runningApp($0).map { DockAppWindows.list(pid: $0.processIdentifier) } ?? [] }
+        actions.windows = { [weak self] in self?.windows(of: $0) ?? [] }
         actions.raiseWindow = { [weak self] app, window in
             if let running = self?.runningApp(app) {
                 DockAppWindows.raise(window, of: running)
