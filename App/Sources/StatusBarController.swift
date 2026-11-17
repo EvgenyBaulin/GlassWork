@@ -11,9 +11,15 @@ final class StatusBarController: NSObject {
     private let separator = makeItem(separatorName, length: NSStatusItem.variableLength, position: separatorPosition)
     private var items: [ModuleID: ModuleItem] = [:]
     private var barOrder: [ModuleID] = []
-    private var collapsed = false
-    private var hideTask: Task<Void, Never>?
+    /// Left of `separator`: what is dragged left of it stays hidden when the bar opens.
+    private let alwaysHiddenSeparator = makeItem(
+        alwaysHiddenName,
+        length: NSStatusItem.variableLength,
+        position: alwaysHiddenPosition
+    )
+    private let hidden = HiddenBarDriver()
     private var hiding = HidingSettings()
+    private var appliedLayout: HiddenBarLayout?
     private lazy var seconds = SecondTicker { [weak self] modules in
         for module in modules {
             self?.items[module]?.refresh()
@@ -25,11 +31,15 @@ final class StatusBarController: NSObject {
     private static let collapsedLength: CGFloat = 10000
     private static let hubName = "GlassWorkHub"
     private static let separatorName = "GlassWorkSeparator"
+    private static let alwaysHiddenName = "GlassWorkAlwaysHiddenSeparator"
     /// Positions count from the right edge and macOS keeps its own items at about 170 and up, in the same
     /// units. Starting at the very right puts those items left of the separator, so hiding covers them
     /// without moving anything of theirs. The clock and Control Center stay to the right of everything.
     private static let hubPosition: CGFloat = 0
     private static let separatorPosition: CGFloat = 1
+    /// Far to the left, so nothing starts out left of it: macOS items and modules stay in the hidden section
+    /// until the user ⌘-drags them across.
+    private static let alwaysHiddenPosition: CGFloat = 800
 
     var hubButton: NSStatusBarButton? {
         hub.button
@@ -40,19 +50,27 @@ final class StatusBarController: NSObject {
         super.init()
         configureHub()
         configureSeparator()
+        configureAlwaysHiddenSeparator()
+        hidden.placement = { [weak self] in self?.separatorPlacement() }
+        hidden.onChange = { [weak self] machine in self?.applyLayout(machine) }
     }
 
     func apply(_ settings: AppSettings) {
         let turnedOn = settings.hiding.isEnabled && !hiding.isEnabled
+        let alwaysHiddenOn = settings.hiding.isEnabled && settings.hiding.hasAlwaysHidden
+        let alwaysHiddenTurnedOn = alwaysHiddenOn && !(hiding.isEnabled && hiding.hasAlwaysHidden)
         hiding = settings.hiding
         if turnedOn {
             // macOS forgets the position of an item that was not visible.
             Self.seedPosition(Self.separatorName, Self.separatorPosition)
         }
-        separator.isVisible = settings.hiding.isEnabled
-        if !settings.hiding.isEnabled, collapsed {
-            setCollapsed(false)
+        if alwaysHiddenTurnedOn {
+            Self.seedPosition(Self.alwaysHiddenName, Self.alwaysHiddenPosition)
         }
+        separator.isVisible = settings.hiding.isEnabled
+        alwaysHiddenSeparator.isVisible = alwaysHiddenOn
+        hidden.configure(settings.hiding)
+        model.shortcuts.setActive(.hiddenBar, settings.hiding.isEnabled)
 
         let wanted = settings.modules.filter { $0.id.isAvailable && $0.mode == .menuBar }
         for id in items.keys where !wanted.contains(where: { $0.id == id }) {
@@ -79,9 +97,6 @@ final class StatusBarController: NSObject {
                 items[setting.id] = ModuleItem(setting: setting, numbers: settings.numberStyle, model: model)
             }
         }
-        if turnedOn {
-            setCollapsed(true)
-        }
         seconds.follow(Set(wanted.map(\.id)))
     }
 
@@ -91,7 +106,8 @@ final class StatusBarController: NSObject {
 
     /// Only our visible status items on the island's display can constrain its right wing.
     func leftmostItemX(on screen: NSScreen) -> CGFloat? {
-        let windows = [hub.button?.window, separator.button?.window] + items.values.map(\.window)
+        let windows = [hub.button?.window, separator.button?.window, alwaysHiddenSeparator.button?.window] + items
+            .values.map(\.window)
         return windows.compactMap { window -> CGFloat? in
             guard let window, window.isVisible, window.screen == screen,
                   window.frame.minX >= screen.frame.midX, window.frame.width < screen.frame.width else { return nil }
@@ -101,6 +117,7 @@ final class StatusBarController: NSObject {
 
     func owns(_ window: NSWindow) -> Bool {
         window === hub.button?.window || window === separator.button?.window
+            || window === alwaysHiddenSeparator.button?.window
             || items.values.contains { $0.window === window }
     }
 
@@ -133,9 +150,13 @@ final class StatusBarController: NSObject {
 
     /// Shows hidden items and hides them again after the configured delay.
     func revealHidden() {
-        guard hiding.isEnabled, collapsed else { return }
-        setCollapsed(false)
-        scheduleHide()
+        hidden.revealIfCollapsed()
+    }
+
+    /// The shortcut. Option held, which the shortcut itself does not use, also opens the always-hidden section.
+    func toggleHidden(option: Bool) {
+        model.closePanels()
+        hidden.toggle(option: option)
     }
 
     private func configureHub() {
@@ -152,7 +173,7 @@ final class StatusBarController: NSObject {
         button.action = #selector(separatorClicked)
         button.toolTip = loc("Click to show or hide. Hold ⌘ and drag an item across ‹ to choose.")
         separator.length = Self.separatorLength
-        updateSeparatorImage()
+        button.image = NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)
     }
 
     @objc private func hubClicked() {
@@ -163,38 +184,43 @@ final class StatusBarController: NSObject {
         }
     }
 
+    private func configureAlwaysHiddenSeparator() {
+        guard let button = alwaysHiddenSeparator.button else { return }
+        button.toolTip = loc("Items dragged left of this mark stay hidden. Option-click ‹ to show them.")
+        alwaysHiddenSeparator.length = Self.separatorLength
+        button.image = NSImage(systemSymbolName: "chevron.left.2", accessibilityDescription: nil)
+        alwaysHiddenSeparator.isVisible = false
+    }
+
     @objc private func separatorClicked() {
         model.closePanels()
-        setCollapsed(!collapsed)
-        if !collapsed {
-            scheduleHide()
+        hidden.toggle(option: NSApp.currentEvent?.modifierFlags.contains(.option) == true)
+    }
+
+    private func applyLayout(_ machine: HiddenBarMachine) {
+        let layout = machine.layout
+        guard layout != appliedLayout else { return }
+        appliedLayout = layout
+        separator.length = Self.length(layout.separator)
+        if let alwaysHidden = layout.alwaysHidden {
+            alwaysHiddenSeparator.length = Self.length(alwaysHidden)
         }
-    }
-
-    private func setCollapsed(_ value: Bool) {
-        collapsed = value
-        separator.length = value ? Self.collapsedLength : Self.separatorLength
-        updateSeparatorImage()
-    }
-
-    private func updateSeparatorImage() {
-        let name = collapsed ? "chevron.left" : "chevron.right"
+        let name = machine.isCollapsed ? "chevron.left" : "chevron.right"
         separator.button?.image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
     }
 
-    private func scheduleHide() {
-        hideTask?.cancel()
-        let delay = hiding.autoHideSeconds
-        hideTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(delay))
-            guard let self, !Task.isCancelled else { return }
-            // Collapsing now would pull the bar out from under an item being ⌘-dragged.
-            if NSEvent.modifierFlags.contains(.command) {
-                scheduleHide()
-            } else {
-                setCollapsed(true)
-            }
-        }
+    private static func length(_ length: HiddenBarSeparatorLength) -> CGFloat {
+        length == .wide ? collapsedLength : separatorLength
+    }
+
+    private func separatorPlacement() -> HiddenBarDriver.Placement? {
+        guard let window = separator.button?.window, let screen = window.screen ?? NSScreen.main else { return nil }
+        let barHeight = max(NSStatusBar.system.thickness, screen.frame.maxY - screen.visibleFrame.maxY)
+        return HiddenBarDriver.Placement(
+            separatorMaxX: window.frame.maxX,
+            screenMaxY: screen.frame.maxY,
+            barHeight: barHeight
+        )
     }
 
     private func showMenu() {

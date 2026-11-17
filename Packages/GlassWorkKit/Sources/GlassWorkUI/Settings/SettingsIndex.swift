@@ -430,6 +430,21 @@ extension SettingsIndex {
                 .menuBar,
                 ["Menu Bar", "Hiding"]
             ),
+            page(
+                "hiding.alwaysHidden",
+                "Always-hidden section",
+                "Всегда скрытая секция",
+                .menuBar,
+                ["Menu Bar", "Hiding"]
+            ),
+            page("hiding.hover", "Show on hover", "Показывать при наведении", .menuBar, ["Menu Bar", "Hiding"]),
+            page(
+                "shortcut.hiddenBar",
+                "Show hidden menu bar items",
+                "Показать скрытые значки строки меню",
+                .shortcuts,
+                ["Shortcuts"]
+            ),
             page("menuBar.resetOrder", "Reset order", "Сбросить порядок", .menuBar, ["Menu Bar"]),
             page("menuBar.defaults", "Restore defaults", "Вернуть по умолчанию", .menuBar, ["Menu Bar"]),
             page("menuBar.allHub", "All to Hub", "Всё в Хаб", .menuBar, ["Menu Bar"]),

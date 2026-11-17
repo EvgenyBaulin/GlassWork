@@ -643,6 +643,38 @@
         }
       }
     },
+    "0.3 s": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0.3 s"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0,3 с"
+          }
+        }
+      }
+    },
+    "0.6 s": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0.6 s"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0,6 с"
+          }
+        }
+      }
+    },
     "1 file": {
       "localizations": {
         "en": {
@@ -1351,6 +1383,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Уже в списке"
+          }
+        }
+      }
+    },
+    "Always-hidden section": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always-hidden section"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всегда скрытая секция"
           }
         }
       }
@@ -3497,6 +3545,22 @@
         }
       }
     },
+    "Hover delay": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hover delay"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задержка наведения"
+          }
+        }
+      }
+    },
     "Hub": {
       "localizations": {
         "ru": {
@@ -3703,6 +3767,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Островок"
+          }
+        }
+      }
+    },
+    "Items dragged left of this mark stay hidden. Option-click ‹ to show them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Items dragged left of this mark stay hidden. Option-click ‹ to show them."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Всё, что перетащено левее этой метки, остаётся скрытым. Чтобы показать, щёлкните ‹ с ⌥."
           }
         }
       }
@@ -6571,6 +6651,22 @@
         }
       }
     },
+    "Show hidden menu bar items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show hidden menu bar items"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать скрытые значки строки меню"
+          }
+        }
+      }
+    },
     "Show modules": {
       "localizations": {
         "en": {
@@ -6583,6 +6679,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Показать модули"
+          }
+        }
+      }
+    },
+    "Show on hover": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show on hover"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показывать при наведении"
           }
         }
       }
@@ -8269,6 +8381,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Зарезервированная"
+          }
+        }
+      }
+    },
+    "With the always-hidden section on, items you ⌘-drag left of the second mark stay hidden when ‹ opens. Option-click ‹, or press the shortcut with Option held, to show them too.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With the always-hidden section on, items you ⌘-drag left of the second mark stay hidden when ‹ opens. Option-click ‹, or press the shortcut with Option held, to show them too."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "С включённой всегда скрытой секцией значки, которые вы перетащили с ⌘ левее второй метки, остаются скрытыми при открытии ‹. Щёлкните ‹ с ⌥ или нажмите сочетание с ⌥, чтобы показать и их."
           }
         }
       }

@@ -58,8 +58,23 @@ public struct ModuleSettings: Codable, Sendable, Equatable, Identifiable {
 public struct HidingSettings: Codable, Sendable, Equatable {
     public var isEnabled = false
     public var autoHideSeconds = 10
+    /// A second separator to the left of the first. What is dragged left of it stays hidden when the bar opens.
+    public var hasAlwaysHidden = false
+    /// Opens the hidden items when the pointer rests at the separator.
+    public var showsOnHover = false
+    public var hoverDelay = HiddenBarHoverDelay.medium
 
     public init() {}
+
+    /// Missing keys keep their defaults, so settings from an older version still load.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? false
+        autoHideSeconds = try container.decodeIfPresent(Int.self, forKey: .autoHideSeconds) ?? 10
+        hasAlwaysHidden = try container.decodeIfPresent(Bool.self, forKey: .hasAlwaysHidden) ?? false
+        showsOnHover = try container.decodeIfPresent(Bool.self, forKey: .showsOnHover) ?? false
+        hoverDelay = (try? container.decodeIfPresent(HiddenBarHoverDelay.self, forKey: .hoverDelay)) ?? .medium
+    }
 }
 
 /// How the Hub lays out its tiles.
