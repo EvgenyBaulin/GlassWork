@@ -52,6 +52,7 @@ public final class WeatherStore {
         guard new != settings else { return }
         let placesChanged = new.places != settings.places || new.useCurrentLocation != settings.useCurrentLocation
         settings = new
+        schedule.setInterval(TimeInterval(max(new.refreshMinutes, 1)) * 60)
         if placesChanged {
             schedule.expire()
         }

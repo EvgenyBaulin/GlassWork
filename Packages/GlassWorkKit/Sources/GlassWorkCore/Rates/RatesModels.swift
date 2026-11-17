@@ -68,6 +68,9 @@ public struct RatesSettings: Codable, Sendable, Equatable {
     public var barPair: RatePair?
     /// Draws the day change in the bar's own color instead of green and red.
     public var isMonochrome = false
+    /// Fixed decimals for every rate; nil keeps the automatic rule (big numbers lose theirs).
+    public var decimalPlaces: Int?
+    public static let decimalChoices = [2, 4]
 
     public init() {}
 
@@ -76,7 +79,7 @@ public struct RatesSettings: Codable, Sendable, Equatable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case pairs, barPair, isMonochrome
+        case pairs, barPair, isMonochrome, decimalPlaces
     }
 
     public init(from decoder: Decoder) throws {
@@ -84,6 +87,7 @@ public struct RatesSettings: Codable, Sendable, Equatable {
         pairs = try container.decodeIfPresent([RatePair].self, forKey: .pairs) ?? Self.defaultPairs
         barPair = try container.decodeIfPresent(RatePair.self, forKey: .barPair)
         isMonochrome = try container.decodeIfPresent(Bool.self, forKey: .isMonochrome) ?? false
+        decimalPlaces = try container.decodeIfPresent(Int.self, forKey: .decimalPlaces)
     }
 }
 
@@ -153,13 +157,18 @@ public struct RatesSnapshot: Codable, Sendable, Equatable {
 
 public extension Format {
     /// Big numbers lose their decimals, small ones keep four: 68,420 · 81.42 · 1.1558.
-    static func exchangeRate(_ value: Double, locale: Locale = .current) -> String {
-        value.formatted(.number.precision(.fractionLength(rateDigits(value))).locale(locale))
+    static func exchangeRate(_ value: Double, digits: Int? = nil, locale: Locale = .current) -> String {
+        value.formatted(.number.precision(.fractionLength(digits ?? rateDigits(value))).locale(locale))
     }
 
     /// Uses the digits of the rate itself, so a change lines up with the value above it.
-    static func exchangeRateChange(_ change: Double, of value: Double, locale: Locale = .current) -> String {
-        abs(change).formatted(.number.precision(.fractionLength(rateDigits(value))).locale(locale))
+    static func exchangeRateChange(
+        _ change: Double,
+        of value: Double,
+        digits: Int? = nil,
+        locale: Locale = .current
+    ) -> String {
+        abs(change).formatted(.number.precision(.fractionLength(digits ?? rateDigits(value))).locale(locale))
     }
 
     static func signedPercent(_ share: Double, locale: Locale = .current) -> String {

@@ -296,6 +296,18 @@ struct TimerDurationTests {
         #expect(TimerDuration.parse("1:02:03") == 3723)
     }
 
+    @Test func unitsMeanHoursMinutesSeconds() {
+        #expect(TimerDuration.parse("1h 5m") == 3900)
+        #expect(TimerDuration.parse("2h") == 7200)
+        #expect(TimerDuration.parse("90s") == 90)
+        #expect(TimerDuration.parse("1H5M30S") == 3930)
+        #expect(TimerDuration.parse("25 min") == 1500)
+        #expect(TimerDuration.parse("24h") == 86400)
+        #expect(TimerDuration.parse("25h") == nil)
+        #expect(TimerDuration.parse("h") == nil)
+        #expect(TimerDuration.parse("5 x") == nil)
+    }
+
     @Test func refusesWhatIsNotADuration() {
         for text in ["", "0", "tea", "1:60", "1:", ":30", "1:2:3:4", "-5", "1.5", "1441", "24:00:01"] {
             #expect(TimerDuration.parse(text) == nil, "\(text)")

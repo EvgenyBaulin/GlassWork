@@ -52,6 +52,65 @@ struct DatesTests {
         #expect(data.sortedDates(from: now).map(\.title) == ["Soon", "Far", "Past"])
     }
 
+    private var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }
+
+    private func day(_ year: Int, _ month: Int, _ day: Int) -> Date {
+        calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 12))!
+    }
+
+    @Test func aYearlyDateComesBackNextYear() {
+        let birthday = ImportantDate(title: "B", date: day(2020, 3, 10), repeats: .yearly)
+        let next = birthday.nextOccurrence(from: day(2026, 5, 1), calendar: calendar)
+        #expect(calendar.dateComponents([.year, .month, .day], from: next) == DateComponents(
+            year: 2027,
+            month: 3,
+            day: 10
+        ))
+        #expect(birthday.daysLeft(from: day(2026, 3, 9), calendar: calendar) == 1)
+        #expect(birthday.daysLeft(from: day(2026, 3, 10), calendar: calendar) == 0)
+    }
+
+    @Test func aMonthlyDateComesBackNextMonth() {
+        let rent = ImportantDate(title: "R", date: day(2026, 1, 15), repeats: .monthly)
+        #expect(rent.daysLeft(from: day(2026, 5, 10), calendar: calendar) == 5)
+        #expect(rent.daysLeft(from: day(2026, 5, 20), calendar: calendar) == 26)
+    }
+
+    @Test func aDateAheadAndOneThatDoesNotRepeatStayPut() {
+        let ahead = ImportantDate(title: "A", date: day(2030, 1, 1), repeats: .yearly)
+        #expect(ahead.nextOccurrence(from: day(2026, 5, 1), calendar: calendar) == ahead.date)
+        let past = ImportantDate(title: "P", date: day(2026, 1, 1))
+        #expect(past.daysLeft(from: day(2026, 1, 11), calendar: calendar) == -10)
+    }
+
+    @Test func oldSavedDatesDecodeWithoutRepeat() throws {
+        let json = #"{"id":"6C8C6C1E-0000-4000-8000-000000000001","title":"Old","date":0}"#
+        let item = try JSONDecoder().decode(ImportantDate.self, from: Data(json.utf8))
+        #expect(item.repeats == .none)
+        let saved = try JSONEncoder().encode(ImportantDate(title: "N", date: .now, repeats: .monthly))
+        #expect(try JSONDecoder().decode(ImportantDate.self, from: saved).repeats == .monthly)
+    }
+
+    @Test func movesCitiesUpAndDown() {
+        var data = EverydayData()
+        data.cities = [
+            WorldCity(name: "A", timeZone: "Europe/Paris"),
+            WorldCity(name: "B", timeZone: "Asia/Tokyo"),
+            WorldCity(name: "C", timeZone: "America/New_York"),
+        ]
+        data.moveCity("America/New_York", by: -1)
+        #expect(data.cities.map(\.name) == ["A", "C", "B"])
+        data.moveCity("Europe/Paris", by: -1)
+        data.moveCity("Asia/Tokyo", by: 1)
+        #expect(data.cities.map(\.name) == ["A", "C", "B"])
+        data.moveCity("Asia/Tokyo", by: -2)
+        #expect(data.cities.map(\.name) == ["B", "A", "C"])
+    }
+
     @Test func keepsRecentColorsUnique() {
         var data = EverydayData()
         data.addColor("#111111")

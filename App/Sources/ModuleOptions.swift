@@ -83,9 +83,29 @@ private struct WeatherOptions: View {
         )
     }
 
+    private var refreshMinutes: Binding<Int> {
+        Binding(
+            get: { store.settings.weather.refreshMinutes },
+            set: { value in store.update { $0.weather.refreshMinutes = value } }
+        )
+    }
+
+    private func intervalTitle(_ minutes: Int) -> String {
+        switch minutes {
+        case 15: loc("15 minutes")
+        case 30: loc("30 minutes")
+        case 60: loc("1 hour")
+        case 180: loc("3 hours")
+        default: loc("\(minutes) minutes")
+        }
+    }
+
     var body: some View {
         Section(loc("Weather")) {
             Toggle(loc("Use current location"), isOn: useLocation)
+            Picker(loc("Refresh every"), selection: refreshMinutes) {
+                ForEach(WeatherSettings.refreshChoices, id: \.self) { Text(intervalTitle($0)).tag($0) }
+            }
             Text(loc("macOS asks for access when this is turned on. Cities are managed in the panel."))
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -103,9 +123,21 @@ private struct RatesOptions: View {
         )
     }
 
+    /// Zero stands for Auto, which a picker can tag but the settings keep as nil.
+    private var decimalPlaces: Binding<Int> {
+        Binding(
+            get: { store.settings.rates.decimalPlaces ?? 0 },
+            set: { value in store.update { $0.rates.decimalPlaces = value == 0 ? nil : value } }
+        )
+    }
+
     var body: some View {
         Section(loc("Rates")) {
             Toggle(loc("Monochrome day change in the menu bar"), isOn: isMonochrome)
+            Picker(loc("Decimal places"), selection: decimalPlaces) {
+                Text(loc("Auto")).tag(0)
+                ForEach(RatesSettings.decimalChoices, id: \.self) { Text("\($0)").tag($0) }
+            }
         }
     }
 }
@@ -140,6 +172,9 @@ private struct ClipboardOptions: View {
             Stepper(value: binding(\.retentionDays), in: 1 ... 365) {
                 Text(loc("Keep for \(store.settings.clipboard.retentionDays) days"))
             }
+            Picker(loc("History size"), selection: binding(\.historyLimit)) {
+                ForEach(ClipboardSettings.historyLimits, id: \.self) { Text(loc("\($0) items")).tag($0) }
+            }
             Toggle(loc("Show the last item in the menu bar"), isOn: binding(\.showsLastItem))
             Text(loc("Stored on this Mac, not encrypted. Pinned items are kept until you delete them."))
                 .font(.caption)
@@ -147,6 +182,7 @@ private struct ClipboardOptions: View {
         }
         Section(loc("Paste")) {
             Toggle(loc("Paste on click"), isOn: pasteOnClick)
+            Toggle(loc("Paste as plain text by default"), isOn: binding(\.pastesPlainByDefault))
             if store.settings.clipboard.pasteOnClick, !Accessibility.isTrusted {
                 LabeledContent(loc("Needs Accessibility")) {
                     Button(loc("Open System Settings")) { Accessibility.openSettings() }

@@ -55,23 +55,55 @@ public struct FinishedTimer: Codable, Sendable, Equatable, Identifiable {
     }
 }
 
+/// How a counted-down date comes back.
+public enum DateRepeat: String, Codable, Sendable, CaseIterable {
+    case none, yearly, monthly
+}
+
 /// A date to count down to.
 public struct ImportantDate: Codable, Sendable, Equatable, Identifiable {
     public var id = UUID()
     public var title: String
     public var date: Date
+    public var repeats = DateRepeat.none
 
-    public init(title: String, date: Date) {
+    public init(title: String, date: Date, repeats: DateRepeat = .none) {
         self.title = title
         self.date = date
+        self.repeats = repeats
     }
 
-    /// Calendar days left; today counts as zero.
+    private enum CodingKeys: String, CodingKey {
+        case id, title, date, repeats
+    }
+
+    /// Saved data from before repetition existed has no `repeats`.
+    public init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        id = try values.decode(UUID.self, forKey: .id)
+        title = try values.decode(String.self, forKey: .title)
+        date = try values.decode(Date.self, forKey: .date)
+        repeats = try values.decodeIfPresent(DateRepeat.self, forKey: .repeats) ?? .none
+    }
+
+    /// The date itself while it is still ahead (or does not repeat); otherwise its next yearly or monthly turn.
+    public func nextOccurrence(from now: Date, calendar: Calendar = .current) -> Date {
+        let today = calendar.startOfDay(for: now)
+        guard repeats != .none, calendar.startOfDay(for: date) < today else { return date }
+        var parts = calendar.dateComponents([.month, .day], from: date)
+        if repeats == .monthly {
+            parts.month = nil
+        }
+        let before = today.addingTimeInterval(-1)
+        return calendar.nextDate(after: before, matching: parts, matchingPolicy: .nextTime) ?? date
+    }
+
+    /// Calendar days left to the next occurrence; today counts as zero.
     public func daysLeft(from now: Date, calendar: Calendar = .current) -> Int {
         calendar.dateComponents(
             [.day],
             from: calendar.startOfDay(for: now),
-            to: calendar.startOfDay(for: date)
+            to: calendar.startOfDay(for: nextOccurrence(from: now, calendar: calendar))
         ).day ?? 0
     }
 }
@@ -165,6 +197,14 @@ public struct EverydayData: Codable, Sendable, Equatable {
         colors.removeAll { $0 == hex }
         colors.insert(hex, at: 0)
         colors = Array(colors.prefix(limit))
+    }
+
+    /// Moves a city one place up (`-1`) or down (`1`). The first city is the one the menu bar shows.
+    public mutating func moveCity(_ id: WorldCity.ID, by step: Int) {
+        guard let index = cities.firstIndex(where: { $0.id == id }) else { return }
+        let target = index + step
+        guard cities.indices.contains(target) else { return }
+        cities.insert(cities.remove(at: index), at: target)
     }
 
     /// Soonest first; dates already gone stay at the end.

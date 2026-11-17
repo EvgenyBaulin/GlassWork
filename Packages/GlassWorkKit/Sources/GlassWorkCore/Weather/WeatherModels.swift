@@ -28,17 +28,22 @@ public struct WeatherSettings: Codable, Sendable, Equatable {
     public var places: [WeatherPlace] = []
     /// Off until the user turns it on; macOS is not asked for the position before that.
     public var useCurrentLocation = false
+    /// Minutes between forecast downloads while something on screen needs them.
+    public var refreshMinutes = WeatherSettings.defaultRefreshMinutes
+    public static let defaultRefreshMinutes = 30
+    public static let refreshChoices = [15, 30, 60, 180]
 
     public init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case places, useCurrentLocation
+        case places, useCurrentLocation, refreshMinutes
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         places = try container.decodeIfPresent([WeatherPlace].self, forKey: .places) ?? []
         useCurrentLocation = try container.decodeIfPresent(Bool.self, forKey: .useCurrentLocation) ?? false
+        refreshMinutes = try container.decodeIfPresent(Int.self, forKey: .refreshMinutes) ?? Self.defaultRefreshMinutes
     }
 }
 

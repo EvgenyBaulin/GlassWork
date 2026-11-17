@@ -267,6 +267,22 @@
         }
       }
     },
+    "%lld minutes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld minutes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld мин"
+          }
+        }
+      }
+    },
     "%lld of %lld done": {
       "localizations": {
         "en": {
@@ -551,12 +567,60 @@
         }
       }
     },
+    "15 minutes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 minutes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 минут"
+          }
+        }
+      }
+    },
     "24 h": {
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
             "value": "24 ч"
+          }
+        }
+      }
+    },
+    "3 hours": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 hours"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 часа"
+          }
+        }
+      }
+    },
+    "30 minutes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 minutes"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 минут"
           }
         }
       }
@@ -1235,6 +1299,22 @@
         }
       }
     },
+    "Click to paste plain text · ⌥-click keeps formatting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click to paste plain text · ⌥-click keeps formatting"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клик вставляет простой текст · ⌥-клик сохраняет форматирование"
+          }
+        }
+      }
+    },
     "Completed": {
       "localizations": {
         "en": {
@@ -1649,6 +1729,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Осталось дней: %lld"
+          }
+        }
+      }
+    },
+    "Decimal places": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decimal places"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знаков после запятой"
           }
         }
       }
@@ -2537,6 +2633,22 @@
         }
       }
     },
+    "History size": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "History size"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Размер истории"
+          }
+        }
+      }
+    },
     "Hub": {
       "localizations": {
         "ru": {
@@ -3319,6 +3431,22 @@
         }
       }
     },
+    "Monthly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monthly"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каждый месяц"
+          }
+        }
+      }
+    },
     "Moon": {
       "localizations": {
         "ru": {
@@ -3345,6 +3473,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Москва"
+          }
+        }
+      }
+    },
+    "Move down": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move down"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вниз"
+          }
+        }
+      }
+    },
+    "Move up": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move up"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вверх"
           }
         }
       }
@@ -3959,6 +4119,22 @@
         }
       }
     },
+    "Or type 25, 1:30 or 1h 5m": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Or type 25, 1:30 or 1h 5m"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Или введите 25, 1:30 или 1h 5m"
+          }
+        }
+      }
+    },
     "Or type min or mm:ss": {
       "localizations": {
         "en": {
@@ -4077,6 +4253,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Вставка"
+          }
+        }
+      }
+    },
+    "Paste as plain text by default": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste as plain text by default"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставлять как простой текст по умолчанию"
           }
         }
       }
@@ -4511,6 +4703,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Отрисовка"
+          }
+        }
+      }
+    },
+    "Repeat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeat"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повтор"
           }
         }
       }
@@ -5989,6 +6197,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Год в точках"
+          }
+        }
+      }
+    },
+    "Yearly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yearly"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Каждый год"
           }
         }
       }

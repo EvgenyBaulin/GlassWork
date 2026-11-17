@@ -88,7 +88,7 @@ extension ItemContent {
         let quote = store.snapshot.quote(for: pair)
         let isOld = store.isStale || store.isUnavailable(pair)
         var content = ItemContent(
-            figure: quote.map { Format.exchangeRate($0.value) } ?? "—",
+            figure: quote.map { Format.exchangeRate($0.value, digits: store.settings.decimalPlaces) } ?? "—",
             template: "\(pair.base) \(pair.source == .coinGecko ? "888,888" : "888.88") ↑ 99.9%"
         )
         content.showsSymbol = false
