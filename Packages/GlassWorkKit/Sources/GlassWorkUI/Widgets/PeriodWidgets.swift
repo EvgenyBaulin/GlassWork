@@ -240,7 +240,7 @@ struct WeekendWidget: View {
 
     /// One dot per day of this week: today ringed, weekend days filled.
     private var dayDots: some View {
-        let calendar = Calendar.current
+        let calendar = RegionalFormat.calendar
         let week = calendar.dateInterval(of: .weekOfYear, for: context.now)?.start ?? context.now
         return HStack(spacing: 4) {
             ForEach(0 ..< 7, id: \.self) { offset in
@@ -296,7 +296,7 @@ struct WeekendWidget: View {
                     Capsule().fill(tint).frame(width: 3, height: 30)
                     VStack(alignment: .leading, spacing: 0) {
                         Text(event.title).font(.system(size: 13, weight: .semibold)).lineLimit(1)
-                        Text(event.start.formatted(.dateTime.weekday(.abbreviated).hour().minute()))
+                        Text(event.start.formatted(.dateTime.weekday(.abbreviated).hour().minute().regional))
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
                     }
@@ -365,7 +365,7 @@ struct StopwatchWidget: View {
     /// "Running since 4:08 PM", or just the state.
     private var statusText: String {
         guard let started = stopwatch.startedAt else { return state }
-        return loc("Running since \(started.formatted(date: .omitted, time: .shortened))")
+        return loc("Running since \(started.timeText)")
     }
 
     var body: some View {

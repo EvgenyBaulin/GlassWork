@@ -56,7 +56,7 @@ private struct DockFilePreviewCard: View {
                 Text(file.name).font(.system(size: 13, weight: .semibold)).lineLimit(1).truncationMode(.middle)
                 fact(loc("Size"), Format.bytes(Double(file.size), style: .precise))
             }
-            fact(loc("Added"), file.added.formatted(date: .abbreviated, time: .shortened))
+            fact(loc("Added"), file.added.dateTimeText)
         }
         .padding(12)
         .frame(width: file.isFolder ? 240 : 324, alignment: .leading)

@@ -139,6 +139,7 @@ struct SnapshotProvider: TimelineProvider {
     private func readSnapshot() -> WidgetSnapshot? {
         let snapshot = store.read(WidgetSnapshot.self, for: WidgetSnapshot.key)
         Format.temperatureUnit = snapshot?.temperatureUnit ?? .system
+        RegionalFormat.apply(snapshot?.regional ?? RegionalSettings())
         return snapshot
     }
 }
@@ -157,9 +158,15 @@ struct KindView: View {
         }
     }
 
+    /// Entries are drawn after they are read, so the clock and week start are set again for this one.
+    private func withRegionalFormat(_ snapshot: WidgetSnapshot?) -> WidgetSnapshot? {
+        RegionalFormat.apply(snapshot?.regional ?? RegionalSettings())
+        return snapshot
+    }
+
     var body: some View {
         Group {
-            if let snapshot = entry.snapshot {
+            if let snapshot = withRegionalFormat(entry.snapshot) {
                 WidgetFace(kind: kind, size: size, snapshot: snapshot, now: entry.date, showsSeconds: false)
             } else {
                 Text(loc("Open GlassWork to start")).foregroundStyle(.secondary)

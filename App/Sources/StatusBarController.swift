@@ -266,9 +266,9 @@ final class StatusBarController: NSObject {
     /// The time alone for today, with the day added when the pause runs past midnight.
     private static func pauseEnd(_ date: Date) -> String {
         if Calendar.current.isDateInToday(date) {
-            return date.formatted(date: .omitted, time: .shortened)
+            return date.timeText
         }
-        return date.formatted(date: .abbreviated, time: .shortened)
+        return date.dateTimeText
     }
 
     @objc private func pauseUpdates(_ sender: NSMenuItem) {

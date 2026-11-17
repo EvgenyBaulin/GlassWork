@@ -25,8 +25,8 @@ public enum AppHistoryRange: CaseIterable, Sendable {
     /// A week's peak needs its day.
     func text(_ date: Date) -> String {
         switch self {
-        case .hour, .day: date.formatted(date: .omitted, time: .shortened)
-        case .week: date.formatted(.dateTime.weekday(.abbreviated).hour().minute())
+        case .hour, .day: date.timeText
+        case .week: date.formatted(.dateTime.weekday(.abbreviated).hour().minute().regional)
         }
     }
 }
@@ -56,7 +56,7 @@ private struct AppHistoryCard: View {
                 InteractiveChart(
                     series: [series],
                     height: 140,
-                    tooltipDate: Date.FormatStyle(date: .abbreviated, time: .shortened),
+                    tooltipDate: Date.FormatStyle(date: .abbreviated, time: .shortened).regional,
                     initialHover: hover
                 )
             } else {

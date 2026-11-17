@@ -73,7 +73,7 @@ struct VPNPanel: View {
     @ViewBuilder
     private func details(_ reading: VPNReading) -> some View {
         if let since {
-            let time = since.formatted(date: .omitted, time: .shortened)
+            let time = since.timeText
             InfoRow(title: loc("Since"), value: "\(time) · \(CompactDuration.format(now.timeIntervalSince(since)))")
         }
         if let tunnel = reading.tunnels.first {

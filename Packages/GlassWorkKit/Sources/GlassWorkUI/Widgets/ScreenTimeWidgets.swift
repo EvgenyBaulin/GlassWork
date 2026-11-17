@@ -63,7 +63,7 @@ struct ScreenHourChart: View {
                     format: { WidgetDuration.short($0) }
                 )],
                 height: height,
-                tooltipDate: Date.FormatStyle(date: .omitted, time: .shortened),
+                tooltipDate: Date.FormatStyle(date: .omitted, time: .shortened).regional,
                 style: .bars(unit: .hour),
                 initialHover: hover
             )

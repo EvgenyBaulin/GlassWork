@@ -26,25 +26,27 @@ struct ClockPlace: Identifiable {
     }
 
     func timeText(at date: Date) -> String {
-        date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: zone))
+        date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, timeZone: zone).regional)
     }
 
     /// The time without AM or PM: "3:47", or "15:47" where the Mac shows 24 hours.
     func digits(at date: Date) -> String {
-        date.formatted(Date.FormatStyle(timeZone: zone).hour(.defaultDigits(amPM: .omitted)).minute(.twoDigits))
+        date
+            .formatted(Date.FormatStyle(timeZone: zone).hour(.defaultDigits(amPM: .omitted)).minute(.twoDigits)
+                .regional)
     }
 
     func hourText(at date: Date) -> String {
-        date.formatted(Date.FormatStyle(timeZone: zone).hour(.defaultDigits(amPM: .omitted)))
+        date.formatted(Date.FormatStyle(timeZone: zone).hour(.defaultDigits(amPM: .omitted)).regional)
     }
 
     func minuteText(at date: Date) -> String {
-        date.formatted(Date.FormatStyle(timeZone: zone).minute(.twoDigits))
+        date.formatted(Date.FormatStyle(timeZone: zone).minute(.twoDigits).regional)
     }
 
     /// "AM" or "PM"; nil where the Mac shows 24 hours.
     func dayPeriod(at date: Date) -> String? {
-        let format = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: .current) ?? ""
+        let format = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: RegionalFormat.locale) ?? ""
         guard format.contains("a") else { return nil }
         let formatter = DateFormatter()
         formatter.timeZone = zone

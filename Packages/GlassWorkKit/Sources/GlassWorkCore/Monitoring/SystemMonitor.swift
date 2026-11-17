@@ -323,6 +323,7 @@ public final class SystemMonitor {
     }
 
     private func fillDetails(of snapshot: inout WidgetSnapshot, for kinds: Set<WidgetKind>, at date: Date) {
+        snapshot.regional = RegionalFormat.settings
         if kinds.contains(.fans) {
             let since = date.addingTimeInterval(-600)
             snapshot.fanHistory = fanHistories.mapValues { history in

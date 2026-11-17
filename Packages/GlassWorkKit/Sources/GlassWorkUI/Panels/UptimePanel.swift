@@ -19,7 +19,7 @@ struct UptimePanelContent: View {
     var body: some View {
         PanelFrame(module: .uptime, subtitle: "") {
             BigFigure(text: CompactDuration.format(now.timeIntervalSince(boot)))
-            InfoRow(title: loc("Started"), value: boot.formatted(date: .abbreviated, time: .shortened))
+            InfoRow(title: loc("Started"), value: boot.dateTimeText)
             InfoRow(title: loc("Last sleep"), value: stamp(history.lastSleep))
             InfoRow(title: loc("Last wake"), value: stamp(history.lastWake))
             InfoRow(title: loc("Sleeps since start"), value: "\(history.sleepCount)")
@@ -38,12 +38,12 @@ struct UptimePanelContent: View {
 
     private func stamp(_ date: Date?) -> String {
         guard let date else { return "—" }
-        return date.formatted(date: .abbreviated, time: .shortened)
+        return date.dateTimeText
     }
 
     private func range(_ session: AwakeSession) -> String {
-        let start = session.start.formatted(date: .omitted, time: .shortened)
-        let end = session.end.map { $0.formatted(date: .omitted, time: .shortened) } ?? loc("now")
+        let start = session.start.timeText
+        let end = session.end.map(\.timeText) ?? loc("now")
         return "\(start) – \(end)"
     }
 }

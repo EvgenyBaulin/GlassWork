@@ -6,7 +6,7 @@ import SwiftUI
 struct IslandPresentation {
     let event: IslandEvent
     let now: Date
-    var locale = Locale.current
+    var locale = RegionalFormat.locale
     var timeZone = TimeZone.current
 
     var tint: Color {

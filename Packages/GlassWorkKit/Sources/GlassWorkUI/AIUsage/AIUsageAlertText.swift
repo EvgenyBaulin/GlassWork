@@ -14,7 +14,7 @@ public enum AIUsageAlertText {
         }
         guard let reset = alert.resetsAt, reset > now else { return (title, "") }
         let when = alert.kind == .fiveHour
-            ? reset.formatted(date: .omitted, time: .shortened)
+            ? reset.timeText
             : AIWindowText.resetDay(reset, from: now)
         return (title, loc("Resets \(when)"))
     }

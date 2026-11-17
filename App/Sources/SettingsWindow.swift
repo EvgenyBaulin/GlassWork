@@ -480,7 +480,7 @@ struct GeneralPane: View {
                     Button(loc("Reset all…"), role: .destructive, action: confirmReset)
                 }
                 ForEach(store.backups.list()) { backup in
-                    LabeledContent(backup.date.formatted(date: .abbreviated, time: .shortened)) {
+                    LabeledContent(backup.date.dateTimeText) {
                         Button(loc("Restore")) {
                             if let settings = store.backups.load(backup) {
                                 store.replace(with: settings)

@@ -144,7 +144,7 @@ struct WeatherWidget: View {
     }
 
     private func hourLabel(_ date: Date, in report: WeatherReport) -> String {
-        var style = Date.FormatStyle(date: .omitted, time: .omitted).hour(.defaultDigits(amPM: .abbreviated))
+        var style = Date.FormatStyle(date: .omitted, time: .omitted).hour(.defaultDigits(amPM: .abbreviated)).regional
         style.timeZone = report.zone
         return date.formatted(style)
     }

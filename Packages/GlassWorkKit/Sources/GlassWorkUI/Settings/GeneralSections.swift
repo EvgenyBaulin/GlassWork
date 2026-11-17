@@ -75,6 +75,6 @@ public struct AutoUpdateSection: View {
     }
 
     private static func text(_ date: Date) -> String {
-        date.formatted(date: .abbreviated, time: .shortened)
+        date.dateTimeText
     }
 }

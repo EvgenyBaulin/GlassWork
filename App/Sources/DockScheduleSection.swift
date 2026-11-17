@@ -72,6 +72,7 @@ private struct DockRuleRow: View {
                     get: { time },
                     set: { value in edit { $0.minute = Self.minute(of: value) } }
                 ), displayedComponents: .hourAndMinute)
+                    .environment(\.locale, RegionalFormat.locale)
                 Spacer()
                 Button(role: .destructive) { change(nil) } label: { Image(systemName: "minus.circle") }
                     .buttonStyle(.borderless)
@@ -116,7 +117,7 @@ private struct DockRuleRow: View {
 
     /// The week as the owner's calendar starts it.
     private static var weekOrder: [Int] {
-        let first = Calendar.current.firstWeekday
+        let first = RegionalFormat.calendar.firstWeekday
         return (0 ..< 7).map { (first - 1 + $0) % 7 + 1 }
     }
 

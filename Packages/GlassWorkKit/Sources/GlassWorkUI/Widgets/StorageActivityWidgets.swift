@@ -361,7 +361,7 @@ struct TimeMachineWidget: View {
             WidgetSection(title: loc("Recent backups"))
             ForEach(status.backups.reversed().prefix(limit), id: \.self) { date in
                 Label(
-                    date.formatted(.dateTime.weekday(.abbreviated).hour().minute()),
+                    date.formatted(.dateTime.weekday(.abbreviated).hour().minute().regional),
                     systemImage: "checkmark.circle.fill"
                 )
                 .font(.system(size: 12))

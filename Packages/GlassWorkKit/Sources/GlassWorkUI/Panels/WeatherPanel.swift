@@ -45,8 +45,8 @@ extension Format {
     /// When data is from. The time alone would make yesterday's forecast look like today's.
     static func dataTime(_ date: Date, now: Date) -> String {
         Calendar.current.isDate(date, inSameDayAs: now)
-            ? date.formatted(date: .omitted, time: .shortened)
-            : date.formatted(.dateTime.weekday().day().month().hour().minute())
+            ? date.timeText
+            : date.formatted(.dateTime.weekday().day().month().hour().minute().regional)
     }
 
     static func windSpeed(_ metresPerSecond: Double) -> String {
@@ -250,7 +250,7 @@ struct WeatherForecast: View {
     }
 
     private func hourLabel(_ date: Date) -> String {
-        var style = Date.FormatStyle(date: .omitted, time: .omitted).hour(.defaultDigits(amPM: .omitted))
+        var style = Date.FormatStyle(date: .omitted, time: .omitted).hour(.defaultDigits(amPM: .omitted)).regional
         style.timeZone = report.zone
         return date.formatted(style)
     }

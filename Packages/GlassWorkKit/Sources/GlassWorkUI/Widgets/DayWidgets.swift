@@ -23,7 +23,7 @@ struct ModularClockWidget: View {
     let now: Date
 
     private var calendar: Calendar {
-        .current
+        RegionalFormat.calendar
     }
 
     private var dayShare: Double {
@@ -48,6 +48,7 @@ struct ModularClockWidget: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Palette.orange)
                 Text(now, style: .time)
+                    .environment(\.locale, RegionalFormat.locale)
                     .font(.system(size: size == .small ? 30 : 42, weight: .semibold, design: .rounded))
                     .minimumScaleFactor(0.5)
                 Spacer()
@@ -108,7 +109,7 @@ struct UpNextWidget: View {
                 Text(loc("No events today")).font(.system(size: 13)).foregroundStyle(.secondary)
             }
             ForEach(upcoming.prefix(limit)) { event in
-                AgendaRow(event: event, detail: event.start.formatted(date: .omitted, time: .shortened))
+                AgendaRow(event: event, detail: event.start.timeText)
             }
         }
     }
@@ -129,7 +130,7 @@ struct EndsInWidget: View {
         VStack(alignment: .leading, spacing: 8) {
             WidgetHeader(title: loc("Ends In"), symbol: "timer.circle", tint: Palette.red)
             if state.current.isEmpty {
-                Text(state.next.map { loc("Free until \($0.start.formatted(date: .omitted, time: .shortened))") }
+                Text(state.next.map { loc("Free until \($0.start.timeText)") }
                     ?? loc("Free all day"))
                     .font(.system(size: 15, weight: .semibold))
             }
@@ -422,8 +423,8 @@ struct DaylightWidget: View {
             Spacer()
             Text(times.daylight.map(CompactDuration.format) ?? "—")
                 .font(.system(size: 34, weight: .semibold, design: .rounded))
-            InfoRow(title: loc("Sunrise"), value: times.sunrise?.formatted(date: .omitted, time: .shortened) ?? "—")
-            InfoRow(title: loc("Sunset"), value: times.sunset?.formatted(date: .omitted, time: .shortened) ?? "—")
+            InfoRow(title: loc("Sunrise"), value: times.sunrise?.timeText ?? "—")
+            InfoRow(title: loc("Sunset"), value: times.sunset?.timeText ?? "—")
         }
     }
 }
