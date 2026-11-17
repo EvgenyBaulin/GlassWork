@@ -77,6 +77,8 @@ public enum ItemOption {
     public static let todoGroupsByList = "groupByList"
     public static let todoDefaultFilter = "defaultFilter"
     public static let todoNewItemList = "newItemList"
+    public static let todoCountMode = "countMode"
+    public static let todoIncludesUndated = "includeUndated"
     public static let panelSize = "panelSize"
     public static let notesFont = "font"
     public static let hidesWhenDone = "hideWhenDone"

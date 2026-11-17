@@ -68,6 +68,8 @@ struct OptionTableTests {
         "5 hours": "5 часов",
         "Completed items": "Выполненные",
         "Due date": "По сроку",
+        "Due today": "На сегодня",
+        "Open items": "Открытые",
         "Glass": "Стекло",
         "Hero": "Герой",
         "Hide after 1 day": "Скрывать через день",

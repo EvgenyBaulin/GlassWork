@@ -71,6 +71,19 @@ extension ModuleOptionSpec {
                 ]),
                 fallback: TodoFilter.all.rawValue
             ),
+            option(
+                .todos, Key.todoCountMode, "Count in the menu bar", "Считать в строке меню",
+                .choice([
+                    OptionChoice(TodoCountMode.open.rawValue, "Open items"),
+                    OptionChoice(TodoCountMode.dueToday.rawValue, "Due today"),
+                    OptionChoice(TodoCountMode.overdue.rawValue, "Overdue"),
+                ]),
+                fallback: TodoCountMode.open.rawValue
+            ),
+            toggle(
+                .todos, Key.todoIncludesUndated, "Include items without a date", "Включать задачи без даты",
+                fallback: true
+            ),
         ]
     }
 }

@@ -197,12 +197,33 @@ public enum CompletedTodos: String, Sendable, CaseIterable {
     }
 }
 
+/// What the To-Dos item in the menu bar counts.
+public enum TodoCountMode: String, Sendable, CaseIterable {
+    case open, dueToday, overdue
+
+    /// The filter whose items are counted.
+    var filter: TodoFilter {
+        switch self {
+        case .open: .all
+        case .dueToday: .today
+        case .overdue: .overdue
+        }
+    }
+
+    public func count(in items: [TodoItem], now: Date, calendar: Calendar = .current) -> Int {
+        filter.apply(to: items, now: now, calendar: calendar).count
+    }
+}
+
 /// The order of the to-do list, which the panel and the widgets share.
 public struct TodoOptions: Sendable, Equatable {
     public var sort = TodoSort.manual
     public var completed = CompletedTodos.hide
     public var groupsByList = true
     public var defaultFilter = TodoFilter.all
+    public var countMode = TodoCountMode.open
+    /// False hides reminders that have no due date, everywhere the list shows.
+    public var includesUndated = true
     /// The list new reminders go to, remembered from the panel. Nil or a missing list means the Mac's default.
     public var newItemList: String?
     /// Nil until the first choice: every list shows.
@@ -215,6 +236,8 @@ public struct TodoOptions: Sendable, Equatable {
         completed = options.choice(ItemOption.todoCompleted, default: .hide)
         groupsByList = options.flag(ItemOption.todoGroupsByList, default: true)
         defaultFilter = options.choice(ItemOption.todoDefaultFilter, default: .all)
+        countMode = options.choice(ItemOption.todoCountMode, default: .open)
+        includesUndated = options.flag(ItemOption.todoIncludesUndated, default: true)
         newItemList = options[ItemOption.todoNewItemList].flatMap { $0.isEmpty ? nil : $0 }
         hidden = options[ItemOption.hiddenTodoLists].map { text in
             Set(text.split(separator: ",").map(String.init))
@@ -237,7 +260,8 @@ public struct TodoOptions: Sendable, Equatable {
     }
 
     /// Open items first, then the ticked ones still on the list, the latest of them first.
-    public func arranged(_ items: [TodoItem], now: Date) -> [TodoItem] {
+    public func arranged(_ allItems: [TodoItem], now: Date) -> [TodoItem] {
+        let items = includesUndated ? allItems : allItems.filter { $0.due != nil }
         let open = items.filter { !$0.isCompleted }
         let oldest = completed.seconds.map { now.addingTimeInterval(-$0) }
         let done = items.filter { item in

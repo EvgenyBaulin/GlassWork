@@ -2083,6 +2083,22 @@
         }
       }
     },
+    "Count in the menu bar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Count in the menu bar"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Считать в строке меню"
+          }
+        }
+      }
+    },
     "CPU": {
       "localizations": {
         "ru": {
@@ -2767,6 +2783,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "сухо"
+          }
+        }
+      }
+    },
+    "Due today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Due today"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На сегодня"
           }
         }
       }
@@ -3843,6 +3875,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Занят: %@"
+          }
+        }
+      }
+    },
+    "Include items without a date": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include items without a date"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включать задачи без даты"
           }
         }
       }
@@ -5463,6 +5511,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Открывать в"
+          }
+        }
+      }
+    },
+    "Open items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open items"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открытые"
           }
         }
       }
