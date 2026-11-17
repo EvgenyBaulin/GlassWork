@@ -59,7 +59,7 @@ struct CounterPanel: View {
     }
 
     private func change(_ edit: @escaping (inout CounterState) -> Void) {
-        actions.updateSettings { $0.updateCounter(edit) }
+        actions.updateState { $0.updateCounter(edit) }
     }
 
     private func commitTitle() {

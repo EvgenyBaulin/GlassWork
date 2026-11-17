@@ -189,7 +189,7 @@ final class DockController {
         case let .perform(action): model.perform(action)
         case .toggleStopwatch: monitor.everyday.update { $0.stopwatch.toggle(at: Date()) }
         case .togglePlayback: monitor.nowPlaying.perform(.toggle)
-        case .incrementCounter: model.store.update { $0.updateCounter { $0.increment() } }
+        case .incrementCounter: model.store.update(undoable: false) { $0.updateCounter { $0.increment() } }
         case let .open(url): NSWorkspace.shared.open(url)
         }
     }
