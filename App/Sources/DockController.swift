@@ -44,6 +44,10 @@ final class DockController {
         }
     }
 
+    private lazy var tiles = DockTileWatcher(state: state) { [weak self] in
+        self?.window != nil && self?.isRevealed == true
+    }
+
     private var cardDismissal: TransientDismissal?
     private lazy var folders = DockFolders { [weak self] in self?.state.files = $0 }
 
@@ -111,7 +115,12 @@ final class DockController {
 
     private func observeApps() {
         let center = NSWorkspace.shared.notificationCenter
-        let names = [NSWorkspace.didLaunchApplicationNotification, NSWorkspace.didTerminateApplicationNotification]
+        let names = [
+            NSWorkspace.didLaunchApplicationNotification,
+            NSWorkspace.didTerminateApplicationNotification,
+            NSWorkspace.didHideApplicationNotification,
+            NSWorkspace.didUnhideApplicationNotification,
+        ]
         workspace = names.map { name in
             center.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
                 let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
@@ -124,6 +133,7 @@ final class DockController {
         NSWorkspace.shared.runningApplications.forEach(noteUsed)
         trash.start()
         fullScreen.start()
+        tiles.start()
     }
 
     /// Restores even with no window, so a Dock left hidden by a crash comes back once it is turned off.
@@ -133,6 +143,7 @@ final class DockController {
         }
         shrink?.cancel()
         trash.stop()
+        tiles.stop()
         tooltip.hide()
         fullScreen.stop()
         isFullScreenFront = false
@@ -348,6 +359,7 @@ final class DockController {
         }
         state.running = DockRunningApps.match(apps, bundleIDs: bundleIDs, running: running)
         tracker.update(running: state.running, at: Date())
+        tiles.refreshHidden()
         showLaunches()
     }
 

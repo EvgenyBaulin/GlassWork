@@ -253,6 +253,12 @@ public final class DockLiveState {
     public var running: Set<String> = []
     /// Paths of Dock apps that were clicked and have not started yet.
     public var launching: Set<String> = []
+    /// Badge labels by app path, as the system Dock shows them. Empty without Accessibility.
+    public var badges: [String: String] = [:]
+    /// Paths of apps that want attention.
+    public var attention: Set<String> = []
+    /// Paths of running apps that are hidden.
+    public var hidden: Set<String> = []
     /// The room along the screen's edge. Unlimited until the app has measured a screen.
     public var available = Double.infinity
     /// The set of widgets wanted.
