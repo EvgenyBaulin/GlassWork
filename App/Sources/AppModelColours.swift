@@ -1,3 +1,4 @@
+import AppKit
 import GlassWorkCore
 import GlassWorkUI
 
@@ -15,5 +16,11 @@ extension AppModel {
                 self?.statusBar.refreshItems()
             }
         }
+    }
+
+    /// The Hub opened from another item, below that item and not below the Hub's own icon.
+    func toggleHub(from button: NSStatusBarButton) {
+        statusBar.revealHidden()
+        panels.toggleHub(from: button)
     }
 }
