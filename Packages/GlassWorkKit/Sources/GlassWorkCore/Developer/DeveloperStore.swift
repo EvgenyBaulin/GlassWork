@@ -12,6 +12,7 @@ public final class DeveloperStore {
     public private(set) var git: GitReading?
     public private(set) var devServers: DevServerReading?
     public private(set) var docker: DockerReading?
+    public private(set) var dockerContexts: [DockerContext] = []
     public private(set) var ping = PingLog()
     public private(set) var vpn: VPNReading?
     /// When the connection was first seen, which is close enough to when it started.
@@ -212,11 +213,27 @@ public final class DeveloperStore {
     }
 
     private func readDocker() {
-        let collector = DockerCollector(runner: runner)
+        let collector = dockerCollector()
         load(.docker) {
-            await collector.read()
+            await (collector.read(), collector.contexts())
         } apply: { store, value in
-            store.docker = value
+            store.docker = value.0
+            store.dockerContexts = value.1
+        }
+    }
+
+    private func dockerCollector() -> DockerCollector {
+        let custom = options.dockerPath
+        return DockerCollector(runner: runner, locate: { DockerCLI.resolve(custom: custom) })
+    }
+
+    /// Switches the Docker context, then reads again so the panel shows its containers.
+    public func useDockerContext(_ name: String) {
+        let collector = dockerCollector()
+        Task { [weak self] in
+            guard await collector.use(context: name) else { return }
+            self?.lastRead[.docker] = nil
+            self?.refresh(.docker)
         }
     }
 
@@ -277,6 +294,9 @@ public final class DeveloperStore {
         aiUsage = aiUsage?.excluding(options.aiDisabledTools).warning(at: options.usageWarnShare)
         if options.aiDisabledTools != old.aiDisabledTools {
             lastRead[.aiUsage] = nil
+        }
+        if options.dockerPath != old.dockerPath {
+            lastRead[.docker] = nil
         }
         if options.devServerRule != old.devServerRule {
             lastRead[.devServers] = nil

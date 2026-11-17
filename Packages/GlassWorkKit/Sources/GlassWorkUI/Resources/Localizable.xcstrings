@@ -453,6 +453,22 @@
         }
       }
     },
+    "%lld s": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld s"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld с"
+          }
+        }
+      }
+    },
     "%lld sensors": {
       "localizations": {
         "ru": {
@@ -789,6 +805,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Добавлено на полку"
+          }
+        }
+      }
+    },
+    "Address": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Address"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Адрес"
           }
         }
       }
@@ -1299,6 +1331,22 @@
         }
       }
     },
+    "Check every": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check every"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверять каждые"
+          }
+        }
+      }
+    },
     "Check Wi-Fi or Ethernet. Rates return when a connection is back.": {
       "localizations": {
         "en": {
@@ -1311,6 +1359,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Проверьте Wi-Fi или Ethernet. Скорость появится, когда сеть вернётся."
+          }
+        }
+      }
+    },
+    "Choose docker…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose docker…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать docker…"
+          }
+        }
+      }
+    },
+    "Choose the docker command line tool": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose the docker command line tool"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите программу docker"
           }
         }
       }
@@ -1343,6 +1423,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Клик вставляет простой текст · ⌥-клик сохраняет форматирование"
+          }
+        }
+      }
+    },
+    "Command line tool": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Command line tool"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Программа в командной строке"
           }
         }
       }
@@ -1781,6 +1877,22 @@
         }
       }
     },
+    "Default browser": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default browser"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Браузер по умолчанию"
+          }
+        }
+      }
+    },
     "Default filter": {
       "localizations": {
         "en": {
@@ -2131,6 +2243,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Код %1$lld · %2$@"
+          }
+        }
+      }
+    },
+    "Expected status": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expected status"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ожидаемый статус"
           }
         }
       }
@@ -3297,6 +3425,22 @@
         }
       }
     },
+    "Method": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Method"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Метод"
+          }
+        }
+      }
+    },
     "MIT License": {
       "localizations": {
         "ru": {
@@ -4055,6 +4199,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Откройте GlassWork"
+          }
+        }
+      }
+    },
+    "Open in": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открывать в"
           }
         }
       }
@@ -5937,6 +6097,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Обновляю…"
+          }
+        }
+      }
+    },
+    "Use automatic": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use automatic"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Искать автоматически"
           }
         }
       }

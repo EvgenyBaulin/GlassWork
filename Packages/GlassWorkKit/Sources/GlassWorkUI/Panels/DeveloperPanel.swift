@@ -22,8 +22,14 @@ struct DeveloperPanel: View {
                 selected: store.options.gitRepository,
                 manual: store.options.gitRepositories
             )
-        case .devServers: DevServersPanel(reading: store.devServers)
-        case .docker: DockerPanel(reading: store.docker)
+        case .devServers: DevServersPanel(reading: store.devServers, opener: store.options.devServerOpener)
+        case .docker:
+            DockerPanel(
+                reading: store.docker,
+                contexts: store.dockerContexts,
+                onRetry: { store.refresh(.docker) },
+                onUseContext: { store.useDockerContext($0) }
+            )
         case .ping: PingPanel(log: store.ping, host: store.options.pingHost)
         case .vpn: VPNPanel(reading: store.vpn, since: store.vpnSince)
         case .wifi: WiFiPanel(reading: store.wifi, signal: store.wifiLastMinute)
@@ -56,6 +62,29 @@ public struct DeveloperOptionsSection: View {
                 Picker(loc("Refresh every"), selection: refreshMinutes) {
                     ForEach([1, 5, 15, 30, 60], id: \.self) { minutes in
                         Text(loc("\(minutes) min")).tag(minutes)
+                    }
+                }
+            }
+        case .devServers:
+            Section(loc("Open")) {
+                BrowserPicker(selection: option(DeveloperOptions.Key.openIn).flatMap { $0.isEmpty ? nil : $0 }) {
+                    setOption(DeveloperOptions.Key.openIn, $0)
+                }
+            }
+        case .docker:
+            Section(loc("Docker")) {
+                LabeledContent(loc("Command line tool")) {
+                    Text(option(DeveloperOptions.Key.dockerPath) ?? loc("Automatic"))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+                HStack {
+                    Button(loc("Choose docker…")) {
+                        DockerBinaryPicker.choose { setOption(DeveloperOptions.Key.dockerPath, $0) }
+                    }
+                    if option(DeveloperOptions.Key.dockerPath) != nil {
+                        Button(loc("Use automatic")) { setOption(DeveloperOptions.Key.dockerPath, nil) }
                     }
                 }
             }

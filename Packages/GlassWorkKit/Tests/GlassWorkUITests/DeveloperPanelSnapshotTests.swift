@@ -120,6 +120,28 @@ struct DeveloperPanelSnapshotTests {
     }
 
     @Test(arguments: [true, false])
+    func dockerWithContexts(dark: Bool) {
+        let contexts = [
+            DockerContext(name: "desktop-linux", isCurrent: false),
+            DockerContext(name: "orbstack", isCurrent: true),
+        ]
+        let container = DockerContainer(
+            id: "3f2a", name: "postgres-dev", image: "postgres:16", status: "Up 2 hours",
+            isRunning: true, ports: ["5432→5432"]
+        )
+        snapshotPanel(
+            DockerPanel(reading: .containers([container], context: "orbstack"), contexts: contexts),
+            name: "docker-contexts",
+            dark: dark
+        )
+    }
+
+    @Test(arguments: [true, false])
+    func dockerMissing(dark: Bool) {
+        snapshotPanel(DockerPanel(reading: .notInstalled), name: "docker-missing", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
     func devServers(dark: Bool) {
         let servers = [
             DevServer(
@@ -165,6 +187,17 @@ struct DeveloperPanelSnapshotTests {
         ])
         let panel = GitPanel(reading: reading, selected: nil, manual: [], now: start)
         snapshotPanel(panel, name: "git", dark: dark)
+    }
+
+    @Test(arguments: [true, false])
+    func gitRemoveManualRepository(dark: Bool) {
+        var healthy = repository("/dev/pocket-api", changed: 2, age: 7200)
+        healthy.isManual = true
+        let panel = GitPanel(
+            reading: .repositories([healthy]), selected: nil, manual: [healthy.path], now: start,
+            hoveredRow: healthy.path
+        )
+        snapshotPanel(panel, name: "git-remove", dark: dark)
     }
 
     @Test func gitProblems() {
